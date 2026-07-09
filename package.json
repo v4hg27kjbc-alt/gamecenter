@@ -1,1 +1,1 @@
-{"name":"henry","private":true,"scripts":{"build":"mkdir -p dist && cp index.html dist/"}}
+{"name":"henry","private":true,"scripts":{"build":"echo static && cp index.html README.md dist/ 2>/dev/null; mkdir -p dist && cp index.html dist/"}}
