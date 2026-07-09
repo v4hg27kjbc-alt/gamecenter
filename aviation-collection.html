@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>民航客机收藏馆 | Airliner Collection</title>
+<style>
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.13);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --accent: #4fc3f7;
+  --accent-glow: rgba(79, 195, 247, 0.45);
+  --text: #e0e0e0;
+  --text-dim: #9e9e9e;
+  --card-hover-bg: rgba(255, 255, 255, 0.11);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(160deg, #0a1220 0%, #0e1a2e 35%, #162840 65%, #0c1628 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+.stars-layer {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+.star {
+  position: absolute; background: white; border-radius: 50%;
+  animation: twinkle var(--dur) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.9); }
+}
+
+.app-container {
+  position: relative; z-index: 1;
+  max-width: 1340px; margin: 0 auto; padding: 36px 20px 60px;
+}
+
+.header {
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 40px 40px 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--glass-shadow);
+  text-align: center;
+  animation: headerSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes headerSlideIn {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.header h1 {
+  font-size: 2.8rem; font-weight: 700;
+  background: linear-gradient(135deg, #e3f2fd, #81d4fa, #e3f2fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px; margin-bottom: 6px;
+}
+.header .subtitle {
+  color: var(--text-dim); font-size: 0.9rem;
+  letter-spacing: 5px; text-transform: uppercase;
+}
+
+.filter-bar {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 14px; justify-content: center; align-items: center;
+}
+.filter-chip {
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 9px 22px;
+  color: var(--text); cursor: pointer; font-size: 0.88rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none; white-space: nowrap;
+}
+.filter-chip:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.28);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+.filter-chip.active {
+  background: rgba(79, 195, 247, 0.22);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 22px var(--accent-glow);
+}
+
+.airline-country-bar {
+  display: none;
+  flex-wrap: wrap; gap: 8px; justify-content: center;
+  margin-bottom: 24px; padding: 16px 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  animation: fadeDown 0.4s ease;
+}
+.airline-country-bar.visible { display: flex; }
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.country-chip {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 40px;
+  padding: 7px 18px;
+  color: var(--text-dim); cursor: pointer;
+  font-size: 0.82rem;
+  transition: all 0.3s ease; user-select: none;
+}
+.country-chip:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+.country-chip.active {
+  background: rgba(79, 195, 247, 0.18);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.collection-count {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 9px 22px;
+  color: var(--text-dim); font-size: 0.88rem;
+  margin-left: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 26px;
+}
+
+.card {
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden; cursor: pointer;
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation: cardFadeIn 0.6s ease backwards;
+  animation-delay: calc(var(--i) * 0.07s);
+  display: flex; flex-direction: column;
+}
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(36px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.card:hover {
+  transform: translateY(-7px) scale(1.015);
+  background: var(--card-hover-bg);
+  border-color: rgba(255,255,255,0.32);
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.4), 0 0 28px var(--accent-glow);
+}
+.card:active { transform: scale(0.97); }
+
+.card-image-wrap {
+  position: relative; width: 100%; height: 200px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(10,18,36,0.3), rgba(10,18,36,0.85));
+}
+.card-image-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card:hover .card-image-wrap img { transform: scale(1.07); }
+.card-image-wrap::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 55px;
+  background: linear-gradient(transparent, rgba(10, 16, 26, 0.92));
+}
+
+.card-airlines-mini {
+  position: absolute; bottom: 10px; left: 14px; display: flex; gap: 6px; z-index: 2;
+}
+.airline-mini-logo {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.4);
+  object-fit: contain; padding: 2px;
+}
+
+.card-badge {
+  position: absolute; top: 12px; right: 12px;
+  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 3px 12px;
+  font-size: 0.73rem; color: #ffd54f;
+  letter-spacing: 1px; font-weight: 600; z-index: 2;
+}
+.card-bookmark {
+  position: absolute; top: 12px; left: 12px; z-index: 3;
+  width: 34px; height: 34px;
+  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.3s ease;
+}
+.card-bookmark.collected {
+  background: rgba(255, 87, 34, 0.55);
+  border-color: #ff5722;
+  box-shadow: 0 0 14px rgba(255, 87, 34, 0.5);
+}
+.card-bookmark svg { width: 17px; height: 17px; fill: none; stroke: white; stroke-width: 2; }
+.card-bookmark.collected svg { fill: #ff5722; stroke: #ff5722; }
+
+.card-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+.card-body h3 {
+  font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;
+  color: #fff; letter-spacing: 0.5px;
+}
+.card-body .model-code {
+  font-size: 0.78rem; color: var(--accent); font-weight: 600;
+  letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase;
+}
+.card-body .desc {
+  font-size: 0.85rem; color: var(--text-dim); line-height: 1.55; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-stats {
+  display: flex; gap: 16px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.card-stats .stat { flex: 1; text-align: center; }
+.stat-value { font-size: 0.95rem; font-weight: 700; color: #fff; }
+.stat-label { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+
+.overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  animation: overlayIn 0.28s ease;
+}
+@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+.detail-modal {
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  background: rgba(18, 28, 46, 0.78);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  width: 92%; max-width: 760px; max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 40px var(--accent-glow);
+  animation: modalSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(36px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header-img { position: relative; }
+.modal-header-img img {
+  width: 100%; height: 260px; object-fit: cover;
+  border-radius: 28px 28px 0 0;
+}
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 38px; height: 38px;
+  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  color: white; font-size: 1.2rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s ease; z-index: 2;
+}
+.modal-close:hover { background: rgba(255,255,255,0.18); transform: rotate(90deg); }
+.modal-body { padding: 26px 30px 34px; }
+.modal-body h2 { font-size: 1.7rem; color: #fff; margin-bottom: 3px; }
+.modal-code { color: var(--accent); font-size: 0.82rem; letter-spacing: 2px; margin-bottom: 14px; }
+.modal-desc { color: #ccc; line-height: 1.75; font-size: 0.93rem; margin-bottom: 20px; }
+.modal-specs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px;
+}
+.spec-item {
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 13px;
+  padding: 12px 16px;
+}
+.spec-label { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+.spec-value { font-size: 1.05rem; color: #fff; font-weight: 700; margin-top: 2px; }
+
+.airlines-section { margin-top: 4px; }
+.airlines-section h3 {
+  font-size: 1rem; color: var(--accent); margin-bottom: 14px;
+  letter-spacing: 1px; display: flex; align-items: center; gap: 8px;
+}
+.airlines-section h3::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+.airline-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 16px 18px; margin-bottom: 12px;
+  display: flex; gap: 16px; align-items: flex-start;
+  transition: all 0.3s ease;
+}
+.airline-card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+.airline-card:last-child { margin-bottom: 0; }
+.airline-logo {
+  width: 52px; height: 52px; border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  object-fit: contain; padding: 4px;
+  background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+.airline-info { flex: 1; min-width: 0; }
+.airline-name {
+  font-size: 1rem; font-weight: 700; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.airline-country-tag {
+  font-size: 0.7rem; font-weight: 500;
+  background: rgba(79, 195, 247, 0.15);
+  color: var(--accent);
+  border-radius: 10px;
+  padding: 2px 10px;
+}
+.airline-desc {
+  font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;
+  margin-bottom: 10px;
+}
+.airline-website {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; color: var(--accent);
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  background: rgba(79, 195, 247, 0.1);
+  border: 1px solid rgba(79, 195, 247, 0.25);
+  border-radius: 20px;
+  padding: 6px 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.airline-website:hover {
+  background: rgba(79, 195, 247, 0.22);
+  border-color: var(--accent);
+  box-shadow: 0 0 16px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.airline-website svg { width: 13px; height: 13px; }
+
+@media (max-width: 768px) {
+  .header { padding: 28px 18px; }
+  .header h1 { font-size: 1.9rem; }
+  .grid { grid-template-columns: 1fr; gap: 18px; }
+  .detail-modal { width: 96%; max-height: 92vh; }
+  .modal-specs { grid-template-columns: 1fr; }
+  .airline-card { flex-direction: column; align-items: center; text-align: center; }
+  .airline-logo { width: 44px; height: 44px; }
+}
+</style>
+</head>
+<body>
+
+<div class="stars-layer" id="starsLayer"></div>
+
+<div class="app-container">
+  <div class="header">
+    <h1>民航客机收藏馆</h1>
+    <p class="subtitle">真实型号 · 航司档案 · 毛玻璃美学</p>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-chip active" data-filter="civil">民航客机</div>
+    <div class="filter-chip" data-filter="fighter">战斗机</div>
+    <div class="filter-chip" data-filter="bomber">轰炸机</div>
+    <div class="filter-chip" data-filter="transport">运输机</div>
+    <div class="filter-chip" data-filter="helicopter">直升机</div>
+    <div class="filter-chip" data-filter="all">全部</div>
+    <div class="collection-count" id="collectionCount">已收藏 0 架</div>
+  </div>
+
+  <div class="airline-country-bar" id="countryBar">
+    <div class="country-chip active" data-country="all">全部航司</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="overlayContainer"></div>
+
+<script>
+// ===== SVG 精美占位图生成 =====
+function placeholdImage(img, name, code, category) {
+  const colors = {
+    civil: ['#0d47a1', '#1565c0', '#42a5f5'],
+    fighter: ['#1a237e', '#283593', '#5c6bc0'],
+    bomber: ['#263238', '#37474f', '#607d8b'],
+    transport: ['#1b5e20', '#2e7d32', '#66bb6a'],
+    helicopter: ['#4a148c', '#6a1b9a', '#ab47bc']
+  };
+  const c = colors[category] || colors.civil;
+  const w = 800, h = 400;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="${c[0]}"/>
+        <stop offset="100%" stop-color="${c[1]}"/>
+      </linearGradient>
+      <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+        <stop offset="50%" stop-color="rgba(255,255,255,0.02)"/>
+        <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
+      </linearGradient>
+      <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <rect width="${w}" height="${h}" fill="url(#bg)"/>
+    <rect width="${w}" height="${h}" fill="url(#shine)"/>
+    <circle cx="${w*0.15}" cy="${h*0.25}" r="${w*0.25}" fill="rgba(255,255,255,0.03)"/>
+    <circle cx="${w*0.82}" cy="${h*0.72}" r="${w*0.18}" fill="rgba(255,255,255,0.03)"/>
+    <circle cx="${w*0.5}" cy="${h*0.5}" r="${w*0.35}" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <g transform="translate(${w/2},${h*0.42})" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="0" cy="0" rx="140" ry="14" fill="rgba(255,255,255,0.06)"/>
+      <line x1="-130" y1="0" x2="130" y2="0"/>
+      <line x1="-20" y1="0" x2="-120" y2="-60"/>
+      <line x1="-20" y1="0" x2="-120" y2="60"/>
+      <line x1="20" y1="0" x2="110" y2="-45"/>
+      <line x1="20" y1="0" x2="110" y2="45"/>
+      <line x1="100" y1="0" x2="140" y2="-35"/>
+      <line x1="100" y1="0" x2="140" y2="35"/>
+      <circle cx="-80" cy="-35" r="8" fill="rgba(255,255,255,0.1)"/>
+      <circle cx="-80" cy="35" r="8" fill="rgba(255,255,255,0.1)"/>
+      <circle cx="70" cy="-25" r="8" fill="rgba(255,255,255,0.1)"/>
+      <circle cx="70" cy="25" r="8" fill="rgba(255,255,255,0.1)"/>
+    </g>
+    <text x="${w/2}" y="${h*0.72}" text-anchor="middle" fill="white" font-family="-apple-system,'PingFang SC',sans-serif" font-size="36" font-weight="700" letter-spacing="3" filter="url(#glow)">${name}</text>
+    <text x="${w/2}" y="${h*0.72+42}" text-anchor="middle" fill="${c[2]}" font-family="-apple-system,'PingFang SC',sans-serif" font-size="18" font-weight="600" letter-spacing="5">${code.toUpperCase()}</text>
+    <rect x="${w/2-50}" y="${h-48}" width="100" height="28" rx="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="${w/2}" y="${h-30}" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="12" letter-spacing="2">${category==='civil'?'民航客机':category==='fighter'?'战斗机':category==='bomber'?'轰炸机':category==='transport'?'运输机':'直升机'}</text>
+  </svg>`;
+  img.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+
+// ===== 图片代理：解决维基图片国内加载问题 =====
+function proxyUrl(url) {
+  if (!url || (!url.includes('wikimedia.org') && !url.includes('wikipedia.org'))) return url;
+  return 'https://wsrv.nl/?url=' + encodeURIComponent(url.replace(/^https?:\/\//, '')) + '&w=800&output=webp';
+}
+
+// ===== 航空公司数据库 =====
+const airlines = {
+  'ua': {
+    id: 'ua', name: '美国联合航空', nameEn: 'United Airlines',
+    country: '美国', code: 'UA',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/United_Airlines_Logo.svg/200px-United_Airlines_Logo.svg.png',
+    desc: '美国联合航空成立于1926年，是全球航线网络最广的航空公司之一，星空联盟创始成员。总部位于芝加哥，机队规模超过900架，通航六大洲350+目的地。',
+    website: 'https://www.united.com'
+  },
+  'dl': {
+    id: 'dl', name: '达美航空', nameEn: 'Delta Air Lines',
+    country: '美国', code: 'DL',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Delta_logo.svg/200px-Delta_logo.svg.png',
+    desc: '达美航空是全球第二大航空公司（按客运量），天合联盟创始成员，总部位于亚特兰大。运营超过900架飞机，日均航班超5000班次，以运营可靠性和准点率著称。',
+    website: 'https://www.delta.com'
+  },
+  'ca': {
+    id: 'ca', name: '中国国际航空', nameEn: 'Air China',
+    country: '中国', code: 'CA',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Air_China_logo.svg/200px-Air_China_logo.svg.png',
+    desc: '中国国际航空是中国载旗航空公司，星空联盟成员，总部位于北京。拥有中国最大的宽体机队，执飞全球近200个目的地，以安全记录和优质国际航线服务闻名。',
+    website: 'https://www.airchina.com.cn'
+  },
+  'mu': {
+    id: 'mu', name: '中国东方航空', nameEn: 'China Eastern Airlines',
+    country: '中国', code: 'MU',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/China_Eastern_Airlines_logo.svg/200px-China_Eastern_Airlines_logo.svg.png',
+    desc: '中国东方航空总部位于上海，天合联盟成员，拥有超过600架现代化飞机。以上海浦东和虹桥为双枢纽，是全球C919客机的首发商业运营商。',
+    website: 'https://www.ceair.com'
+  },
+  'cz': {
+    id: 'cz', name: '中国南方航空', nameEn: 'China Southern Airlines',
+    country: '中国', code: 'CZ',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/China_Southern_Airlines_logo.svg/200px-China_Southern_Airlines_logo.svg.png',
+    desc: '中国南方航空总部位于广州，是亚洲机队规模最大、年客运量最大的航空公司之一。运营超过650架飞机，以广州白云和北京大兴为双枢纽，航线网络覆盖全球。',
+    website: 'https://www.csair.com'
+  },
+  'ek': {
+    id: 'ek', name: '阿联酋航空', nameEn: 'Emirates',
+    country: '阿联酋', code: 'EK',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Emirates_logo.svg/200px-Emirates_logo.svg.png',
+    desc: '阿联酋航空是全球最大的A380和波音777运营商，总部位于迪拜。以极致奢华服务和"空中五星级酒店"体验闻名，机队全部为宽体机，通航六大洲160+目的地。',
+    website: 'https://www.emirates.com'
+  },
+  'sq': {
+    id: 'sq', name: '新加坡航空', nameEn: 'Singapore Airlines',
+    country: '新加坡', code: 'SQ',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Singapore_Airlines_Logo.svg/200px-Singapore_Airlines_Logo.svg.png',
+    desc: '新加坡航空是全球评级最高的航空公司之一，星空联盟成员。以卓越服务、创新客舱产品和"新加坡女孩"品牌形象著称，连续多年获Skytrax五星评级。',
+    website: 'https://www.singaporeair.com'
+  },
+  'qr': {
+    id: 'qr', name: '卡塔尔航空', nameEn: 'Qatar Airways',
+    country: '卡塔尔', code: 'QR',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Qatar_Airways_Logo.svg/200px-Qatar_Airways_Logo.svg.png',
+    desc: '卡塔尔航空是寰宇一家成员，总部位于多哈。以全球最佳商务舱Qsuite和哈马德国际机场旗舰枢纽闻名，多次获Skytrax年度最佳航空公司大奖。',
+    website: 'https://www.qatarairways.com'
+  },
+  'nh': {
+    id: 'nh', name: '全日空', nameEn: 'All Nippon Airways',
+    country: '日本', code: 'NH',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/All_Nippon_Airways_Logo.svg/200px-All_Nippon_Airways_Logo.svg.png',
+    desc: '全日空（ANA）是日本最大航空公司，星空联盟成员，总部位于东京。以精细的日式服务、出色的准点率和787机队规模（全球最多）著称，连续多年获Skytrax五星评级。',
+    website: 'https://www.ana.co.jp'
+  },
+  'lh': {
+    id: 'lh', name: '汉莎航空', nameEn: 'Lufthansa',
+    country: '德国', code: 'LH',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Lufthansa_Logo_2018.svg/200px-Lufthansa_Logo_2018.svg.png',
+    desc: '汉莎航空是欧洲最大航空集团，星空联盟创始成员，总部位于法兰克福。以严谨的德国工程精神运营超过300架飞机，法兰克福和慕尼黑为双枢纽，覆盖全球200+目的地。',
+    website: 'https://www.lufthansa.com'
+  },
+  'ba': {
+    id: 'ba', name: '英国航空', nameEn: 'British Airways',
+    country: '英国', code: 'BA',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/British_Airways_Logo.svg/200px-British_Airways_Logo.svg.png',
+    desc: '英国航空是英国载旗航空公司，寰宇一家创始成员。以伦敦希思罗为超级枢纽，执飞全球近200个目的地，以英伦优雅服务和协和号超音速客机的历史遗产而闻名。',
+    website: 'https://www.britishairways.com'
+  },
+  'af': {
+    id: 'af', name: '法国航空', nameEn: 'Air France',
+    country: '法国', code: 'AF',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Air_France_Logo.svg/200px-Air_France_Logo.svg.png',
+    desc: '法国航空是法国载旗航空公司，天合联盟创始成员，总部位于巴黎。以巴黎戴高乐为枢纽，将法式生活艺术融入飞行体验，头等舱La Première被称为空中最奢华的旅程之一。',
+    website: 'https://www.airfrance.com'
+  },
+  'ey': {
+    id: 'ey', name: '阿提哈德航空', nameEn: 'Etihad Airways',
+    country: '阿联酋', code: 'EY',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Etihad_Airways_logo.svg/200px-Etihad_Airways_logo.svg.png',
+    desc: '阿提哈德航空是阿联酋国家航空公司，总部位于阿布扎比。以空中官邸The Residence套房和创新的经济舱智能座椅闻名，将阿拉伯式奢华待客之道带上天空。',
+    website: 'https://www.etihad.com'
+  },
+  'cx': {
+    id: 'cx', name: '国泰航空', nameEn: 'Cathay Pacific',
+    country: '中国香港', code: 'CX',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Cathay_Pacific_logo.svg/200px-Cathay_Pacific_logo.svg.png',
+    desc: '国泰航空是香港载旗航空公司，寰宇一家创始成员。以香港国际机场为枢纽，以其卓越的亚洲待客之道和全球航线网络连接世界，多次获评全球最佳航空公司。',
+    website: 'https://www.cathaypacific.com'
+  },
+  'ay': {
+    id: 'ay', name: '芬兰航空', nameEn: 'Finnair',
+    country: '芬兰', code: 'AY',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Finnair_logo.svg/200px-Finnair_logo.svg.png',
+    desc: '芬兰航空是芬兰载旗航空公司，寰宇一家成员，总部位于赫尔辛基。以欧亚之间最短北极航线而闻名，赫尔辛基枢纽是连接欧洲与亚洲最快捷的门户之一。',
+    website: 'https://www.finnair.com'
+  },
+  'tk': {
+    id: 'tk', name: '土耳其航空', nameEn: 'Turkish Airlines',
+    country: '土耳其', code: 'TK',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Turkish_Airlines_logo.svg/200px-Turkish_Airlines_logo.svg.png',
+    desc: '土耳其航空是星空联盟成员，总部位于伊斯坦布尔。以全球通航国家最多的航空公司著称，伊斯坦布尔新机场是连接欧亚非三大洲的超级枢纽。',
+    website: 'https://www.turkishairlines.com'
+  }
+};
+
+// ===== 飞机器数据库 =====
+const aircrafts = [
+  {
+    id: 1, name: '空客 A380', code: 'Airbus A380',
+    category: 'civil', country: '欧洲',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/0/09/A6-EDY_A380_Emirates_31_jan_2013_jfk_%288442269364%29.jpg',
+    desc: '空客A380是全球最大的双层宽体客机，2005年首飞，2007年投入商业运营。标准三舱布局可载525-853名乘客，航程达15,200公里。两层全通式客舱和安静的客舱环境重新定义了长途飞行体验。',
+    specs: { '巡航速度': '0.85 马赫', '最大航程': '15,200 km', '载客量': '525–853 人', '翼展': '79.75 m' },
+    airlineIds: ['ek', 'sq', 'ba', 'af', 'lh', 'ey']
+  },
+  {
+    id: 2, name: '波音 787-9 梦想客机', code: 'Boeing 787-9',
+    category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/4/46/United_Airlines_Boeing_787-8_%28N27903%29.jpg',
+    desc: '波音787-9是787系列的加长型号，2013年首飞。机身大量采用碳纤维复合材料，比同规格客机节油20%。电致变色舷窗、更高的客舱湿度和更低的舱压大幅提升乘客舒适度。',
+    specs: { '巡航速度': '0.85 马赫', '最大航程': '14,140 km', '载客量': '242–330 人', '翼展': '60.12 m' },
+    airlineIds: ['ua', 'nh', 'ba', 'cz']
+  },
+  {
+    id: 3, name: '空客 A350-900 XWB', code: 'Airbus A350-900',
+    category: 'civil', country: '欧洲',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Airbus_A350-941_F-WWCF_MSN002_ILA_Berlin_2016_%28cropped%29.jpg',
+    desc: '空客A350-900是新一代远程宽体客机，2015年投入运营。配备罗尔斯·罗伊斯遄达XWB发动机，客舱宽度比787多约13厘米，噪音降低30%，燃油效率较上一代提升25%。',
+    specs: { '巡航速度': '0.85 马赫', '最大航程': '15,000 km', '载客量': '300–440 人', '翼展': '64.75 m' },
+    airlineIds: ['sq', 'qr', 'cx', 'ay', 'lh', 'tk']
+  },
+  {
+    id: 4, name: '波音 777-300ER', code: 'Boeing 777-300ER',
+    category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/8/83/Emirates_Boeing_777-300ER_A6-ECZ.jpg',
+    desc: '波音777-300ER是全球最畅销的远程宽体客机之一，2004年投入运营。配备GE90-115B发动机，以出色的双发延程飞行能力跨洋运营。',
+    specs: { '巡航速度': '0.84 马赫', '最大航程': '13,650 km', '载客量': '368–550 人', '翼展': '64.8 m' },
+    airlineIds: ['ek', 'ua', 'cx', 'af', 'tk', 'ba']
+  },
+  {
+    id: 5, name: '中国商飞 C919', code: 'COMAC C919',
+    category: 'civil', country: '中国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Comac_C919_at_Vladivostok_2024.jpg',
+    desc: 'C919是中国首款按国际适航标准研制的干线单通道客机，2017年首飞，2023年商业运营。采用先进气动设计和LEAP-1C发动机，与A320neo和737 MAX同级别竞争，代表中国民用航空制造业的重大突破。',
+    specs: { '巡航速度': '0.785 马赫', '最大航程': '5,555 km', '载客量': '158–192 人', '翼展': '35.8 m' },
+    airlineIds: ['mu', 'ca', 'cz']
+  },
+  {
+    id: 6, name: '空客 A320neo', code: 'Airbus A320neo',
+    category: 'civil', country: '欧洲',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/8/86/Airbus_A320neo_prototype_F-WNEW.jpg',
+    desc: '空客A320neo是全球最畅销的单通道客机系列，2016年投入运营。换装新一代发动机后燃油效率提升15-20%，噪音降低50%。截至2025年订单已超10,000架。',
+    specs: { '巡航速度': '0.78 马赫', '最大航程': '6,300 km', '载客量': '150–194 人', '翼展': '35.8 m' },
+    airlineIds: ['ca', 'cz', 'lh', 'tk', 'ba']
+  },
+  {
+    id: 7, name: '波音 737 MAX 8', code: 'Boeing 737 MAX 8',
+    category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/7/78/United_Airlines_Boeing_737_MAX_9_N37504.jpg',
+    desc: '波音737 MAX 8是737系列最新一代，2017年投入运营。配备CFM LEAP-1B发动机和先进技术翼梢小翼，燃油效率较737NG提升14%。经过全面升级后，安全性已得到充分验证和监管认可。',
+    specs: { '巡航速度': '0.79 马赫', '最大航程': '6,570 km', '载客量': '162–210 人', '翼展': '35.92 m' },
+    airlineIds: ['ua', 'cz', 'tk']
+  },
+  {
+    id: 8, name: '空客 A330-300', code: 'Airbus A330-300',
+    category: 'civil', country: '欧洲',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/d/d8/Turkish_Airlines_Airbus_A330-300_TC-JOC.jpg',
+    desc: '空客A330-300是畅销的中远程宽体客机，1994年投入运营，经过多轮升级至今仍在生产。以出色的运营经济性和客舱舒适度在中远程航线广泛使用，是中国航空公司宽体机队的核心机型之一。',
+    specs: { '巡航速度': '0.82 马赫', '最大航程': '11,750 km', '载客量': '277–440 人', '翼展': '60.3 m' },
+    airlineIds: ['ca', 'mu', 'cz', 'tk', 'cx']
+  },
+  {
+    id: 9, name: '巴航工业 E195-E2', code: 'Embraer E195-E2',
+    category: 'civil', country: '巴西',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/7/78/Embraer_E195-E2_PR-ZIQ.jpg',
+    desc: '巴航工业E195-E2是E-Jet E2系列中最大的型号，2019年投入运营。采用全新普惠PW1900G齿轮涡扇发动机和全新机翼，燃油效率提升25%，是130座级最省油的单通道喷气客机。',
+    specs: { '巡航速度': '0.8 马赫', '最大航程': '4,800 km', '载客量': '120–146 人', '翼展': '35.1 m' },
+    airlineIds: ['lh']
+  },
+  {
+    id: 10, name: '空客 A220-300', code: 'Airbus A220-300',
+    category: 'civil', country: '加拿大/欧洲',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/1/1f/AirBaltic_A220-300_YL-AAU.jpg',
+    desc: '空客A220-300（原庞巴迪CS300）是一款极具创新性的支线/窄体客机，2016年投入运营。采用大量复合材料和普惠齿轮涡扇发动机，客舱最宽、舷窗最大，燃油效率极佳。',
+    specs: { '巡航速度': '0.82 马赫', '最大航程': '6,300 km', '载客量': '130–160 人', '翼展': '35.1 m' },
+    airlineIds: ['ay', 'dl']
+  },
+  {
+    id: 20, name: 'F-22 猛禽', code: 'F-22 Raptor', category: 'fighter', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Lockheed_Martin_F-22A_Raptor_JSOH.jpg',
+    desc: '世界上第一款第五代隐形空优战斗机，1997年首飞。兼具隐身、超巡、超机动性和先进航电。',
+    specs: { '最大速度': '2.25 马赫', '作战半径': '850 km', '升限': '20,000 m', '翼展': '13.56 m' }
+  },
+  {
+    id: 21, name: '歼-20 威龙', code: 'J-20', category: 'fighter', country: '中国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Chengdu_J-20_at_Airshow_China_2018_%28cropped%29.jpg',
+    desc: '中国首款第五代双发重型隐形战斗机，2017年服役，具备高隐身性和超机动性。',
+    specs: { '最大速度': '2.0 马赫', '作战半径': '1,200 km', '升限': '20,000 m', '翼展': '13.01 m' }
+  },
+  {
+    id: 22, name: 'B-2 幽灵', code: 'B-2 Spirit', category: 'bomber', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/B-2_Spirit_original.jpg',
+    desc: '全球唯一隐身战略轰炸机，飞翼布局，雷达反射截积极小，单架造价约24亿美元。',
+    specs: { '最大速度': '0.95 马赫', '作战半径': '11,000 km', '升限': '15,200 m', '翼展': '52.4 m' }
+  },
+  {
+    id: 23, name: 'C-17 环球霸王 III', code: 'C-17', category: 'transport', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/1/1b/C-17_Globemaster_III_4.jpg',
+    desc: '大型战略战术运输机，最大载重77吨，可短距起降于未铺设跑道。',
+    specs: { '巡航速度': '0.74 马赫', '航程': '10,390 km', '载重': '77 吨', '翼展': '51.75 m' }
+  },
+  {
+    id: 24, name: '运-20 鲲鹏', code: 'Y-20', category: 'transport', country: '中国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/d/d6/Xian_Y-20_at_Airshow_China_2018.jpg',
+    desc: '中国自主研发大型运输机，最大起飞重量220吨，填补战略运输空白。',
+    specs: { '巡航速度': '0.75 马赫', '航程': '7,800 km', '载重': '66 吨', '翼展': '45 m' }
+  },
+  {
+    id: 25, name: 'AH-64 阿帕奇', code: 'AH-64 Apache', category: 'helicopter', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/e/ee/AH-64D_Apache_Longbow.jpg',
+    desc: '全球最先进武装直升机之一，可挂载16枚地狱火导弹，被誉为坦克杀手。',
+    specs: { '最大速度': '293 km/h', '作战半径': '480 km', '升限': '6,400 m', '旋翼直径': '14.63 m' }
+  }
+];
+
+let collection = new Set(JSON.parse(localStorage.getItem('aviation_collection') || '[]'));
+let currentFilter = 'civil';
+let currentCountry = 'all';
+
+function getAirlineCountries() {
+  const countries = new Set();
+  aircrafts.forEach(a => {
+    (a.airlineIds || []).forEach(aid => {
+      if (airlines[aid]) countries.add(airlines[aid].country);
+    });
+  });
+  return [...countries].sort();
+}
+
+function renderCountryBar() {
+  const bar = document.getElementById('countryBar');
+  const countries = getAirlineCountries();
+  bar.innerHTML = '<div class="country-chip active" data-country="all">全部航司</div>' +
+    countries.map(c => `<div class="country-chip" data-country="${c}">${c}</div>`).join('');
+
+  bar.querySelectorAll('.country-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      bar.querySelectorAll('.country-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentCountry = chip.dataset.country;
+      renderCards();
+    });
+  });
+}
+
+function matchesCountry(aircraft) {
+  if (currentCountry === 'all') return true;
+  if (!aircraft.airlineIds) return false;
+  return aircraft.airlineIds.some(aid => airlines[aid] && airlines[aid].country === currentCountry);
+}
+
+function renderCards() {
+  const grid = document.getElementById('grid');
+  const countryBar = document.getElementById('countryBar');
+
+  if (currentFilter === 'civil') {
+    countryBar.classList.add('visible');
+  } else {
+    countryBar.classList.remove('visible');
+  }
+
+  let filtered = aircrafts.filter(a => currentFilter === 'all' ? true : a.category === currentFilter);
+
+  if (currentFilter === 'civil' && currentCountry !== 'all') {
+    filtered = filtered.filter(a => matchesCountry(a));
+  }
+
+  if (currentFilter === 'civil') {
+    filtered.sort((a, b) => (b.airlineIds || []).length - (a.airlineIds || []).length);
+  }
+
+  grid.innerHTML = filtered.map((a, i) => {
+    const miniLogos = (a.airlineIds || []).slice(0, 3).map(aid => {
+      const al = airlines[aid];
+      return al ? `<img class="airline-mini-logo" src="${proxyUrl(al.logo)}" alt="${al.name}" onerror="this.style.display='none'" loading="lazy">` : '';
+    }).join('');
+
+    return `
+    <div class="card" data-id="${a.id}" style="--i:${i}" onclick="openDetail(${a.id})">
+      <div class="card-image-wrap">
+        <img src="${proxyUrl(a.image)}" alt="${a.name}" loading="lazy"
+             onerror="placeholdImage(this,'${a.name}','${a.code}','${a.category}')">
+        <div class="card-badge">${a.country}</div>
+        ${miniLogos ? `<div class="card-airlines-mini">${miniLogos}</div>` : ''}
+        <div class="card-bookmark ${collection.has(a.id) ? 'collected' : ''}"
+             onclick="event.stopPropagation(); toggleCollect(${a.id})">
+          <svg viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21z"/></svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>${a.name}</h3>
+        <div class="model-code">${a.code}</div>
+        <div class="desc">${a.desc}</div>
+        <div class="card-stats">
+          <div class="stat"><div class="stat-value">${a.specs['巡航速度'] || a.specs['最大速度'] || '--'}</div><div class="stat-label">速度</div></div>
+          <div class="stat"><div class="stat-value">${a.specs['翼展'] || a.specs['旋翼直径'] || '--'}</div><div class="stat-label">翼展</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateCollectionCount();
+}
+
+function toggleCollect(id) {
+  if (collection.has(id)) collection.delete(id);
+  else collection.add(id);
+  localStorage.setItem('aviation_collection', JSON.stringify([...collection]));
+  renderCards();
+}
+
+function updateCollectionCount() {
+  document.getElementById('collectionCount').textContent = `已收藏 ${collection.size} 架`;
+}
+
+function openDetail(id) {
+  const a = aircrafts.find(x => x.id === id);
+  if (!a) return;
+
+  const airlineCards = (a.airlineIds || []).map(aid => {
+    const al = airlines[aid];
+    if (!al) return '';
+    return `
+    <div class="airline-card">
+      <img class="airline-logo" src="${proxyUrl(al.logo)}" alt="${al.name}"
+           onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2252%22 height=%2252%22><rect fill=%22%23222%22 width=%2252%22 height=%2252%22 rx=%2214%22/><text fill=%22%23888%22 x=%2226%22 y=%2230%22 text-anchor=%22middle%22 font-size=%2210%22>${al.code}</text></svg>'">
+      <div class="airline-info">
+        <div class="airline-name">${al.name} <span class="airline-country-tag">${al.country}</span></div>
+        <div class="airline-desc">${al.desc}</div>
+        <a class="airline-website" href="${al.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          访问官网了解更多
+        </a>
+      </div>
+    </div>`;
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="detail-modal" style="position:relative">
+      <div class="modal-header-img">
+        <img src="${proxyUrl(a.image)}" alt="${a.name}"
+             onerror="placeholdImage(this,'${a.name}','${a.code}','${a.category}')">
+        <div class="modal-close" onclick="closeDetail()">&times;</div>
+      </div>
+      <div class="modal-body">
+        <h2>${a.name}</h2>
+        <div class="modal-code">${a.code} · ${a.country}</div>
+        <div class="modal-desc">${a.desc}</div>
+        <div class="modal-specs">
+          ${Object.entries(a.specs).map(([k, v]) =>
+            `<div class="spec-item"><div class="spec-label">${k}</div><div class="spec-value">${v}</div></div>`
+          ).join('')}
+        </div>
+        ${airlineCards ? `<div class="airlines-section"><h3>运营航司</h3>${airlineCards}</div>` : ''}
+      </div>
+    </div>
+  `;
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
+  document.getElementById('overlayContainer').appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('overlayContainer').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+document.querySelector('.filter-bar').addEventListener('click', (e) => {
+  if (!e.target.classList.contains('filter-chip')) return;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  currentFilter = e.target.dataset.filter;
+  if (currentFilter !== 'civil') currentCountry = 'all';
+  renderCards();
+});
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
+
+function createStars() {
+  const layer = document.getElementById('starsLayer');
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 110; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.width = star.style.height = (Math.random() * 2.2 + 0.8) + 'px';
+    star.style.setProperty('--dur', (Math.random() * 3 + 2) + 's');
+    star.style.setProperty('--delay', Math.random() * 5 + 's');
+    frag.appendChild(star);
+  }
+  layer.appendChild(frag);
+}
+
+createStars();
+renderCountryBar();
+renderCards();
+</script>
+</body>
+</html>
