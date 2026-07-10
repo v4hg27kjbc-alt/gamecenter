@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>民航客机收藏馆 | Airliner Collection</title>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="1b107f5a-12d4-4db7-a8bd-c1d9cd2ecbb7"></script>
 <style>
 :root {
   --glass-bg: rgba(255, 255, 255, 0.07);
@@ -1200,8 +1201,8 @@ function renderCards() {
 }
 
 function toggleCollect(id) {
-  if (collection.has(id)) collection.delete(id);
-  else collection.add(id);
+  if (collection.has(id)) { collection.delete(id); window._track('uncollect', { aircraftId: id }); }
+  else { collection.add(id); window._track('collect', { aircraftId: id }); }
   localStorage.setItem('aviation_collection', JSON.stringify([...collection]));
   renderCards();
 }
@@ -1287,6 +1288,7 @@ function showCompare() {
   const a1 = aircrafts.find(x => x.id === ids[0]);
   const a2 = aircrafts.find(x => x.id === ids[1]);
   if (!a1 || !a2) return;
+  window._track('compare', { id1: a1.id, id2: a2.id, name1: a1.name, name2: a2.name });
 
   // Determine which specs to compare (find common keys)
   const specKeys1 = Object.keys(a1.specs);
@@ -1394,6 +1396,10 @@ function initBackToTop() {
 // ===== 初始化事件监听 =====
 document.getElementById('searchInput').addEventListener('input', (e) => {
   searchQuery = e.target.value;
+  clearTimeout(window._searchDebounce);
+  window._searchDebounce = setTimeout(function() {
+    if (searchQuery.trim()) window._track('search', { query: searchQuery.trim() });
+  }, 800);
   renderCards();
 });
 
@@ -1407,6 +1413,7 @@ document.getElementById('sortGroup').addEventListener('click', (e) => {
     sortBy = newSort;
     sortDir = 'asc';
   }
+  window._track('sort', { by: sortBy, dir: sortDir });
   updateSortUI();
   renderCards();
 });
@@ -1419,6 +1426,7 @@ initBackToTop();
 function openDetail(id) {
   const a = aircrafts.find(x => x.id === id);
   if (!a) return;
+  window._track('card_click', { aircraftId: a.id, name: a.name, code: a.code, category: a.category });
 
   const airlineCards = (a.airlineIds || []).map(aid => {
     const al = airlines[aid];
@@ -1477,6 +1485,7 @@ document.querySelector('.filter-bar').addEventListener('click', (e) => {
   e.target.classList.add('active');
   currentFilter = e.target.dataset.filter;
   if (currentFilter !== 'civil') currentCountry = 'all';
+  window._track('filter', { filter: currentFilter });
   renderCards();
 });
 
@@ -1510,6 +1519,65 @@ showToast();
 createStars();
 renderCountryBar();
 renderCards();
+
+// ===== 埋点系统 =====
+(function() {
+  const STORAGE_KEY = 'aviation_analytics';
+  const VISITOR_KEY = 'aviation_visitor_id';
+
+  function getVisitorId() {
+    let vid = localStorage.getItem(VISITOR_KEY);
+    if (!vid) {
+      vid = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem(VISITOR_KEY, vid);
+    }
+    return vid;
+  }
+  const visitorId = getVisitorId();
+
+  function getData() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"events":[]}');
+    } catch (e) {
+      return { events: [] };
+    }
+  }
+
+  function saveData(data) {
+    try {
+      if (data.events.length > 5000) {
+        data.events = data.events.slice(-4000);
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  window._track = function(eventType, payload) {
+    var data = getData();
+    var ua = navigator.userAgent;
+    var isMobile = /Mobile|Android|iPhone|iPad/i.test(ua);
+    var browser = 'Other';
+    if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edg') === -1) browser = 'Chrome';
+    else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) browser = 'Safari';
+    else if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
+    else if (ua.indexOf('Edg') > -1) browser = 'Edge';
+
+    var event = {
+      type: eventType,
+      timestamp: Date.now(),
+      visitorId: visitorId,
+      screen: screen.width + 'x' + screen.height,
+      browser: browser,
+      isMobile: isMobile
+    };
+    for (var k in payload) { event[k] = payload[k]; }
+    data.events.push(event);
+    saveData(data);
+  };
+
+  // PV
+  window._track('pv', { page: 'aviation-collection', title: document.title });
+})();
 </script>
 
 <button class="back-to-top" id="backToTop" onclick="scrollToTop()" title="返回顶部">
