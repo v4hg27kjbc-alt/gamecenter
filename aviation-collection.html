@@ -2502,23 +2502,26 @@ function generateShareCard(id) {
   var domImg = document.querySelector('.card[data-id="' + id + '"] .card-image-wrap img');
 
   if (domImg && domImg.complete && domImg.naturalWidth > 0) {
-    // DOM 图片已成功加载，直接绘制（canvas 会被 taint，但预览显示正常）
+    // DOM 图片已成功加载，直接绘制并下载
     drawCard(ctx, domImg, W, H, a, c);
-    showSharePreview(canvas);
+    window._shareCanvas = canvas;
+    downloadShareCard();
   } else {
     // 兜底：尝试通过 proxyUrl 加载
     var img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function() {
       drawCard(ctx, img, W, H, a, c);
-      showSharePreview(canvas);
+      window._shareCanvas = canvas;
+      downloadShareCard();
     };
     img.onerror = function() {
       // 使用 SVG 占位图
       var svgImg = new Image();
       svgImg.onload = function() {
         drawCard(ctx, svgImg, W, H, a, c);
-        showSharePreview(canvas);
+        window._shareCanvas = canvas;
+        downloadShareCard();
       };
       svgImg.src = createPlaceholderSVG(a, c);
     };
