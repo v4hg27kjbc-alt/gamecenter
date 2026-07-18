@@ -956,6 +956,30 @@ body {
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes dicePop { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes diceShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes diceGlow { 0%,100% { text-shadow: 0 0 20px rgba(79,195,247,0.3); } 50% { text-shadow: 0 0 40px rgba(79,195,247,0.8), 0 0 80px rgba(79,195,247,0.4); } }
+.dice-overlay {
+  position: fixed; z-index: 400; inset: 0;
+  background: rgba(5,10,22,0.92);
+  display: flex; align-items: center; justify-content: center;
+  animation: dicePop 0.3s ease-out;
+}
+.dice-box { text-align: center; }
+.dice-rolling {
+  font-size: 3rem; font-weight: 700; color: var(--text);
+  min-height: 4rem; transition: all 0.1s;
+  animation: diceShake 0.1s infinite;
+}
+.dice-rolling.dice-done {
+  animation: diceGlow 0.6s ease-in-out;
+  font-size: 3.5rem; color: var(--accent);
+}
+.dice-hint { color: var(--text-dim); margin-top: 16px; font-size: 1rem; }
+@media (max-width: 640px) {
+  .dice-rolling { font-size: 1.6rem; }
+  .dice-rolling.dice-done { font-size: 2rem; }
+}
 .lightbox-close {
   position: absolute; top: 24px; right: 28px;
   width: 44px; height: 44px;
@@ -2287,9 +2311,42 @@ function switchToAircraft(id) {
 }
 
 function randomLucky() {
-  var idx = Math.floor(Math.random() * aircrafts.length);
-  var a = aircrafts[idx];
-  if (a) openDetail(a.id);
+  var btn = document.getElementById('luckyButton');
+  if (!btn || btn.dataset.rolling === '1') return;
+  btn.dataset.rolling = '1';
+  btn.style.pointerEvents = 'none';
+
+  // Show dice overlay
+  var overlay = document.createElement('div');
+  overlay.className = 'dice-overlay';
+  overlay.id = 'diceOverlay';
+  overlay.innerHTML = '<div class="dice-box"><div class="dice-rolling" id="diceText">...</div><div class="dice-hint">探索中...</div></div>';
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  var count = 0, max = 12, delay = 80;
+  var interval = setInterval(function() {
+    var r = aircrafts[Math.floor(Math.random() * aircrafts.length)];
+    document.getElementById('diceText').textContent = r.name;
+    count++;
+    if (count >= max) {
+      clearInterval(interval);
+      setTimeout(function() {
+        var idx = Math.floor(Math.random() * aircrafts.length);
+        var chosen = aircrafts[idx];
+        document.getElementById('diceText').textContent = chosen.name;
+        document.getElementById('diceText').classList.add('dice-done');
+        document.querySelector('.dice-hint').textContent = chosen.categoryLabel || '';
+        setTimeout(function() {
+          document.body.style.overflow = '';
+          if (overlay.parentNode) overlay.remove();
+          btn.dataset.rolling = '0';
+          btn.style.pointerEvents = '';
+          openDetail(chosen.id);
+        }, 600);
+      }, 100);
+    }
+  }, delay);
 }
 
 function openDetail(id) {
