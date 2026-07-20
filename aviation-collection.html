@@ -2677,6 +2677,8 @@ function openDetail(id) {
 function closeDetail() {
   document.getElementById('overlayContainer').innerHTML = '';
   document.body.style.overflow = '';
+  // 清除 hash，避免刷新时自动打开
+  history.replaceState(null, '', window.location.pathname + window.location.search);
 }
 
 document.querySelector('.filter-bar').addEventListener('click', (e) => {
