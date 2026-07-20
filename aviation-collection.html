@@ -112,10 +112,10 @@ body {
   box-shadow: var(--glass-shadow);
   text-align: center;
   position: relative;
-  animation: headerSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fadeInDown 0.6s ease;
 }
-@keyframes headerSlideIn {
-  from { opacity: 0; transform: translateY(-30px); }
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .header h1 {
@@ -130,6 +130,199 @@ body {
   color: var(--text-dim); font-size: 0.9rem;
   letter-spacing: 5px; text-transform: uppercase;
 }
+
+/* ===== Hero Banner 全幅轮播 ===== */
+.hero-banner {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  margin-bottom: 32px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+}
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  display: flex;
+  pointer-events: none;
+}
+.hero-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.65);
+  transform: scale(1.02);
+  transition: transform 6s ease;
+}
+.hero-slide.active .hero-bg {
+  transform: scale(1);
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+}
+.hero-text {
+  width: 45%;
+  min-width: 340px;
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  background: rgba(10, 18, 36, 0.55);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero-text h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.hero-text .hero-manufacturer {
+  font-size: 1rem;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero-text .hero-desc {
+  font-size: 0.9rem;
+  color: rgba(224,224,224,0.78);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hero-image {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.hero-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+.hero-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 10px;
+}
+.hero-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  padding: 0;
+}
+.hero-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  transform: scale(1.25);
+}
+.hero-dot:hover {
+  background: rgba(255,255,255,0.6);
+}
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+.hero-banner:hover .hero-arrow {
+  opacity: 1;
+}
+.hero-arrow:hover {
+  background: rgba(0,0,0,0.6);
+  border-color: rgba(255,255,255,0.35);
+}
+.hero-arrow-prev {
+  left: 16px;
+}
+.hero-arrow-next {
+  right: 16px;
+}
+@media (max-width: 768px) {
+  .hero-banner {
+    height: 280px;
+  }
+  .hero-content {
+    flex-direction: column;
+  }
+  .hero-text {
+    width: 100%;
+    min-width: 0;
+    padding: 20px 20px 12px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+  .hero-text h2 {
+    font-size: 1.4rem;
+  }
+  .hero-text .hero-manufacturer {
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+  }
+  .hero-text .hero-desc {
+    font-size: 0.78rem;
+    -webkit-line-clamp: 2;
+  }
+  .hero-image {
+    flex: 1;
+    padding: 12px 16px;
+  }
+  .hero-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}
+
 .filter-bar {
   display: flex; gap: 10px; flex-wrap: wrap;
   margin-bottom: 14px; justify-content: center; align-items: center;
@@ -151,6 +344,25 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0,0,0,0.3);
 }
+.filter-chip {
+  position: relative;
+  overflow: hidden;
+}
+.filter-chip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  transform: skewX(-25deg);
+  transition: left 0.6s ease;
+}
+.filter-chip:hover::after {
+  left: 120%;
+}
+
 .filter-chip.active {
   background: rgba(79, 195, 247, 0.22);
   border-color: var(--accent);
@@ -209,6 +421,15 @@ body {
   gap: 26px;
 }
 
+
+/* ===== 卡片淡入上升动画 ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card.animate-in {
+  animation: fadeInUp 0.55s ease backwards;
+}
 .card {
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
@@ -218,13 +439,8 @@ body {
   overflow: hidden; cursor: pointer;
   transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  animation: cardFadeIn 0.6s ease backwards;
-  animation-delay: calc(var(--i) * 0.07s);
+  /* fadeInUp applied via IntersectionObserver */
   display: flex; flex-direction: column;
-}
-@keyframes cardFadeIn {
-  from { opacity: 0; transform: translateY(36px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .card:hover {
   transform: translateY(-7px) scale(1.015);
@@ -242,7 +458,7 @@ body {
   width: 100%; height: 100%; object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.card:hover .card-image-wrap img { transform: scale(1.07); }
+.card:hover .card-image-wrap img { transform: scale(1.05); transition: transform 0.3s ease; }
 .card-image-wrap::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0; height: 55px;
@@ -491,10 +707,10 @@ body {
   line-height: 1.7;
   position: relative;
   display: none;
-  animation: fadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: bannerFadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .update-banner.visible { display: block; }
-@keyframes fadeInDown {
+@keyframes bannerFadeInDown {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
@@ -554,9 +770,13 @@ body {
   font-family: inherit;
 }
 .search-input::placeholder { color: var(--text-dim); }
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 22px var(--accent-glow); }
+  50% { box-shadow: 0 0 36px var(--accent-glow), 0 0 60px rgba(79,195,247,0.2); }
+}
 .search-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 22px var(--accent-glow);
+  animation: glowPulse 2s ease-in-out infinite;
   background: rgba(255,255,255,0.11);
 }
 .search-input:focus + svg,
@@ -761,8 +981,15 @@ body {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
+@keyframes bounceIn {
+  0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+  50% { transform: translateY(-8px) scale(1.05); }
+  70% { transform: translateY(3px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 .back-to-top.visible {
   opacity: 1; transform: translateY(0); pointer-events: auto;
+  animation: bounceIn 0.5s ease;
 }
 .back-to-top:hover {
   background: rgba(79, 195, 247, 0.3);
@@ -1016,6 +1243,13 @@ body {
     <p class="subtitle" id="headerSubtitle">作者 Marvis &amp; Henry</p>
   </div>
 
+  <div class="hero-banner" id="heroBanner">
+    <!-- Slides injected by JS -->
+    <div class="hero-dots" id="heroDots"></div>
+    <button class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous">&#8249;</button>
+    <button class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next">&#8250;</button>
+  </div>
+
   <div class="update-banner" id="updateBanner">
     <span id="updateBannerText"></span>
     <button class="banner-close" onclick="dismissUpdateBanner()" title="关闭">&times;</button>
@@ -1116,7 +1350,7 @@ const i18n = {
     announcement: '16家航司Logo全新设计款上线，点击卡片查看详情',
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">「手气不错」</span>随机探索，全屏动画抽选飞机<span class="banner-sep">|</span><span class="banner-highlight">「大图预览」</span>点击飞机图片可放大查看，支持滚轮缩放<span class="banner-sep">|</span><span class="banner-highlight">「相关推荐」</span>详情页底部查看同类飞机推荐',
+    updateBanner: '<span class="banner-highlight">「首页 Banner」</span>精选飞机自动轮播展示<span class="banner-sep">|</span><span class="banner-highlight">「手气不错」</span>随机探索，全屏动画抽选飞机<span class="banner-sep">|</span><span class="banner-highlight">「大图预览」</span>点击飞机图片可放大查看，支持滚轮缩放<span class="banner-sep">|</span><span class="banner-highlight">「相关推荐」</span>详情页底部查看同类飞机推荐',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -1272,7 +1506,7 @@ const i18n = {
     announcement: '16 New Airline Logo Designs Now Live — Tap Any Card for Details',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">「Lucky Draw」</span>Random exploration with fullscreen dice animation<span class="banner-sep">|</span><span class="banner-highlight">「Image Preview」</span>Click aircraft images to zoom in, scroll wheel supported<span class="banner-sep">|</span><span class="banner-highlight">「Related Aircraft」</span>View similar aircraft at the bottom of the detail page',
+    updateBanner: '<span class="banner-highlight">「Hero Banner」</span>Featured aircraft carousel on homepage<span class="banner-sep">|</span><span class="banner-highlight">「Lucky Draw」</span>Random exploration with fullscreen dice animation<span class="banner-sep">|</span><span class="banner-highlight">「Image Preview」</span>Click aircraft images to zoom in, scroll wheel supported<span class="banner-sep">|</span><span class="banner-highlight">「Related Aircraft」</span>View similar aircraft at the bottom of the detail page',
 
     specCruiseSpeed: 'Cruise Speed',
     specMaxSpeed: 'Max Speed',
@@ -2175,7 +2409,9 @@ document.getElementById('sortGroup').addEventListener('click', (e) => {
 
 updateSortUI();
 initTiltEffect();
+initCardAnimation();
 initBackToTop();
+initHeroBanner();
 
 
 // ===== P2: 大图预览 Lightbox =====
@@ -2466,15 +2702,116 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260718-v3', '1');
+  localStorage.setItem('aviation-update-20260718-v4', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260718-v3')) return;
+  if (localStorage.getItem('aviation-update-20260718-v4')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
   banner.classList.add('visible');
 }
+
+// ===== Hero Banner 轮播 =====
+function initHeroBanner() {
+  const heroIds = [1, 5, 20, 4]; // A380, C919, F-22, 777-300ER
+  const heroAircraft = heroIds.map(function(id) {
+    return aircrafts.find(function(a) { return a.id === id; });
+  }).filter(Boolean);
+
+  if (heroAircraft.length === 0) return;
+
+  const banner = document.getElementById('heroBanner');
+  const dotsContainer = document.getElementById('heroDots');
+  let currentIndex = 0;
+  let autoTimer = null;
+  const INTERVAL = 4000;
+
+  // Build slides
+  heroAircraft.forEach(function(a, i) {
+    const slide = document.createElement('div');
+    slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
+    slide.innerHTML =
+      '<div class="hero-bg" style="background-image:url(' + proxyUrl(a.image) + ')"></div>' +
+      '<div class="hero-content">' +
+        '<div class="hero-text">' +
+          '<h2>' + t(a.name) + '</h2>' +
+          '<div class="hero-manufacturer">' + (a.code.split(' ')[0] || '') + ' · ' + a.country + '</div>' +
+          '<div class="hero-desc">' + t(a.desc) + '</div>' +
+        '</div>' +
+        '<div class="hero-image">' +
+          '<img src="' + proxyUrl(a.image) + '" alt="' + t(a.name) + '" onerror="this.style.display=\'none\'">' +
+        '</div>' +
+      '</div>';
+    slide.addEventListener('click', function() { openDetail(a.id); });
+    banner.insertBefore(slide, dotsContainer);
+
+    // Dot
+    const dot = document.createElement('button');
+    dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', t(a.name));
+    dot.addEventListener('click', function(e) {
+      e.stopPropagation();
+      goToSlide(i);
+    });
+    dotsContainer.appendChild(dot);
+  });
+
+  const slides = banner.querySelectorAll('.hero-slide');
+  const dots = dotsContainer.querySelectorAll('.hero-dot');
+
+  function goToSlide(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    dots.forEach(function(d) { d.classList.remove('active'); });
+    currentIndex = index;
+    slides[currentIndex].classList.add('active');
+    dots[currentIndex].classList.add('active');
+    resetTimer();
+  }
+
+  function nextSlide() {
+    goToSlide((currentIndex + 1) % slides.length);
+  }
+
+  function prevSlide() {
+    goToSlide((currentIndex - 1 + slides.length) % slides.length);
+  }
+
+  function startTimer() {
+    stopTimer();
+    autoTimer = setInterval(nextSlide, INTERVAL);
+  }
+
+  function stopTimer() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  }
+
+  function resetTimer() {
+    stopTimer();
+    startTimer();
+  }
+
+  document.getElementById('heroPrev').addEventListener('click', prevSlide);
+  document.getElementById('heroNext').addEventListener('click', nextSlide);
+
+  // Pause on hover
+  banner.addEventListener('mouseenter', stopTimer);
+  banner.addEventListener('mouseleave', startTimer);
+
+  // Touch swipe support
+  let touchStartX = 0;
+  banner.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; });
+  banner.addEventListener('touchend', function(e) {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+    }
+  });
+
+  startTimer();
+}
+
 showToast();
 initUpdateBanner();
 createStars();
