@@ -3086,7 +3086,7 @@ function dismissUpdateBanner() {
   localStorage.setItem('aviation-update-20260722-v7', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260722-v5')) return;
+  if (localStorage.getItem('aviation-update-20260722-v7')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
