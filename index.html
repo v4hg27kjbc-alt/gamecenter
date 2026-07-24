@@ -558,7 +558,7 @@ body {
 }
 .card-bookmark.collected {
   background: rgba(255, 87, 34, 0.55);
-  border-color: #ff5722;
+  border-color: #1565c0;
   box-shadow: 0 0 14px rgba(255, 87, 34, 0.5);
 }
 .card-bookmark svg { width: 17px; height: 17px; fill: none; stroke: white; stroke-width: 2; }
@@ -1440,9 +1440,77 @@ body {
 }
 
 
+/* ===== 滚动进度条 ===== */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, #29b6f6, #0288d1, #4fc3f7);
+  z-index: 99999;
+  width: 0;
+  transition: width 0.1s linear;
+}
+
+/* ===== 导出收藏按钮 ===== */
+.export-collection-wrap {
+  display: flex; align-items: center; gap: 8px;
+}
+.export-collection-btn {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 9px 22px;
+  color: var(--text-dim); font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.export-collection-btn:hover {
+  background: rgba(79, 195, 247, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.export-dropdown {
+  display: none; position: absolute;
+  right: 0; top: 110%;
+  background: rgba(20, 30, 50, 0.95);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.export-dropdown.show { display: block; }
+.export-dropdown-item {
+  display: block; width: 100%;
+  padding: 11px 18px;
+  border: none; background: transparent;
+  color: var(--text); font-size: 0.9rem;
+  cursor: pointer; text-align: left;
+  transition: background 0.15s;
+}
+.export-dropdown-item:hover { background: rgba(79,195,247,0.15); }
+.export-dropdown-item:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.06); }
+
+.modal-action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  background: rgba(255,255,255,0.08); color: #ccc;
+}
+.modal-action-btn:hover {
+  background: rgba(255,255,255,0.15); color: #fff;
+  border-color: rgba(255,255,255,0.25);
+}
+
 </style>
 </head>
 <body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <div class="stars-layer" id="starsLayer"></div>
 
@@ -3008,7 +3076,7 @@ function openDetail(id) {
         <div class="modal-close" onclick="closeDetail()">&times;</div>
       </div>
       <div class="modal-body">
-        <h2>${t(a.name)}</h2>
+        <h2 style="margin:0 0 2px 0">${t(a.name)}</h2>
         <div class="modal-code">${a.code} · ${a.country}</div>
         <div class="modal-desc">${t(a.desc)}</div>
         <div class="modal-specs">
@@ -3017,6 +3085,10 @@ function openDetail(id) {
           ).join('')}
         </div>
         <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+          <button class="modal-action-btn" style="background:${collection.has(a.id)?'#1565c0':'rgba(255,255,255,0.08)'};color:${collection.has(a.id)?'#fff':'#ccc'}"
+                  onclick="event.stopPropagation();toggleCollect(${a.id});var b=this;b.style.background=collection.has(${a.id})?'#1565c0':'rgba(255,255,255,0.08)';b.style.color=collection.has(${a.id})?'#fff':'#ccc';b.textContent=collection.has(${a.id})?'已收藏':'收藏'">${collection.has(a.id) ? '已收藏' : '收藏'}</button>
+          <button class="modal-action-btn"
+                  onclick="event.stopPropagation();exportSingleAircraft(${a.id})">导出为图片</button>
         </div>
         ${airlineCards ? `<div class="airlines-section"><h3>${t('operatingAirlines')}</h3>${airlineCards}</div>` : ''}
         ${renderRelatedSection(a.id)}
@@ -3418,6 +3490,261 @@ if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register(swUrl).catch(function() {});
     } catch(e) {}
   })();
+}
+</script>
+
+<script>
+// ===== 滚动进度条 =====
+(function() {
+  var bar = document.getElementById('scrollProgress');
+  function updateProgress() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    var pct = docH > 0 ? Math.min(100, (scrollTop / docH) * 100) : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+})();
+
+// ===== 导出收藏 =====
+function toggleExportDropdown() {
+  var dd = document.getElementById('exportDropdown');
+  dd.classList.toggle('show');
+}
+document.addEventListener('click', function(e) {
+  var btn = document.getElementById('exportCollectionBtn');
+  var dd = document.getElementById('exportDropdown');
+  if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.remove('show');
+  }
+});
+
+function getCollectionData() {
+  var collected = [];
+  aircrafts.forEach(function(a) {
+    if (collection.has(a.id)) {
+      collected.push({
+        name: a.name,
+        code: a.code,
+        category: a.category,
+        country: a.country,
+        specs: a.specs,
+        desc: a.desc,
+        image: a.image,
+        id: a.id
+      });
+    }
+  });
+  return collected;
+}
+
+// ===== 制造商图标 =====
+function getManufacturerIcon(code) {
+  var mfr = (code || '').split(' ')[0].toLowerCase();
+  var color, text;
+  if (mfr === 'airbus') { color = '#0288d1'; text = 'A'; }
+  else if (mfr === 'boeing') { color = '#0d47a1'; text = 'B'; }
+  else if (mfr === 'comac') { color = '#c62828'; text = 'C'; }
+  else if (mfr === 'embraer') { color = '#2e7d32'; text = 'E'; }
+  else if (mfr === 'lockheed') { color = '#607d8b'; text = 'LM'; }
+  else if (mfr === 'northrop') { color = '#546e7a'; text = 'NG'; }
+  else if (mfr === '成都飞机工业集团') { color = '#c62828'; text = '成'; }
+  else if (mfr === '西安飞机工业集团') { color = '#1565c0'; text = '西'; }
+  else { color = '#78909c'; text = (code || '?').charAt(0).toUpperCase(); }
+  return '<svg width="32" height="32" viewBox="0 0 32 32" style="flex-shrink:0"><rect width="32" height="32" rx="6" fill="' + color + '"/><text x="16" y="22" text-anchor="middle" fill="white" font-size="' + (text.length > 1 ? '11' : '14') + '" font-weight="bold" font-family="sans-serif">' + text + '</text></svg>';
+}
+
+// ===== 导出单架飞机图片 =====
+function exportSingleAircraft(id) {
+  var a = aircrafts.find(function(x) { return x.id === id; });
+  if (!a) return;
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 3);
+  var W = 600;
+  var padding = 40;
+  var headerH = 120;
+  var bodyH = 200;
+  var canvasH = headerH + bodyH + padding;
+
+  var canvas = document.createElement('canvas');
+  canvas.width = W * dpr;
+  canvas.height = canvasH * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // White bg
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, canvasH);
+
+  // Header
+  ctx.fillStyle = '#0d2137';
+  ctx.fillRect(0, 0, W, headerH);
+
+  // Name
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 24px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText(t(a.name) || a.code, padding, headerH/2 - 10);
+
+  // Code + country
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText(a.code + ' · ' + a.country, padding, headerH/2 + 17);
+
+  // Specs
+  var specsY = headerH + 30;
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('规格参数', padding, specsY);
+
+  var specEntries = Object.entries(a.specs || {});
+  var specLabels = { cruise_speed: '巡航速度', max_speed: '最大速度', max_range: '最大航程', range: '航程', combat_radius: '作战半径', capacity: '载客量', load: '载重', wingspan: '翼展', ceiling: '升限', rotor_diameter: '旋翼直径' };
+  var sx = padding, sy = specsY + 30;
+  ctx.fillStyle = '#333';
+  ctx.font = '13px -apple-system, "PingFang SC", sans-serif';
+  specEntries.forEach(function(entry, i) {
+    var col = i % 2;
+    var row = Math.floor(i / 2);
+    var x = sx + col * 260;
+    var y = sy + row * 26;
+    ctx.fillStyle = '#607d8b';
+    ctx.fillText((specLabels[entry[0]] || entry[0]) + ': ', x, y);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillText(entry[1], x + 90, y);
+  });
+
+  // Border
+  ctx.strokeStyle = '#0d2137';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, W, canvasH);
+
+  // Footer
+  ctx.fillStyle = '#90a4ae';
+  ctx.font = '10px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('Generated: ' + new Date().toISOString().slice(0,10), W - padding, canvasH - 12);
+  ctx.textAlign = 'left';
+
+  try {
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var el = document.createElement('a');
+      el.href = url;
+      el.download = (t(a.name) || a.code).replace(/[\/\\:]/g, '-') + '.png';
+      el.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  } catch(e) {
+    alert('导出图片失败');
+  }
+}
+
+function exportCollectionImage() {
+  toggleExportDropdown();
+  var data = getCollectionData();
+  if (data.length === 0) { alert('收藏列表为空'); return; }
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 3);
+  var W = 800;
+  var padding = 32;
+  var rowH = 90;
+  var headerH = 80;
+  var canvasH = headerH + data.length * rowH + padding * 2;
+  var canvas = document.createElement('canvas');
+  canvas.width = W * dpr;
+  canvas.height = canvasH * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, canvasH);
+
+  // Header
+  ctx.fillStyle = '#0d2137';
+  ctx.fillRect(0, 0, W, headerH);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 22px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('航空收藏馆 - 我的收藏', padding, 50);
+
+  data.forEach(function(item, i) {
+    var y = headerH + i * rowH;
+    var isOdd = i % 2 === 0;
+    if (isOdd) {
+      ctx.fillStyle = '#f8f9fa';
+      ctx.fillRect(0, y, W, rowH);
+    }
+
+    // Name
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
+    var name = t(item.name) || item.code;
+    ctx.fillText(name, padding, y + 28);
+
+    // Code + category
+    ctx.fillStyle = '#607d8b';
+    ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+    var catLabel = '';
+    switch (item.category) {
+      case 'civil': catLabel = '民航客机'; break;
+      case 'fighter': catLabel = '战斗机'; break;
+      case 'bomber': catLabel = '轰炸机'; break;
+      case 'transport': catLabel = '运输机'; break;
+      case 'helicopter': catLabel = '直升机'; break;
+    }
+    ctx.fillText(item.code + ' · ' + catLabel, padding, y + 52);
+
+    // Specs inline right side
+    ctx.fillStyle = '#90a4ae';
+    ctx.font = '11px -apple-system, "PingFang SC", sans-serif';
+    ctx.textAlign = 'right';
+    var specsStr = '';
+    if (item.specs) {
+      var keys = Object.keys(item.specs);
+      specsStr = keys.slice(0, 3).map(function(k) {
+        return item.specs[k];
+      }).join(' · ');
+    }
+    ctx.fillText(specsStr, W - padding, y + 40);
+    ctx.textAlign = 'left';
+
+    // Bottom separator
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(padding, y + rowH - 0.5);
+    ctx.lineTo(W - padding, y + rowH - 0.5);
+    ctx.stroke();
+  });
+
+  // Border
+  ctx.strokeStyle = '#0d2137';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, W, canvasH);
+
+  // Footer
+  ctx.fillStyle = '#90a4ae';
+  ctx.font = '10px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('aviation-collection.pages.dev', padding, canvasH - 12);
+  ctx.textAlign = 'right';
+  ctx.fillText('Generated: ' + new Date().toISOString().slice(0,10), W - padding, canvasH - 12);
+  ctx.textAlign = 'left';
+
+  try {
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'aviation-collection-' + new Date().toISOString().slice(0,10) + '.png';
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  } catch(e) {
+    alert('导出图片失败，请尝试导出 JSON');
+  }
 }
 </script>
 
