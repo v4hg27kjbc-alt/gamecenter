@@ -77,6 +77,18 @@
   --card-hover-bg: rgba(255, 255, 255, 0.11);
 }
 
+/* ===== 浅色模式变量覆盖 ===== */
+body.light-mode {
+  --glass-bg: rgba(0, 0, 0, 0.04);
+  --glass-border: rgba(0, 0, 0, 0.10);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  --accent: #1565c0;
+  --accent-glow: rgba(21, 101, 192, 0.30);
+  --text: #1a1a2e;
+  --text-dim: #666;
+  --card-hover-bg: rgba(0, 0, 0, 0.06);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -86,12 +98,19 @@ body {
   min-height: 100vh;
   color: var(--text);
   overflow-x: hidden;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+body.light-mode {
+  background: linear-gradient(160deg, #e8edf5 0%, #f0f4f8 35%, #e4eaf2 65%, #e8edf5 100%);
+  color: var(--text);
 }
 
 .stars-layer {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 0;
+  transition: opacity 0.4s ease;
 }
+body.light-mode .stars-layer { opacity: 0; }
 .star {
   position: absolute; background: white; border-radius: 50%;
   animation: twinkle var(--dur) ease-in-out infinite;
@@ -119,6 +138,7 @@ body {
   text-align: center;
   position: relative;
   animation: fadeInDown 0.6s ease;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 @keyframes fadeInDown {
   from { opacity: 0; transform: translateY(-10px); }
@@ -132,9 +152,131 @@ body {
   background-clip: text;
   letter-spacing: 2px; margin-bottom: 6px;
 }
+body.light-mode .header h1 {
+  background: linear-gradient(135deg, #1a1a2e, #1565c0, #1a1a2e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 .header .subtitle {
   color: var(--text-dim); font-size: 0.9rem;
   letter-spacing: 5px; text-transform: uppercase;
+}
+
+/* ===== 深色/浅色模式切换按钮 ===== */
+.theme-toggle {
+  position: absolute; top: 20px; right: 24px; z-index: 10;
+  width: 42px; height: 42px;
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--glass-shadow);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text);
+  font-size: 1.25rem;
+  padding: 0;
+}
+.theme-toggle:hover {
+  background: var(--card-hover-bg);
+  border-color: rgba(255,255,255,0.32);
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35), 0 0 16px var(--accent-glow);
+}
+body.light-mode .theme-toggle:hover {
+  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+.theme-toggle:active { transform: scale(0.92); }
+
+/* —— 图标旋转弹出动画 —— */
+@keyframes iconSpinIn {
+  0%   { transform: rotate(0deg) scale(0.3); opacity: 0; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+.theme-toggle.no-animate svg { transition: none; }
+.theme-toggle.anim-icon svg { animation: iconSpinIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* 长按视觉反馈 */
+.theme-toggle.long-pressing { transform: scale(1.12); box-shadow: 0 0 22px var(--accent-glow); }
+
+.theme-toggle svg {
+  width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+/* ===== 主题选择弹窗 ===== */
+.theme-modal-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(10, 18, 32, 0.55);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  display: flex; align-items: center; justify-content: center;
+  animation: themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes themeModalIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.theme-modal-overlay.fade-out {
+  animation: themeModalOut 0.3s ease forwards;
+}
+@keyframes themeModalOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.95); }
+}
+.theme-modal-card {
+  position: relative;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 36px;
+  max-width: 440px; width: 90%;
+  box-shadow: var(--glass-shadow);
+  text-align: center;
+  color: var(--text);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+}
+.theme-modal-card h3 {
+  font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;
+}
+.theme-modal-card .modal-sub {
+  font-size: 0.88rem; color: var(--text-dim); margin-bottom: 28px; line-height: 1.5;
+}
+.theme-modal-choices {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+}
+.theme-modal-btn {
+  flex: 1; min-width: 140px; padding: 14px 20px;
+  border-radius: 14px; border: 2px solid transparent;
+  cursor: pointer; font-size: 0.95rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  color: inherit;
+}
+.theme-modal-btn:hover { transform: scale(1.05); }
+.theme-modal-btn:active { transform: scale(0.96); }
+.theme-modal-btn.dark-btn {
+  background: #0a1220; color: #e3f2fd; border-color: rgba(255,255,255,0.15);
+}
+.theme-modal-btn.light-btn {
+  background: #e8edf5; color: #1a1a2e; border-color: rgba(0,0,0,0.1);
+}
+.theme-modal-close {
+  position: absolute; top: 12px; right: 14px;
+  width: 32px; height: 32px;
+  background: none; border: none;
+  font-size: 1.5rem; color: var(--text-dim);
+  cursor: pointer; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease; line-height: 1;
+}
+.theme-modal-close:hover {
+  background: var(--glass-bg); color: var(--text);
 }
 
 /* ===== 统计面板 ===== */
@@ -152,7 +294,7 @@ body {
   padding: 18px 16px;
   text-align: center;
   box-shadow: var(--glass-shadow);
-  transition: transform 0.3s ease, background 0.3s ease;
+  transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 .stat-card:hover {
   transform: translateY(-3px);
@@ -167,6 +309,7 @@ body {
   letter-spacing: 0.5px;
   font-variant-numeric: tabular-nums;
 }
+body.light-mode .stat-card .stat-number { color: #1a1a2e; }
 .stat-card .stat-label {
   font-size: 0.72rem; color: var(--text-dim);
   letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;
@@ -244,6 +387,11 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+body.light-mode .hero-text {
+  background: rgba(255,255,255,0.55);
+  border-right: 1px solid rgba(0,0,0,0.08);
 }
 .hero-text h2 {
   font-size: 2.2rem;
@@ -252,6 +400,8 @@ body {
   margin-bottom: 8px;
   letter-spacing: 1px;
 }
+body.light-mode .hero-text h2 { color: #1a1a2e; }
+body.light-mode .hero-text .hero-desc { color: rgba(26,26,46,0.72); }
 .hero-text .hero-manufacturer {
   font-size: 1rem;
   color: var(--accent);
@@ -338,6 +488,12 @@ body {
   background: rgba(0,0,0,0.6);
   border-color: rgba(255,255,255,0.35);
 }
+body.light-mode .hero-arrow {
+  background: rgba(255,255,255,0.5);
+  border-color: rgba(0,0,0,0.12);
+  color: #333;
+}
+body.light-mode .hero-arrow:hover { background: rgba(255,255,255,0.75); border-color: rgba(0,0,0,0.2); color: #111; }
 .hero-arrow-prev {
   left: 16px;
 }
@@ -402,6 +558,11 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0,0,0,0.3);
 }
+body.light-mode .filter-chip:hover {
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+}
 .filter-chip {
   position: relative;
   overflow: hidden;
@@ -426,6 +587,10 @@ body {
   border-color: var(--accent);
   color: #fff;
   box-shadow: 0 0 22px var(--accent-glow);
+}
+body.light-mode .filter-chip.active {
+  background: rgba(21, 101, 192, 0.15);
+  color: #1565c0;
 }
 
 .airline-country-bar {
@@ -456,6 +621,13 @@ body {
   transition: all 0.3s ease; user-select: none;
 }
 .country-chip:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+body.light-mode .airline-country-bar {
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .country-chip { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+body.light-mode .country-chip:hover { color: #1a1a2e; border-color: rgba(0,0,0,0.25); }
+body.light-mode .country-chip.active { background: rgba(21,101,192,0.12); color: #1565c0; }
 .country-chip.active {
   background: rgba(79, 195, 247, 0.18);
   border-color: var(--accent);
@@ -501,12 +673,17 @@ body {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
   /* card-animate + card-visible triggered by IntersectionObserver */
   display: flex; flex-direction: column;
+  transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 .card:hover {
   transform: translateY(-7px) scale(1.015);
   background: var(--card-hover-bg);
   border-color: rgba(255,255,255,0.32);
   box-shadow: 0 14px 44px rgba(0, 0, 0, 0.4), 0 0 28px var(--accent-glow);
+}
+body.light-mode .card:hover {
+  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.12), 0 0 24px var(--accent-glow);
 }
 .card:active { transform: scale(0.97); }
 
@@ -584,6 +761,8 @@ body {
 }
 .card-stats .stat { flex: 1; text-align: center; }
 .stat-value { font-size: 0.95rem; font-weight: 700; color: #fff; }
+body.light-mode .stat-value { color: #1a1a2e; }
+body.light-mode .card-body h3 { color: #1a1a2e; }
 .stat-label { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
 
 .overlay {
@@ -593,7 +772,9 @@ body {
   -webkit-backdrop-filter: blur(5px);
   display: flex; align-items: center; justify-content: center;
   animation: overlayIn 0.28s ease;
+  transition: background 0.4s ease;
 }
+body.light-mode .overlay { background: rgba(0,0,0,0.35); }
 @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
 .detail-modal {
   backdrop-filter: blur(26px) saturate(180%);
@@ -606,6 +787,15 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 40px var(--accent-glow);
   animation: modalSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
+body.light-mode .detail-modal {
+  background: rgba(255,255,255,0.82);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 0 30px var(--accent-glow);
+}
+body.light-mode .modal-body h2 { color: #1a1a2e; }
+body.light-mode .modal-desc { color: #555; }
+body.light-mode .modal-code { color: #1565c0; }
+body.light-mode .spec-value { color: #1a1a2e; }
+body.light-mode .airline-name { color: #1a1a2e; }
 @keyframes modalSlideIn {
   from { opacity: 0; transform: translateY(36px) scale(0.92); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -752,6 +942,14 @@ body {
   transition: background 0.3s;
 }
 .announcement-toast .toast-close:hover { background: rgba(255,255,255,0.25); }
+body.light-mode .announcement-toast {
+  background: rgba(21,101,192,0.08);
+  border-color: rgba(21,101,192,0.25);
+  color: #1a1a2e;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+body.light-mode .announcement-toast .toast-close { background: rgba(0,0,0,0.08); color: #555; }
+body.light-mode .announcement-toast .toast-close:hover { background: rgba(0,0,0,0.15); }
 
 /* ===== 更新通知横幅 ===== */
 .update-banner {
@@ -768,6 +966,11 @@ body {
   position: relative;
   display: none;
   animation: bannerFadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.light-mode .update-banner {
+  background: rgba(255,255,255,0.88);
+  color: #333;
+  border-left-color: #1565c0;
 }
 .update-banner.visible { display: block; }
 @keyframes bannerFadeInDown {
@@ -829,6 +1032,10 @@ body {
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: inherit;
 }
+body.light-mode .search-input {
+  color: #1a1a2e;
+}
+body.light-mode .search-input::placeholder { color: #999; }
 .search-input::placeholder { color: var(--text-dim); }
 @keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 22px var(--accent-glow); }
@@ -869,6 +1076,13 @@ body {
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
   animation: suggestIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
+body.light-mode .suggestions-dropdown {
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+body.light-mode .suggestion-name { color: #1a1a2e; }
+body.light-mode .suggestion-item:hover { background: rgba(21,101,192,0.08); }
 @keyframes suggestIn {
   from { opacity: 0; transform: translateY(-6px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -916,6 +1130,7 @@ body {
   display: flex; align-items: center; gap: 4px;
 }
 .sort-chip:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+body.light-mode .sort-chip:hover { color: #1a1a2e; border-color: rgba(0,0,0,0.25); }
 .sort-chip.active {
   background: rgba(79, 195, 247, 0.18);
   border-color: var(--accent); color: var(--accent);
@@ -956,6 +1171,10 @@ body {
   display: none; align-items: center; gap: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 24px var(--accent-glow);
   animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.light-mode .compare-bar {
+  background: rgba(255,255,255,0.88);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 20px var(--accent-glow);
 }
 .compare-bar.visible { display: flex; }
 @keyframes slideUp {
@@ -1008,6 +1227,11 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 40px var(--accent-glow);
   animation: modalSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
+body.light-mode .compare-modal {
+  background: rgba(255,255,255,0.86);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 0 30px var(--accent-glow);
+}
+body.light-mode .compare-modal .compare-header h2 { color: #1a1a2e; }
 .compare-modal .compare-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 28px; border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -1101,6 +1325,15 @@ body {
   border-color: var(--accent);
   box-shadow: 0 6px 24px rgba(79, 195, 247, 0.4);
   transform: translateY(-3px);
+}
+body.light-mode .back-to-top {
+  background: rgba(21,101,192,0.08);
+  border-color: rgba(21,101,192,0.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+body.light-mode .back-to-top:hover {
+  background: rgba(21,101,192,0.16);
+  box-shadow: 0 4px 18px rgba(21,101,192,0.3);
 }
 .back-to-top svg {
   width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 2.5;
@@ -1257,6 +1490,21 @@ body {
   background: rgba(255,255,255,0.06);
   color: #e0e0e0;
 }
+
+/* ===== 浅色模式: add-modal ===== */
+body.light-mode .add-modal .form-group input,
+body.light-mode .add-modal .form-group textarea,
+body.light-mode .add-modal .form-group select {
+  background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a2e;
+}
+body.light-mode .add-modal .btn-cancel { border-color: rgba(0,0,0,0.15); color: #666; }
+body.light-mode .add-modal .btn-cancel:hover { background: rgba(0,0,0,0.05); color: #333; }
+body.light-mode .add-modal h2,
+body.light-mode .add-modal .modal-subtitle { color: #1a1a2e; }
+body.light-mode .add-modal .form-group label { color: #555; }
+body.light-mode .add-modal .airline-chip { border-color: rgba(0,0,0,0.12); color: #666; background: rgba(0,0,0,0.03); }
+body.light-mode .add-modal .airline-chip.selected { background: rgba(21,101,192,0.12); border-color: #1565c0; color: #1565c0; }
+body.light-mode .add-modal .form-group select option { background: #fff; color: #1a1a2e; }
 
 .card .custom-delete-btn {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -1525,6 +1773,10 @@ body {
   <div class="header">
     <h1 id="headerTitle" class="title-fade-in" style="animation-delay:0.1s">民航客机收藏馆</h1>
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式" title="切换深色/浅色模式">
+      <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="themeIconMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </div>
 
   <div class="hero-banner" id="heroBanner">
@@ -1874,8 +2126,6 @@ function placeholdImage(img, name, code, category) {
 // ===== 图片代理：解决维基图片国内加载问题 =====
 function proxyUrl(url) {
   if (!url || (!url.includes('wikimedia.org') && !url.includes('wikipedia.org') && !url.includes('clearbit.com'))) return url;
-  // thumb.php URLs are served directly from commons and accessible in China
-  if (url.includes('thumb.php')) return url;
   return 'https://wsrv.nl/?url=' + encodeURIComponent(url.replace(/^https?:\/\//, '')) + '&w=800&output=webp';
 }
 
@@ -3373,6 +3623,197 @@ createStars();
 renderCountryBar();
 renderCards();
 
+// ===== 深色/浅色模式切换 =====
+(function initTheme() {
+  var toggleBtn = document.getElementById('themeToggle');
+  var sunIcon = document.getElementById('themeIconSun');
+  var moonIcon = document.getElementById('themeIconMoon');
+  var STORAGE_KEY = 'aviation-theme';
+
+  // --- 图标动画辅助 ---
+  function triggerIconAnim(svgEl) {
+    toggleBtn.classList.add('anim-icon');
+    svgEl.addEventListener('animationend', function handler() {
+      svgEl.removeEventListener('animationend', handler);
+      toggleBtn.classList.remove('anim-icon');
+    }, { once: true });
+  }
+
+  function setTheme(mode) {
+    var wasDifferent = (mode === 'light') !== document.body.classList.contains('light-mode');
+    if (mode === 'light') {
+      document.body.classList.add('light-mode');
+      if (wasDifferent) {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = '';
+        triggerIconAnim(moonIcon);
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = '';
+      }
+    } else {
+      document.body.classList.remove('light-mode');
+      if (wasDifferent) {
+        sunIcon.style.display = '';
+        moonIcon.style.display = 'none';
+        triggerIconAnim(sunIcon);
+      } else {
+        sunIcon.style.display = '';
+        moonIcon.style.display = 'none';
+      }
+    }
+  }
+
+  // --- 弹窗 ---
+  function openThemeModal(context) {
+    var modalOverlay = document.getElementById('themeModalOverlay');
+    var modalTitle = document.getElementById('themeModalTitle');
+    var modalSub = document.getElementById('themeModalSub');
+    if (!modalOverlay || !modalTitle || !modalSub) return;
+    modalOverlay.setAttribute('data-context', context);
+    if (context === 'first-visit') {
+      modalTitle.textContent = '选择主题 / Choose Theme';
+      modalSub.textContent = '深色还是浅色模式？你随时可以长按右上角按钮更改';
+    } else {
+      modalTitle.textContent = '主题设置 / Theme Settings';
+      modalSub.textContent = '随时切换深浅模式 / Switch anytime';
+    }
+    modalOverlay.style.display = '';
+    modalOverlay.classList.remove('fade-out');
+    // 强制回流以重启动画
+    void modalOverlay.offsetWidth;
+    modalOverlay.style.animation = 'none';
+    void modalOverlay.offsetWidth;
+    modalOverlay.style.animation = 'themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+  }
+
+  function closeThemeModal() {
+    var modalOverlay = document.getElementById('themeModalOverlay');
+    modalOverlay.style.animation = '';
+    modalOverlay.classList.add('fade-out');
+    modalOverlay.addEventListener('animationend', function handler() {
+      modalOverlay.removeEventListener('animationend', handler);
+      modalOverlay.style.display = 'none';
+      modalOverlay.classList.remove('fade-out');
+    }, { once: true });
+  }
+
+  // 弹窗内按钮点击 + overlay 关闭（延迟到 DOM 解析完成）
+  window.addEventListener('DOMContentLoaded', function() {
+    var modalOverlay = document.getElementById('themeModalOverlay');
+    if (!modalOverlay) return;
+    modalOverlay.querySelectorAll('.theme-modal-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var mode = this.getAttribute('data-theme');
+        setTheme(mode);
+        try { localStorage.setItem(STORAGE_KEY, mode); } catch(e) {}
+        closeThemeModal();
+      });
+    });
+    var closeBtn = document.getElementById('themeModalClose');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeThemeModal();
+      });
+    }
+    modalOverlay.addEventListener('click', function(e) {
+      if (e.target === modalOverlay && modalOverlay.getAttribute('data-context') !== 'first-visit') {
+        closeThemeModal();
+      }
+    });
+  });
+
+  // --- 普通点击切换 ---
+  function toggleTheme() {
+    toggleBtn.classList.add('no-animate');
+    var isLight = document.body.classList.contains('light-mode');
+    var newMode = isLight ? 'dark' : 'light';
+    setTheme(newMode);
+    try { localStorage.setItem(STORAGE_KEY, newMode); } catch(e) {}
+    // 动画结束后移除 no-animate
+    setTimeout(function() { toggleBtn.classList.remove('no-animate'); }, 450);
+  }
+
+  // --- 长按检测 ---
+  var longPressTimer = null;
+  var longPressTriggered = false;
+  var pressStartX = 0, pressStartY = 0;
+
+  function onPressStart(e) {
+    longPressTriggered = false;
+    var pt = e.touches ? e.touches[0] : e;
+    pressStartX = pt.clientX;
+    pressStartY = pt.clientY;
+    toggleBtn.classList.add('long-pressing');
+    longPressTimer = setTimeout(function() {
+      longPressTriggered = true;
+      toggleBtn.classList.remove('long-pressing');
+      openThemeModal('settings');
+    }, 600);
+  }
+
+  function onPressMove(e) {
+    if (!longPressTimer) return;
+    var pt = e.touches ? e.touches[0] : e;
+    var dx = pt.clientX - pressStartX;
+    var dy = pt.clientY - pressStartY;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+      toggleBtn.classList.remove('long-pressing');
+    }
+  }
+
+  function onPressEnd(e) {
+    toggleBtn.classList.remove('long-pressing');
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+    if (!longPressTriggered) {
+      // 普通 click
+      toggleTheme();
+    }
+  }
+
+  // 桌面端
+  toggleBtn.addEventListener('mousedown', onPressStart);
+  toggleBtn.addEventListener('mousemove', onPressMove);
+  toggleBtn.addEventListener('mouseup', onPressEnd);
+  toggleBtn.addEventListener('mouseleave', function() {
+    toggleBtn.classList.remove('long-pressing');
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  });
+
+  // 移动端
+  toggleBtn.addEventListener('touchstart', onPressStart, { passive: false });
+  toggleBtn.addEventListener('touchmove', onPressMove, { passive: false });
+  toggleBtn.addEventListener('touchend', onPressEnd);
+
+  // 移除旧的 click 监听（用 mousedown+mouseup 已覆盖）
+  // toggleBtn 不再挂 click，由 pressEnd 处理短按
+
+  // --- 初始化 ---
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch(e) {}
+  if (saved === 'light') {
+    setTheme('light');
+  } else if (saved === 'dark') {
+    setTheme('dark');
+  } else {
+    // 无记录：首次访问，不应用任何主题，显示弹窗
+    openThemeModal('first-visit');
+  }
+  // 确保初始图标状态：深色模式下默认显示太阳，浅色模式默认显示月亮
+  // setTheme 已处理 display，此处仅兜底无记录场景
+  if (saved === null) {
+    sunIcon.style.display = '';
+    moonIcon.style.display = 'none';
+  }
+})();
+
 // P2: Handle initial hash on page load
 if (window.location.hash) {
   setTimeout(function() {
@@ -3760,6 +4201,25 @@ function exportCollectionImage() {
 <!-- 添加模态窗口 -->
 <div class="add-modal-overlay" id="addModalOverlay">
   <div class="add-modal" id="addModal"></div>
+</div>
+
+<!-- 主题选择弹窗 -->
+<div class="theme-modal-overlay" id="themeModalOverlay" style="display:none" data-context="">
+  <div class="theme-modal-card">
+    <button class="theme-modal-close" id="themeModalClose" aria-label="关闭">&times;</button>
+    <h3 id="themeModalTitle">选择主题 / Choose Theme</h3>
+    <p class="modal-sub" id="themeModalSub">深色还是浅色模式？你随时可以长按右上角按钮更改</p>
+    <div class="theme-modal-choices">
+      <button class="theme-modal-btn dark-btn" data-theme="dark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        深色模式 / Dark
+      </button>
+      <button class="theme-modal-btn light-btn" data-theme="light">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        浅色模式 / Light
+      </button>
+    </div>
+  </div>
 </div>
 
 </body>
