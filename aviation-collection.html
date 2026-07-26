@@ -2115,7 +2115,7 @@ const i18n = {
     announcement: '16家航司Logo全新设计款上线，点击卡片查看详情',
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">深色模式·主题切换</span>，全新上线',
+    updateBanner: '<span class="banner-highlight">时间线视图</span> + 全机型年份补全，全新上线',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -3621,10 +3621,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260725-v8', '1');
+  localStorage.setItem('aviation-update-20260726-v9', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260725-v8')) return;
+  if (localStorage.getItem('aviation-update-20260726-v9')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
