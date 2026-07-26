@@ -1754,6 +1754,199 @@ body.light-mode .add-modal .form-group select option { background: #fff; color: 
   border-color: rgba(255,255,255,0.25);
 }
 
+/* ===== 视图切换按钮 ===== */
+.view-switch-bar {
+  display: inline-flex;
+  margin-left: auto;
+}
+.view-switch-btn {
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  border-radius: 20px;
+  transition: all 0.25s;
+  font-family: inherit;
+  white-space: nowrap;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.view-switch-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.view-switch-btn:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+}
+
+/* ===== 时间线容器 ===== */
+#timeline {
+  position: relative;
+  padding: 60px 0 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 时间线竖线 */
+#timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: translateX(-50%);
+  opacity: 0.4;
+}
+
+/* 时间线条目 */
+.tl-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 48px;
+  width: 100%;
+}
+
+.tl-item.tl-left {
+  justify-content: flex-start;
+  padding-right: calc(50% + 40px);
+}
+.tl-item.tl-right {
+  justify-content: flex-end;
+  padding-left: calc(50% + 40px);
+}
+
+/* 时间线卡片 */
+.tl-card {
+  width: 100%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 380px;
+}
+.tl-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+  border-color: var(--accent);
+}
+.tl-card-img {
+  width: 80px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+}
+.tl-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.tl-card-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-card-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.tl-card-mfr {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* 时间线节点 */
+.tl-dot {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, 0);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px var(--bg-color), 0 0 12px rgba(0,168,232,0.4);
+}
+.tl-year {
+  position: absolute;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.tl-left .tl-year {
+  right: 26px;
+}
+.tl-right .tl-year {
+  left: 26px;
+}
+
+
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  #timeline::before {
+    left: 20px;
+  }
+  .tl-item.tl-left,
+  .tl-item.tl-right {
+    justify-content: flex-start;
+    padding-left: 56px;
+    padding-right: 16px;
+  }
+  .tl-dot {
+    left: 20px;
+  }
+  .tl-year {
+    position: absolute;
+    left: 26px !important;
+    right: auto !important;
+  }
+  .tl-card {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* 浅色模式时间线 */
+body.light-mode #timeline::before {
+  opacity: 0.3;
+}
+body.light-mode .tl-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+}
+body.light-mode .tl-card-img {
+  background: rgba(0,0,0,0.04);
+}
+
 </style>
 </head>
 <body>
@@ -1844,6 +2037,9 @@ body.light-mode .add-modal .form-group select option { background: #fff; color: 
     <div class="filter-chip" data-filter="helicopter"><span class="filter-label" id="filterHelicopter">直升机</span></div>
     <div class="filter-chip active" data-filter="all"><span class="filter-label" id="filterAll">全部</span></div>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
+    <div class="view-switch-bar" id="viewSwitchBar">
+      <button class="view-switch-btn" id="viewToggleBtn">时间线</button>
+    </div>
   </div>
 
   <div class="airline-country-bar" id="countryBar">
@@ -1851,6 +2047,9 @@ body.light-mode .add-modal .form-group select option { background: #fff; color: 
   </div>
 
   <div class="grid" id="grid"></div>
+  <div id="timeline" style="display:none">
+    <div class="tl-entries"></div>
+  </div>
 </div>
 
 
@@ -1916,7 +2115,7 @@ const i18n = {
     announcement: '16家航司Logo全新设计款上线，点击卡片查看详情',
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">深色模式·主题切换</span>，全新上线',
+    updateBanner: '<span class="banner-highlight">时间线视图</span> + 全机型年份补全，全新上线',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -2045,6 +2244,7 @@ const i18n = {
     fieldWingspan: '翼展',
     fieldDescZh: '中文简介',
     fieldAirlines: '关联航司',
+    fieldProdDate: '面世年份',
     btnSubmit: '添 加',
     btnCancel: '取消',
     catCivil: '民航客机',
@@ -2375,7 +2575,7 @@ const aircrafts = [
 const aircraftSlugs = {
   1: 'a380', 2: '787-9', 3: 'a350-900', 4: '777-300er', 5: 'c919',
   6: 'a320neo', 7: '737-max-8', 8: 'a330-300', 9: 'e195-e2', 10: 'a220-300',
-  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64'
+  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64', 26: '747-8'
 };
 aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
 
@@ -2395,6 +2595,13 @@ aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
       custom.forEach(function(a) { a.slug = ''; a._custom = true; });
       [].push.apply(aircrafts, custom);
       custom.forEach(function(a) { if (a.id >= _customIdCounter) _customIdCounter = a.id + 1; });
+      // 恢复自定义机型的生产年份
+      custom.forEach(function(a) { if (a.prodDate) prodYearLookup['' + a.id] = a.prodDate; });
+      // Auto-fill prodDate for Boeing 727
+      var patched = false;
+      custom.forEach(function(a) { if (a.name === 'Boeing 727' && !a.prodDate) { a.prodDate = '1964'; patched = true; } });
+      if (patched) { localStorage.setItem('custom_aircrafts', JSON.stringify(custom)); }
+      custom.forEach(function(a) { if (a.prodDate) prodYearLookup['' + a.id] = a.prodDate; });
     }
   } catch(e) {}
 })();
@@ -3031,6 +3238,9 @@ function buildAddForm(modal) {
       '<div class="form-group"><label>' + t('fieldWingspan') + '</label><input id="af_wingspan" placeholder="例: 79.8 m"></div>' +
     '</div>' +
     '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldProdDate') + '</label><input id="af_prodDate" placeholder="例: 2020"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
       '<div class="form-group"><label>' + t('fieldDescZh') + '</label><textarea id="af_descZh" placeholder="中文简介..."></textarea></div>' +
     '</div>' +
     '<div class="form-row single">' +
@@ -3052,6 +3262,7 @@ function submitCustomAircraft() {
   var range = document.getElementById('af_range').value.trim();
   var capacity = document.getElementById('af_capacity').value.trim();
   var wingspan = document.getElementById('af_wingspan').value.trim();
+  var prodDate = document.getElementById('af_prodDate').value.trim();
   var descZh = document.getElementById('af_descZh').value.trim();
 
   if (!zh || !code) { alert('中文名称和型号为必填项'); return; }
@@ -3081,7 +3292,8 @@ function submitCustomAircraft() {
       'wingspan': wingspan || '--'
     },
     slug: '',
-    _custom: true
+    _custom: true,
+    prodDate: prodDate || ''
   };
 
   // 写入 i18n
@@ -3095,7 +3307,8 @@ function submitCustomAircraft() {
     custom.push({
       id: _customIdCounter, name: nameKey, code: code, category: category,
       country: country || '--', image: image || '', desc: descKey,
-      specs: newAircraft.specs, airlineIds: newAircraft.airlineIds
+      specs: newAircraft.specs, airlineIds: newAircraft.airlineIds,
+      prodDate: prodDate || ''
     });
     localStorage.setItem('custom_aircrafts', JSON.stringify(custom));
     // 持久化 i18n
@@ -3107,6 +3320,7 @@ function submitCustomAircraft() {
 
   // 加入当前 aircrafts
   aircrafts.push(newAircraft);
+  if (prodDate) prodYearLookup['' + _customIdCounter] = prodDate;
   _customIdCounter++;
   closeAddForm();
   renderCards();
@@ -3368,6 +3582,8 @@ document.querySelector('.filter-bar').addEventListener('click', (e) => {
   if (currentFilter !== 'civil') currentCountry = 'all';
   window._track('filter', { filter: currentFilter });
   renderCards();
+  // 如果当前是时间线视图，同步刷新
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 });
 
 document.addEventListener('keydown', (e) => {
@@ -3405,10 +3621,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260725-v8', '1');
+  localStorage.setItem('aviation-update-20260726-v9', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260725-v8')) return;
+  if (localStorage.getItem('aviation-update-20260726-v9')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
@@ -3617,11 +3833,99 @@ toggleCollect = function(id) {
 };
 
 
+// ===== 首飞年份 lookup（提取自 JSON-LD） =====
+var prodYearLookup = {
+  '1':'2007','2':'2013','3':'2015','4':'2004','5':'2023',
+  '6':'2016','7':'2017','8':'1994','9':'2019','10':'2016',
+  '20':'2005','21':'2017','22':'1997','23':'1995','24':'2016','25':'1986','26':'2012'
+};
+
+// ===== 时间线视图 =====
+function initTimeline() {
+  var tl = document.getElementById('timeline');
+  if (!tl) return;
+  var entriesEl = tl.querySelector('.tl-entries');
+  if (!entriesEl) return;
+
+  // 按 productionDate 升序排列，无日期的排最后
+  var sorted = aircrafts.slice().sort(function(a, b) {
+    var ya = prodYearLookup[a.id] || '9999';
+    var yb = prodYearLookup[b.id] || '9999';
+    return parseInt(ya) - parseInt(yb);
+  });
+
+  // 按当前筛选条件过滤
+  var hasFilter = (typeof currentFilter !== 'undefined') && currentFilter !== 'all';
+  var html = '';
+  var idx = 0;
+  sorted.forEach(function(a) {
+    if (hasFilter && a.category !== currentFilter) return;
+    var year = prodYearLookup[a.id] || '--';
+    var side = (idx % 2 === 0) ? 'tl-left' : 'tl-right';
+    var mfr = (a.code || '').split(' ')[0];
+    html += '<div class="tl-item ' + side + '" data-id="' + a.id + '">' +
+      '<div class="tl-card" onclick="openDetail(' + a.id + ')">' +
+        '<img class="tl-card-img" src="' + proxyUrl(a.image) + '" alt="' + t(a.name) + '" loading="lazy"' +
+        ' onerror="placeholdImage(this,\'' + t(a.name).replace(/'/g, "\'") + '\',\'' + (a.code || '').replace(/'/g, "\'") + '\',\'' + a.category + '\')">' +
+        '<div class="tl-card-info">' +
+          '<div class="tl-card-name">' + t(a.name) + '</div>' +
+          '<div class="tl-card-meta">' +
+            '<span class="tl-card-mfr">' + mfr + '</span>' +
+            '<span>' + year + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="tl-dot"><span class="tl-year">' + year + '</span></div>' +
+    '</div>';
+    idx++;
+  });
+  entriesEl.innerHTML = html;
+}
+
+// ===== 视图切换逻辑 =====
+(function initViewSwitch() {
+  var gridEl = document.getElementById('grid');
+  var tlEl = document.getElementById('timeline');
+  var toggleBtn = document.getElementById('viewToggleBtn');
+  if (!gridEl || !tlEl || !toggleBtn) return;
+
+  var STORAGE_KEY = 'aviation-view';
+  var currentView = 'grid';
+
+  function switchView(view) {
+    currentView = view;
+    if (view === 'timeline') {
+      gridEl.style.display = 'none';
+      tlEl.style.display = '';
+      toggleBtn.textContent = '网格';
+      toggleBtn.classList.add('active');
+    } else {
+      gridEl.style.display = '';
+      tlEl.style.display = 'none';
+      toggleBtn.textContent = '时间线';
+      toggleBtn.classList.remove('active');
+    }
+    try { localStorage.setItem(STORAGE_KEY, view); } catch(e) {}
+  }
+
+  toggleBtn.addEventListener('click', function() {
+    switchView(currentView === 'timeline' ? 'grid' : 'timeline');
+  });
+
+  // 恢复上次选择的视图
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch(e) {}
+  if (saved === 'timeline') {
+    switchView('timeline');
+  }
+})();
+
 showToast();
 initUpdateBanner();
 createStars();
 renderCountryBar();
 renderCards();
+initTimeline();
 
 // ===== 深色/浅色模式切换 =====
 (function initTheme() {
