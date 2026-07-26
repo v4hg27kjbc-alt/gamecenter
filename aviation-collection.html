@@ -14,7 +14,13 @@
 <meta name="twitter:description" content="飞行器收藏馆 - 收录全球经典民航客机、战斗机、轰炸机、运输机与直升机，含详细参数与运营航司信息">
 <meta name="twitter:image" content="https://commons.wikimedia.org/w/thumb.php?f=A6-EDY_A380_Emirates_31_jan_2013_jfk_(8442269364).jpg&amp;w=800">
 <link rel="canonical" href="https://henry126923.pages.dev/">
-<script defer src="https://cloud.umami.is/script.js" data-website-id="1b107f5a-12d4-4db7-a8bd-c1d9cd2ecbb7"></script>
+
+<!-- Umami Cloud 网站统计
+     获取 website-id：
+       1. 前往 https://cloud.umami.is 注册/登录
+       2. Settings → Websites → 添加网站，域名填 henry126923.pages.dev 或 gamecenter.cc.cd
+       3. 复制 Tracking code 中的 data-website-id 替换下方占位值 -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="YOUR_WEBSITE_ID"></script>
 
 <!-- P1: JSON-LD Structured Data -->
 <script type="application/ld+json">
@@ -71,6 +77,18 @@
   --card-hover-bg: rgba(255, 255, 255, 0.11);
 }
 
+/* ===== 浅色模式变量覆盖 ===== */
+body.light-mode {
+  --glass-bg: rgba(0, 0, 0, 0.04);
+  --glass-border: rgba(0, 0, 0, 0.10);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  --accent: #1565c0;
+  --accent-glow: rgba(21, 101, 192, 0.30);
+  --text: #1a1a2e;
+  --text-dim: #666;
+  --card-hover-bg: rgba(0, 0, 0, 0.06);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -80,12 +98,19 @@ body {
   min-height: 100vh;
   color: var(--text);
   overflow-x: hidden;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+body.light-mode {
+  background: linear-gradient(160deg, #e8edf5 0%, #f0f4f8 35%, #e4eaf2 65%, #e8edf5 100%);
+  color: var(--text);
 }
 
 .stars-layer {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 0;
+  transition: opacity 0.4s ease;
 }
+body.light-mode .stars-layer { opacity: 0; }
 .star {
   position: absolute; background: white; border-radius: 50%;
   animation: twinkle var(--dur) ease-in-out infinite;
@@ -113,6 +138,7 @@ body {
   text-align: center;
   position: relative;
   animation: fadeInDown 0.6s ease;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 @keyframes fadeInDown {
   from { opacity: 0; transform: translateY(-10px); }
@@ -126,9 +152,184 @@ body {
   background-clip: text;
   letter-spacing: 2px; margin-bottom: 6px;
 }
+body.light-mode .header h1 {
+  background: linear-gradient(135deg, #1a1a2e, #1565c0, #1a1a2e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 .header .subtitle {
   color: var(--text-dim); font-size: 0.9rem;
   letter-spacing: 5px; text-transform: uppercase;
+}
+
+/* ===== 深色/浅色模式切换按钮 ===== */
+.theme-toggle {
+  position: absolute; top: 20px; right: 24px; z-index: 10;
+  width: 42px; height: 42px;
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--glass-shadow);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text);
+  font-size: 1.25rem;
+  padding: 0;
+}
+.theme-toggle:hover {
+  background: var(--card-hover-bg);
+  border-color: rgba(255,255,255,0.32);
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35), 0 0 16px var(--accent-glow);
+}
+body.light-mode .theme-toggle:hover {
+  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+.theme-toggle:active { transform: scale(0.92); }
+
+/* —— 图标旋转弹出动画 —— */
+@keyframes iconSpinIn {
+  0%   { transform: rotate(0deg) scale(0.3); opacity: 0; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+.theme-toggle.no-animate svg { transition: none; }
+.theme-toggle.anim-icon svg { animation: iconSpinIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* 长按视觉反馈 */
+.theme-toggle.long-pressing { transform: scale(1.12); box-shadow: 0 0 22px var(--accent-glow); }
+
+.theme-toggle svg {
+  width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+/* ===== 主题选择弹窗 ===== */
+.theme-modal-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(10, 18, 32, 0.55);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  display: flex; align-items: center; justify-content: center;
+  animation: themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes themeModalIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.theme-modal-overlay.fade-out {
+  animation: themeModalOut 0.3s ease forwards;
+}
+@keyframes themeModalOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.95); }
+}
+.theme-modal-card {
+  position: relative;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 36px;
+  max-width: 440px; width: 90%;
+  box-shadow: var(--glass-shadow);
+  text-align: center;
+  color: var(--text);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+}
+.theme-modal-card h3 {
+  font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;
+}
+.theme-modal-card .modal-sub {
+  font-size: 0.88rem; color: var(--text-dim); margin-bottom: 28px; line-height: 1.5;
+}
+.theme-modal-choices {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+}
+.theme-modal-btn {
+  flex: 1; min-width: 140px; padding: 14px 20px;
+  border-radius: 14px; border: 2px solid transparent;
+  cursor: pointer; font-size: 0.95rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  color: inherit;
+}
+.theme-modal-btn:hover { transform: scale(1.05); }
+.theme-modal-btn:active { transform: scale(0.96); }
+.theme-modal-btn.dark-btn {
+  background: #0a1220; color: #e3f2fd; border-color: rgba(255,255,255,0.15);
+}
+.theme-modal-btn.light-btn {
+  background: #e8edf5; color: #1a1a2e; border-color: rgba(0,0,0,0.1);
+}
+.theme-modal-close {
+  position: absolute; top: 12px; right: 14px;
+  width: 32px; height: 32px;
+  background: none; border: none;
+  font-size: 1.5rem; color: var(--text-dim);
+  cursor: pointer; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease; line-height: 1;
+}
+.theme-modal-close:hover {
+  background: var(--glass-bg); color: var(--text);
+}
+
+/* ===== 统计面板 ===== */
+.stats-panel {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 24px; justify-content: center;
+}
+.stat-card {
+  flex: 1; min-width: 140px; max-width: 200px;
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 18px 16px;
+  text-align: center;
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  background: var(--card-hover-bg);
+  border-color: rgba(255,255,255,0.25);
+}
+.stat-card .stat-icon {
+  font-size: 1.6rem; margin-bottom: 6px;
+}
+.stat-card .stat-number {
+  font-size: 1.8rem; font-weight: 700; color: #fff;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+body.light-mode .stat-card .stat-number { color: #1a1a2e; }
+.stat-card .stat-label {
+  font-size: 0.72rem; color: var(--text-dim);
+  letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;
+}
+@media (max-width: 768px) {
+  .stats-panel { gap: 8px; }
+  .stat-card { min-width: 100px; padding: 14px 10px; }
+  .stat-card .stat-number { font-size: 1.4rem; }
+  .stat-card .stat-icon { font-size: 1.3rem; }
+}
+
+/* ===== 标题淡入动画 ===== */
+.title-fade-in {
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: titleFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes titleFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== Hero Banner 全幅轮播 ===== */
@@ -186,6 +387,11 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+body.light-mode .hero-text {
+  background: rgba(255,255,255,0.55);
+  border-right: 1px solid rgba(0,0,0,0.08);
 }
 .hero-text h2 {
   font-size: 2.2rem;
@@ -194,6 +400,8 @@ body {
   margin-bottom: 8px;
   letter-spacing: 1px;
 }
+body.light-mode .hero-text h2 { color: #1a1a2e; }
+body.light-mode .hero-text .hero-desc { color: rgba(26,26,46,0.72); }
 .hero-text .hero-manufacturer {
   font-size: 1rem;
   color: var(--accent);
@@ -280,6 +488,12 @@ body {
   background: rgba(0,0,0,0.6);
   border-color: rgba(255,255,255,0.35);
 }
+body.light-mode .hero-arrow {
+  background: rgba(255,255,255,0.5);
+  border-color: rgba(0,0,0,0.12);
+  color: #333;
+}
+body.light-mode .hero-arrow:hover { background: rgba(255,255,255,0.75); border-color: rgba(0,0,0,0.2); color: #111; }
 .hero-arrow-prev {
   left: 16px;
 }
@@ -344,6 +558,11 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0,0,0,0.3);
 }
+body.light-mode .filter-chip:hover {
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+}
 .filter-chip {
   position: relative;
   overflow: hidden;
@@ -368,6 +587,10 @@ body {
   border-color: var(--accent);
   color: #fff;
   box-shadow: 0 0 22px var(--accent-glow);
+}
+body.light-mode .filter-chip.active {
+  background: rgba(21, 101, 192, 0.15);
+  color: #1565c0;
 }
 
 .airline-country-bar {
@@ -398,6 +621,13 @@ body {
   transition: all 0.3s ease; user-select: none;
 }
 .country-chip:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+body.light-mode .airline-country-bar {
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .country-chip { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+body.light-mode .country-chip:hover { color: #1a1a2e; border-color: rgba(0,0,0,0.25); }
+body.light-mode .country-chip.active { background: rgba(21,101,192,0.12); color: #1565c0; }
 .country-chip.active {
   background: rgba(79, 195, 247, 0.18);
   border-color: var(--accent);
@@ -422,13 +652,15 @@ body {
 }
 
 
-/* ===== 卡片淡入上升动画 ===== */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ===== 卡片淡入上升动画 (IntersectionObserver + CSS) ===== */
+.card-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.card.animate-in {
-  animation: fadeInUp 0.55s ease backwards;
+.card-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 .card {
   backdrop-filter: blur(18px) saturate(180%);
@@ -439,14 +671,19 @@ body {
   overflow: hidden; cursor: pointer;
   transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  /* fadeInUp applied via IntersectionObserver */
+  /* card-animate + card-visible triggered by IntersectionObserver */
   display: flex; flex-direction: column;
+  transition: transform 0.3s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 .card:hover {
   transform: translateY(-7px) scale(1.015);
   background: var(--card-hover-bg);
   border-color: rgba(255,255,255,0.32);
   box-shadow: 0 14px 44px rgba(0, 0, 0, 0.4), 0 0 28px var(--accent-glow);
+}
+body.light-mode .card:hover {
+  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.12), 0 0 24px var(--accent-glow);
 }
 .card:active { transform: scale(0.97); }
 
@@ -498,7 +735,7 @@ body {
 }
 .card-bookmark.collected {
   background: rgba(255, 87, 34, 0.55);
-  border-color: #ff5722;
+  border-color: #1565c0;
   box-shadow: 0 0 14px rgba(255, 87, 34, 0.5);
 }
 .card-bookmark svg { width: 17px; height: 17px; fill: none; stroke: white; stroke-width: 2; }
@@ -524,6 +761,8 @@ body {
 }
 .card-stats .stat { flex: 1; text-align: center; }
 .stat-value { font-size: 0.95rem; font-weight: 700; color: #fff; }
+body.light-mode .stat-value { color: #1a1a2e; }
+body.light-mode .card-body h3 { color: #1a1a2e; }
 .stat-label { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
 
 .overlay {
@@ -533,7 +772,9 @@ body {
   -webkit-backdrop-filter: blur(5px);
   display: flex; align-items: center; justify-content: center;
   animation: overlayIn 0.28s ease;
+  transition: background 0.4s ease;
 }
+body.light-mode .overlay { background: rgba(0,0,0,0.35); }
 @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
 .detail-modal {
   backdrop-filter: blur(26px) saturate(180%);
@@ -546,6 +787,15 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 40px var(--accent-glow);
   animation: modalSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
+body.light-mode .detail-modal {
+  background: rgba(255,255,255,0.82);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 0 30px var(--accent-glow);
+}
+body.light-mode .modal-body h2 { color: #1a1a2e; }
+body.light-mode .modal-desc { color: #555; }
+body.light-mode .modal-code { color: #1565c0; }
+body.light-mode .spec-value { color: #1a1a2e; }
+body.light-mode .airline-name { color: #1a1a2e; }
 @keyframes modalSlideIn {
   from { opacity: 0; transform: translateY(36px) scale(0.92); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -692,6 +942,14 @@ body {
   transition: background 0.3s;
 }
 .announcement-toast .toast-close:hover { background: rgba(255,255,255,0.25); }
+body.light-mode .announcement-toast {
+  background: rgba(21,101,192,0.08);
+  border-color: rgba(21,101,192,0.25);
+  color: #1a1a2e;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+body.light-mode .announcement-toast .toast-close { background: rgba(0,0,0,0.08); color: #555; }
+body.light-mode .announcement-toast .toast-close:hover { background: rgba(0,0,0,0.15); }
 
 /* ===== 更新通知横幅 ===== */
 .update-banner {
@@ -708,6 +966,11 @@ body {
   position: relative;
   display: none;
   animation: bannerFadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.light-mode .update-banner {
+  background: rgba(255,255,255,0.88);
+  color: #333;
+  border-left-color: #1565c0;
 }
 .update-banner.visible { display: block; }
 @keyframes bannerFadeInDown {
@@ -769,6 +1032,10 @@ body {
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: inherit;
 }
+body.light-mode .search-input {
+  color: #1a1a2e;
+}
+body.light-mode .search-input::placeholder { color: #999; }
 .search-input::placeholder { color: var(--text-dim); }
 @keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 22px var(--accent-glow); }
@@ -795,6 +1062,58 @@ body {
   margin-bottom: 14px; display: none;
 }
 
+/* ===== 搜索建议下拉 ===== */
+.suggestions-dropdown {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(18, 28, 46, 0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 6px 0;
+  display: none;
+  z-index: 100;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  animation: suggestIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.light-mode .suggestions-dropdown {
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+body.light-mode .suggestion-name { color: #1a1a2e; }
+body.light-mode .suggestion-item:hover { background: rgba(21,101,192,0.08); }
+@keyframes suggestIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.suggestions-dropdown.visible { display: block; }
+.suggestion-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.suggestion-item:hover {
+  background: rgba(79, 195, 247, 0.12);
+}
+.suggestion-item:first-child { border-radius: 12px 12px 0 0; }
+.suggestion-item:last-child { border-radius: 0 0 12px 12px; }
+.suggestion-thumb {
+  width: 30px; height: 20px; border-radius: 4px;
+  object-fit: cover; flex-shrink: 0;
+  background: rgba(255,255,255,0.06);
+}
+.suggestion-info { display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
+.suggestion-name {
+  font-size: 0.85rem; color: #fff; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.suggestion-code {
+  font-size: 0.72rem; color: var(--text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
 /* ===== 排序按钮组 ===== */
 .sort-group {
   display: flex; gap: 6px; flex-shrink: 0;
@@ -811,6 +1130,7 @@ body {
   display: flex; align-items: center; gap: 4px;
 }
 .sort-chip:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+body.light-mode .sort-chip:hover { color: #1a1a2e; border-color: rgba(0,0,0,0.25); }
 .sort-chip.active {
   background: rgba(79, 195, 247, 0.18);
   border-color: var(--accent); color: var(--accent);
@@ -851,6 +1171,10 @@ body {
   display: none; align-items: center; gap: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 24px var(--accent-glow);
   animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.light-mode .compare-bar {
+  background: rgba(255,255,255,0.88);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 20px var(--accent-glow);
 }
 .compare-bar.visible { display: flex; }
 @keyframes slideUp {
@@ -903,6 +1227,11 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 40px var(--accent-glow);
   animation: modalSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
+body.light-mode .compare-modal {
+  background: rgba(255,255,255,0.86);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 0 30px var(--accent-glow);
+}
+body.light-mode .compare-modal .compare-header h2 { color: #1a1a2e; }
 .compare-modal .compare-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 28px; border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -997,8 +1326,202 @@ body {
   box-shadow: 0 6px 24px rgba(79, 195, 247, 0.4);
   transform: translateY(-3px);
 }
+body.light-mode .back-to-top {
+  background: rgba(21,101,192,0.08);
+  border-color: rgba(21,101,192,0.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+body.light-mode .back-to-top:hover {
+  background: rgba(21,101,192,0.16);
+  box-shadow: 0 4px 18px rgba(21,101,192,0.3);
+}
 .back-to-top svg {
   width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 2.5;
+}
+
+/* ===== 快捷添加悬浮按钮 ===== */
+.fab-add {
+  position: fixed; bottom: 96px; right: 27px; z-index: 999;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.85;
+}
+.fab-add:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 6px 28px rgba(102, 126, 234, 0.55);
+}
+.fab-add svg {
+  width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2.5;
+}
+
+/* ===== 添加模态窗口 ===== */
+.add-modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.add-modal-overlay.show {
+  opacity: 1; pointer-events: auto;
+}
+.add-modal {
+  background: linear-gradient(145deg, #1e2a3a, #1a2332);
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 18px;
+  padding: 32px;
+  width: 90vw; max-width: 680px; max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  position: relative;
+  color: #e0e0e0;
+}
+.add-modal h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.4rem;
+  background: linear-gradient(135deg, #4fc3f7, #7c4dff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.add-modal .modal-subtitle {
+  font-size: 0.82rem; color: #8899aa; margin-bottom: 24px;
+}
+.add-modal .form-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  margin-bottom: 16px;
+}
+.add-modal .form-row.single {
+  grid-template-columns: 1fr;
+}
+.add-modal .form-group {
+  display: flex; flex-direction: column; gap: 5px;
+}
+.add-modal .form-group label {
+  font-size: 0.78rem; font-weight: 600; color: #aab8c5;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.add-modal .form-group input,
+.add-modal .form-group textarea,
+.add-modal .form-group select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.06);
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.add-modal .form-group input:focus,
+.add-modal .form-group textarea:focus,
+.add-modal .form-group select:focus {
+  border-color: #4fc3f7;
+  box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.15);
+}
+.add-modal .form-group textarea {
+  min-height: 80px; resize: vertical;
+}
+.add-modal .form-group select {
+  cursor: pointer;
+}
+.add-modal .form-group select option {
+  background: #1e2a3a; color: #e0e0e0;
+}
+.add-modal .airline-chips {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.add-modal .airline-chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+  color: #aab8c5;
+}
+.add-modal .airline-chip.selected {
+  background: rgba(79, 195, 247, 0.2);
+  border-color: #4fc3f7;
+  color: #4fc3f7;
+}
+.add-modal .btn-row {
+  display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+}
+.add-modal .btn-submit {
+  padding: 11px 28px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+.add-modal .btn-submit:hover {
+  box-shadow: 0 6px 22px rgba(102, 126, 234, 0.5);
+  transform: translateY(-1px);
+}
+.add-modal .btn-cancel {
+  padding: 11px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: #aab8c5;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.add-modal .btn-cancel:hover {
+  background: rgba(255,255,255,0.06);
+  color: #e0e0e0;
+}
+
+/* ===== 浅色模式: add-modal ===== */
+body.light-mode .add-modal .form-group input,
+body.light-mode .add-modal .form-group textarea,
+body.light-mode .add-modal .form-group select {
+  background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #1a1a2e;
+}
+body.light-mode .add-modal .btn-cancel { border-color: rgba(0,0,0,0.15); color: #666; }
+body.light-mode .add-modal .btn-cancel:hover { background: rgba(0,0,0,0.05); color: #333; }
+body.light-mode .add-modal h2,
+body.light-mode .add-modal .modal-subtitle { color: #1a1a2e; }
+body.light-mode .add-modal .form-group label { color: #555; }
+body.light-mode .add-modal .airline-chip { border-color: rgba(0,0,0,0.12); color: #666; background: rgba(0,0,0,0.03); }
+body.light-mode .add-modal .airline-chip.selected { background: rgba(21,101,192,0.12); border-color: #1565c0; color: #1565c0; }
+body.light-mode .add-modal .form-group select option { background: #fff; color: #1a1a2e; }
+
+.card .custom-delete-btn {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(244, 67, 54, 0.9);
+  color: #fff;
+  font-size: 0.72rem;
+  text-align: center;
+  padding: 4px 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  z-index: 6;
+}
+.card.custom-mode .custom-delete-btn {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* ===== 移动端适配 ===== */
@@ -1012,72 +1535,10 @@ body {
   .compare-bar { flex-wrap: wrap; justify-content: center; padding: 12px 16px; }
   .back-to-top { bottom: 20px; right: 16px; width: 40px; height: 40px; }
   .card-compare-check { opacity: 1; transform: scale(1); }
-}
-
-/* ===== 分享卡片预览 ===== */
-.share-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center;
-  animation: overlayIn 0.3s ease;
-}
-.share-modal {
-  background: rgba(18, 28, 46, 0.9);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  width: 92%; max-width: 660px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 40px var(--accent-glow);
-  animation: modalSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-}
-.share-modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.share-modal-header h3 { color: #fff; font-size: 1.1rem; }
-.share-preview-wrap {
-  padding: 24px; text-align: center;
-}
-.share-preview-wrap canvas {
-  max-width: 100%; height: auto;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-.share-modal-actions {
-  display: flex; gap: 10px; justify-content: center;
-  padding: 0 24px 24px;
-}
-.share-download-btn {
-  backdrop-filter: blur(10px);
-  background: rgba(79, 195, 247, 0.2);
-  border: 1px solid var(--accent);
-  border-radius: 50px;
-  padding: 10px 28px;
-  color: #fff; font-size: 0.9rem; font-weight: 600;
-  cursor: pointer; transition: all 0.3s ease;
-  font-family: inherit;
-}
-.share-download-btn:hover {
-  background: rgba(79, 195, 247, 0.35);
-  box-shadow: 0 0 18px var(--accent-glow);
-}
-.share-close-btn {
-  backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 50px;
-  padding: 10px 28px;
-  color: var(--text-dim); font-size: 0.9rem;
-  cursor: pointer; transition: all 0.3s ease;
-  font-family: inherit;
-}
-.share-close-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
-
-@media (max-width: 768px) {
-  .share-modal { width: 96%; }
+  .fab-add { bottom: 78px; right: 15px; width: 40px; height: 40px; }
+  .fab-add svg { width: 20px; height: 20px; }
+  .add-modal { padding: 20px; width: 95vw; }
+  .add-modal .form-row { grid-template-columns: 1fr; }
 }
 
 /* ===== P3: 骨架屏占位卡片 ===== */
@@ -1226,11 +1687,275 @@ body {
   transition: opacity 0.5s ease;
 }
 
+
+/* ===== 滚动进度条 ===== */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, #29b6f6, #0288d1, #4fc3f7);
+  z-index: 99999;
+  width: 0;
+  transition: width 0.1s linear;
+}
+
+/* ===== 导出收藏按钮 ===== */
+.export-collection-wrap {
+  display: flex; align-items: center; gap: 8px;
+}
+.export-collection-btn {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 9px 22px;
+  color: var(--text-dim); font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.export-collection-btn:hover {
+  background: rgba(79, 195, 247, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.export-dropdown {
+  display: none; position: absolute;
+  right: 0; top: 110%;
+  background: rgba(20, 30, 50, 0.95);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  min-width: 160px;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.export-dropdown.show { display: block; }
+.export-dropdown-item {
+  display: block; width: 100%;
+  padding: 11px 18px;
+  border: none; background: transparent;
+  color: var(--text); font-size: 0.9rem;
+  cursor: pointer; text-align: left;
+  transition: background 0.15s;
+}
+.export-dropdown-item:hover { background: rgba(79,195,247,0.15); }
+.export-dropdown-item:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.06); }
+
+.modal-action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  background: rgba(255,255,255,0.08); color: #ccc;
+}
+.modal-action-btn:hover {
+  background: rgba(255,255,255,0.15); color: #fff;
+  border-color: rgba(255,255,255,0.25);
+}
+
+/* ===== 视图切换按钮 ===== */
+.view-switch-bar {
+  display: inline-flex;
+  margin-left: auto;
+}
+.view-switch-btn {
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  border-radius: 20px;
+  transition: all 0.25s;
+  font-family: inherit;
+  white-space: nowrap;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.view-switch-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.view-switch-btn:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+}
+
+/* ===== 时间线容器 ===== */
+#timeline {
+  position: relative;
+  padding: 60px 0 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 时间线竖线 */
+#timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: translateX(-50%);
+  opacity: 0.4;
+}
+
+/* 时间线条目 */
+.tl-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 48px;
+  width: 100%;
+}
+
+.tl-item.tl-left {
+  justify-content: flex-start;
+  padding-right: calc(50% + 40px);
+}
+.tl-item.tl-right {
+  justify-content: flex-end;
+  padding-left: calc(50% + 40px);
+}
+
+/* 时间线卡片 */
+.tl-card {
+  width: 100%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 380px;
+}
+.tl-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+  border-color: var(--accent);
+}
+.tl-card-img {
+  width: 80px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+}
+.tl-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.tl-card-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-card-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.tl-card-mfr {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* 时间线节点 */
+.tl-dot {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, 0);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px var(--bg-color), 0 0 12px rgba(0,168,232,0.4);
+}
+.tl-year {
+  position: absolute;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.tl-left .tl-year {
+  right: 26px;
+}
+.tl-right .tl-year {
+  left: 26px;
+}
+
+
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  #timeline::before {
+    left: 20px;
+  }
+  .tl-item.tl-left,
+  .tl-item.tl-right {
+    justify-content: flex-start;
+    padding-left: 56px;
+    padding-right: 16px;
+  }
+  .tl-dot {
+    left: 20px;
+  }
+  .tl-year {
+    position: absolute;
+    left: 26px !important;
+    right: auto !important;
+  }
+  .tl-card {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* 浅色模式时间线 */
+body.light-mode #timeline::before {
+  opacity: 0.3;
+}
+body.light-mode .tl-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+}
+body.light-mode .tl-card-img {
+  background: rgba(0,0,0,0.04);
+}
+
 </style>
 </head>
 <body>
 
+<div class="scroll-progress" id="scrollProgress"></div>
+
 <div class="stars-layer" id="starsLayer"></div>
+
+
 <div class="announcement-toast" id="announceToast">
   <span class="toast-icon">&#9992;</span>
   <span id="toastMsg">体验全面升级</span>
@@ -1239,8 +1964,12 @@ body {
 
 <div class="app-container">
   <div class="header">
-    <h1 id="headerTitle">民航客机收藏馆</h1>
-    <p class="subtitle" id="headerSubtitle">作者 Marvis &amp; Henry</p>
+    <h1 id="headerTitle" class="title-fade-in" style="animation-delay:0.1s">民航客机收藏馆</h1>
+    <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式" title="切换深色/浅色模式">
+      <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="themeIconMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </div>
 
   <div class="hero-banner" id="heroBanner">
@@ -1248,6 +1977,35 @@ body {
     <div class="hero-dots" id="heroDots"></div>
     <button class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous">&#8249;</button>
     <button class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next">&#8250;</button>
+  </div>
+
+  <!-- 统计面板 -->
+  <div class="stats-panel" id="statsPanel">
+    <div class="stat-card">
+      <div class="stat-icon">&#9992;&#65039;</div>
+      <div class="stat-number" id="statTotalAircraft" data-target="0">0</div>
+      <div class="stat-label">收录飞机</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#127970;</div>
+      <div class="stat-number" id="statAirlines" data-target="0">0</div>
+      <div class="stat-label">运营航司</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#11088;</div>
+      <div class="stat-number" id="statCollection" data-target="0">0</div>
+      <div class="stat-label">我的收藏</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#127758;</div>
+      <div class="stat-number" id="statCountries" data-target="0">0</div>
+      <div class="stat-label">覆盖国家</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">&#128208;</div>
+      <div class="stat-number" id="statTypes" style="font-size:1rem;">--</div>
+      <div class="stat-label">类型分布</div>
+    </div>
   </div>
 
   <div class="update-banner" id="updateBanner">
@@ -1260,6 +2018,7 @@ body {
       <input type="text" class="search-input" id="searchInput" placeholder="" id="searchInputPH" autocomplete="off">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <button class="search-clear" id="searchClear" onclick="clearSearch()">&times;</button>
+      <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
     </div>
     <div class="sort-group" id="sortGroup">
       <div class="sort-chip active" data-sort="speed"><span class="sort-label" id="sortSpeed">速度</span> <span class="sort-arrow">▲</span></div>
@@ -1271,13 +2030,16 @@ body {
   <div class="search-results-hint" id="searchHint"></div>
 
   <div class="filter-bar">
-    <div class="filter-chip active" data-filter="civil"><span class="filter-label" id="filterCivil">民航客机</span></div>
+    <div class="filter-chip" data-filter="civil"><span class="filter-label" id="filterCivil">民航客机</span></div>
     <div class="filter-chip" data-filter="fighter"><span class="filter-label" id="filterFighter">战斗机</span></div>
     <div class="filter-chip" data-filter="bomber"><span class="filter-label" id="filterBomber">轰炸机</span></div>
     <div class="filter-chip" data-filter="transport"><span class="filter-label" id="filterTransport">运输机</span></div>
     <div class="filter-chip" data-filter="helicopter"><span class="filter-label" id="filterHelicopter">直升机</span></div>
-    <div class="filter-chip" data-filter="all"><span class="filter-label" id="filterAll">全部</span></div>
+    <div class="filter-chip active" data-filter="all"><span class="filter-label" id="filterAll">全部</span></div>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
+    <div class="view-switch-bar" id="viewSwitchBar">
+      <button class="view-switch-btn" id="viewToggleBtn">时间线</button>
+    </div>
   </div>
 
   <div class="airline-country-bar" id="countryBar">
@@ -1285,6 +2047,9 @@ body {
   </div>
 
   <div class="grid" id="grid"></div>
+  <div id="timeline" style="display:none">
+    <div class="tl-entries"></div>
+  </div>
 </div>
 
 
@@ -1350,7 +2115,7 @@ const i18n = {
     announcement: '16家航司Logo全新设计款上线，点击卡片查看详情',
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">「首页 Banner」</span>精选飞机自动轮播展示<span class="banner-sep">|</span><span class="banner-highlight">「手气不错」</span>随机探索，全屏动画抽选飞机<span class="banner-sep">|</span><span class="banner-highlight">「大图预览」</span>点击飞机图片可放大查看，支持滚轮缩放<span class="banner-sep">|</span><span class="banner-highlight">「相关推荐」</span>详情页底部查看同类飞机推荐',
+    updateBanner: '<span class="banner-highlight">深色模式·主题切换</span>，全新上线',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -1406,6 +2171,8 @@ const i18n = {
     desc_c17: '大型战略战术运输机，最大载重77吨，可短距起降于未铺设跑道。',
     desc_y20: '中国自主研发大型运输机，最大起飞重量220吨，填补战略运输空白。',
     desc_ah64: '全球最先进武装直升机之一，可挂载16枚地狱火导弹，被誉为坦克杀手。',
+    name_747: '波音 747-8',
+    desc_747: '波音747-8是"空中女王"747系列最新一代，2010年首飞，2012年投入运营。机身长76.3米，为全球最长客机，标志性鹅头双层设计延续半世纪经典，搭载四台GEnx-2B67发动机，节油16%、噪声降低30%。',
 
     // --- P4: 相关推荐 ---
     relatedTitle: '相关推荐',
@@ -1462,161 +2229,35 @@ const i18n = {
     country_EU: '欧洲',
     country_BR: '巴西',
     country_CA: '加拿大/欧洲',
-  },
 
-  en: {
-    pageTitle: 'Airliner Collection |民航客机收藏馆',
-    headerTitle: 'Airliner Collection',
-    headerSubtitle: 'by Marvis & Henry',
-    searchPlaceholder: 'Search aircraft model or name…',
-    backToTop: 'Back to Top',
-
-    sortSpeed: 'Speed',
-    sortRange: 'Range',
-    sortCapacity: 'Capacity',
-    luckyButton: "🎲 I'm Feeling Lucky",
-
-    filterCivil: 'Airliners',
-    filterFighter: 'Fighters',
-    filterBomber: 'Bombers',
-    filterTransport: 'Transports',
-    filterHelicopter: 'Helicopters',
-    filterAll: 'All',
-    countryAll: 'All Airlines',
-
-    collected: 'Collected',
-    collectionUnit: '',
-
-    compareTitle: 'Compare Aircraft',
-    selectAircraft1: 'Select Aircraft 1',
-    selectAircraft2: 'Select Aircraft 2',
-    startCompare: 'Compare',
-    clearCompare: 'Clear',
-    cancelCompare: 'Remove',
-    addCompare: 'Add to Compare',
-
-    operatingAirlines: 'Operating Airlines',
-    visitWebsite: 'Visit Official Website',
-
-    searchFound: 'Found',
-    searchMatch: 'matching aircraft',
-    searchNoMatch1: 'No aircraft matching "',
-    searchNoMatch2: '" found',
-
-    announcement: '16 New Airline Logo Designs Now Live — Tap Any Card for Details',
-
-    // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">「Hero Banner」</span>Featured aircraft carousel on homepage<span class="banner-sep">|</span><span class="banner-highlight">「Lucky Draw」</span>Random exploration with fullscreen dice animation<span class="banner-sep">|</span><span class="banner-highlight">「Image Preview」</span>Click aircraft images to zoom in, scroll wheel supported<span class="banner-sep">|</span><span class="banner-highlight">「Related Aircraft」</span>View similar aircraft at the bottom of the detail page',
-
-    specCruiseSpeed: 'Cruise Speed',
-    specMaxSpeed: 'Max Speed',
-    specMaxRange: 'Max Range',
-    specRange: 'Range',
-    specCombatRadius: 'Combat Radius',
-    specCapacity: 'Capacity',
-    specLoad: 'Payload',
-    specWingspan: 'Wingspan',
-    specCeiling: 'Ceiling',
-    specRotorDiameter: 'Rotor Diameter',
-
-    catCivil: 'Airliner',
-    catFighter: 'Fighter',
-    catBomber: 'Bomber',
-    catTransport: 'Transport',
-    catHelicopter: 'Helicopter',
-
-    name_a380: 'Airbus A380',
-    name_787: 'Boeing 787-9 Dreamliner',
-    name_a350: 'Airbus A350-900 XWB',
-    name_777: 'Boeing 777-300ER',
-    name_c919: 'COMAC C919',
-    name_a320neo: 'Airbus A320neo',
-    name_737max: 'Boeing 737 MAX 8',
-    name_a330: 'Airbus A330-300',
-    name_e195: 'Embraer E195-E2',
-    name_a220: 'Airbus A220-300',
-    name_f22: 'F-22 Raptor',
-    name_j20: 'J-20 Mighty Dragon',
-    name_b2: 'B-2 Spirit',
-    name_c17: 'C-17 Globemaster III',
-    name_y20: 'Y-20 Kunpeng',
-    name_ah64: 'AH-64 Apache',
-
-    desc_a380: 'The Airbus A380 is the world\'s largest double-deck wide-body airliner, first flown in 2005 and entering service in 2007. Standard 3-class configuration seats 525–853 passengers with a range of 15,200 km. Two full-length passenger decks and a quiet cabin redefined long-haul travel.',
-    desc_787: 'The Boeing 787-9 is a stretched variant of the 787 family, first flown in 2013. Extensive use of carbon-fiber composites saves 20% fuel versus comparable aircraft. Electrochromic windows, higher cabin humidity, and lower cabin altitude greatly improve passenger comfort.',
-    desc_a350: 'The Airbus A350-900 is a next-generation long-haul wide-body that entered service in 2015. Powered by Rolls-Royce Trent XWB engines, its cabin is ~13 cm wider than the 787 with 30% less noise and a 25% improvement in fuel efficiency over previous-generation aircraft.',
-    desc_777: 'The Boeing 777-300ER is one of the world\'s best-selling long-haul wide-body aircraft, entering service in 2004. Powered by GE90-115B engines, it excels at transoceanic operations with outstanding twin-engine ETOPS capability.',
-    desc_c919: 'The C919 is China\'s first trunk-route single-aisle airliner developed to international airworthiness standards. First flown in 2017 and entering commercial service in 2023, it features advanced aerodynamics and LEAP-1C engines, competing in the same class as the A320neo and 737 MAX.',
-    desc_a320neo: 'The Airbus A320neo is the world\'s best-selling single-aisle aircraft family, entering service in 2016. New-generation engines deliver 15–20% better fuel efficiency and 50% less noise. As of 2025, orders have surpassed 10,000 units.',
-    desc_737max: 'The Boeing 737 MAX 8 is the latest generation of the 737 family, entering service in 2017. Equipped with CFM LEAP-1B engines and advanced technology winglets, it achieves 14% better fuel efficiency over the 737NG. Following comprehensive upgrades, its safety has been fully validated and recertified.',
-    desc_a330: 'The Airbus A330-300 is a popular mid-to-long-range wide-body, entering service in 1994 and still in production after multiple upgrades. Known for outstanding operating economics and cabin comfort, it is a core wide-body type in Chinese airline fleets.',
-    desc_e195: 'The Embraer E195-E2 is the largest model in the E-Jet E2 family, entering service in 2019. Featuring all-new Pratt & Whitney PW1900G geared turbofan engines and a new wing, it delivers 25% better fuel efficiency and is the most economical single-aisle jet in the 130-seat class.',
-    desc_a220: 'The Airbus A220-300 (formerly Bombardier CS300) is a highly innovative regional/narrow-body aircraft that entered service in 2016. Extensive use of composites and Pratt & Whitney geared turbofan engines, with the widest cabin and largest windows in its class and excellent fuel efficiency.',
-    desc_f22: 'The world\'s first fifth-generation stealth air-superiority fighter, first flown in 1997. Combines stealth, supercruise, super-maneuverability, and advanced avionics.',
-    desc_j20: 'China\'s first fifth-generation twin-engine heavy stealth fighter, entering service in 2017. Features high stealth capability and super-maneuverability.',
-    desc_b2: 'The world\'s only stealth strategic bomber, featuring a flying-wing design with an extremely small radar cross-section. Unit cost approximately $2.4 billion.',
-    desc_c17: 'A large strategic/tactical transport aircraft with a maximum payload of 77 tons, capable of short takeoff and landing on unpaved runways.',
-    desc_y20: 'China\'s domestically developed large transport aircraft with a maximum takeoff weight of 220 tons, filling the strategic airlift capability gap.',
-    desc_ah64: 'One of the world\'s most advanced attack helicopters, capable of carrying 16 Hellfire missiles. Known as the tank killer.',
-
-    // --- P4: Related ---
-    relatedTitle: 'Related Aircraft',
-    relatedNoMatch: 'No related aircraft',
-
-    airline_ua: 'United Airlines',
-    airline_dl: 'Delta Air Lines',
-    airline_ca: 'Air China',
-    airline_mu: 'China Eastern',
-    airline_cz: 'China Southern',
-    airline_ek: 'Emirates',
-    airline_sq: 'Singapore Airlines',
-    airline_qr: 'Qatar Airways',
-    airline_nh: 'ANA',
-    airline_lh: 'Lufthansa',
-    airline_ba: 'British Airways',
-    airline_af: 'Air France',
-    airline_ey: 'Etihad Airways',
-    airline_cx: 'Cathay Pacific',
-    airline_ay: 'Finnair',
-    airline_tk: 'Turkish Airlines',
-
-    desc_airline_ua: 'Founded in 1926, United Airlines is one of the world\'s most extensive route networks and a founding member of Star Alliance. Headquartered in Chicago, its fleet exceeds 900 aircraft serving 350+ destinations across six continents.',
-    desc_airline_dl: 'Delta Air Lines is the world\'s second-largest airline by passenger traffic and a founding member of SkyTeam. Headquartered in Atlanta, it operates over 900 aircraft with 5,000+ daily flights, renowned for operational reliability and on-time performance.',
-    desc_airline_ca: 'Air China is the flag carrier of China and a Star Alliance member, headquartered in Beijing. With China\'s largest wide-body fleet, it serves nearly 200 destinations worldwide and is known for its safety record and premium international routes.',
-    desc_airline_mu: 'China Eastern Airlines is headquartered in Shanghai, a SkyTeam member with over 600 modern aircraft. Operating from dual hubs at Shanghai Pudong and Hongqiao, it is the global launch operator of the COMAC C919.',
-    desc_airline_cz: 'China Southern Airlines is headquartered in Guangzhou, one of Asia\'s largest airlines by fleet size and annual passenger volume. Operating over 650 aircraft from dual hubs at Guangzhou Baiyun and Beijing Daxing, its network spans the globe.',
-    desc_airline_ek: 'Emirates is the world\'s largest operator of the A380 and Boeing 777, headquartered in Dubai. Renowned for ultra-luxury service and its "five-star hotel in the sky" experience, its all-wide-body fleet serves 160+ destinations across six continents.',
-    desc_airline_sq: 'Singapore Airlines is one of the world\'s highest-rated carriers and a Star Alliance member. Known for exceptional service, innovative cabin products, and the iconic "Singapore Girl" brand, it has earned Skytrax 5-star status for many consecutive years.',
-    desc_airline_qr: 'Qatar Airways is a Oneworld member headquartered in Doha. Famous for its Qsuite — the world\'s best business class — and its flagship hub at Hamad International Airport, it has won Skytrax Airline of the Year multiple times.',
-    desc_airline_nh: 'All Nippon Airways (ANA) is Japan\'s largest airline and a Star Alliance member, headquartered in Tokyo. Known for meticulous Japanese hospitality, outstanding punctuality, and the world\'s largest 787 fleet, it has held Skytrax 5-star status for years.',
-    desc_airline_lh: 'Lufthansa is Europe\'s largest airline group and a founding Star Alliance member, headquartered in Frankfurt. Operating over 300 aircraft with characteristic German engineering precision, its dual hubs at Frankfurt and Munich serve 200+ destinations worldwide.',
-    desc_airline_ba: 'British Airways is the flag carrier of the United Kingdom and a founding Oneworld member. With London Heathrow as its super-hub, it serves nearly 200 destinations globally, renowned for British elegance and the Concorde supersonic legacy.',
-    desc_airline_af: 'Air France is the flag carrier of France and a founding SkyTeam member, headquartered in Paris. With Paris Charles de Gaulle as its hub, it brings French art de vivre to the flying experience — its La Première first class is considered one of the most luxurious journeys in the sky.',
-    desc_airline_ey: 'Etihad Airways is the national airline of the UAE, headquartered in Abu Dhabi. Famous for The Residence — a private three-room suite in the sky — and innovative Economy Smart Seats, it brings Arabian hospitality to the skies.',
-    desc_airline_cx: 'Cathay Pacific is the flag carrier of Hong Kong and a founding Oneworld member. Based at Hong Kong International Airport, it connects the world with outstanding Asian hospitality and a global network, having been named World\'s Best Airline multiple times.',
-    desc_airline_ay: 'Finnair is the flag carrier of Finland and a Oneworld member, headquartered in Helsinki. Renowned for the shortest Arctic routes between Europe and Asia, its Helsinki hub is one of the fastest gateways connecting the two continents.',
-    desc_airline_tk: 'Turkish Airlines is a Star Alliance member headquartered in Istanbul. Known for flying to more countries than any other airline, its new Istanbul Airport is a mega-hub connecting Europe, Asia, and Africa.',
-
-    country_US: 'United States',
-    country_CN: 'China',
-    country_JP: 'Japan',
-    country_DE: 'Germany',
-    country_GB: 'United Kingdom',
-    country_FR: 'France',
-    country_AE: 'UAE',
-    country_SG: 'Singapore',
-    country_QA: 'Qatar',
-    country_HK: 'Hong Kong, China',
-    country_FI: 'Finland',
-    country_TR: 'Turkey',
-    country_EU: 'Europe',
-    country_BR: 'Brazil',
-    country_CA: 'Canada/Europe',
+    // --- 快捷添加 ---
+    addAircraft: '添加快捷方式',
+    addAircraftSubtitle: '自定义添加飞行器到收藏馆',
+    fieldNameZh: '中文名称',
+    fieldCode: '制造商 + 型号',
+    fieldCategory: '类别',
+    fieldCountry: '国家',
+    fieldImage: '图片 URL',
+    fieldSpeed: '速度',
+    fieldRange: '航程',
+    fieldCapacity: '载客量',
+    fieldWingspan: '翼展',
+    fieldDescZh: '中文简介',
+    fieldAirlines: '关联航司',
+    fieldProdDate: '面世年份',
+    btnSubmit: '添 加',
+    btnCancel: '取消',
+    catCivil: '民航客机',
+    catFighter: '战斗机',
+    catBomber: '轰炸机',
+    catTransport: '运输机',
+    catHelicopter: '直升机',
+    deleteCustom: '删除此机型',
+    deleteConfirm: '确定要删除这款自定义机型吗？此操作不可撤销。',
   }
 };
 
-let currentLang = localStorage.getItem('aviation_lang') || 'zh';
-function t(key) { return i18n[currentLang]?.[key] || key; }
+function t(key) { return i18n.zh?.[key] || key; }
 const specLabelMap = {
   cruise_speed: 'specCruiseSpeed', max_speed: 'specMaxSpeed', max_range: 'specMaxRange',
   range: 'specRange', combat_radius: 'specCombatRadius', capacity: 'specCapacity',
@@ -1624,57 +2265,12 @@ const specLabelMap = {
   rotor_diameter: 'specRotorDiameter'
 };
 function specLabel(key) { return t(specLabelMap[key]) || key; }
-function applyLanguage() {
-  document.getElementById('htmlRoot').setAttribute('lang', currentLang === 'zh' ? 'zh-CN' : 'en');
-  document.title = t('pageTitle');
-  document.getElementById('headerTitle').textContent = t('headerTitle');
-  document.getElementById('headerSubtitle').textContent = t('headerSubtitle');
-  document.getElementById('searchInputPH').setAttribute('placeholder', t('searchPlaceholder'));
-  document.getElementById('backToTop').setAttribute('title', t('backToTop'));
 
-  // Filter chips
-  ['filterCivil','filterFighter','filterBomber','filterTransport','filterHelicopter','filterAll'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = t(id);
-  });
-
-  // Sort chips
-  ['sortSpeed','sortRange','sortCap'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = t(id);
-  });
-
-  // Lucky button
-  var luckyBtn = document.getElementById('luckyButton');
-  if (luckyBtn) luckyBtn.textContent = t('luckyButton');
-
-  // Country "all" chip
-  const countryAllChip = document.getElementById('countryAllChip');
-  if (countryAllChip) countryAllChip.textContent = t('countryAll');
-
-  // Compare bar default placeholders
-  const slot1 = document.getElementById('compareSlot1');
-  const slot2 = document.getElementById('compareSlot2');
-  if (slot1 && slot1.dataset.current === undefined) slot1.textContent = t('selectAircraft1');
-  if (slot2 && slot2.dataset.current === undefined) slot2.textContent = t('selectAircraft2');
-  const compareBtn = document.getElementById('compareBtn');
-  if (compareBtn) compareBtn.textContent = t('startCompare');
-  const clearBtn = document.getElementById('clearCompareBtn');
-  if (clearBtn) clearBtn.textContent = t('clearCompare');
-
-  // Toast
-  const toastMsg = document.getElementById('toastMsg');
-  if (toastMsg) toastMsg.textContent = t('announcement');
-
-  // Update banner
-  const bannerText = document.getElementById('updateBannerText');
-  if (bannerText) bannerText.innerHTML = t('updateBanner');
-
-  // Re-render dynamic UI
-  renderCountryBar();
-  renderCards();
-  updateSortUI();
-}
+// 硬编码中文 UI 文本
+document.getElementById('htmlRoot').setAttribute('lang', 'zh-CN');
+document.title = '民航客机收藏馆';
+document.getElementById('headerTitle').textContent = '民航客机收藏馆';
+document.getElementById('headerSubtitle').textContent = '作者 Marvis & Henry';
 
 // ===== SVG 精美占位图生成 =====
 function placeholdImage(img, name, code, category) {
@@ -1730,8 +2326,6 @@ function placeholdImage(img, name, code, category) {
 // ===== 图片代理：解决维基图片国内加载问题 =====
 function proxyUrl(url) {
   if (!url || (!url.includes('wikimedia.org') && !url.includes('wikipedia.org') && !url.includes('clearbit.com'))) return url;
-  // thumb.php URLs are served directly from commons and accessible in China
-  if (url.includes('thumb.php')) return url;
   return 'https://wsrv.nl/?url=' + encodeURIComponent(url.replace(/^https?:\/\//, '')) + '&w=800&output=webp';
 }
 
@@ -1968,6 +2562,12 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=AH-64D_Apache_Longbow.jpg&w=800',
     desc: 'desc_ah64',
     specs: { 'max_speed': '293 km/h', 'combat_radius': '480 km', 'ceiling': '6,400 m', 'rotor_diameter': '14.63 m' }
+  },
+  {
+    id: 26, name: 'name_747', code: 'Boeing 747-8', category: 'civil', country: '美国',
+    image: 'https://commons.wikimedia.org/w/thumb.php?f=Lufthansa_Boeing_747-8_(16278601112).jpg&w=800',
+    desc: 'desc_747', airlineIds: ['lh', 'ca'],
+    specs: { 'cruise_speed': '0.855 马赫', 'range': '14,816 km', 'capacity': '410-467 人', 'wingspan': '68.4 m' }
   }
 ];
 
@@ -1975,12 +2575,39 @@ const aircrafts = [
 const aircraftSlugs = {
   1: 'a380', 2: '787-9', 3: 'a350-900', 4: '777-300er', 5: 'c919',
   6: 'a320neo', 7: '737-max-8', 8: 'a330-300', 9: 'e195-e2', 10: 'a220-300',
-  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64'
+  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64', 26: '747-8'
 };
 aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
 
+(function() {
+  try {
+    // 恢复 i18n
+    var savedI18n = JSON.parse(localStorage.getItem('custom_i18n') || '{}');
+    if (typeof savedI18n === 'object') {
+      Object.keys(savedI18n).forEach(function(k) {
+        if (savedI18n[k].zh) i18n.zh[k] = savedI18n[k].zh;
+      });
+    }
+    // 加载自定义机型
+    var custom = JSON.parse(localStorage.getItem('custom_aircrafts') || '[]');
+    _customIdCounter = 100;
+    if (custom.length) {
+      custom.forEach(function(a) { a.slug = ''; a._custom = true; });
+      [].push.apply(aircrafts, custom);
+      custom.forEach(function(a) { if (a.id >= _customIdCounter) _customIdCounter = a.id + 1; });
+      // 恢复自定义机型的生产年份
+      custom.forEach(function(a) { if (a.prodDate) prodYearLookup['' + a.id] = a.prodDate; });
+      // Auto-fill prodDate for Boeing 727
+      var patched = false;
+      custom.forEach(function(a) { if (a.name === 'Boeing 727' && !a.prodDate) { a.prodDate = '1964'; patched = true; } });
+      if (patched) { localStorage.setItem('custom_aircrafts', JSON.stringify(custom)); }
+      custom.forEach(function(a) { if (a.prodDate) prodYearLookup['' + a.id] = a.prodDate; });
+    }
+  } catch(e) {}
+})();
+
 let collection = new Set(JSON.parse(localStorage.getItem('aviation_collection') || '[]'));
-let currentFilter = 'civil';
+let currentFilter = 'all';
 let currentCountry = 'all';
 let searchQuery = '';
 let sortBy = 'speed';
@@ -2090,10 +2717,10 @@ function renderCards() {
   // Search results hint
   if (searchQuery.trim() && filtered.length === 0) {
     searchHint.style.display = 'block';
-    searchHint.textContent = currentLang === 'zh' ? `未找到匹配"${searchQuery.trim()}"的飞行器` : `No aircraft matching "${searchQuery.trim()}" found`;
+    searchHint.textContent = `未找到匹配"${searchQuery.trim()}"的飞行器`;
   } else if (searchQuery.trim()) {
     searchHint.style.display = 'block';
-    searchHint.textContent = currentLang === 'zh' ? `找到 ${filtered.length} 款匹配飞行器` : `Found ${filtered.length} matching aircraft`;
+    searchHint.textContent = `找到 ${filtered.length} 款匹配飞行器`;
   } else {
     searchHint.style.display = 'none';
   }
@@ -2113,7 +2740,7 @@ function renderCards() {
   const items = filtered.map((a, i) => {
     const isCompared = compareSet.has(a.id);
     return `
-    <div class="card tilt-active" data-id="${a.id}" style="--i:${i}" onclick="openDetail(${a.id})">
+    <div class="card card-animate tilt-active${a._custom ? ' custom-card' : ''}" data-id="${a.id}" style="--i:${i}" onclick="openDetail(${a.id})" oncontextmenu="if(${!!a._custom}){event.preventDefault();toggleCustomDeleteMode(${a.id});}">
       <div class="card-image-wrap">
         <div class="skeleton-img"></div>
         <img src="${proxyUrl(a.image)}" alt="${t(a.name)}" loading="lazy"
@@ -2129,6 +2756,7 @@ function renderCards() {
              onclick="event.stopPropagation(); toggleCollect(${a.id})">
           <svg viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21z"/></svg>
         </div>
+        ${a._custom ? '<div class="custom-delete-btn" onclick="event.stopPropagation();deleteCustomAircraft('+a.id+')">'+t('deleteCustom')+'</div>' : ''}
       </div>
       <div class="card-body">
         <h3>${t(a.name)}</h3>
@@ -2185,6 +2813,8 @@ function renderCards() {
     batchIndex++;
     if (batchIndex * BATCH_SIZE < items.length) {
       requestAnimationFrame(function () { setTimeout(renderBatch, 0); });
+    } else {
+      requestAnimationFrame(function () { setTimeout(initCardAnimation, 50); });
     }
   }
   requestAnimationFrame(function () { setTimeout(renderBatch, 0); });
@@ -2198,7 +2828,7 @@ function toggleCollect(id) {
 }
 
 function updateCollectionCount() {
-  document.getElementById('collectionCount').textContent = currentLang === 'zh' ? `已收藏 ${collection.size} 架` : `Collected ${collection.size}`;
+  document.getElementById('collectionCount').textContent = `已收藏 ${collection.size} 架`;
 }
 // ===== 搜索功能 =====
 function clearSearch() {
@@ -2367,24 +2997,25 @@ document.getElementById('grid').addEventListener('mouseleave', (e) => {
   }
 }, true);
 
-// ===== 卡片入场动画 =====
+// ===== 卡片入场动画 (IntersectionObserver + CSS transition) =====
+var _cardObserver = null;
 function initCardAnimation() {
-  var cards = document.querySelectorAll('.card-wrap');
+  if (_cardObserver) _cardObserver.disconnect();
+  var cards = document.querySelectorAll('.card.card-animate:not(.skeleton-card)');
   if (!cards.length) return;
 
-  var observer = new IntersectionObserver(function(entries) {
+  _cardObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) {
-        var card = entry.target;
-        card.style.animation = 'fadeInUp 0.6s ease forwards';
-        observer.unobserve(card);
+        entry.target.classList.add('card-visible');
+        _cardObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 
   cards.forEach(function(card, index) {
-    card.style.animationDelay = (index * 50) + 'ms';
-    observer.observe(card);
+    card.style.transitionDelay = (index % 12) * 45 + 'ms';
+    _cardObserver.observe(card);
   });
 }
 
@@ -2404,13 +3035,67 @@ function initBackToTop() {
   });
 }
 
-// ===== 初始化事件监听 =====
+// ===== 搜索建议 =====
+var suggestionsDropdown = document.getElementById('suggestionsDropdown');
+
+function showSuggestions(query) {
+  if (!query) { suggestionsDropdown.classList.remove('visible'); return; }
+  var q = query.toLowerCase();
+  var matches = [];
+  for (var i = 0; i < aircrafts.length; i++) {
+    var a = aircrafts[i];
+    var nameText = t(a.name).toLowerCase();
+    var codeText = a.code.toLowerCase();
+    if (nameText.includes(q) || codeText.includes(q)) {
+      matches.push(a);
+      if (matches.length >= 5) break;
+    }
+  }
+  if (matches.length === 0) { suggestionsDropdown.classList.remove('visible'); return; }
+  var html = '';
+  for (var j = 0; j < matches.length; j++) {
+    var a = matches[j];
+    html += '<div class="suggestion-item" data-id="' + a.id + '">' +
+      '<img class="suggestion-thumb" src="' + a.image + '" alt="">' +
+      '<div class="suggestion-info">' +
+      '<span class="suggestion-name">' + t(a.name) + '</span>' +
+      '<span class="suggestion-code">' + a.code + '</span>' +
+      '</div></div>';
+  }
+  suggestionsDropdown.innerHTML = html;
+  suggestionsDropdown.classList.add('visible');
+}
+
+suggestionsDropdown.addEventListener('click', function(e) {
+  var item = e.target.closest('.suggestion-item');
+  if (!item) return;
+  var id = parseInt(item.dataset.id);
+  suggestionsDropdown.classList.remove('visible');
+  openDetail(id);
+});
+
+// Close suggestions on Escape or click outside
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') suggestionsDropdown.classList.remove('visible');
+});
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.search-wrap')) suggestionsDropdown.classList.remove('visible');
+});
+
+var _suggestTimer = null;
 document.getElementById('searchInput').addEventListener('input', (e) => {
   searchQuery = e.target.value;
   clearTimeout(window._searchDebounce);
   window._searchDebounce = setTimeout(function() {
     if (searchQuery.trim()) window._track('search', { query: searchQuery.trim() });
   }, 800);
+  clearTimeout(_suggestTimer);
+  var q = searchQuery.trim();
+  if (q) {
+    _suggestTimer = setTimeout(function() { showSuggestions(q); }, 200);
+  } else {
+    suggestionsDropdown.classList.remove('visible');
+  }
   renderCards();
 });
 
@@ -2435,6 +3120,211 @@ initTiltEffect();
 initCardAnimation();
 initBackToTop();
 initHeroBanner();
+initCustomCardContextMenu();
+
+
+// ===== 自定义机型: 右键/长按上下文菜单 =====
+var _customDeleteModeId = null;
+
+function initCustomCardContextMenu() {
+  // Close delete mode on clicking anywhere else
+  document.addEventListener('click', function(e) {
+    if (_customDeleteModeId !== null && !e.target.closest('.custom-card')) {
+      exitCustomDeleteMode();
+    }
+  });
+  // Long-press detection on touch devices
+  var longPressTimer = null;
+  document.addEventListener('touchstart', function(e) {
+    var card = e.target.closest('.custom-card');
+    if (!card) return;
+    longPressTimer = setTimeout(function() {
+      var id = parseInt(card.getAttribute('data-id'));
+      if (!isNaN(id)) toggleCustomDeleteMode(id);
+    }, 600);
+  }, { passive: true });
+  document.addEventListener('touchend', function() { clearTimeout(longPressTimer); });
+  document.addEventListener('touchmove', function() { clearTimeout(longPressTimer); });
+}
+
+function toggleCustomDeleteMode(id) {
+  if (_customDeleteModeId === id) { exitCustomDeleteMode(); return; }
+  exitCustomDeleteMode();
+  var card = document.querySelector('.card[data-id="' + id + '"]');
+  if (card) { card.classList.add('custom-mode'); _customDeleteModeId = id; }
+}
+
+function exitCustomDeleteMode() {
+  if (_customDeleteModeId !== null) {
+    var prev = document.querySelector('.card[data-id="' + _customDeleteModeId + '"]');
+    if (prev) prev.classList.remove('custom-mode');
+    _customDeleteModeId = null;
+  }
+}
+
+// ===== 自定义机型: 删除 =====
+function deleteCustomAircraft(id) {
+  if (!confirm(t('deleteConfirm'))) return;
+  exitCustomDeleteMode();
+  // 记录 name/desc keys 以备清理
+  var removed = null;
+  for (var i = aircrafts.length - 1; i >= 0; i--) {
+    if (aircrafts[i].id === id) { removed = aircrafts.splice(i, 1)[0]; break; }
+  }
+  if (!removed) return;
+  // 更新 localStorage
+  try {
+    var custom = JSON.parse(localStorage.getItem('custom_aircrafts') || '[]');
+    custom = custom.filter(function(a) { return a.id !== id; });
+    localStorage.setItem('custom_aircrafts', JSON.stringify(custom));
+    // 清理 i18n
+    var savedI18n = JSON.parse(localStorage.getItem('custom_i18n') || '{}');
+    delete savedI18n[removed.name];
+    delete savedI18n[removed.desc];
+    delete i18n.zh[removed.name];
+    delete i18n.zh[removed.desc];
+    localStorage.setItem('custom_i18n', JSON.stringify(savedI18n));
+  } catch(e) {}
+  renderCards();
+}
+
+// ===== 快捷添加: 模态窗口 =====
+function openAddForm() {
+  var overlay = document.getElementById('addModalOverlay');
+  var modal = document.getElementById('addModal');
+  buildAddForm(modal);
+  overlay.classList.add('show');
+}
+
+function closeAddForm() {
+  document.getElementById('addModalOverlay').classList.remove('show');
+}
+
+function buildAddForm(modal) {
+  var catOptions = [
+    { val: 'civil', label: t('catCivil') },
+    { val: 'fighter', label: t('catFighter') },
+    { val: 'bomber', label: t('catBomber') },
+    { val: 'transport', label: t('catTransport') },
+    { val: 'helicopter', label: t('catHelicopter') }
+  ];
+  var catSelect = '<select id="af_category">' + catOptions.map(function(o) {
+    return '<option value="' + o.val + '">' + o.label + '</option>';
+  }).join('') + '</select>';
+
+  var airlineChips = Object.keys(airlines).map(function(k) {
+    return '<span class="airline-chip" data-id="' + k + '" onclick="this.classList.toggle(\'selected\')">' + t('airline_' + k) + '</span>';
+  }).join('');
+
+  modal.innerHTML = '<h2>' + t('addAircraft') + '</h2>' +
+    '<div class="modal-subtitle">' + t('addAircraftSubtitle') + '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldNameZh') + '</label><input id="af_nameZh" placeholder="例: 空中客车 A380"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldCode') + '</label><input id="af_code" placeholder="例: Airbus A380-800"></div>' +
+      '<div class="form-group"><label>' + t('fieldCategory') + '</label>' + catSelect + '</div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldCountry') + '</label><input id="af_country" placeholder="例: 法国"></div>' +
+      '<div class="form-group"><label>' + t('fieldImage') + '</label><input id="af_image" placeholder="https://..."></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldSpeed') + '</label><input id="af_speed" placeholder="例: 0.85 马赫"></div>' +
+      '<div class="form-group"><label>' + t('fieldRange') + '</label><input id="af_range" placeholder="例: 15,200 km"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldCapacity') + '</label><input id="af_capacity" placeholder="例: 400-550 人"></div>' +
+      '<div class="form-group"><label>' + t('fieldWingspan') + '</label><input id="af_wingspan" placeholder="例: 79.8 m"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldProdDate') + '</label><input id="af_prodDate" placeholder="例: 2020"></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>' + t('fieldDescZh') + '</label><textarea id="af_descZh" placeholder="中文简介..."></textarea></div>' +
+    '</div>' +
+    '<div class="form-row single">' +
+      '<div class="form-group"><label>' + t('fieldAirlines') + '</label><div class="airline-chips" id="af_airlineChips">' + airlineChips + '</div></div>' +
+    '</div>' +
+    '<div class="btn-row">' +
+      '<button class="btn-cancel" onclick="closeAddForm()">' + t('btnCancel') + '</button>' +
+      '<button class="btn-submit" onclick="submitCustomAircraft()">' + t('btnSubmit') + '</button>' +
+    '</div>';
+}
+
+function submitCustomAircraft() {
+  var zh = document.getElementById('af_nameZh').value.trim();
+  var code = document.getElementById('af_code').value.trim();
+  var category = document.getElementById('af_category').value;
+  var country = document.getElementById('af_country').value.trim();
+  var image = document.getElementById('af_image').value.trim();
+  var speed = document.getElementById('af_speed').value.trim();
+  var range = document.getElementById('af_range').value.trim();
+  var capacity = document.getElementById('af_capacity').value.trim();
+  var wingspan = document.getElementById('af_wingspan').value.trim();
+  var prodDate = document.getElementById('af_prodDate').value.trim();
+  var descZh = document.getElementById('af_descZh').value.trim();
+
+  if (!zh || !code) { alert('中文名称和型号为必填项'); return; }
+
+  var nameKey = 'name_custom_' + _customIdCounter;
+  var descKey = 'desc_custom_' + _customIdCounter;
+
+  // 收集选中航司
+  var selectedAirlines = [];
+  var chips = document.querySelectorAll('#af_airlineChips .airline-chip.selected');
+  chips.forEach(function(c) { selectedAirlines.push(c.getAttribute('data-id')); });
+
+  // 构建新机型
+  var newAircraft = {
+    id: _customIdCounter,
+    name: nameKey,
+    code: code,
+    category: category,
+    country: country || '--',
+    image: image || '',
+    desc: descKey,
+    airlineIds: selectedAirlines.length ? selectedAirlines : undefined,
+    specs: {
+      'cruise_speed': speed || '--',
+      'range': range || '--',
+      'capacity': capacity || '--',
+      'wingspan': wingspan || '--'
+    },
+    slug: '',
+    _custom: true,
+    prodDate: prodDate || ''
+  };
+
+  // 写入 i18n
+  i18n.zh[nameKey] = zh;
+  if (descZh) i18n.zh[descKey] = descZh;
+  else i18n.zh[descKey] = '';
+
+  // 保存到 localStorage
+  try {
+    var custom = JSON.parse(localStorage.getItem('custom_aircrafts') || '[]');
+    custom.push({
+      id: _customIdCounter, name: nameKey, code: code, category: category,
+      country: country || '--', image: image || '', desc: descKey,
+      specs: newAircraft.specs, airlineIds: newAircraft.airlineIds,
+      prodDate: prodDate || ''
+    });
+    localStorage.setItem('custom_aircrafts', JSON.stringify(custom));
+    // 持久化 i18n
+    var savedI18n = JSON.parse(localStorage.getItem('custom_i18n') || '{}');
+    savedI18n[nameKey] = { zh: zh };
+    savedI18n[descKey] = { zh: descZh || '' };
+    localStorage.setItem('custom_i18n', JSON.stringify(savedI18n));
+  } catch(e) {}
+
+  // 加入当前 aircrafts
+  aircrafts.push(newAircraft);
+  if (prodDate) prodYearLookup['' + _customIdCounter] = prodDate;
+  _customIdCounter++;
+  closeAddForm();
+  renderCards();
+}
 
 
 // ===== P2: 大图预览 Lightbox =====
@@ -2650,7 +3540,7 @@ function openDetail(id) {
         <div class="modal-close" onclick="closeDetail()">&times;</div>
       </div>
       <div class="modal-body">
-        <h2>${t(a.name)}</h2>
+        <h2 style="margin:0 0 2px 0">${t(a.name)}</h2>
         <div class="modal-code">${a.code} · ${a.country}</div>
         <div class="modal-desc">${t(a.desc)}</div>
         <div class="modal-specs">
@@ -2659,7 +3549,10 @@ function openDetail(id) {
           ).join('')}
         </div>
         <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
-          <button class="viewer3d-btn" onclick="event.stopPropagation();generateShareCard(${a.id})" style="background:transparent;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);padding:8px 18px;border-radius:8px;cursor:pointer;font-size:0.85rem;">分享卡片</button>
+          <button class="modal-action-btn" style="background:${collection.has(a.id)?'#1565c0':'rgba(255,255,255,0.08)'};color:${collection.has(a.id)?'#fff':'#ccc'}"
+                  onclick="event.stopPropagation();toggleCollect(${a.id});var b=this;b.style.background=collection.has(${a.id})?'#1565c0':'rgba(255,255,255,0.08)';b.style.color=collection.has(${a.id})?'#fff':'#ccc';b.textContent=collection.has(${a.id})?'已收藏':'收藏'">${collection.has(a.id) ? '已收藏' : '收藏'}</button>
+          <button class="modal-action-btn"
+                  onclick="event.stopPropagation();exportSingleAircraft(${a.id})">导出为图片</button>
         </div>
         ${airlineCards ? `<div class="airlines-section"><h3>${t('operatingAirlines')}</h3>${airlineCards}</div>` : ''}
         ${renderRelatedSection(a.id)}
@@ -2689,13 +3582,14 @@ document.querySelector('.filter-bar').addEventListener('click', (e) => {
   if (currentFilter !== 'civil') currentCountry = 'all';
   window._track('filter', { filter: currentFilter });
   renderCards();
+  // 如果当前是时间线视图，同步刷新
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 });
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   // 优先关闭最顶层弹窗
   if (document.querySelector('.image-lightbox')) { closeImageLightbox(); return; }
-  if (document.getElementById('shareOverlay')) { closeSharePreview(); return; }
   closeDetail();
 });
 
@@ -2727,10 +3621,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260718-v4', '1');
+  localStorage.setItem('aviation-update-20260725-v8', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260718-v4')) return;
+  if (localStorage.getItem('aviation-update-20260725-v8')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
@@ -2739,7 +3633,7 @@ function initUpdateBanner() {
 
 // ===== Hero Banner 轮播 =====
 function initHeroBanner() {
-  const heroIds = [1, 5, 20, 4]; // A380, C919, F-22, 777-300ER
+  const heroIds = [26, 2, 3, 8]; // 747-8, 787-9, A350-900, A330-300
   const heroAircraft = heroIds.map(function(id) {
     return aircrafts.find(function(a) { return a.id === id; });
   }).filter(Boolean);
@@ -2837,11 +3731,392 @@ function initHeroBanner() {
   startTimer();
 }
 
+// ===== 统计面板动画与更新 =====
+var _statsAnimated = false;
+function animateStats() {
+  if (_statsAnimated) { updateStatsNumbers(); return; }
+  _statsAnimated = true;
+  var cards = [
+    { el: document.getElementById('statTotalAircraft'), target: aircrafts.length },
+    { el: document.getElementById('statAirlines'), target: Object.keys(airlines).length },
+    { el: document.getElementById('statCollection'), target: collection.size },
+    { el: document.getElementById('statCountries'), target: getUniqueCountryCount() }
+  ];
+  // Types stat is text, handle separately
+  updateTypesStat();
+
+  var duration = 600;
+  cards.forEach(function(card) {
+    card.el.setAttribute('data-target', card.target);
+    animateNumber(card.el, card.target, duration);
+  });
+}
+
+function updateStatsNumbers() {
+  document.getElementById('statTotalAircraft').textContent = aircrafts.length;
+  document.getElementById('statTotalAircraft').setAttribute('data-target', aircrafts.length);
+  document.getElementById('statAirlines').textContent = Object.keys(airlines).length;
+  document.getElementById('statAirlines').setAttribute('data-target', Object.keys(airlines).length);
+  document.getElementById('statCollection').textContent = collection.size;
+  document.getElementById('statCollection').setAttribute('data-target', collection.size);
+  document.getElementById('statCountries').textContent = getUniqueCountryCount();
+  document.getElementById('statCountries').setAttribute('data-target', getUniqueCountryCount());
+  updateTypesStat();
+}
+
+function getUniqueCountryCount() {
+  var countries = new Set();
+  aircrafts.forEach(function(a) { if (a.country) countries.add(a.country); });
+  return countries.size;
+}
+
+function updateTypesStat() {
+  var types = { civil: 0, fighter: 0, bomber: 0, transport: 0, helicopter: 0 };
+  aircrafts.forEach(function(a) { if (types[a.category] !== undefined) types[a.category]++; });
+  document.getElementById('statTypes').textContent =
+    '民航 ' + types.civil + ' / 战斗 ' + types.fighter;
+}
+
+function animateNumber(el, target, duration) {
+  var start = 0;
+  var startTime = null;
+  function step(timestamp) {
+    if (!startTime) startTime = timestamp;
+    var progress = Math.min((timestamp - startTime) / duration, 1);
+    // easeOutCubic
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var current = Math.round(eased * target);
+    el.textContent = current;
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = target;
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+// Use IntersectionObserver to trigger stats animation when visible
+(function initStatsObserver() {
+  var panel = document.getElementById('statsPanel');
+  if (!panel) return;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        animateStats();
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  observer.observe(panel);
+  // Also trigger immediately if already visible
+  setTimeout(function() {
+    var rect = panel.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      animateStats();
+    }
+  }, 300);
+})();
+
+// Hook into renderCards to update stats after render
+var _origRenderCards = renderCards;
+renderCards = function() {
+  _origRenderCards();
+  updateStatsNumbers();
+};
+
+// Hook into toggleCollect to update collection stat
+var _origToggleCollect = toggleCollect;
+toggleCollect = function(id) {
+  _origToggleCollect(id);
+  updateStatsNumbers();
+};
+
+
+// ===== 首飞年份 lookup（提取自 JSON-LD） =====
+var prodYearLookup = {
+  '1':'2007','2':'2013','3':'2015','4':'2004','5':'2023',
+  '6':'2016','7':'2017','8':'1994','9':'2019','10':'2016',
+  '20':'2005','21':'2017','22':'1997','23':'1995','24':'2016','25':'1986','26':'2012'
+};
+
+// ===== 时间线视图 =====
+function initTimeline() {
+  var tl = document.getElementById('timeline');
+  if (!tl) return;
+  var entriesEl = tl.querySelector('.tl-entries');
+  if (!entriesEl) return;
+
+  // 按 productionDate 升序排列，无日期的排最后
+  var sorted = aircrafts.slice().sort(function(a, b) {
+    var ya = prodYearLookup[a.id] || '9999';
+    var yb = prodYearLookup[b.id] || '9999';
+    return parseInt(ya) - parseInt(yb);
+  });
+
+  // 按当前筛选条件过滤
+  var hasFilter = (typeof currentFilter !== 'undefined') && currentFilter !== 'all';
+  var html = '';
+  var idx = 0;
+  sorted.forEach(function(a) {
+    if (hasFilter && a.category !== currentFilter) return;
+    var year = prodYearLookup[a.id] || '--';
+    var side = (idx % 2 === 0) ? 'tl-left' : 'tl-right';
+    var mfr = (a.code || '').split(' ')[0];
+    html += '<div class="tl-item ' + side + '" data-id="' + a.id + '">' +
+      '<div class="tl-card" onclick="openDetail(' + a.id + ')">' +
+        '<img class="tl-card-img" src="' + proxyUrl(a.image) + '" alt="' + t(a.name) + '" loading="lazy"' +
+        ' onerror="placeholdImage(this,\'' + t(a.name).replace(/'/g, "\'") + '\',\'' + (a.code || '').replace(/'/g, "\'") + '\',\'' + a.category + '\')">' +
+        '<div class="tl-card-info">' +
+          '<div class="tl-card-name">' + t(a.name) + '</div>' +
+          '<div class="tl-card-meta">' +
+            '<span class="tl-card-mfr">' + mfr + '</span>' +
+            '<span>' + year + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="tl-dot"><span class="tl-year">' + year + '</span></div>' +
+    '</div>';
+    idx++;
+  });
+  entriesEl.innerHTML = html;
+}
+
+// ===== 视图切换逻辑 =====
+(function initViewSwitch() {
+  var gridEl = document.getElementById('grid');
+  var tlEl = document.getElementById('timeline');
+  var toggleBtn = document.getElementById('viewToggleBtn');
+  if (!gridEl || !tlEl || !toggleBtn) return;
+
+  var STORAGE_KEY = 'aviation-view';
+  var currentView = 'grid';
+
+  function switchView(view) {
+    currentView = view;
+    if (view === 'timeline') {
+      gridEl.style.display = 'none';
+      tlEl.style.display = '';
+      toggleBtn.textContent = '网格';
+      toggleBtn.classList.add('active');
+    } else {
+      gridEl.style.display = '';
+      tlEl.style.display = 'none';
+      toggleBtn.textContent = '时间线';
+      toggleBtn.classList.remove('active');
+    }
+    try { localStorage.setItem(STORAGE_KEY, view); } catch(e) {}
+  }
+
+  toggleBtn.addEventListener('click', function() {
+    switchView(currentView === 'timeline' ? 'grid' : 'timeline');
+  });
+
+  // 恢复上次选择的视图
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch(e) {}
+  if (saved === 'timeline') {
+    switchView('timeline');
+  }
+})();
+
 showToast();
 initUpdateBanner();
 createStars();
 renderCountryBar();
 renderCards();
+initTimeline();
+
+// ===== 深色/浅色模式切换 =====
+(function initTheme() {
+  var toggleBtn = document.getElementById('themeToggle');
+  var sunIcon = document.getElementById('themeIconSun');
+  var moonIcon = document.getElementById('themeIconMoon');
+  var STORAGE_KEY = 'aviation-theme';
+
+  // --- 图标动画辅助 ---
+  function triggerIconAnim(svgEl) {
+    toggleBtn.classList.add('anim-icon');
+    svgEl.addEventListener('animationend', function handler() {
+      svgEl.removeEventListener('animationend', handler);
+      toggleBtn.classList.remove('anim-icon');
+    }, { once: true });
+  }
+
+  function setTheme(mode) {
+    var wasDifferent = (mode === 'light') !== document.body.classList.contains('light-mode');
+    if (mode === 'light') {
+      document.body.classList.add('light-mode');
+      if (wasDifferent) {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = '';
+        triggerIconAnim(moonIcon);
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = '';
+      }
+    } else {
+      document.body.classList.remove('light-mode');
+      if (wasDifferent) {
+        sunIcon.style.display = '';
+        moonIcon.style.display = 'none';
+        triggerIconAnim(sunIcon);
+      } else {
+        sunIcon.style.display = '';
+        moonIcon.style.display = 'none';
+      }
+    }
+  }
+
+  // --- 弹窗 ---
+  function openThemeModal(context) {
+    var modalOverlay = document.getElementById('themeModalOverlay');
+    var modalTitle = document.getElementById('themeModalTitle');
+    var modalSub = document.getElementById('themeModalSub');
+    if (!modalOverlay || !modalTitle || !modalSub) return;
+    modalOverlay.setAttribute('data-context', context);
+    if (context === 'first-visit') {
+      modalTitle.textContent = '选择主题 / Choose Theme';
+      modalSub.textContent = '深色还是浅色模式？你随时可以长按右上角按钮更改';
+    } else {
+      modalTitle.textContent = '主题设置 / Theme Settings';
+      modalSub.textContent = '随时切换深浅模式 / Switch anytime';
+    }
+    modalOverlay.style.display = '';
+    modalOverlay.classList.remove('fade-out');
+    // 强制回流以重启动画
+    void modalOverlay.offsetWidth;
+    modalOverlay.style.animation = 'none';
+    void modalOverlay.offsetWidth;
+    modalOverlay.style.animation = 'themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+  }
+
+  function closeThemeModal() {
+    var modalOverlay = document.getElementById('themeModalOverlay');
+    modalOverlay.style.animation = '';
+    modalOverlay.classList.add('fade-out');
+    modalOverlay.addEventListener('animationend', function handler() {
+      modalOverlay.removeEventListener('animationend', handler);
+      modalOverlay.style.display = 'none';
+      modalOverlay.classList.remove('fade-out');
+    }, { once: true });
+  }
+
+  // 弹窗内按钮点击 + overlay 关闭（延迟到 DOM 解析完成）
+  window.addEventListener('DOMContentLoaded', function() {
+    var modalOverlay = document.getElementById('themeModalOverlay');
+    if (!modalOverlay) return;
+    modalOverlay.querySelectorAll('.theme-modal-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var mode = this.getAttribute('data-theme');
+        setTheme(mode);
+        try { localStorage.setItem(STORAGE_KEY, mode); } catch(e) {}
+        closeThemeModal();
+      });
+    });
+    var closeBtn = document.getElementById('themeModalClose');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeThemeModal();
+      });
+    }
+    modalOverlay.addEventListener('click', function(e) {
+      if (e.target === modalOverlay && modalOverlay.getAttribute('data-context') !== 'first-visit') {
+        closeThemeModal();
+      }
+    });
+  });
+
+  // --- 普通点击切换 ---
+  function toggleTheme() {
+    toggleBtn.classList.add('no-animate');
+    var isLight = document.body.classList.contains('light-mode');
+    var newMode = isLight ? 'dark' : 'light';
+    setTheme(newMode);
+    try { localStorage.setItem(STORAGE_KEY, newMode); } catch(e) {}
+    // 动画结束后移除 no-animate
+    setTimeout(function() { toggleBtn.classList.remove('no-animate'); }, 450);
+  }
+
+  // --- 长按检测 ---
+  var longPressTimer = null;
+  var longPressTriggered = false;
+  var pressStartX = 0, pressStartY = 0;
+
+  function onPressStart(e) {
+    longPressTriggered = false;
+    var pt = e.touches ? e.touches[0] : e;
+    pressStartX = pt.clientX;
+    pressStartY = pt.clientY;
+    toggleBtn.classList.add('long-pressing');
+    longPressTimer = setTimeout(function() {
+      longPressTriggered = true;
+      toggleBtn.classList.remove('long-pressing');
+      openThemeModal('settings');
+    }, 600);
+  }
+
+  function onPressMove(e) {
+    if (!longPressTimer) return;
+    var pt = e.touches ? e.touches[0] : e;
+    var dx = pt.clientX - pressStartX;
+    var dy = pt.clientY - pressStartY;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+      toggleBtn.classList.remove('long-pressing');
+    }
+  }
+
+  function onPressEnd(e) {
+    toggleBtn.classList.remove('long-pressing');
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+    if (!longPressTriggered) {
+      // 普通 click
+      toggleTheme();
+    }
+  }
+
+  // 桌面端
+  toggleBtn.addEventListener('mousedown', onPressStart);
+  toggleBtn.addEventListener('mousemove', onPressMove);
+  toggleBtn.addEventListener('mouseup', onPressEnd);
+  toggleBtn.addEventListener('mouseleave', function() {
+    toggleBtn.classList.remove('long-pressing');
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  });
+
+  // 移动端
+  toggleBtn.addEventListener('touchstart', onPressStart, { passive: false });
+  toggleBtn.addEventListener('touchmove', onPressMove, { passive: false });
+  toggleBtn.addEventListener('touchend', onPressEnd);
+
+  // 移除旧的 click 监听（用 mousedown+mouseup 已覆盖）
+  // toggleBtn 不再挂 click，由 pressEnd 处理短按
+
+  // --- 初始化 ---
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch(e) {}
+  if (saved === 'light') {
+    setTheme('light');
+  } else if (saved === 'dark') {
+    setTheme('dark');
+  } else {
+    // 无记录：首次访问，不应用任何主题，显示弹窗
+    openThemeModal('first-visit');
+  }
+  // 确保初始图标状态：深色模式下默认显示太阳，浅色模式默认显示月亮
+  // setTheme 已处理 display，此处仅兜底无记录场景
+  if (saved === null) {
+    sunIcon.style.display = '';
+    moonIcon.style.display = 'none';
+  }
+})();
 
 // P2: Handle initial hash on page load
 if (window.location.hash) {
@@ -2911,245 +4186,6 @@ if (window.location.hash) {
   window._track('pv', { page: 'aviation-collection', title: document.title });
 })();
 
-// ===== 分享卡片生成 =====
-function generateShareCard(id) {
-  var a = aircrafts.find(function(x) { return x.id === id; });
-  if (!a) return;
-
-  var colors = {
-    civil: ['#0d47a1', '#1565c0', '#42a5f5'],
-    fighter: ['#1a237e', '#283593', '#5c6bc0'],
-    bomber: ['#263238', '#37474f', '#607d8b'],
-    transport: ['#1b5e20', '#2e7d32', '#66bb6a'],
-    helicopter: ['#4a148c', '#6a1b9a', '#ab47bc']
-  };
-  var c = colors[a.category] || colors.civil;
-
-  var W = 1200, H = 630;
-  var canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  var ctx = canvas.getContext('2d');
-
-  // 存储原图 URL，供下载回退使用
-  window._shareOriginalImage = a.image;
-
-  // 优先从页面 DOM 中获取已渲染的卡片封面图片
-  var domImg = document.querySelector('.card[data-id="' + id + '"] .card-image-wrap img');
-
-  if (domImg && domImg.complete && domImg.naturalWidth > 0) {
-    drawCard(ctx, domImg, W, H, a, c);
-    showSharePreview(canvas);
-  } else {
-    // 兜底：尝试通过 proxyUrl 加载
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function() {
-      drawCard(ctx, img, W, H, a, c);
-      showSharePreview(canvas);
-    };
-    img.onerror = function() {
-      // 使用 SVG 占位图
-      var svgImg = new Image();
-      svgImg.onload = function() {
-        drawCard(ctx, svgImg, W, H, a, c);
-        showSharePreview(canvas);
-      };
-      svgImg.src = createPlaceholderSVG(a, c);
-    };
-    img.src = proxyUrl(a.image);
-  }
-}
-
-function createPlaceholderSVG(a, c) {
-  var w = 800, h = 400;
-  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
-    '<defs>' +
-      '<linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">' +
-        '<stop offset="0%" stop-color="' + c[0] + '"/>' +
-        '<stop offset="100%" stop-color="' + c[1] + '"/>' +
-      '</linearGradient>' +
-    '</defs>' +
-    '<rect width="' + w + '" height="' + h + '" fill="url(#bg2)"/>' +
-    '<ellipse cx="' + (w/2) + '" cy="' + (h*0.45) + '" rx="140" ry="14" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>' +
-    '<line x1="' + (w/2-130) + '" y1="' + (h*0.45) + '" x2="' + (w/2+130) + '" y2="' + (h*0.45) + '" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
-    '<line x1="' + (w/2-20) + '" y1="' + (h*0.45) + '" x2="' + (w/2-120) + '" y2="' + (h*0.45-60) + '" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>' +
-    '<line x1="' + (w/2-20) + '" y1="' + (h*0.45) + '" x2="' + (w/2-120) + '" y2="' + (h*0.45+60) + '" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>' +
-    '<line x1="' + (w/2+20) + '" y1="' + (h*0.45) + '" x2="' + (w/2+110) + '" y2="' + (h*0.45-45) + '" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>' +
-    '<line x1="' + (w/2+20) + '" y1="' + (h*0.45) + '" x2="' + (w/2+110) + '" y2="' + (h*0.45+45) + '" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>' +
-    '<circle cx="' + (w/2-80) + '" cy="' + (h*0.45-35) + '" r="6" fill="rgba(255,255,255,0.1)"/>' +
-    '<circle cx="' + (w/2+70) + '" cy="' + (h*0.45-25) + '" r="6" fill="rgba(255,255,255,0.1)"/>' +
-  '</svg>';
-  return 'data:image/svg+xml,' + encodeURIComponent(svg);
-}
-
-function drawCard(ctx, img, W, H, a, c) {
-  var leftW = Math.floor(W * 0.45); // 540px 深色区
-  var rightW = W - leftW;           // 660px 渐变文字区
-  var rightPad = 60;
-
-  // ===== 左侧：深色区块 + 真实飞机图片 =====
-  var darkGrad = ctx.createLinearGradient(0, 0, 0, H);
-  darkGrad.addColorStop(0, '#0d1525');
-  darkGrad.addColorStop(1, '#050a16');
-  ctx.fillStyle = darkGrad;
-  ctx.fillRect(0, 0, leftW, H);
-
-  // 飞机图片 — contain 完整显示不裁剪
-  ctx.save();
-  ctx.fillStyle = '#050a16';
-  ctx.fillRect(0, 0, leftW, H);
-  var imgRatio = img.width / img.height || 1.5;
-  var boxRatio = leftW / H;
-  var drawW, drawH, drawX, drawY;
-  if (imgRatio > boxRatio) {
-    drawW = leftW;
-    drawH = leftW / imgRatio;
-    drawX = 0;
-    drawY = (H - drawH) / 2;
-  } else {
-    drawH = H;
-    drawW = H * imgRatio;
-    drawX = (leftW - drawW) / 2;
-    drawY = 0;
-  }
-  ctx.drawImage(img, drawX, drawY, drawW, drawH);
-  ctx.restore();
-
-  // 左侧底部遮罩：让图片底部自然融入深色背景
-  var fadeGrad = ctx.createLinearGradient(0, H - 120, 0, H);
-  fadeGrad.addColorStop(0, 'rgba(5,10,22,0)');
-  fadeGrad.addColorStop(1, 'rgba(5,10,22,0.9)');
-  ctx.fillStyle = fadeGrad;
-  ctx.fillRect(0, 0, leftW, H);
-
-  // ===== 右侧：渐变背景 + 错落文字 =====
-  var bgGrad = ctx.createLinearGradient(leftW, 0, W, H);
-  bgGrad.addColorStop(0, c[0]);
-  bgGrad.addColorStop(0.5, c[1]);
-  bgGrad.addColorStop(1, c[2]);
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(leftW, 0, rightW, H);
-
-  // 装饰圆
-  ctx.globalAlpha = 0.04;
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.arc(W - 140, 160, 220, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(leftW + 80, H - 100, 150, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  var textX = leftW + rightPad;
-  var edgeR = W - rightPad;
-
-  // --- 顶部靠右：型号代码（小号，半透明灰） ---
-  ctx.textAlign = 'right';
-  ctx.fillStyle = 'rgba(255,255,255,0.32)';
-  ctx.font = '400 15px -apple-system, "PingFang SC", "Helvetica Neue", sans-serif';
-  ctx.fillText(a.code.toUpperCase(), edgeR, 80);
-
-  // --- 中上部偏左：飞机名称（大号粗体白色） ---
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#ffffff';
-  var nameText = t(a.name);
-  var nameSize = 50;
-  ctx.font = '700 ' + nameSize + 'px -apple-system, "PingFang SC", "Helvetica Neue", sans-serif';
-  var nameW = ctx.measureText(nameText).width;
-  if (nameW > rightW - rightPad * 2 && nameSize > 34) {
-    nameSize = Math.max(34, Math.floor((rightW - rightPad * 2) / nameW * nameSize));
-    ctx.font = '700 ' + nameSize + 'px -apple-system, "PingFang SC", "Helvetica Neue", sans-serif';
-  }
-  ctx.fillText(nameText, textX, 170);
-
-  // --- 中间偏右：3 项核心参数（纵向排列，右侧对齐） ---
-  var specs = a.specs;
-  var specKeys = Object.keys(specs).slice(0, 3);
-  ctx.textAlign = 'right';
-  var specY0 = 260;
-
-  specKeys.forEach(function(key, i) {
-    var y = specY0 + i * 96;
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
-    ctx.font = '400 14px -apple-system, "PingFang SC", sans-serif';
-    ctx.fillText(specLabel(key), edgeR - 30, y);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 32px -apple-system, "PingFang SC", sans-serif';
-    ctx.fillText(specs[key], edgeR - 30, y + 36);
-  });
-
-  // --- 底部偏左：URL 次标题 ---
-  ctx.textAlign = 'left';
-  ctx.fillStyle = 'rgba(255,255,255,0.38)';
-  ctx.font = '400 15px -apple-system, "PingFang SC", "Helvetica Neue", sans-serif';
-  ctx.fillText('henry126923.pages.dev', textX, H - 44);
-
-  // --- 底部偏右：水印 ---
-  ctx.textAlign = 'right';
-  ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  ctx.font = '400 13px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('aviation-collection', edgeR, H - 44);
-}
-
-function showSharePreview(canvas) {
-  // 移除已有
-  var existing = document.getElementById('shareOverlay');
-  if (existing) existing.remove();
-
-  var overlay = document.createElement('div');
-  overlay.className = 'share-overlay';
-  overlay.id = 'shareOverlay';
-  overlay.innerHTML =
-    '<div class="share-modal">' +
-      '<div class="share-modal-header">' +
-        '<h3>分享卡片预览</h3>' +
-        '<div class="modal-close" onclick="closeSharePreview()" style="position:static">&times;</div>' +
-      '</div>' +
-      '<div class="share-preview-wrap" id="sharePreviewWrap"></div>' +
-      '<div class="share-modal-actions">' +
-        '<button class="share-download-btn" onclick="downloadShareCard()">下载 PNG</button>' +
-        '<button class="share-close-btn" onclick="closeSharePreview()">关闭</button>' +
-      '</div>' +
-    '</div>';
-
-  document.body.appendChild(overlay);
-  document.body.style.overflow = 'hidden';
-  document.getElementById('sharePreviewWrap').appendChild(canvas);
-
-  // 存储 canvas 引用供下载使用
-  window._shareCanvas = canvas;
-
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeSharePreview(); });
-}
-
-function downloadShareCard() {
-  if (!window._shareCanvas) return;
-  try {
-    var link = document.createElement('a');
-    link.download = 'aviation-collection-share.png';
-    link.href = window._shareCanvas.toDataURL('image/png');
-    link.click();
-  } catch (e) {
-    // Canvas 被跨域图片 taint，toDataURL 不可用，回退为打开原图
-    if (window._shareOriginalImage) {
-      window.open(window._shareOriginalImage, '_blank');
-    } else {
-      alert('无法下载：图片跨域限制。请右键预览图保存，或尝试打开原图。');
-    }
-  }
-}
-
-function closeSharePreview() {
-  var overlay = document.getElementById('shareOverlay');
-  if (overlay) overlay.remove();
-  // 如果详情弹窗仍存在，保持 overflow hidden
-  if (!document.getElementById('overlayContainer') || !document.getElementById('overlayContainer').children.length) {
-    document.body.style.overflow = '';
-  }
-  window._shareCanvas = null;
-}
 
 // ===== P2: Hash-based URL routing =====
 function handleHashOpen() {
@@ -3202,9 +4238,293 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+<script>
+// ===== 滚动进度条 =====
+(function() {
+  var bar = document.getElementById('scrollProgress');
+  function updateProgress() {
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    var docH = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    var pct = docH > 0 ? Math.min(100, (scrollTop / docH) * 100) : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+})();
+
+// ===== 导出收藏 =====
+function toggleExportDropdown() {
+  var dd = document.getElementById('exportDropdown');
+  dd.classList.toggle('show');
+}
+document.addEventListener('click', function(e) {
+  var btn = document.getElementById('exportCollectionBtn');
+  var dd = document.getElementById('exportDropdown');
+  if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.remove('show');
+  }
+});
+
+function getCollectionData() {
+  var collected = [];
+  aircrafts.forEach(function(a) {
+    if (collection.has(a.id)) {
+      collected.push({
+        name: a.name,
+        code: a.code,
+        category: a.category,
+        country: a.country,
+        specs: a.specs,
+        desc: a.desc,
+        image: a.image,
+        id: a.id
+      });
+    }
+  });
+  return collected;
+}
+
+// ===== 制造商图标 =====
+function getManufacturerIcon(code) {
+  var mfr = (code || '').split(' ')[0].toLowerCase();
+  var color, text;
+  if (mfr === 'airbus') { color = '#0288d1'; text = 'A'; }
+  else if (mfr === 'boeing') { color = '#0d47a1'; text = 'B'; }
+  else if (mfr === 'comac') { color = '#c62828'; text = 'C'; }
+  else if (mfr === 'embraer') { color = '#2e7d32'; text = 'E'; }
+  else if (mfr === 'lockheed') { color = '#607d8b'; text = 'LM'; }
+  else if (mfr === 'northrop') { color = '#546e7a'; text = 'NG'; }
+  else if (mfr === '成都飞机工业集团') { color = '#c62828'; text = '成'; }
+  else if (mfr === '西安飞机工业集团') { color = '#1565c0'; text = '西'; }
+  else { color = '#78909c'; text = (code || '?').charAt(0).toUpperCase(); }
+  return '<svg width="32" height="32" viewBox="0 0 32 32" style="flex-shrink:0"><rect width="32" height="32" rx="6" fill="' + color + '"/><text x="16" y="22" text-anchor="middle" fill="white" font-size="' + (text.length > 1 ? '11' : '14') + '" font-weight="bold" font-family="sans-serif">' + text + '</text></svg>';
+}
+
+// ===== 导出单架飞机图片 =====
+function exportSingleAircraft(id) {
+  var a = aircrafts.find(function(x) { return x.id === id; });
+  if (!a) return;
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 3);
+  var W = 600;
+  var padding = 40;
+  var headerH = 120;
+  var bodyH = 200;
+  var canvasH = headerH + bodyH + padding;
+
+  var canvas = document.createElement('canvas');
+  canvas.width = W * dpr;
+  canvas.height = canvasH * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // White bg
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, canvasH);
+
+  // Header
+  ctx.fillStyle = '#0d2137';
+  ctx.fillRect(0, 0, W, headerH);
+
+  // Name
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 24px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText(t(a.name) || a.code, padding, headerH/2 - 10);
+
+  // Code + country
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '13px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText(a.code + ' · ' + a.country, padding, headerH/2 + 17);
+
+  // Specs
+  var specsY = headerH + 30;
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('规格参数', padding, specsY);
+
+  var specEntries = Object.entries(a.specs || {});
+  var specLabels = { cruise_speed: '巡航速度', max_speed: '最大速度', max_range: '最大航程', range: '航程', combat_radius: '作战半径', capacity: '载客量', load: '载重', wingspan: '翼展', ceiling: '升限', rotor_diameter: '旋翼直径' };
+  var sx = padding, sy = specsY + 30;
+  ctx.fillStyle = '#333';
+  ctx.font = '13px -apple-system, "PingFang SC", sans-serif';
+  specEntries.forEach(function(entry, i) {
+    var col = i % 2;
+    var row = Math.floor(i / 2);
+    var x = sx + col * 260;
+    var y = sy + row * 26;
+    ctx.fillStyle = '#607d8b';
+    ctx.fillText((specLabels[entry[0]] || entry[0]) + ': ', x, y);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillText(entry[1], x + 90, y);
+  });
+
+  // Border
+  ctx.strokeStyle = '#0d2137';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, W, canvasH);
+
+  // Footer
+  ctx.fillStyle = '#90a4ae';
+  ctx.font = '10px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('Generated: ' + new Date().toISOString().slice(0,10), W - padding, canvasH - 12);
+  ctx.textAlign = 'left';
+
+  try {
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var el = document.createElement('a');
+      el.href = url;
+      el.download = (t(a.name) || a.code).replace(/[\/\\:]/g, '-') + '.png';
+      el.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  } catch(e) {
+    alert('导出图片失败');
+  }
+}
+
+function exportCollectionImage() {
+  toggleExportDropdown();
+  var data = getCollectionData();
+  if (data.length === 0) { alert('收藏列表为空'); return; }
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 3);
+  var W = 800;
+  var padding = 32;
+  var rowH = 90;
+  var headerH = 80;
+  var canvasH = headerH + data.length * rowH + padding * 2;
+  var canvas = document.createElement('canvas');
+  canvas.width = W * dpr;
+  canvas.height = canvasH * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, canvasH);
+
+  // Header
+  ctx.fillStyle = '#0d2137';
+  ctx.fillRect(0, 0, W, headerH);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 22px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('航空收藏馆 - 我的收藏', padding, 50);
+
+  data.forEach(function(item, i) {
+    var y = headerH + i * rowH;
+    var isOdd = i % 2 === 0;
+    if (isOdd) {
+      ctx.fillStyle = '#f8f9fa';
+      ctx.fillRect(0, y, W, rowH);
+    }
+
+    // Name
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
+    var name = t(item.name) || item.code;
+    ctx.fillText(name, padding, y + 28);
+
+    // Code + category
+    ctx.fillStyle = '#607d8b';
+    ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+    var catLabel = '';
+    switch (item.category) {
+      case 'civil': catLabel = '民航客机'; break;
+      case 'fighter': catLabel = '战斗机'; break;
+      case 'bomber': catLabel = '轰炸机'; break;
+      case 'transport': catLabel = '运输机'; break;
+      case 'helicopter': catLabel = '直升机'; break;
+    }
+    ctx.fillText(item.code + ' · ' + catLabel, padding, y + 52);
+
+    // Specs inline right side
+    ctx.fillStyle = '#90a4ae';
+    ctx.font = '11px -apple-system, "PingFang SC", sans-serif';
+    ctx.textAlign = 'right';
+    var specsStr = '';
+    if (item.specs) {
+      var keys = Object.keys(item.specs);
+      specsStr = keys.slice(0, 3).map(function(k) {
+        return item.specs[k];
+      }).join(' · ');
+    }
+    ctx.fillText(specsStr, W - padding, y + 40);
+    ctx.textAlign = 'left';
+
+    // Bottom separator
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(padding, y + rowH - 0.5);
+    ctx.lineTo(W - padding, y + rowH - 0.5);
+    ctx.stroke();
+  });
+
+  // Border
+  ctx.strokeStyle = '#0d2137';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, W, canvasH);
+
+  // Footer
+  ctx.fillStyle = '#90a4ae';
+  ctx.font = '10px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('aviation-collection.pages.dev', padding, canvasH - 12);
+  ctx.textAlign = 'right';
+  ctx.fillText('Generated: ' + new Date().toISOString().slice(0,10), W - padding, canvasH - 12);
+  ctx.textAlign = 'left';
+
+  try {
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'aviation-collection-' + new Date().toISOString().slice(0,10) + '.png';
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  } catch(e) {
+    alert('导出图片失败，请尝试导出 JSON');
+  }
+}
+</script>
+
 <button class="back-to-top" id="backToTop" onclick="scrollToTop()" title="">
   <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
+
+<!-- 快捷添加悬浮按钮 -->
+<button class="fab-add" id="fabAddBtn" onclick="openAddForm()" title="">
+  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- 添加模态窗口 -->
+<div class="add-modal-overlay" id="addModalOverlay">
+  <div class="add-modal" id="addModal"></div>
+</div>
+
+<!-- 主题选择弹窗 -->
+<div class="theme-modal-overlay" id="themeModalOverlay" style="display:none" data-context="">
+  <div class="theme-modal-card">
+    <button class="theme-modal-close" id="themeModalClose" aria-label="关闭">&times;</button>
+    <h3 id="themeModalTitle">选择主题 / Choose Theme</h3>
+    <p class="modal-sub" id="themeModalSub">深色还是浅色模式？你随时可以长按右上角按钮更改</p>
+    <div class="theme-modal-choices">
+      <button class="theme-modal-btn dark-btn" data-theme="dark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        深色模式 / Dark
+      </button>
+      <button class="theme-modal-btn light-btn" data-theme="light">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        浅色模式 / Light
+      </button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
