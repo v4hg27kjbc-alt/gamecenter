@@ -634,6 +634,33 @@ body.light-mode .country-chip.active { background: rgba(21,101,192,0.12); color:
   color: var(--accent);
 }
 
+/* airline filter bar */
+.airline-filter-bar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px; padding: 12px 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(79, 195, 247, 0.08);
+  border: 1px solid rgba(79, 195, 247, 0.25);
+  border-radius: 18px;
+  animation: fadeDown 0.4s ease;
+}
+.airline-filter-label { color: var(--text-dim); font-size: 0.82rem; }
+.airline-filter-name { color: var(--accent); font-weight: 700; font-size: 0.95rem; }
+.airline-filter-close {
+  margin-left: auto; width: 28px; height: 28px;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06); color: #ccc;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1rem; transition: all 0.3s ease;
+}
+.airline-filter-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+body.light-mode .airline-filter-bar { background: rgba(21,101,192,0.06); border-color: rgba(21,101,192,0.2); }
+body.light-mode .airline-filter-label { color: #555; }
+body.light-mode .airline-filter-name { color: #1565c0; }
+body.light-mode .airline-filter-close { border-color: rgba(0,0,0,0.15); color: #666; }
+body.light-mode .airline-filter-close:hover { background: rgba(0,0,0,0.08); color: #333; }
+
 .collection-count {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2046,6 +2073,12 @@ body.light-mode .tl-card-img {
     <div class="country-chip active" data-country="all" id="countryAllChip">全部航司</div>
   </div>
 
+  <div class="airline-filter-bar" id="airlineFilterBar" style="display:none">
+    <span class="airline-filter-label">当前航司：</span>
+    <span class="airline-filter-name" id="airlineFilterName"></span>
+    <span class="airline-filter-close" id="airlineFilterClose">&times;</span>
+  </div>
+
   <div class="grid" id="grid"></div>
   <div id="timeline" style="display:none">
     <div class="tl-entries"></div>
@@ -2609,6 +2642,7 @@ aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
 let collection = new Set(JSON.parse(localStorage.getItem('aviation_collection') || '[]'));
 let currentFilter = 'all';
 let currentCountry = 'all';
+let currentAirline = null;
 let searchQuery = '';
 let sortBy = 'speed';
 let sortDir = 'asc';
@@ -2645,6 +2679,8 @@ function renderCountryBar() {
       bar.querySelectorAll('.country-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       currentCountry = chip.dataset.country;
+      currentAirline = null;
+      document.getElementById('airlineFilterBar').style.display = 'none';
       renderCards();
     });
   });
@@ -2654,6 +2690,18 @@ function matchesCountry(aircraft) {
   if (currentCountry === 'all') return true;
   if (!aircraft.airlineIds) return false;
   return aircraft.airlineIds.some(aid => airlines[aid] && airlines[aid].country === currentCountry);
+}
+
+function filterByAirline(aid) {
+  currentAirline = aid;
+  currentFilter = 'civil';
+  currentCountry = 'all';
+  var al = airlines.find(function(a){return a.id===aid;});
+  document.getElementById('airlineFilterName').textContent = al ? al.name : aid;
+  document.getElementById('airlineFilterBar').style.display = 'flex';
+  renderCards();
+  // Scroll to grid
+  document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function extractNumeric(specStr) {
@@ -2695,6 +2743,11 @@ function renderCards() {
 
   if (currentFilter === 'civil' && currentCountry !== 'all') {
     filtered = filtered.filter(a => matchesCountry(a));
+  }
+
+  // Airline filter (clicked from detail modal)
+  if (currentAirline) {
+    filtered = filtered.filter(a => (a.airlineIds || []).includes(currentAirline));
   }
 
   // Search filter
@@ -3519,7 +3572,7 @@ function openDetail(id) {
       <img class="airline-logo" src="${proxyUrl(al.logo)}" alt="${al.name}"
            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2252%22 height=%2252%22><rect fill=%22%23222%22 width=%2252%22 height=%2252%22 rx=%2214%22/><text fill=%22%23888%22 x=%2226%22 y=%2230%22 text-anchor=%22middle%22 font-size=%2210%22>${al.code}</text></svg>'">
       <div class="airline-info">
-        <div class="airline-name">${al.name} <span class="airline-country-tag">${al.country}</span></div>
+        <div class="airline-name" style="cursor:pointer" onclick="event.stopPropagation();closeDetail();filterByAirline('${aid}')" title="查看该航司所有机型">${al.name} <span class="airline-country-tag">${al.country}</span></div>
         <div class="airline-desc">${t(al.desc)}</div>
         <a class="airline-website" href="${al.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -3580,6 +3633,8 @@ document.querySelector('.filter-bar').addEventListener('click', (e) => {
   e.target.classList.add('active');
   currentFilter = e.target.dataset.filter;
   if (currentFilter !== 'civil') currentCountry = 'all';
+  currentAirline = null;
+  document.getElementById('airlineFilterBar').style.display = 'none';
   window._track('filter', { filter: currentFilter });
   renderCards();
   // 如果当前是时间线视图，同步刷新
@@ -3926,6 +3981,13 @@ createStars();
 renderCountryBar();
 renderCards();
 initTimeline();
+
+// airline filter bar close button
+document.getElementById('airlineFilterClose').addEventListener('click', function() {
+  currentAirline = null;
+  document.getElementById('airlineFilterBar').style.display = 'none';
+  renderCards();
+});
 
 // ===== 深色/浅色模式切换 =====
 (function initTheme() {
