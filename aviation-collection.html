@@ -502,7 +502,7 @@ body.light-mode .hero-arrow:hover { background: rgba(255,255,255,0.75); border-c
 }
 @media (max-width: 768px) {
   .hero-banner {
-    height: 280px;
+    height: 420px;
   }
   .hero-content {
     flex-direction: column;
@@ -510,30 +510,38 @@ body.light-mode .hero-arrow:hover { background: rgba(255,255,255,0.75); border-c
   .hero-text {
     width: 100%;
     min-width: 0;
-    padding: 20px 20px 12px;
+    padding: 16px 16px 8px;
     border-right: none;
     border-bottom: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
   }
   .hero-text h2 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
   .hero-text .hero-manufacturer {
-    font-size: 0.82rem;
-    margin-bottom: 8px;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
   }
   .hero-text .hero-desc {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     -webkit-line-clamp: 2;
   }
   .hero-image {
     flex: 1;
-    padding: 12px 16px;
+    padding: 8px 16px;
+  }
+  .hero-image img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
   }
   .hero-arrow {
     width: 36px;
     height: 36px;
     font-size: 1rem;
+  }
+  .hero-dots {
+    bottom: 10px;
   }
 }
 
@@ -605,6 +613,71 @@ body.light-mode .filter-chip.active {
   animation: fadeDown 0.4s ease;
 }
 .airline-country-bar.visible { display: flex; }
+
+/* airline logos bar (always visible, no popup needed) */
+.airline-logos-bar {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  margin-bottom: 20px; padding: 12px 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  animation: fadeDown 0.4s ease;
+}
+.airline-logo-chip {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  cursor: pointer; transition: all 0.25s ease;
+  overflow: hidden; user-select: none;
+  -webkit-user-select: none;
+  position: relative; touch-action: manipulation;
+}
+.airline-logo-chip img { width: 30px; height: 30px; border-radius: 8px; pointer-events: none; }
+.airline-logo-chip:hover { border-color: rgba(255,255,255,0.4); transform: scale(1.1); }
+.airline-logo-chip.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(79,195,247,0.45);
+  background: rgba(79,195,247,0.15);
+}
+.airline-logo-chip.longpress-progress {
+  border-color: var(--accent);
+}
+@keyframes logoActivate {
+  0% { transform: scale(1); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); border-color: var(--accent); box-shadow: 0 0 16px rgba(79,195,247,0.45); }
+}
+.airline-export-btn {
+  padding: 5px 14px; border-radius: 20px;
+  border: 1px solid rgba(79,195,247,0.35);
+  background: rgba(79,195,247,0.1);
+  color: var(--accent); cursor: pointer;
+  font-size: 0.8rem; transition: all 0.3s ease;
+  margin-left: 6px;
+}
+.airline-export-btn:hover { background: rgba(79,195,247,0.22); border-color: rgba(79,195,247,0.6); }
+
+body.light-mode .airline-logos-bar {
+  background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08);
+}
+body.light-mode .airline-logo-chip {
+  background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1);
+}
+body.light-mode .airline-logo-chip:hover { border-color: rgba(0,0,0,0.25); }
+body.light-mode .airline-logo-chip.active {
+  border-color: #1565c0; box-shadow: 0 0 12px rgba(21,101,192,0.3);
+  background: rgba(21,101,192,0.1);
+}
+body.light-mode .airline-export-btn {
+  background: rgba(21,101,192,0.08); border-color: rgba(21,101,192,0.25);
+  color: #1565c0;
+}
+body.light-mode .airline-export-btn:hover { background: rgba(21,101,192,0.16); }
+
 @keyframes fadeDown {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -2073,9 +2146,12 @@ body.light-mode .tl-card-img {
     <div class="country-chip active" data-country="all" id="countryAllChip">全部航司</div>
   </div>
 
+  <div class="airline-logos-bar" id="airlineLogosBar"></div>
+
   <div class="airline-filter-bar" id="airlineFilterBar" style="display:none">
     <span class="airline-filter-label">当前航司：</span>
     <span class="airline-filter-name" id="airlineFilterName"></span>
+    <button class="airline-export-btn" id="airlineExportBtn" onclick="exportAirlineImage()">导出图片</button>
     <span class="airline-filter-close" id="airlineFilterClose">&times;</span>
   </div>
 
@@ -2681,7 +2757,9 @@ function renderCountryBar() {
       currentCountry = chip.dataset.country;
       currentAirline = null;
       document.getElementById('airlineFilterBar').style.display = 'none';
+      updateAirlineLogosBar();
       renderCards();
+      if (document.getElementById('timeline').style.display !== 'none') initTimeline();
     });
   });
 }
@@ -2692,16 +2770,165 @@ function matchesCountry(aircraft) {
   return aircraft.airlineIds.some(aid => airlines[aid] && airlines[aid].country === currentCountry);
 }
 
+// ===== Airline Logos Bar (always visible, no popup) =====
+var _longPressTimer = null;
+var _longPressTarget = null;
+
+function renderAirlineLogosBar() {
+  var bar = document.getElementById('airlineLogosBar');
+  var ids = Object.keys(airlines);
+  var html = '';
+  for (var i = 0; i < ids.length; i++) {
+    var al = airlines[ids[i]];
+    html += '<div class="airline-logo-chip' + (currentAirline === al.id ? ' active' : '') + '" data-aid="' + al.id + '" title="' + al.name + ' | ' + al.country + '">' +
+      '<img src="' + al.logo + '" alt="' + al.code + '"></div>';
+  }
+  bar.innerHTML = html;
+
+  // Attach click handler
+  bar.querySelectorAll('.airline-logo-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      filterByAirline(chip.dataset.aid);
+    });
+  });
+}
+
+function updateAirlineLogosBar() {
+  var bar = document.getElementById('airlineLogosBar');
+  if (!bar) return;
+  bar.querySelectorAll('.airline-logo-chip').forEach(function(chip) {
+    if (chip.dataset.aid === currentAirline) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+}
+
+function exportAirlineImage() {
+  if (!currentAirline) return;
+  var al = airlines[currentAirline];
+  if (!al) return;
+
+  var filtered = aircrafts.filter(function(a) {
+    return (a.airlineIds || []).includes(currentAirline);
+  });
+
+  if (filtered.length === 0) { alert('该航司暂无收录机型'); return; }
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 3);
+  var W = 700;
+  var padding = 24;
+  var headerH = 64;
+  var rowH = 52;
+  var footerH = 20;
+  var canvasH = headerH + filtered.length * rowH + footerH;
+
+  var canvas = document.createElement('canvas');
+  canvas.width = W * dpr;
+  canvas.height = canvasH * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // White bg
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, canvasH);
+
+  // Header
+  ctx.fillStyle = '#0d2137';
+  ctx.fillRect(0, 0, W, headerH);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 18px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText(al.name + ' · ' + al.code, padding, 28);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '11px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText(al.country + ' | 收录 ' + filtered.length + ' 款机型', padding, 50);
+
+  // Rows
+  var specLabels = { cruise_speed: '巡航速度', max_speed: '最大速度', max_range: '最大航程', range: '航程', combat_radius: '作战半径', capacity: '载客量', load: '载重', wingspan: '翼展', ceiling: '升限', rotor_diameter: '旋翼直径' };
+
+  filtered.forEach(function(a, i) {
+    var y = headerH + i * rowH;
+    if (i % 2 === 0) {
+      ctx.fillStyle = '#f8f9fa';
+      ctx.fillRect(0, y, W, rowH);
+    }
+
+    // Name + code on same line
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+    ctx.fillText(t(a.name) || a.code, padding, y + 18);
+
+    // Specs on the right
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#78909c';
+    ctx.font = '9px -apple-system, "PingFang SC", sans-serif';
+    var specKeys = Object.keys(a.specs || {});
+    var specsStr = specKeys.slice(0, 3).map(function(k) { return a.specs[k]; }).join(' · ');
+    ctx.fillText(specsStr, W - padding, y + 18);
+
+    // Code + brief desc on second line
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#90a4ae';
+    ctx.font = '9px -apple-system, "PingFang SC", sans-serif';
+    var descText = t(a.desc).replace(/<[^>]+>/g, '').substring(0, 40);
+    ctx.fillText(a.code + ' — ' + descText + '…', padding, y + 38);
+
+    // Bottom separator
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(padding, y + rowH - 0.5);
+    ctx.lineTo(W - padding, y + rowH - 0.5);
+    ctx.stroke();
+    ctx.textAlign = 'left';
+  });
+
+  // Border
+  ctx.strokeStyle = '#0d2137';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, W, canvasH);
+
+  // Footer
+  ctx.fillStyle = '#90a4ae';
+  ctx.font = '9px -apple-system, "PingFang SC", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('Generated: ' + new Date().toISOString().slice(0,10), W - padding, canvasH - 6);
+  ctx.textAlign = 'left';
+
+  try {
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var el = document.createElement('a');
+      el.href = url;
+      el.download = (al.name || al.code).replace(/[\/\\:]/g, '-') + '-机型合集.png';
+      el.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  } catch(e) {
+    alert('导出图片失败');
+  }
+}
+
 function filterByAirline(aid) {
   currentAirline = aid;
-  currentFilter = 'civil';
+  currentFilter = 'all';
   currentCountry = 'all';
-  var al = airlines.find(function(a){return a.id===aid;});
+  // Update filter bar chip
+  document.querySelectorAll('.filter-bar .filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  var allChip = document.querySelector('.filter-bar .filter-chip[data-filter="all"]');
+  if (allChip) allChip.classList.add('active');
+  var al = airlines[aid];
   document.getElementById('airlineFilterName').textContent = al ? al.name : aid;
   document.getElementById('airlineFilterBar').style.display = 'flex';
+  updateAirlineLogosBar();
   renderCards();
-  // Scroll to grid
-  document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (document.getElementById('timeline').style.display !== 'none') {
+    initTimeline();
+  } else {
+    document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function extractNumeric(specStr) {
@@ -2888,6 +3115,7 @@ function clearSearch() {
   searchQuery = '';
   document.getElementById('searchInput').value = '';
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 }
 
 // ===== 排序功能 =====
@@ -2914,6 +3142,7 @@ function toggleCompare(id) {
   }
   updateCompareBar();
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 }
 
 function updateCompareBar() {
@@ -2953,6 +3182,7 @@ function clearCompare() {
   compareSet.clear();
   updateCompareBar();
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 }
 
 function showCompare() {
@@ -3150,6 +3380,7 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
     suggestionsDropdown.classList.remove('visible');
   }
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 });
 
 document.getElementById('sortGroup').addEventListener('click', (e) => {
@@ -3166,6 +3397,7 @@ document.getElementById('sortGroup').addEventListener('click', (e) => {
   userSetSort = true;
   updateSortUI();
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 });
 
 updateSortUI();
@@ -3239,6 +3471,7 @@ function deleteCustomAircraft(id) {
     localStorage.setItem('custom_i18n', JSON.stringify(savedI18n));
   } catch(e) {}
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 }
 
 // ===== 快捷添加: 模态窗口 =====
@@ -3377,6 +3610,7 @@ function submitCustomAircraft() {
   _customIdCounter++;
   closeAddForm();
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 }
 
 
@@ -3635,6 +3869,7 @@ document.querySelector('.filter-bar').addEventListener('click', (e) => {
   if (currentFilter !== 'civil') currentCountry = 'all';
   currentAirline = null;
   document.getElementById('airlineFilterBar').style.display = 'none';
+  updateAirlineLogosBar();
   window._track('filter', { filter: currentFilter });
   renderCards();
   // 如果当前是时间线视图，同步刷新
@@ -3909,12 +4144,27 @@ function initTimeline() {
     return parseInt(ya) - parseInt(yb);
   });
 
-  // 按当前筛选条件过滤
-  var hasFilter = (typeof currentFilter !== 'undefined') && currentFilter !== 'all';
+  // 按当前全部筛选条件过滤（与 renderCards 对齐）
+  if (typeof currentFilter !== 'undefined' && currentFilter !== 'all') {
+    sorted = sorted.filter(function(a) { return a.category === currentFilter; });
+  }
+  if (currentFilter === 'civil' && currentCountry !== 'all') {
+    sorted = sorted.filter(function(a) { return matchesCountry(a); });
+  }
+  if (currentAirline) {
+    sorted = sorted.filter(function(a) { return (a.airlineIds || []).includes(currentAirline); });
+  }
+  if (searchQuery.trim()) {
+    var q = searchQuery.trim().toLowerCase();
+    sorted = sorted.filter(function(a) {
+      return t(a.name).toLowerCase().includes(q) ||
+        a.code.toLowerCase().includes(q) ||
+        t(a.desc).toLowerCase().includes(q);
+    });
+  }
   var html = '';
   var idx = 0;
   sorted.forEach(function(a) {
-    if (hasFilter && a.category !== currentFilter) return;
     var year = prodYearLookup[a.id] || '--';
     var side = (idx % 2 === 0) ? 'tl-left' : 'tl-right';
     var mfr = (a.code || '').split(' ')[0];
@@ -3934,7 +4184,7 @@ function initTimeline() {
     '</div>';
     idx++;
   });
-  entriesEl.innerHTML = html;
+  entriesEl.innerHTML = html || '<div class="tl-empty">没有匹配的飞行器</div>';
 }
 
 // ===== 视图切换逻辑 =====
@@ -3979,6 +4229,7 @@ showToast();
 initUpdateBanner();
 createStars();
 renderCountryBar();
+renderAirlineLogosBar();
 renderCards();
 initTimeline();
 
@@ -3986,7 +4237,9 @@ initTimeline();
 document.getElementById('airlineFilterClose').addEventListener('click', function() {
   currentAirline = null;
   document.getElementById('airlineFilterBar').style.display = 'none';
+  updateAirlineLogosBar();
   renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 });
 
 // ===== 深色/浅色模式切换 =====
