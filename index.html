@@ -601,6 +601,41 @@ body.light-mode .filter-chip.active {
   color: #1565c0;
 }
 
+/* ===== 标签栏 ===== */
+.tag-bar {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px; justify-content: center; align-items: center;
+}
+.tag-chip {
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 6px 16px;
+  color: var(--text); cursor: pointer; font-size: 0.8rem;
+  transition: all 0.3s ease;
+  user-select: none; white-space: nowrap;
+  opacity: 0.7;
+}
+.tag-chip:hover { opacity: 0.9; transform: translateY(-1px); }
+.tag-chip.active {
+  opacity: 1;
+  background: rgba(255, 152, 0, 0.22);
+  border-color: #ff9800;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(255, 152, 0, 0.3);
+}
+body.light-mode .tag-chip.active {
+  background: rgba(245, 124, 0, 0.15);
+  color: #e65100;
+}
+.tag-chip .tag-count {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  margin-left: 3px;
+}
+
 .airline-country-bar {
   display: none;
   flex-wrap: wrap; gap: 8px; justify-content: center;
@@ -2139,7 +2174,25 @@ body.light-mode .tl-card-img {
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <div class="view-switch-bar" id="viewSwitchBar">
       <button class="view-switch-btn" id="viewToggleBtn">时间线</button>
-    </div>
+    
+  <div class="tag-bar" id="tagBar">
+    <div class="tag-chip" data-tag="double_deck"><span class="tag-label">双层客舱</span></div>
+    <div class="tag-chip" data-tag="super_jumbo"><span class="tag-label">超大型</span></div>
+    <div class="tag-chip" data-tag="quad_engine"><span class="tag-label">四发</span></div>
+    <div class="tag-chip" data-tag="twin_engine"><span class="tag-label">双发</span></div>
+    <div class="tag-chip" data-tag="composite"><span class="tag-label">复合材料</span></div>
+    <div class="tag-chip" data-tag="ultra_range"><span class="tag-label">超远程</span></div>
+    <div class="tag-chip" data-tag="narrow_body"><span class="tag-label">窄体</span></div>
+    <div class="tag-chip" data-tag="wide_body"><span class="tag-label">宽体</span></div>
+    <div class="tag-chip" data-tag="domestic"><span class="tag-label">国产</span></div>
+    <div class="tag-chip" data-tag="fuel_efficient"><span class="tag-label">省油</span></div>
+    <div class="tag-chip" data-tag="regional"><span class="tag-label">支线</span></div>
+    <div class="tag-chip" data-tag="fifth_gen"><span class="tag-label">五代机</span></div>
+    <div class="tag-chip" data-tag="stealth"><span class="tag-label">隐身</span></div>
+    <div class="tag-chip" data-tag="strategic"><span class="tag-label">战略级</span></div>
+    <div class="tag-chip" data-tag="attack"><span class="tag-label">武装</span></div>
+  </div>
+</div>
   </div>
 
   <div class="airline-country-bar" id="countryBar">
@@ -2222,6 +2275,24 @@ const i18n = {
 
     // --- 公告 ---
     announcement: '16家航司Logo全新设计款上线，点击卡片查看详情',
+
+    // --- 标签 ---
+    tag_double_deck: '双层客舱',
+    tag_super_jumbo: '超大型',
+    tag_quad_engine: '四发',
+    tag_twin_engine: '双发',
+    tag_composite: '复合材料',
+    tag_ultra_range: '超远程',
+    tag_narrow_body: '窄体',
+    tag_wide_body: '宽体',
+    tag_domestic: '国产',
+    tag_fuel_efficient: '省油',
+    tag_regional: '支线',
+    tag_fifth_gen: '五代机',
+    tag_stealth: '隐身',
+    tag_strategic: '战略级',
+    tag_attack: '武装',
+
 
     // --- 更新横幅 ---
     updateBanner: '<span class="banner-highlight">时间轴联动筛选</span> + 航司单击查询 + 导出图优化 + 手机轮播适配',
@@ -2365,6 +2436,26 @@ const i18n = {
     deleteConfirm: '确定要删除这款自定义机型吗？此操作不可撤销。',
   }
 };
+
+// ===== 标签系统元数据 =====
+const tagMeta = [
+  { key: 'double_deck',   i18n: 'tag_double_deck' },
+  { key: 'super_jumbo',   i18n: 'tag_super_jumbo' },
+  { key: 'quad_engine',   i18n: 'tag_quad_engine' },
+  { key: 'twin_engine',   i18n: 'tag_twin_engine' },
+  { key: 'composite',     i18n: 'tag_composite' },
+  { key: 'ultra_range',   i18n: 'tag_ultra_range' },
+  { key: 'narrow_body',   i18n: 'tag_narrow_body' },
+  { key: 'wide_body',     i18n: 'tag_wide_body' },
+  { key: 'domestic',      i18n: 'tag_domestic' },
+  { key: 'fuel_efficient', i18n: 'tag_fuel_efficient' },
+  { key: 'regional',      i18n: 'tag_regional' },
+  { key: 'fifth_gen',     i18n: 'tag_fifth_gen' },
+  { key: 'stealth',       i18n: 'tag_stealth' },
+  { key: 'strategic',     i18n: 'tag_strategic' },
+  { key: 'attack',        i18n: 'tag_attack' },
+];
+var activeTags = [];
 
 function t(key) { return i18n.zh?.[key] || key; }
 const specLabelMap = {
@@ -2562,7 +2653,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=A6-EDY_A380_Emirates_31_jan_2013_jfk_(8442269364).jpg&w=800',
     desc: 'desc_a380',
     specs: { 'cruise_speed': '0.85 马赫', 'max_range': '15,200 km', 'capacity': '525–853 人', 'wingspan': '79.75 m' },
-    airlineIds: ['ek', 'sq', 'ba', 'af', 'lh', 'ey']
+    airlineIds: ['ek', 'sq', 'ba', 'af', 'lh', 'ey'],
+    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body']
   },
   {
     id: 2, name: 'name_787', code: 'Boeing 787-9',
@@ -2570,7 +2662,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Japan_Airlines_Boeing_787-9_JA861J.jpg&w=800',
     desc: 'desc_787',
     specs: { 'cruise_speed': '0.85 马赫', 'max_range': '14,140 km', 'capacity': '242–330 人', 'wingspan': '60.12 m' },
-    airlineIds: ['ua', 'nh', 'ba', 'cz']
+    airlineIds: ['ua', 'nh', 'ba', 'cz'],
+    tags: ['twin_engine', 'composite', 'ultra_range', 'wide_body', 'fuel_efficient']
   },
   {
     id: 3, name: 'name_a350', code: 'Airbus A350-900',
@@ -2578,7 +2671,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Airbus_A350-941_F-WWCF_MSN002_ILA_Berlin_2016_17.jpg&w=800',
     desc: 'desc_a350',
     specs: { 'cruise_speed': '0.85 马赫', 'max_range': '15,000 km', 'capacity': '300–440 人', 'wingspan': '64.75 m' },
-    airlineIds: ['sq', 'qr', 'cx', 'ay', 'lh', 'tk']
+    airlineIds: ['sq', 'qr', 'cx', 'ay', 'lh', 'tk'],
+    tags: ['twin_engine', 'composite', 'ultra_range', 'wide_body', 'fuel_efficient']
   },
   {
     id: 4, name: 'name_777', code: 'Boeing 777-300ER',
@@ -2586,7 +2680,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Qatar_Boeing_777-300ER_A7-BEP_IAD_VA1.jpg&w=800',
     desc: 'desc_777',
     specs: { 'cruise_speed': '0.84 马赫', 'max_range': '13,650 km', 'capacity': '368–550 人', 'wingspan': '64.8 m' },
-    airlineIds: ['ek', 'ua', 'cx', 'af', 'tk', 'ba']
+    airlineIds: ['ek', 'ua', 'cx', 'af', 'tk', 'ba'],
+    tags: ['twin_engine', 'ultra_range', 'wide_body']
   },
   {
     id: 5, name: 'name_c919', code: 'COMAC C919',
@@ -2594,7 +2689,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=COMAC_B-001A_May_2017.jpg&w=800',
     desc: 'desc_c919',
     specs: { 'cruise_speed': '0.785 马赫', 'max_range': '5,555 km', 'capacity': '158–192 人', 'wingspan': '35.8 m' },
-    airlineIds: ['mu', 'ca', 'cz']
+    airlineIds: ['mu', 'ca', 'cz'],
+    tags: ['twin_engine', 'narrow_body', 'domestic']
   },
   {
     id: 6, name: 'name_a320neo', code: 'Airbus A320neo',
@@ -2602,7 +2698,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Frontier_Airbus_A320neo_N353FR_BWI_MD1.jpg&w=800',
     desc: 'desc_a320neo',
     specs: { 'cruise_speed': '0.78 马赫', 'max_range': '6,300 km', 'capacity': '150–194 人', 'wingspan': '35.8 m' },
-    airlineIds: ['ca', 'cz', 'lh', 'tk', 'ba']
+    airlineIds: ['ca', 'cz', 'lh', 'tk', 'ba'],
+    tags: ['twin_engine', 'narrow_body', 'fuel_efficient']
   },
   {
     id: 7, name: 'name_737max', code: 'Boeing 737 MAX 8',
@@ -2610,7 +2707,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Southwest_Boeing_737-8_MAX_N8847Q_BWI_MD2.jpg&w=800',
     desc: 'desc_737max',
     specs: { 'cruise_speed': '0.79 马赫', 'max_range': '6,570 km', 'capacity': '162–210 人', 'wingspan': '35.92 m' },
-    airlineIds: ['ua', 'cz', 'tk']
+    airlineIds: ['ua', 'cz', 'tk'],
+    tags: ['twin_engine', 'narrow_body']
   },
   {
     id: 8, name: 'name_a330', code: 'Airbus A330-300',
@@ -2618,7 +2716,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Swiss_Airbus_A330-300_HB-JHM_IAD_VA1.jpg&w=800',
     desc: 'desc_a330',
     specs: { 'cruise_speed': '0.82 马赫', 'max_range': '11,750 km', 'capacity': '277–440 人', 'wingspan': '60.3 m' },
-    airlineIds: ['ca', 'mu', 'cz', 'tk', 'cx']
+    airlineIds: ['ca', 'mu', 'cz', 'tk', 'cx'],
+    tags: ['twin_engine', 'wide_body']
   },
   {
     id: 9, name: 'name_e195', code: 'Embraer E195-E2',
@@ -2626,7 +2725,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Embraer_E195-E2_PR-ZIQ.jpg&w=800',
     desc: 'desc_e195',
     specs: { 'cruise_speed': '0.8 马赫', 'max_range': '4,800 km', 'capacity': '120–146 人', 'wingspan': '35.1 m' },
-    airlineIds: ['lh']
+    airlineIds: ['lh'],
+    tags: ['twin_engine', 'regional']
   },
   {
     id: 10, name: 'name_a220', code: 'Airbus A220-300',
@@ -2634,7 +2734,8 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Airbus_A220-300.jpg&w=800',
     desc: 'desc_a220',
     specs: { 'cruise_speed': '0.82 马赫', 'max_range': '6,300 km', 'capacity': '130–160 人', 'wingspan': '35.1 m' },
-    airlineIds: ['ay', 'dl']
+    airlineIds: ['ay', 'dl'],
+    tags: ['twin_engine', 'narrow_body', 'regional', 'fuel_efficient']
   },
   {
     id: 20, name: 'name_f22', code: 'F-22 Raptor', category: 'fighter', country: '美国',
@@ -2676,6 +2777,13 @@ const aircrafts = [
     id: 26, name: 'name_747', code: 'Boeing 747-8', category: 'civil', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Lufthansa_Boeing_747-8_(16278601112).jpg&w=800',
     desc: 'desc_747', airlineIds: ['lh', 'ca'],
+    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
+    tags: ['twin_engine', 'attack'],
+    tags: ['quad_engine', 'strategic', 'domestic'],
+    tags: ['quad_engine', 'strategic'],
+    tags: ['stealth', 'strategic'],
+    tags: ['twin_engine', 'fifth_gen', 'stealth', 'domestic'],
+    tags: ['twin_engine', 'fifth_gen', 'stealth'],
     specs: { 'cruise_speed': '0.855 马赫', 'range': '14,816 km', 'capacity': '410-467 人', 'wingspan': '68.4 m' }
   }
 ];
@@ -2773,6 +2881,65 @@ function matchesCountry(aircraft) {
 // ===== Airline Logos Bar (always visible, no popup) =====
 var _longPressTimer = null;
 var _longPressTarget = null;
+
+// ===== 标签筛选系统 =====
+
+function renderTagBar() {
+  var bar = document.getElementById('tagBar');
+  if (!bar) return;
+
+  // Count aircrafts per tag (respect current category/country/airline but NOT tag filter itself)
+  var base = aircrafts.filter(function(a) {
+    if (currentFilter !== 'all' && a.category !== currentFilter) return false;
+    if (currentFilter === 'civil' && currentCountry !== 'all' && !matchesCountry(a)) return false;
+    if (currentAirline && !(a.airlineIds || []).includes(currentAirline)) return false;
+    if (searchQuery.trim()) {
+      var q = searchQuery.trim().toLowerCase();
+      if (!t(a.name).toLowerCase().includes(q) && !a.code.toLowerCase().includes(q) && !t(a.desc).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  bar.querySelectorAll('.tag-chip').forEach(function(chip) {
+    var tag = chip.dataset.tag;
+    // Count how many in base have this tag
+    var count = base.filter(function(a) { return (a.tags || []).includes(tag); }).length;
+    var labelEl = chip.querySelector('.tag-label');
+    if (labelEl) {
+      labelEl.textContent = t(tagMeta.find(function(m) { return m.key === tag; }).i18n) + ' ' + count;
+    }
+    if (activeTags.includes(tag)) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+    // Disable tags with 0 results
+    if (count === 0) {
+      chip.style.display = 'none';
+    } else {
+      chip.style.display = '';
+    }
+  });
+}
+
+function initTagBar() {
+  var bar = document.getElementById('tagBar');
+  if (!bar) return;
+  bar.querySelectorAll('.tag-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var tag = chip.dataset.tag;
+      var idx = activeTags.indexOf(tag);
+      if (idx >= 0) {
+        activeTags.splice(idx, 1);
+      } else {
+        activeTags.push(tag);
+      }
+      renderTagBar();
+      renderCards();
+      if (document.getElementById('timeline').style.display !== 'none') initTimeline();
+    });
+  });
+}
 
 function renderAirlineLogosBar() {
   var bar = document.getElementById('airlineLogosBar');
@@ -2976,6 +3143,12 @@ function renderCards() {
   if (currentAirline) {
     filtered = filtered.filter(a => (a.airlineIds || []).includes(currentAirline));
   }
+
+  // Tag filter
+  if (activeTags.length > 0) {
+    filtered = filtered.filter(a => activeTags.every(function(tag) { return (a.tags || []).includes(tag); }));
+  }
+  renderTagBar();
 
   // Search filter
   if (searchQuery.trim()) {
@@ -4154,6 +4327,9 @@ function initTimeline() {
   if (currentAirline) {
     sorted = sorted.filter(function(a) { return (a.airlineIds || []).includes(currentAirline); });
   }
+  if (activeTags.length > 0) {
+    sorted = sorted.filter(function(a) { return activeTags.every(function(tag) { return (a.tags || []).includes(tag); }); });
+  }
   if (searchQuery.trim()) {
     var q = searchQuery.trim().toLowerCase();
     sorted = sorted.filter(function(a) {
@@ -4230,6 +4406,7 @@ initUpdateBanner();
 createStars();
 renderCountryBar();
 renderAirlineLogosBar();
+initTagBar();
 renderCards();
 initTimeline();
 
