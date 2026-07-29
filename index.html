@@ -2239,7 +2239,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">标签栏精简</span> + 弹窗标签胶囊 + 交互流畅度提升',
+    updateBanner: '<span class="banner-highlight">导出修复</span> + 结构优化 + 更流畅的交互体验',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -3967,10 +3967,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260728-v11', '1');
+  localStorage.setItem('aviation-update-20260729-v12', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260728-v11')) return;
+  if (localStorage.getItem('aviation-update-20260729-v12')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
