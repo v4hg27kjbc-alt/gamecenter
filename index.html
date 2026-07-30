@@ -275,6 +275,69 @@ body.light-mode .theme-toggle:hover {
   background: var(--glass-bg); color: var(--text);
 }
 
+/* ===== 热门排行 ===== */
+.ranking-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px); z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.ranking-modal {
+  background: #0d1520; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; padding: 28px 24px; width: 440px; max-height: 80vh;
+  overflow-y: auto; position: relative;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+.ranking-modal h2 {
+  margin: 0 0 6px 0; font-size: 18px; color: #e0e0e0;
+  display: flex; align-items: center; gap: 8px;
+}
+.ranking-modal .ranking-subtitle {
+  font-size: 12px; color: #607d8b; margin-bottom: 16px;
+}
+.ranking-close {
+  position: absolute; top: 16px; right: 18px;
+  width: 32px; height: 32px; background: none; border: none;
+  font-size: 1.4rem; color: #78909c; cursor: pointer;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.ranking-close:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.ranking-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  transition: background 0.15s; margin-bottom: 6px;
+}
+.ranking-item:hover { background: rgba(255,255,255,0.05); }
+.ranking-rank {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+  background: rgba(255,255,255,0.08); color: #78909c;
+}
+.ranking-rank.gold { background: linear-gradient(135deg, #f9a825, #f57f17); color: #fff; }
+.ranking-rank.silver { background: linear-gradient(135deg, #90a4ae, #607d8b); color: #fff; }
+.ranking-rank.bronze { background: linear-gradient(135deg, #8d6e63, #5d4037); color: #fff; }
+.ranking-thumb {
+  width: 44px; height: 32px; border-radius: 6px; object-fit: cover;
+  background: #1a2a3a; flex-shrink: 0;
+}
+.ranking-info { flex: 1; min-width: 0; }
+.ranking-name { font-size: 14px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ranking-code { font-size: 11px; color: #607d8b; }
+.ranking-count { font-size: 13px; color: #ffb74d; font-weight: 600; flex-shrink: 0; }
+.ranking-empty {
+  text-align: center; padding: 32px 0; color: #607d8b; font-size: 14px;
+}
+.ranking-clear {
+  text-align: right; margin-top: 8px; font-size: 11px;
+}
+.ranking-clear a {
+  color: #546e7a; cursor: pointer; text-decoration: none;
+  transition: color 0.15s;
+}
+.ranking-clear a:hover { color: #e57373; }
+
 /* ===== 统计面板 ===== */
 .stats-panel {
   display: flex; gap: 14px; flex-wrap: wrap;
@@ -2134,6 +2197,10 @@ body.light-mode .tl-card-img {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
     </button>
+    <button class="export-collection-btn" id="rankingBtn" onclick="showRanking()" title="热门排行">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10M12 3v14M8 7l4-4 4 4"/><polyline points="8 17 12 13 16 17"/></svg>
+      热门排行
+    </button>
     <div class="view-switch-bar" id="viewSwitchBar">
       <button class="view-switch-btn" id="viewToggleBtn">时间线</button>
 </div>
@@ -2240,6 +2307,13 @@ const i18n = {
 
     // --- 更新横幅 ---
     updateBanner: '<span class="banner-highlight">导出修复</span> + 结构优化 + 更流畅的交互体验',
+
+    // --- 热门排行 ---
+    rankingTitle: '热门排行',
+    rankingSubtitle: '机型查看次数排名',
+    rankingViews: '次',
+    rankingEmpty: '暂无数据，快去浏览机型吧',
+    rankingClear: '清除排行数据',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -3852,6 +3926,7 @@ function openDetail(id) {
   }
 
   window._track('card_click', { aircraftId: a.id, name: t(a.name), code: a.code, category: a.category });
+  recordView(a.id);
 
   const airlineCards = (a.airlineIds || []).map(aid => {
     const al = airlines[aid];
@@ -4996,6 +5071,81 @@ function exportSingleAircraft(id) {
     }, 'image/png');
   } catch(e) {
     alert('导出图片失败');
+  }
+}
+
+// ===== 查看次数排行 =====
+var RANKING_KEY = 'aviation_view_counts';
+
+function recordView(id) {
+  try {
+    var counts = JSON.parse(localStorage.getItem(RANKING_KEY) || '{}');
+    counts[id] = (counts[id] || 0) + 1;
+    localStorage.setItem(RANKING_KEY, JSON.stringify(counts));
+  } catch(e) {}
+}
+
+function getViewCounts() {
+  try {
+    var counts = JSON.parse(localStorage.getItem(RANKING_KEY) || '{}');
+  } catch(e) { var counts = {}; }
+  var list = [];
+  Object.keys(counts).forEach(function(id) {
+    var a = aircrafts.find(function(x) { return x.id === parseInt(id); });
+    if (a) list.push({ id: a.id, name: t(a.name), code: a.code, category: a.category, image: a.image, count: counts[id] });
+  });
+  list.sort(function(a, b) { return b.count - a.count; });
+  return list.slice(0, 10);
+}
+
+function showRanking() {
+  var list = getViewCounts();
+  var rankClass = ['gold', 'silver', 'bronze'];
+  var itemsHtml = '';
+  if (list.length === 0) {
+    itemsHtml = '<div class="ranking-empty">' + t('rankingEmpty') + '</div>';
+  } else {
+    list.forEach(function(item, i) {
+      var rc = i < 3 ? ' ' + rankClass[i] : '';
+      itemsHtml += '<div class="ranking-item" onclick="closeRanking();openDetail(' + item.id + ')">' +
+        '<div class="ranking-rank' + rc + '">' + (i + 1) + '</div>' +
+        '<img class="ranking-thumb" src="' + proxyUrl(item.image) + '" alt="' + item.name + '" onerror="this.style.display=\'none\'">' +
+        '<div class="ranking-info">' +
+          '<div class="ranking-name">' + item.name + '</div>' +
+          '<div class="ranking-code">' + item.code + '</div>' +
+        '</div>' +
+        '<div class="ranking-count">' + item.count + ' ' + t('rankingViews') + '</div>' +
+      '</div>';
+    });
+  }
+
+  var overlay = document.createElement('div');
+  overlay.className = 'ranking-overlay';
+  overlay.id = 'rankingOverlay';
+  overlay.innerHTML =
+    '<div class="ranking-modal">' +
+      '<button class="ranking-close" onclick="closeRanking()">&times;</button>' +
+      '<h2>' + t('rankingTitle') + '</h2>' +
+      '<div class="ranking-subtitle">' + t('rankingSubtitle') + '</div>' +
+      itemsHtml +
+      (list.length > 0 ? '<div class="ranking-clear"><a onclick="clearRanking()">' + t('rankingClear') + '</a></div>' : '') +
+    '</div>';
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeRanking(); });
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRanking() {
+  var ov = document.getElementById('rankingOverlay');
+  if (ov) { ov.remove(); }
+  document.body.style.overflow = '';
+}
+
+function clearRanking() {
+  if (confirm('确定清除所有排行数据？')) {
+    localStorage.removeItem(RANKING_KEY);
+    closeRanking();
+    showRanking();
   }
 }
 
