@@ -2306,7 +2306,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">导出修复</span> + 结构优化 + 更流畅的交互体验',
+    updateBanner: '<span class="banner-highlight">热门排行</span> + 导出修复 + 交互优化',
 
     // --- 热门排行 ---
     rankingTitle: '热门排行',
@@ -4042,10 +4042,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260729-v12', '1');
+  localStorage.setItem('aviation-update-20260729-v13', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260729-v12')) return;
+  if (localStorage.getItem('aviation-update-20260729-v13')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
