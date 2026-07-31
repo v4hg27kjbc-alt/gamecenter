@@ -2329,7 +2329,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">热门排行</span> + 导出修复 + 交互优化',
+    updateBanner: '修复冷知识弹幕卡死 + <span class="banner-highlight">热门排行</span> + 冷知识弹幕 + 修复更新横幅显示',
 
     // --- 热门排行 ---
     rankingTitle: '热门排行',
@@ -4103,10 +4103,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260731-v15', '1');
+  localStorage.setItem('aviation-update-20260731-v16', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260731-v15')) return;
+  if (localStorage.getItem('aviation-update-20260731-v16')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
