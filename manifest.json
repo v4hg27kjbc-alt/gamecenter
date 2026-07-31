@@ -1,0 +1,21 @@
+{
+  "name": "民航客机收藏馆 | Airliner Collection",
+  "short_name": "客机收藏馆",
+  "description": "飞行器收藏馆 - 收录全球经典民航客机、战斗机、轰炸机、运输机与直升机",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1220",
+  "theme_color": "#0a1220",
+  "icons": [
+    {
+      "src": "https://commons.wikimedia.org/w/thumb.php?f=A6-EDY_A380_Emirates_31_jan_2013_jfk_(8442269364).jpg&w=192",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://commons.wikimedia.org/w/thumb.php?f=A6-EDY_A380_Emirates_31_jan_2013_jfk_(8442269364).jpg&w=512",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

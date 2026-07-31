@@ -2230,7 +2230,7 @@ body.light-mode .tl-card-img {
   </div>
 
   <div class="airline-country-bar" id="countryBar">
-    <div class="country-chip active" data-country="all" id="countryAllChip">全部航司</div>
+    <div class="country-chip active" data-country="all">全部航司</div>
   </div>
 
   <div class="airline-logos-bar" id="airlineLogosBar"></div>
@@ -4719,38 +4719,9 @@ window.addEventListener('hashchange', handleHashOpen);
   }
 })();
 
-// ===== P4: PWA Service Worker (inline) =====
+// ===== P4: PWA Service Worker =====
 if ('serviceWorker' in navigator) {
-  (function() {
-    var swCode = 'const CACHE_NAME="aviation-collection-v1";' +
-      'const ASSETS=["/","/manifest.json"];' +
-      'self.addEventListener("install",function(e){' +
-        'e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS)}))' +
-      '});' +
-      'self.addEventListener("activate",function(e){' +
-        'e.waitUntil(caches.keys().then(function(keys){' +
-          'return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))' +
-        '}))' +
-      '});' +
-      'self.addEventListener("fetch",function(e){' +
-        'e.respondWith(' +
-          'caches.match(e.request).then(function(r){' +
-            'return r||fetch(e.request).then(function(resp){' +
-              'if(resp&&resp.status===200&&resp.type==="basic"){' +
-                'var clone=resp.clone();' +
-                'caches.open(CACHE_NAME).then(function(c){c.put(e.request,clone)})' +
-              '}' +
-              'return resp' +
-            '})' +
-          '})' +
-        ')' +
-      '});';
-    try {
-      var blob = new Blob([swCode], { type: 'application/javascript' });
-      var swUrl = URL.createObjectURL(blob);
-      navigator.serviceWorker.register(swUrl).catch(function() {});
-    } catch(e) {}
-  })();
+  navigator.serviceWorker.register('/sw.js').catch(function() {});
 }
 </script>
 
