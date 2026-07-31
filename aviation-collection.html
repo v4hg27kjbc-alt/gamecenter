@@ -4103,7 +4103,7 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260729-v13', '1');
+  localStorage.setItem('aviation-update-20260731-v15', '1');
 }
 function initUpdateBanner() {
   if (localStorage.getItem('aviation-update-20260731-v14')) return;
@@ -5225,7 +5225,7 @@ function clearRanking() {
     for (var i = 1; i <= 20; i++) { f.push(i18n.zh['coldFact_' + i]); }
     return f;
   })();
-  var lastIdx = -1, timer = null;
+  var lastIdx = -1, timer = null, _spawning = false;
 
   function spawn() {
     var idx;
@@ -5239,21 +5239,44 @@ function clearRanking() {
     document.body.appendChild(el);
     el.addEventListener('animationend', function() { el.remove(); });
 
+    _spawning = false;
     var next = 15000 + Math.random() * 25000; /* 15~40 秒间隔 */
-    timer = setTimeout(spawn, next);
+    timer = setTimeout(function() { _spawning = false; spawn(); }, next);
   }
 
   /* 首页展示弹幕，详情页暂停 */
   function checkAndStart() {
+    if (_spawning) return;
+    _spawning = true;
     if (timer) { clearTimeout(timer); timer = null; }
     var isDetail = !!document.getElementById('detail-panel');
-    if (!isDetail) { spawn(); }
+    if (!isDetail) { spawn(); } else { _spawning = false; }
   }
 
   checkAndStart();
-  /* 通过 MutationObserver 监听 detail-panel 的出现 / 消失 */
-  var obs = new MutationObserver(function() { checkAndStart(); });
-  obs.observe(document.getElementById('app') || document.body, { childList: true, subtree: true, attributes: false });
+  /* 监听 detail-panel 的出现 / 消失，忽略 toast 自身的 DOM 变动 */
+  var obs = new MutationObserver(function(mutations) {
+    for (var i = 0; i < mutations.length; i++) {
+      var m = mutations[i];
+      if (m.type !== 'childList') continue;
+      for (var j = 0; j < m.addedNodes.length; j++) {
+        var node = m.addedNodes[j];
+        if (node.nodeType !== 1) continue;
+        if (node.classList && node.classList.contains('cold-fact-toast')) continue;
+        if (node.id === 'detail-panel' || (node.querySelector && node.querySelector('#detail-panel'))) {
+          checkAndStart(); return;
+        }
+      }
+      for (var k = 0; k < m.removedNodes.length; k++) {
+        var rn = m.removedNodes[k];
+        if (rn.nodeType !== 1) continue;
+        if (rn.id === 'detail-panel' || (rn.querySelector && rn.querySelector('#detail-panel'))) {
+          checkAndStart(); return;
+        }
+      }
+    }
+  });
+  obs.observe(document.body, { childList: true, subtree: true, attributes: false });
 })();
 </script>
 
