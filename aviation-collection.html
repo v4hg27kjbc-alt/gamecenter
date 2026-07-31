@@ -3252,23 +3252,30 @@ function renderCards() {
 
   let batchIndex = 0;
   function renderBatch() {
-    if (batchIndex === 0) {
-      // Replace skeletons with first batch of real cards
-      grid.innerHTML = items.slice(0, BATCH_SIZE).join('');
-    } else {
-      const start = batchIndex * BATCH_SIZE;
-      const end = Math.min(start + BATCH_SIZE, items.length);
-      if (start >= items.length) return;
-      grid.insertAdjacentHTML('beforeend', items.slice(start, end).join(''));
-    }
-    batchIndex++;
-    if (batchIndex * BATCH_SIZE < items.length) {
-      requestAnimationFrame(function () { setTimeout(renderBatch, 0); });
-    } else {
-      requestAnimationFrame(function () { setTimeout(initCardAnimation, 50); });
+    try {
+      if (batchIndex === 0) {
+        // Replace skeletons with first batch of real cards
+        grid.innerHTML = items.slice(0, BATCH_SIZE).join('');
+      } else {
+        const start = batchIndex * BATCH_SIZE;
+        const end = Math.min(start + BATCH_SIZE, items.length);
+        if (start >= items.length) return;
+        grid.insertAdjacentHTML('beforeend', items.slice(start, end).join(''));
+      }
+      batchIndex++;
+      if (batchIndex * BATCH_SIZE < items.length) {
+        requestAnimationFrame(renderBatch);
+      } else {
+        requestAnimationFrame(function() { initCardAnimation(); });
+      }
+    } catch (e) {
+      console.error('renderBatch error:', e);
+      // Fallback: render all cards at once
+      grid.innerHTML = items.join('');
+      requestAnimationFrame(function() { initCardAnimation(); });
     }
   }
-  requestAnimationFrame(function () { setTimeout(renderBatch, 0); });
+  requestAnimationFrame(renderBatch);
 }
 
 function toggleCollect(id) {
@@ -3473,6 +3480,15 @@ function initCardAnimation() {
     card.style.transitionDelay = (index % 12) * 45 + 'ms';
     _cardObserver.observe(card);
   });
+
+  // Safety fallback: ensure cards become visible within 800ms
+  setTimeout(function() {
+    cards.forEach(function(card) {
+      if (!card.classList.contains('card-visible')) {
+        card.classList.add('card-visible');
+      }
+    });
+  }, 800);
 }
 
 // ===== 返回顶部 =====
