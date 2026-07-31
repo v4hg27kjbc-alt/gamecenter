@@ -338,6 +338,29 @@ body.light-mode .theme-toggle:hover {
 }
 .ranking-clear a:hover { color: #e57373; }
 
+/* ===== 冷知识弹幕 ===== */
+.cold-fact-toast {
+  position: fixed; z-index: 9999;
+  bottom: 90px; right: -100%;
+  max-width: 420px; padding: 10px 16px;
+  background: rgba(13, 21, 32, 0.92); border: 1px solid rgba(255, 152, 0, 0.4);
+  border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  color: #e0e0e0; font-size: 13px; line-height: 1.5;
+  pointer-events: none; white-space: nowrap;
+  animation: coldFactSlide 16s linear;
+}
+.cold-fact-toast::before {
+  content: '✈ 冷知识';
+  display: block; font-size: 10px; color: #ff9800;
+  margin-bottom: 2px; letter-spacing: 1px;
+}
+@keyframes coldFactSlide {
+  0%   { right: -100%; }
+  5%   { right: 10px; }
+  85%  { right: 10px; }
+  100% { right: -100%; }
+}
+
 /* ===== 统计面板 ===== */
 .stats-panel {
   display: flex; gap: 14px; flex-wrap: wrap;
@@ -2314,6 +2337,28 @@ const i18n = {
     rankingViews: '次',
     rankingEmpty: '暂无数据，快去浏览机型吧',
     rankingClear: '清除排行数据',
+
+    // --- 冷知识弹幕 ---
+    coldFact_1: '波音 747 的垂直尾翼高达 19.4 米，相当于六层楼的高度',
+    coldFact_2: '空客 A380 的机翼面积约 845 平方米，相当于 3 个网球场',
+    coldFact_3: '飞机餐口味偏淡是因为高空气压降低了约 30% 的味觉敏感度',
+    coldFact_4: '黑匣子的外壳其实是醒目的橙色，便于事故后搜寻',
+    coldFact_5: '民航客机万米巡航时外界温度低至 -50°C，靠空调系统维持客舱 20°C',
+    coldFact_6: '飞机舷窗底部的小孔用于平衡内外气压差，保护窗户结构',
+    coldFact_7: '闪电击中飞机时电流沿金属机身表面传导逸散，舱内人员毫发无损',
+    coldFact_8: '协和号超音速飞行时因空气摩擦热膨胀，机身会拉长约 30 厘米',
+    coldFact_9: '飞机客舱内的空气每 2-3 分钟经过 HEPA 过滤完全更换一次',
+    coldFact_10: '民航飞机轮胎充填的是氮气而非普通空气，防止高温高压爆胎',
+    coldFact_11: '一架波音 747 由约 600 万个独立零件组装而成',
+    coldFact_12: '世界上最短的商业航班位于苏格兰，航程仅 47 秒',
+    coldFact_13: '飞机起飞和降落阶段的油耗占整个航程的 25%',
+    coldFact_14: '民航客机降落时通常逆风着陆，增加升力、缩短滑跑距离',
+    coldFact_15: '飞行员和副驾驶在飞行途中吃不同餐食，以防同时食物中毒',
+    coldFact_16: '飞机发动机吸入鸟类时称为鸟击，90% 发生在起降阶段',
+    coldFact_17: '一条跑道可承载的最大起飞重量超过 500 吨',
+    coldFact_18: '空客和波音驾驶舱最大的区别是：空客用侧杆，波音用中央操纵杆',
+    coldFact_19: 'A350 机身 53% 由碳纤维复合材料制成，比同级别飞机轻 20%',
+    coldFact_20: '民航客机每飞行一小时需接受约 12 小时的地面维护检查',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -5183,6 +5228,47 @@ function clearRanking() {
     </div>
   </div>
 </div>
+
+<script>
+// ===== 冷知识弹幕 =====
+(function() {
+  'use strict';
+  var pool = (function() {
+    var f = [];
+    for (var i = 1; i <= 20; i++) { f.push(i18n.zh['coldFact_' + i]); }
+    return f;
+  })();
+  var lastIdx = -1, timer = null;
+
+  function spawn() {
+    var idx;
+    do { idx = Math.floor(Math.random() * pool.length); }
+    while (pool.length > 1 && idx === lastIdx);
+    lastIdx = idx;
+
+    var el = document.createElement('div');
+    el.className = 'cold-fact-toast';
+    el.textContent = pool[idx];
+    document.body.appendChild(el);
+    el.addEventListener('animationend', function() { el.remove(); });
+
+    var next = 15000 + Math.random() * 25000; /* 15~40 秒间隔 */
+    timer = setTimeout(spawn, next);
+  }
+
+  /* 首页展示弹幕，详情页暂停 */
+  function checkAndStart() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    var isDetail = !!document.getElementById('detail-panel');
+    if (!isDetail) { spawn(); }
+  }
+
+  checkAndStart();
+  /* 通过 MutationObserver 监听 detail-panel 的出现 / 消失 */
+  var obs = new MutationObserver(function() { checkAndStart(); });
+  obs.observe(document.getElementById('app') || document.body, { childList: true, subtree: true, attributes: false });
+})();
+</script>
 
 </body>
 </html>
