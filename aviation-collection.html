@@ -2126,7 +2126,127 @@ body.light-mode .tl-card-img {
   width: 14px; height: 14px;
 }
 
+
+/* ===== World Map Section ===== */
+.map-section {
+  margin: 32px auto 0;
+  max-width: 1200px;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.map-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.map-section-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin: 0;
+}
+body.light-mode .map-section-header h3 {
+  color: #1a1a2e;
+}
+.map-section-header .map-hint {
+  font-size: 0.78rem;
+  color: #78909c;
+}
+.map-container {
+  width: 100%;
+  height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  background: #1a2a3a;
+  position: relative;
+}
+body.light-mode .map-container {
+  background: #f0f4f8;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.map-container .leaflet-container {
+  background: #1a2a3a !important;
+  font-family: -apple-system, "PingFang SC", sans-serif;
+}
+body.light-mode .map-container .leaflet-container {
+  background: #f0f4f8 !important;
+}
+.map-container .leaflet-tile-pane {
+  filter: brightness(0.6) saturate(0.5) invert(0.85) hue-rotate(180deg);
+}
+body.light-mode .map-container .leaflet-tile-pane {
+  filter: brightness(0.9) saturate(0.7) invert(0) hue-rotate(0);
+}
+/* Custom popup */
+.map-country-popup {
+  font-family: -apple-system, "PingFang SC", sans-serif;
+  text-align: center;
+  min-width: 140px;
+}
+.map-country-popup .popup-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+}
+.map-country-popup .popup-count {
+  font-size: 0.85rem;
+  color: #607d8b;
+}
+.map-country-popup .popup-action {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 14px;
+  background: #1565c0;
+  color: #fff;
+  border-radius: 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.map-country-popup .popup-action:hover {
+  background: #0d47a1;
+}
+/* Custom marker styling handled via Leaflet divIcon */
+.country-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255,255,255,0.9);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  font-weight: 700;
+  font-size: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.country-marker-icon:hover {
+  transform: scale(1.25);
+  z-index: 999 !important;
+}
+/* Responsive */
+@media (max-width: 768px) {
+  .map-container {
+    height: 300px;
+    border-radius: 12px;
+  }
+  .map-section {
+    padding: 0 12px;
+  }
+}
+
 </style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 </head>
 <body>
 
@@ -2186,6 +2306,17 @@ body.light-mode .tl-card-img {
       <div class="stat-label">类型分布</div>
     </div>
   </div>
+
+  <!-- ===== 国家分布地图 ===== -->
+  <div class="map-section" id="mapSection">
+    <div class="map-section-header">
+      <h3>&#127758; 国家分布地图</h3>
+      <span class="map-hint">点击标记查看该国产机型</span>
+    </div>
+    <div class="map-container" id="worldMap"></div>
+  </div>
+
+
 
   <div class="update-banner" id="updateBanner">
     <span id="updateBannerText"></span>
@@ -2974,6 +3105,175 @@ function updateAirlineLogosBar() {
     }
   });
 }
+
+
+
+// ===== 国家分布地图 =====
+var _countryCoords = {
+  '美国': [37.09, -95.71],
+  '中国': [35.86, 104.19],
+  '俄罗斯': [61.52, 105.32],
+  '法国': [46.60, 2.21],
+  '德国': [51.16, 10.45],
+  '英国': [55.37, -3.43],
+  '巴西': [-14.23, -51.92],
+  '加拿大': [56.13, -106.34],
+  '意大利': [41.87, 12.56],
+  '瑞典': [60.12, 18.64],
+  '日本': [36.20, 138.25],
+  '荷兰': [52.13, 5.29],
+  '乌克兰': [48.37, 31.16],
+  '以色列': [31.04, 34.85],
+  '澳大利亚': [-25.27, 133.77],
+  '印度': [20.59, 78.96],
+  '西班牙': [40.46, -3.74],
+  '韩国': [35.90, 127.76],
+  '瑞士': [46.81, 8.22],
+  '波兰': [51.91, 19.14],
+  '欧洲': [50.85, 4.35],
+  '南非': [-30.55, 22.93],
+  '阿根廷': [-38.41, -63.61],
+  '土耳其': [38.96, 35.24],
+  '伊朗': [32.42, 53.68],
+  '印尼': [-0.78, 113.92],
+  '埃及': [26.82, 30.80],
+  '新加坡': [1.35, 103.81],
+  '中国台湾': [23.69, 120.96],
+  '国际': [48.85, 2.35]
+};
+
+var _countryMarkerColors = [
+  '#1565c0', '#c62828', '#2e7d32', '#ef6c00', '#6a1b9a',
+  '#00838f', '#ad1457', '#283593', '#4e342e', '#558b2f',
+  '#e65100', '#4527a0', '#00695c', '#bf360c', '#1b5e20'
+];
+
+var _worldMap = null;
+var _countryMarkers = {};
+var _mapInitialized = false;
+
+function getCountryCounts() {
+  var counts = {};
+  aircrafts.forEach(function(a) {
+    var c = a.country || '--';
+    counts[c] = (counts[c] || 0) + 1;
+  });
+  return counts;
+}
+
+function getColorForIndex(idx) {
+  return _countryMarkerColors[idx % _countryMarkerColors.length];
+}
+
+function initWorldMap() {
+  if (_mapInitialized) return;
+  var mapEl = document.getElementById('worldMap');
+  if (!mapEl) return;
+  _mapInitialized = true;
+
+  _worldMap = L.map('worldMap', {
+    center: [25, 0],
+    zoom: 2,
+    zoomControl: true,
+    scrollWheelZoom: true,
+    attributionControl: false
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18,
+    minZoom: 2
+  }).addTo(_worldMap);
+
+  // Also add light tiles option - we'll use dark tiles for dark mode
+  // and re-init on theme change is too heavy. Dark tiles work acceptably in light mode too.
+
+  var counts = getCountryCounts();
+  var countries = Object.keys(counts).filter(function(c) { return _countryCoords[c]; });
+  var maxCount = Math.max.apply(null, countries.map(function(c) { return counts[c]; }));
+
+  countries.forEach(function(country, idx) {
+    var coord = _countryCoords[country];
+    var count = counts[country];
+    var color = getColorForIndex(idx);
+    
+    // Radius based on count: min 14, max 36
+    var radius = 14 + Math.round((count / Math.max(maxCount, 1)) * 22);
+    
+    var icon = L.divIcon({
+      className: '',
+      html: '<div class="country-marker-icon" style="width:' + (radius*2) + 'px;height:' + (radius*2) + 'px;background:' + color + ';line-height:' + (radius*2) + 'px;">' + count + '</div>',
+      iconSize: [radius*2, radius*2],
+      iconAnchor: [radius, radius],
+      popupAnchor: [0, -radius]
+    });
+
+    var marker = L.marker(coord, { icon: icon }).addTo(_worldMap);
+    
+    var popupHTML = '<div class="map-country-popup">' +
+      '<div class="popup-name">' + country + '</div>' +
+      '<div class="popup-count">' + count + ' 款机型</div>' +
+      '<div class="popup-action" onclick="filterByMapCountry(\'' + country.replace(/'/g, "\'") + '\')">查看机型</div>' +
+      '</div>';
+    
+    marker.bindPopup(popupHTML);
+
+    _countryMarkers[country] = marker;
+  });
+
+  // Invalidate size after a short delay (for initial load when map container might be hidden)
+  setTimeout(function() { if (_worldMap) _worldMap.invalidateSize(); }, 300);
+}
+
+function filterByMapCountry(country) {
+  // Switch to civil filter and set country
+  currentFilter = 'civil';
+  currentCountry = country;
+  currentAirline = null;
+  
+  // Update filter bar UI
+  document.querySelectorAll('.filter-bar .filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  var civilChip = document.querySelector('.filter-bar .filter-chip[data-filter="civil"]');
+  if (civilChip) civilChip.classList.add('active');
+  
+  // Update country bar UI
+  updateCountryBarUI();
+  
+  // Hide airline filter bar
+  document.getElementById('airlineFilterBar').style.display = 'none';
+  
+  // Show country bar
+  var countryBar = document.getElementById('countryBar');
+  if (countryBar) countryBar.classList.add('visible');
+  
+  renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
+  
+  // Scroll to grid
+  document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateCountryBarUI() {
+  var bar = document.getElementById('countryBar');
+  if (!bar) return;
+  bar.querySelectorAll('.country-chip').forEach(function(chip) {
+    if (chip.getAttribute('data-country') === currentCountry) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+}
+
+// Initialize map when DOM is ready
+(function() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initWorldMap, 100);
+    });
+  } else {
+    setTimeout(initWorldMap, 100);
+  }
+})();
 
 function exportAirlineImage() {
   if (!currentAirline) return;
