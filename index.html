@@ -3156,6 +3156,7 @@ var _mapInitialized = false;
 function getCountryCounts() {
   var counts = {};
   aircrafts.forEach(function(a) {
+    if (a.category !== 'civil') return; // 只统计民航，与点击筛选一致
     var c = a.country || '--';
     counts[c] = (counts[c] || 0) + 1;
   });
