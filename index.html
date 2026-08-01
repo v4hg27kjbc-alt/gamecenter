@@ -3017,6 +3017,7 @@ aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
 let collection = new Set(JSON.parse(localStorage.getItem('aviation_collection') || '[]'));
 let currentFilter = 'all';
 let currentCountry = 'all';
+let currentMapCountry = null; // 地图筛选：按飞机制造国，与currentCountry（航司所在国）独立
 let currentAirline = null;
 let searchQuery = '';
 let sortBy = 'speed';
@@ -3054,6 +3055,7 @@ function renderCountryBar() {
       bar.querySelectorAll('.country-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       currentCountry = chip.dataset.country;
+      currentMapCountry = null;
       currentAirline = null;
       document.getElementById('airlineFilterBar').style.display = 'none';
       updateAirlineLogosBar();
@@ -3224,9 +3226,10 @@ function initWorldMap() {
 }
 
 function filterByMapCountry(country) {
-  // Switch to civil filter and set country
+  // Switch to civil filter and set manufacturing country
   currentFilter = 'civil';
-  currentCountry = country;
+  currentCountry = 'all'; // 清空航司所在国筛选
+  currentMapCountry = country; // 按飞机制造国筛选
   currentAirline = null;
   
   // Update filter bar UI
@@ -3255,10 +3258,17 @@ function updateCountryBarUI() {
   var bar = document.getElementById('countryBar');
   if (!bar) return;
   bar.querySelectorAll('.country-chip').forEach(function(chip) {
+    chip.classList.remove('active');
+  });
+  // 地图筛选时高亮「全部航司」
+  if (currentMapCountry) {
+    var allChip = bar.querySelector('.country-chip[data-country="all"]');
+    if (allChip) allChip.classList.add('active');
+    return;
+  }
+  bar.querySelectorAll('.country-chip').forEach(function(chip) {
     if (chip.getAttribute('data-country') === currentCountry) {
       chip.classList.add('active');
-    } else {
-      chip.classList.remove('active');
     }
   });
 }
@@ -3460,6 +3470,11 @@ function renderCards() {
 
   if (currentFilter === 'civil' && currentCountry !== 'all') {
     filtered = filtered.filter(a => matchesCountry(a));
+  }
+
+  // Map country filter: filter by aircraft manufacturing country
+  if (currentMapCountry) {
+    filtered = filtered.filter(a => a.country === currentMapCountry);
   }
 
   // Airline filter (clicked from detail modal)
@@ -4379,6 +4394,7 @@ document.querySelector('.filter-bar').addEventListener('click', (e) => {
   e.target.classList.add('active');
   currentFilter = e.target.dataset.filter;
   if (currentFilter !== 'civil') currentCountry = 'all';
+  currentMapCountry = null;
   currentAirline = null;
   document.getElementById('airlineFilterBar').style.display = 'none';
   updateAirlineLogosBar();
