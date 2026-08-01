@@ -2308,7 +2308,7 @@ body.light-mode .map-container .leaflet-tile-pane {
   </div>
 
   <!-- ===== 国家分布地图 ===== -->
-  <div class="map-section" id="mapSection">
+  <div class="map-section" id="mapSection" style="display:none">
     <div class="map-section-header">
       <h3>&#127758; 国家分布地图</h3>
       <span class="map-hint">点击标记查看该国产机型</span>
@@ -2354,6 +2354,10 @@ body.light-mode .map-container .leaflet-tile-pane {
     <button class="export-collection-btn" id="rankingBtn" onclick="showRanking()" title="热门排行">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10M12 3v14M8 7l4-4 4 4"/><polyline points="8 17 12 13 16 17"/></svg>
       热门排行
+    </button>
+    <button class="export-collection-btn" id="mapToggleBtn" onclick="toggleWorldMap()" title="国家分布地图">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      国家分布地图
     </button>
     <div class="view-switch-bar" id="viewSwitchBar">
       <button class="view-switch-btn" id="viewToggleBtn">时间线</button>
@@ -2971,12 +2975,6 @@ const aircrafts = [
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Lufthansa_Boeing_747-8_(16278601112).jpg&w=800',
     desc: 'desc_747', airlineIds: ['lh', 'ca'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
-    tags: ['twin_engine', 'attack'],
-    tags: ['quad_engine', 'strategic', 'domestic'],
-    tags: ['quad_engine', 'strategic'],
-    tags: ['stealth', 'strategic'],
-    tags: ['twin_engine', 'fifth_gen', 'stealth', 'domestic'],
-    tags: ['twin_engine', 'fifth_gen', 'stealth'],
     specs: { 'cruise_speed': '0.855 马赫', 'range': '14,816 km', 'capacity': '410-467 人', 'wingspan': '68.4 m' }
   }
 ];
@@ -3139,7 +3137,8 @@ var _countryCoords = {
   '埃及': [26.82, 30.80],
   '新加坡': [1.35, 103.81],
   '中国台湾': [23.69, 120.96],
-  '国际': [48.85, 2.35]
+  '国际': [48.85, 2.35],
+  '加拿大/欧洲': [56.13, -60.00]
 };
 
 var _countryMarkerColors = [
@@ -3264,14 +3263,35 @@ function updateCountryBarUI() {
   });
 }
 
-// Initialize map when DOM is ready
+// Initialize map when DOM is ready (deferred to first toggle)
+var _mapFirstShow = true;
+
+function toggleWorldMap() {
+  var mapSection = document.getElementById('mapSection');
+  if (!mapSection) return;
+  var isHidden = mapSection.style.display === 'none';
+  if (isHidden) {
+    mapSection.style.display = '';
+    if (_mapFirstShow) {
+      _mapFirstShow = false;
+      initWorldMap();
+    } else if (_worldMap) {
+      setTimeout(function() { _worldMap.invalidateSize(); }, 100);
+    }
+    document.getElementById('mapToggleBtn').classList.add('active');
+    mapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    mapSection.style.display = 'none';
+    document.getElementById('mapToggleBtn').classList.remove('active');
+  }
+}
+
 (function() {
+  // Map is initialized on first toggle click, not on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(initWorldMap, 100);
+      // Map init deferred to toggleWorldMap
     });
-  } else {
-    setTimeout(initWorldMap, 100);
   }
 })();
 
