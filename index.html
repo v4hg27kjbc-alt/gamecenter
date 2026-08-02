@@ -159,6 +159,15 @@ body.light-mode .header h1 {
   letter-spacing: 5px; text-transform: uppercase;
 }
 
+/* ===== 恢复冷知识链接 ===== */
+.restore-coldfact {
+  display: inline-block; margin-top: 8px;
+  font-size: 0.72rem; color: var(--text-dim);
+  cursor: pointer; letter-spacing: 1px;
+  transition: color 0.3s; user-select: none;
+}
+.restore-coldfact:hover { color: var(--accent); }
+
 /* ===== 深色/浅色模式切换按钮 ===== */
 .theme-toggle {
   position: absolute; top: 20px; right: 24px; z-index: 10;
@@ -342,17 +351,33 @@ body.light-mode .theme-toggle:hover {
 .cold-fact-toast {
   position: fixed; z-index: 9999;
   bottom: 90px; right: -100%;
-  max-width: 420px; padding: 10px 16px;
+  max-width: 420px; padding: 10px 36px 10px 16px;
   background: rgba(13, 21, 32, 0.92); border: 1px solid rgba(255, 152, 0, 0.4);
   border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
   color: #e0e0e0; font-size: 13px; line-height: 1.5;
-  pointer-events: none; white-space: nowrap;
+  white-space: normal; user-select: none;
   animation: coldFactSlide 16s linear;
+  cursor: default;
 }
 .cold-fact-toast::before {
   content: '✈ 冷知识';
   display: block; font-size: 10px; color: #ff9800;
   margin-bottom: 2px; letter-spacing: 1px;
+}
+.cold-fact-toast .cold-fact-toast-close {
+  position: absolute; top: 8px; right: 8px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: none; color: #999;
+  font-size: 11px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.2s; line-height: 1; padding: 0;
+}
+.cold-fact-toast .cold-fact-toast-close:hover {
+  background: rgba(255,255,255,0.25); color: #fff;
+}
+.cold-fact-toast .cold-fact-toast-hint {
+  display: block; font-size: 9px; color: rgba(255,255,255,0.3);
+  margin-top: 4px; letter-spacing: 0.5px;
 }
 @keyframes coldFactSlide {
   0%   { right: -100%; }
@@ -1088,13 +1113,86 @@ body.light-mode .airline-name { color: #1a1a2e; }
 .airline-website svg { width: 13px; height: 13px; }
 
 @media (max-width: 768px) {
-  .header { padding: 28px 18px; }
-  .header h1 { font-size: 1.9rem; }
-  .grid { grid-template-columns: 1fr; gap: 18px; }
-  .detail-modal { width: 96%; max-height: 92vh; }
-  .modal-specs { grid-template-columns: 1fr; }
+  .app-container { padding: 20px 12px 40px; }
+  .header { padding: 24px 16px; margin-bottom: 20px; border-radius: 18px; }
+  .header h1 { font-size: 1.7rem; }
+  .header .subtitle { font-size: 0.8rem; }
+  .hero-banner { height: 260px; border-radius: 18px; margin-bottom: 20px; }
+  .hero-content { flex-direction: column; }
+  .hero-text { width: 100%; min-width: 0; padding: 12px 14px 6px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+  .hero-text h2 { font-size: 1.1rem; }
+  .hero-text .hero-manufacturer { font-size: 0.7rem; margin-bottom: 2px; }
+  .hero-text .hero-desc { font-size: 0.68rem; -webkit-line-clamp: 2; }
+  .hero-image { flex: 1; padding: 6px 14px; }
+  .hero-image img { max-height: 120px; }
+  .hero-arrow { width: 32px; height: 32px; font-size: 1.2rem; }
+  .hero-dots { bottom: 8px; gap: 6px; }
+  .hero-dot { width: 6px; height: 6px; }
+  .stats-panel { gap: 8px; padding: 12px; flex-wrap: wrap; justify-content: center; }
+  .stat-card { min-width: 80px; padding: 12px 8px; border-radius: 14px; }
+  .stat-card .stat-number { font-size: 1.2rem; }
+  .stat-card .stat-label { font-size: 0.65rem; }
+  .stat-card .stat-icon { font-size: 1.1rem; }
+  .search-sort-row { flex-direction: column; gap: 10px; }
+  .search-wrap { max-width: 100%; }
+  .sort-group { justify-content: center; width: 100%; flex-wrap: wrap; }
+  .sort-chip { padding: 6px 10px; font-size: 0.7rem; }
+  #luckyButton { padding: 6px 12px; font-size: 0.72rem; }
+  .view-switch-bar { margin-left: 0; width: 100%; justify-content: center; }
+  .filter-bar { gap: 6px; padding: 10px; flex-wrap: wrap; justify-content: center; }
+  .filter-chip { padding: 5px 12px; font-size: 0.7rem; }
+  .airline-country-bar { flex-direction: column; gap: 8px; padding: 10px 14px; }
+  .airline-logos-bar { gap: 8px; padding: 8px 12px; justify-content: center; flex-wrap: wrap; }
+  .airline-logos-bar img { width: 28px; height: 28px; }
+  .grid { grid-template-columns: 1fr; gap: 16px; }
+  .card { border-radius: 16px; }
+  .card-image-wrap img { height: 180px; }
+  .card-body { padding: 14px 16px 16px; }
+  .card-body h3 { font-size: 1rem; }
+  .detail-modal { width: 96%; max-height: 92vh; border-radius: 20px; }
+  .modal-header-img img { height: 180px; border-radius: 20px 20px 0 0; }
+  .modal-body { padding: 16px 18px 20px; }
+  .modal-body h2 { font-size: 1.3rem; }
+  .modal-specs { grid-template-columns: 1fr; gap: 6px; }
+  .compare-bar { flex-wrap: wrap; justify-content: center; padding: 10px 14px; gap: 8px; }
+  .compare-bar .compare-slot { min-width: 100px; font-size: 0.72rem; padding: 6px 10px; }
+  .compare-bar .compare-btn { padding: 8px 16px; font-size: 0.75rem; }
+  .compare-bar .compare-clear { font-size: 0.7rem; }
   .airline-card { flex-direction: column; align-items: center; text-align: center; }
-  .airline-logo { width: 44px; height: 44px; }
+  .airline-logo { width: 40px; height: 40px; }
+  .cold-fact-toast { max-width: 320px; bottom: 70px; font-size: 12px; padding: 8px 30px 8px 12px; }
+  .cold-fact-toast .cold-fact-toast-hint { font-size: 8px; margin-top: 2px; }
+  .export-collection-btn { padding: 5px 10px; font-size: 0.7rem; margin-left: 4px; }
+}
+
+@media (max-width: 480px) {
+  .header h1 { font-size: 1.4rem; }
+  .header .subtitle { font-size: 0.72rem; }
+  .hero-banner { height: 200px; border-radius: 14px; }
+  .hero-arrow { width: 26px; height: 26px; font-size: 1rem; }
+  .hero-text h2 { font-size: 0.95rem; }
+  .hero-image img { max-height: 90px; }
+  .stat-card { min-width: 65px; padding: 10px 6px; border-radius: 10px; }
+  .stat-card .stat-number { font-size: 1rem; }
+  .stat-card .stat-label { font-size: 0.6rem; }
+  .stat-card .stat-icon { font-size: 0.9rem; }
+  .stats-panel { gap: 6px; padding: 8px; }
+  .card-image-wrap img { height: 160px; }
+  .card-body { padding: 10px 12px 14px; }
+  .card-body h3 { font-size: 0.9rem; }
+  .detail-modal { border-radius: 16px; }
+  .modal-header-img img { height: 140px; border-radius: 16px 16px 0 0; }
+  .modal-body h2 { font-size: 1.15rem; }
+  .modal-body { padding: 12px 14px 16px; }
+  .filter-chip { padding: 4px 8px; font-size: 0.65rem; }
+  .search-input { font-size: 0.8rem; padding: 8px 36px 8px 14px; }
+  .sort-chip { padding: 5px 8px; font-size: 0.65rem; }
+  .cold-fact-toast { max-width: 260px; bottom: 60px; font-size: 11px; right: 10px; }
+  .back-to-top { bottom: 16px; right: 10px; width: 36px; height: 36px; }
+  .fab-add { bottom: 66px; right: 10px; width: 36px; height: 36px; }
+  .compare-bar { padding: 8px 10px; }
+  .cold-fact-toast .cold-fact-toast-close { width: 18px; height: 18px; top: 6px; right: 6px; font-size: 10px; }
+  .cold-fact-toast .cold-fact-toast-hint { font-size: 7px; }
 }
 .announcement-toast {
   position: fixed; top: -80px; left: 50%; transform: translateX(-50%); z-index: 200;
@@ -2265,6 +2363,7 @@ body.light-mode .map-container .leaflet-tile-pane {
   <div class="header">
     <h1 id="headerTitle" class="title-fade-in" style="animation-delay:0.1s">民航客机收藏馆</h1>
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
+    <span class="restore-coldfact" id="restoreColdFact" onclick="restoreColdFact()" title="恢复冷知识弹幕" style="display:none">&#9733; 恢复冷知识</span>
     <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式" title="切换深色/浅色模式">
       <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       <svg id="themeIconMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -5567,8 +5666,27 @@ function clearRanking() {
 
 <script>
 // ===== 冷知识弹幕 =====
+/* global restoreColdFact */
 (function() {
   'use strict';
+
+  /* 检查用户是否已关闭冷知识 */
+  function isDisabled() {
+    try { return localStorage.getItem('coldFactDisabled') === 'true'; } catch(e) { return false; }
+  }
+
+  /* 更新恢复链接显示状态 */
+  function updateRestoreLink() {
+    var link = document.getElementById('restoreColdFact');
+    if (link) { link.style.display = isDisabled() ? 'inline-block' : 'none'; }
+  }
+
+  /* 初始化时更新链接 */
+  updateRestoreLink();
+
+  /* 如果已关闭，不执行后续逻辑 */
+  if (isDisabled()) return;
+
   var pool = (function() {
     var f = [];
     for (var i = 1; i <= 20; i++) { f.push(i18n.zh['coldFact_' + i]); }
@@ -5576,7 +5694,16 @@ function clearRanking() {
   })();
   var lastIdx = -1, timer = null, _spawning = false;
 
+  /* 长按处理器 */
+  var _longPressTimer = null;
+  function cancelLongPress() {
+    if (_longPressTimer) { clearTimeout(_longPressTimer); _longPressTimer = null; }
+  }
+
   function spawn() {
+    /* 每次 spawn 前检查是否被禁用 */
+    if (isDisabled()) return;
+
     var idx;
     do { idx = Math.floor(Math.random() * pool.length); }
     while (pool.length > 1 && idx === lastIdx);
@@ -5584,17 +5711,99 @@ function clearRanking() {
 
     var el = document.createElement('div');
     el.className = 'cold-fact-toast';
-    el.textContent = pool[idx];
+
+    /* 文字内容 */
+    var textSpan = document.createElement('span');
+    textSpan.textContent = pool[idx];
+    el.appendChild(textSpan);
+
+    /* 长按提示 */
+    var hint = document.createElement('span');
+    hint.className = 'cold-fact-toast-hint';
+    hint.textContent = '长按可关闭冷知识';
+    el.appendChild(hint);
+
+    /* 关闭按钮 */
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'cold-fact-toast-close';
+    closeBtn.textContent = '×';
+    closeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      el.remove();
+    });
+    el.appendChild(closeBtn);
+
+    /* 长按检测 */
+    el.addEventListener('touchstart', function(e) {
+      cancelLongPress();
+      _longPressTimer = setTimeout(function() {
+        _longPressTimer = null;
+        showColdFactConfirm();
+      }, 800);
+    }, { passive: true });
+    el.addEventListener('mousedown', function(e) {
+      cancelLongPress();
+      _longPressTimer = setTimeout(function() {
+        _longPressTimer = null;
+        showColdFactConfirm();
+      }, 800);
+    });
+    el.addEventListener('touchend', cancelLongPress);
+    el.addEventListener('touchmove', cancelLongPress);
+    el.addEventListener('mouseup', cancelLongPress);
+    el.addEventListener('mouseleave', cancelLongPress);
+
     document.body.appendChild(el);
-    el.addEventListener('animationend', function() { el.remove(); });
+
+    el.addEventListener('animationend', function() {
+      el.remove();
+      cancelLongPress();
+    });
 
     _spawning = false;
     var next = 15000 + Math.random() * 25000; /* 15~40 秒间隔 */
     timer = setTimeout(function() { _spawning = false; spawn(); }, next);
   }
 
+  /* 展示关闭冷知识的确认弹窗 */
+  function showColdFactConfirm() {
+    /* 避免重复弹出 */
+    if (document.getElementById('coldFactConfirmOverlay')) return;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'coldFactConfirmOverlay';
+    overlay.style.cssText = 'position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;animation:overlayIn 0.2s ease;';
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:rgba(22,33,52,0.95);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:28px 24px;max-width:340px;width:88%;text-align:center;color:#e0e0e0;box-shadow:0 12px 40px rgba(0,0,0,0.5);';
+    box.innerHTML = '<p style="margin:0 0 6px;font-size:1.05rem;font-weight:600;">冷知识弹幕</p>' +
+      '<p style="margin:0 0 20px;font-size:0.85rem;color:#999;">确定不再显示冷知识弹幕吗？<br>可随时在标题下方恢复。</p>' +
+      '<button id="cfDisableBtn" style="margin:0 8px;padding:10px 28px;border-radius:22px;border:1px solid #ff5252;background:rgba(255,82,82,0.15);color:#ff5252;font-size:0.85rem;cursor:pointer;">不再显示</button>' +
+      '<button id="cfKeepBtn" style="margin:0 8px;padding:10px 28px;border-radius:22px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#ccc;font-size:0.85rem;cursor:pointer;">继续显示</button>';
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    document.getElementById('cfDisableBtn').addEventListener('click', function() {
+      try { localStorage.setItem('coldFactDisabled', 'true'); } catch(e) {}
+      updateRestoreLink();
+      /* 移除所有现有弹幕并清空定时器 */
+      if (timer) { clearTimeout(timer); timer = null; }
+      var toasts = document.querySelectorAll('.cold-fact-toast');
+      for (var t = 0; t < toasts.length; t++) { toasts[t].remove(); }
+      overlay.remove();
+    });
+    document.getElementById('cfKeepBtn').addEventListener('click', function() {
+      overlay.remove();
+    });
+  }
+
   /* 首页展示弹幕，详情页暂停 */
   function checkAndStart() {
+    if (isDisabled()) return;
     if (_spawning) return;
     _spawning = true;
     if (timer) { clearTimeout(timer); timer = null; }
@@ -5616,6 +5825,7 @@ function clearRanking() {
           var node = m.addedNodes[j];
           if (node.nodeType !== 1) continue;
           if (node.classList && node.classList.contains('cold-fact-toast')) continue;
+          if (node.id === 'coldFactConfirmOverlay') continue;
           if (node.id === 'detail-panel' || (node.querySelector && node.querySelector('#detail-panel'))) {
             checkAndStart(); return;
           }
@@ -5632,6 +5842,15 @@ function clearRanking() {
   });
   obs.observe(document.body, { childList: true, subtree: true, attributes: false });
 })();
+
+/* 恢复冷知识（全局函数，供 HTML onclick 调用） */
+function restoreColdFact() {
+  try { localStorage.removeItem('coldFactDisabled'); } catch(e) {}
+  var link = document.getElementById('restoreColdFact');
+  if (link) { link.style.display = 'none'; }
+  /* 重新加载页面以重新启动冷知识机制 */
+  location.reload();
+}
 </script>
 
 </body>
