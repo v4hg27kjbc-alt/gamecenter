@@ -2563,7 +2563,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">国家分布地图</span> + 修复冷知识弹幕卡死 + 热门排行 + 冷知识弹幕',
+    updateBanner: '<span class="banner-highlight">移动端全面适配</span> + 冷知识关闭按钮 + 长按禁用 + 页面闪烁修复 + 星空优化',
 
     // --- 热门排行 ---
     rankingTitle: '热门排行',
@@ -4551,10 +4551,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260801-v17', '1');
+  localStorage.setItem('aviation-update-20260802-v18', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260801-v17')) return;
+  if (localStorage.getItem('aviation-update-20260802-v18')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
