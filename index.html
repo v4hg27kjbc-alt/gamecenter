@@ -3576,22 +3576,22 @@ function renderCards() {
 
   // Batch progressive rendering: 6 cards per frame to avoid main-thread jank
   const BATCH_SIZE = 6;
-  grid.innerHTML = skeletonHTML;
-  updateCollectionCount();
-  updateCompareBar();
 
   if (items.length === 0) {
-    // Clear skeletons after a brief delay when no results
-    setTimeout(function() { if (grid.querySelector('.skeleton-card')) grid.innerHTML = ''; }, 350);
+    grid.innerHTML = '';
+    updateCollectionCount();
+    updateCompareBar();
     return;
   }
 
+  // Direct batch render without skeleton to avoid flash
   let batchIndex = 0;
   function renderBatch() {
     try {
       if (batchIndex === 0) {
-        // Replace skeletons with first batch of real cards
         grid.innerHTML = items.slice(0, BATCH_SIZE).join('');
+        updateCollectionCount();
+        updateCompareBar();
       } else {
         const start = batchIndex * BATCH_SIZE;
         const end = Math.min(start + BATCH_SIZE, items.length);
@@ -3606,7 +3606,6 @@ function renderCards() {
       }
     } catch (e) {
       console.error('renderBatch error:', e);
-      // Fallback: render all cards at once
       grid.innerHTML = items.join('');
       requestAnimationFrame(function() { initCardAnimation(); });
     }
@@ -3769,18 +3768,31 @@ function showCompare() {
 
 // ===== 3D 倾斜效果 =====
 function initTiltEffect() {
+  let tiltRAF = null;
+  let lastEvent = null;
+
   document.addEventListener('mousemove', (e) => {
-    const cards = document.querySelectorAll('.card.tilt-active:hover');
-    cards.forEach(card => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -8;
-      const rotateY = ((x - centerX) / centerX) * 8;
-      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-7px) scale(1.015)`;
-    });
+    lastEvent = e;
+    if (!tiltRAF) {
+      tiltRAF = requestAnimationFrame(() => {
+        tiltRAF = null;
+        if (!lastEvent) return;
+        const e = lastEvent;
+        const cards = document.querySelectorAll('.card.tilt-active:hover');
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          // Cache rect per card during this frame to avoid multiple forced layouts
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -8;
+          const rotateY = ((x - centerX) / centerX) * 8;
+          card.style.transform = 'perspective(800px) rotateX(' + rotateX.toFixed(1) + 'deg) rotateY(' + rotateY.toFixed(1) + 'deg) translateY(-7px) scale(1.015)';
+        }
+      });
+    }
   });
 
   document.addEventListener('mouseleave', (e) => {
@@ -4415,7 +4427,7 @@ document.addEventListener('keydown', (e) => {
 function createStars() {
   const layer = document.getElementById('starsLayer');
   const frag = document.createDocumentFragment();
-  for (let i = 0; i < 110; i++) {
+  for (let i = 0; i < 50; i++) {
     const star = document.createElement('div');
     star.className = 'star';
     star.style.left = Math.random() * 100 + '%';
@@ -5592,26 +5604,31 @@ function clearRanking() {
 
   checkAndStart();
   /* 监听 detail-panel 的出现 / 消失，忽略 toast 自身的 DOM 变动 */
+  var _obsDebounce = null;
   var obs = new MutationObserver(function(mutations) {
-    for (var i = 0; i < mutations.length; i++) {
-      var m = mutations[i];
-      if (m.type !== 'childList') continue;
-      for (var j = 0; j < m.addedNodes.length; j++) {
-        var node = m.addedNodes[j];
-        if (node.nodeType !== 1) continue;
-        if (node.classList && node.classList.contains('cold-fact-toast')) continue;
-        if (node.id === 'detail-panel' || (node.querySelector && node.querySelector('#detail-panel'))) {
-          checkAndStart(); return;
+    if (_obsDebounce) return;
+    _obsDebounce = setTimeout(function() {
+      _obsDebounce = null;
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        if (m.type !== 'childList') continue;
+        for (var j = 0; j < m.addedNodes.length; j++) {
+          var node = m.addedNodes[j];
+          if (node.nodeType !== 1) continue;
+          if (node.classList && node.classList.contains('cold-fact-toast')) continue;
+          if (node.id === 'detail-panel' || (node.querySelector && node.querySelector('#detail-panel'))) {
+            checkAndStart(); return;
+          }
+        }
+        for (var k = 0; k < m.removedNodes.length; k++) {
+          var rn = m.removedNodes[k];
+          if (rn.nodeType !== 1) continue;
+          if (rn.id === 'detail-panel' || (rn.querySelector && rn.querySelector('#detail-panel'))) {
+            checkAndStart(); return;
+          }
         }
       }
-      for (var k = 0; k < m.removedNodes.length; k++) {
-        var rn = m.removedNodes[k];
-        if (rn.nodeType !== 1) continue;
-        if (rn.id === 'detail-panel' || (rn.querySelector && rn.querySelector('#detail-panel'))) {
-          checkAndStart(); return;
-        }
-      }
-    }
+    }, 100);
   });
   obs.observe(document.body, { childList: true, subtree: true, attributes: false });
 })();
