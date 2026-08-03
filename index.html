@@ -1346,6 +1346,19 @@ body.light-mode .search-input::placeholder { color: #999; }
   margin-bottom: 14px; display: none;
 }
 
+/* ===== 搜索高亮 ===== */
+.search-highlight {
+  background: rgba(255, 152, 0, 0.35);
+  color: #ffb74d;
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 600;
+}
+body.light-mode .search-highlight {
+  background: rgba(255, 152, 0, 0.25);
+  color: #e65100;
+}
+
 /* ===== 搜索建议下拉 ===== */
 .suggestions-dropdown {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0;
@@ -2458,6 +2471,14 @@ body.light-mode .map-container .leaflet-tile-pane {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
       国家分布地图
     </button>
+    <button class="export-collection-btn" id="exportJsonBtn" onclick="exportCollectionJSON()" title="导出收藏JSON">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span class="export-label" id="exportJsonLabel"></span>
+    </button>
+    <button class="export-collection-btn" id="importJsonBtn" onclick="importCollectionJSON()" title="导入收藏JSON">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span class="export-label" id="importJsonLabel"></span>
+    </button>
     <div class="view-switch-bar" id="viewSwitchBar">
       <button class="view-switch-btn" id="viewToggleBtn">时间线</button>
 </div>
@@ -2540,6 +2561,19 @@ const i18n = {
     searchMatch: '款匹配飞行器',
     searchNoMatch1: '未找到匹配"',
     searchNoMatch2: '"的飞行器',
+    searchNoMatchFriendly: '未找到匹配的飞机，试试其他关键词',
+    searchFound: '找到 N 款匹配飞行器',
+
+    // --- 收藏导入导出 ---
+    exportCollection: '导出收藏',
+    importCollection: '导入收藏',
+    noCollectionData: '暂无收藏数据可导出',
+    importSuccess: '成功导入',
+    importResult: '架飞机收藏（跳过 0 架已存在）',
+    importConfirm: '将导入 JSON 文件中的收藏数据，与现有收藏合并后去重。是否继续？',
+    importNoFile: '未选择文件或文件无效',
+    importParseError: '文件格式错误，请选择正确的 JSON 文件',
+    exportCount: '共导出 N 架收藏',
 
     // --- 公告 ---
     announcement: '16家航司Logo全新设计款上线，点击卡片查看详情',
@@ -2563,7 +2597,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">移动端全面适配</span> + 冷知识关闭按钮 + 长按禁用 + 页面闪烁修复 + 星空优化',
+    updateBanner: '<span class="banner-highlight">搜索全面升级</span> + 支持航司/发动机/国家模糊搜索 + 关键词高亮 + 收藏JSON导出导入',
 
     // --- 热门排行 ---
     rankingTitle: '热门排行',
@@ -2731,6 +2765,198 @@ const i18n = {
     catHelicopter: '直升机',
     deleteCustom: '删除此机型',
     deleteConfirm: '确定要删除这款自定义机型吗？此操作不可撤销。',
+  },
+
+  en: {
+    // --- Page Base ---
+    pageTitle: 'Airliner Collection',
+    headerTitle: 'Airliner Collection',
+    headerSubtitle: 'by Marvis & Henry',
+    searchPlaceholder: 'Search aircraft model or name...',
+    backToTop: 'Back to Top',
+
+    // --- Sort ---
+    sortSpeed: 'Speed',
+    sortRange: 'Range',
+    sortCap: 'Capacity',
+
+    // --- Filter ---
+    filterCivil: 'Airliners',
+    filterFighter: 'Fighters',
+    filterBomber: 'Bombers',
+    filterTransport: 'Transports',
+    filterHelicopter: 'Helicopters',
+    filterAll: 'All',
+
+    // --- Search ---
+    searchNoMatch: 'No matching aircraft found',
+    searchNoMatchFriendly: 'No matching aircraft found, try a different keyword',
+    searchFound: 'Found N matching aircraft',
+    searchHintEmpty: 'Displaying all aircraft',
+
+    // --- Collection ---
+    collected: 'Collected',
+    noCollection: 'No collection yet',
+
+    // --- Export/Import ---
+    exportCollection: 'Export',
+    importCollection: 'Import',
+    noCollectionData: 'No collection data to export',
+    importSuccess: 'Successfully imported',
+    importResult: 'aircraft (0 already existed, skipped)',
+    importConfirm: 'Import JSON collection data and merge with existing collection. Continue?',
+    importNoFile: 'No file selected or file is invalid',
+    importParseError: 'Invalid file format, please select a valid JSON file',
+    exportCount: 'Exported N aircraft',
+
+    // --- Announcement ---
+    announcement: '16 airlines with new logo design now live, click cards for details',
+
+    // --- Tags ---
+    tag_double_deck: 'Double Deck',
+    tag_super_jumbo: 'Super Jumbo',
+    tag_quad_engine: 'Quad Engine',
+    tag_twin_engine: 'Twin Engine',
+    tag_composite: 'Composite',
+    tag_ultra_range: 'Ultra Long Range',
+    tag_narrow_body: 'Narrow Body',
+    tag_wide_body: 'Wide Body',
+    tag_domestic: 'Domestic',
+    tag_fuel_efficient: 'Fuel Efficient',
+    tag_regional: 'Regional',
+    tag_fifth_gen: '5th Gen',
+    tag_stealth: 'Stealth',
+    tag_strategic: 'Strategic',
+    tag_attack: 'Armed',
+
+    // --- Update Banner ---
+    updateBanner: '<span class="banner-highlight">Full mobile adaptation</span> + Cold fact dismiss + Long press disable + Flicker fix + Star fix',
+
+    // --- Ranking ---
+    rankingTitle: 'Popular Ranking',
+    rankingSubtitle: 'Aircraft view count ranking',
+    rankingViews: 'views',
+    rankingEmpty: 'No data yet, browse aircraft to start',
+    rankingClear: 'Clear ranking data',
+
+    // --- Cold Facts ---
+    coldFact_1: 'The Boeing 747\'s tail fin stands 19.4m tall, equivalent to a six-story building',
+    coldFact_2: 'The Airbus A380\'s wing area is about 845 sqm, roughly 3 tennis courts',
+    coldFact_3: 'Airline food tastes bland because high altitude reduces taste sensitivity by ~30%',
+    coldFact_4: 'Black boxes are actually bright orange for easier recovery after accidents',
+    coldFact_5: 'At cruising altitude, outside temperature drops to -50; cabin A/C maintains 20\u00b0C',
+    coldFact_6: 'The tiny hole in airplane windows balances pressure differentials to protect the window',
+    coldFact_7: 'When lightning strikes an aircraft, current travels along the metal skin safely away',
+    coldFact_8: 'Concorde stretched about 30cm during supersonic flight due to frictional heating',
+    coldFact_9: 'Cabin air is completely replaced every 2-3 minutes through HEPA filtration',
+    coldFact_10: 'Aircraft tires are filled with nitrogen not air, preventing high-temp blowouts',
+    coldFact_11: 'A single Boeing 747 is assembled from approximately 6 million individual parts',
+    coldFact_12: 'The shortest commercial flight in Scotland lasts only 47 seconds',
+    coldFact_13: 'Takeoff and landing account for 25% of total fuel consumption per flight',
+    coldFact_14: 'Airliners typically land against the wind to increase lift and shorten rollout',
+    coldFact_15: 'Pilots and co-pilots eat different meals to avoid simultaneous food poisoning',
+    coldFact_16: 'Bird strikes occur when engines ingest birds, 90% happen during takeoff/landing',
+    coldFact_17: 'A single runway can support a maximum takeoff weight exceeding 500 tons',
+    coldFact_18: 'Key cockpit difference: Airbus uses sidestick, Boeing uses central yoke',
+    coldFact_19: 'The A350 fuselage is 53% carbon fiber composite, 20% lighter than peers',
+    coldFact_20: 'For every hour of flight, an airliner requires about 12 hours of ground maintenance',
+
+    // --- Spec Labels ---
+    specCruiseSpeed: 'Cruise Speed',
+    specMaxSpeed: 'Max Speed',
+    specMaxRange: 'Max Range',
+    specRange: 'Range',
+    specCombatRadius: 'Combat Radius',
+    specCapacity: 'Capacity',
+    specLoad: 'Payload',
+    specWingspan: 'Wingspan',
+    specCeiling: 'Ceiling',
+    specRotorDiameter: 'Rotor Diameter',
+
+    // --- Category Labels ---
+    catCivil: 'Airliner',
+    catFighter: 'Fighter',
+    catBomber: 'Bomber',
+    catTransport: 'Transport',
+    catHelicopter: 'Helicopter',
+
+    // --- Country Names ---
+    country_US: 'USA',
+    country_CN: 'China',
+    country_JP: 'Japan',
+    country_DE: 'Germany',
+    country_GB: 'UK',
+    country_FR: 'France',
+    country_AE: 'UAE',
+    country_SG: 'Singapore',
+    country_QA: 'Qatar',
+    country_HK: 'Hong Kong',
+    country_FI: 'Finland',
+    country_TR: 'Turkey',
+    country_EU: 'Europe',
+    country_BR: 'Brazil',
+    country_CA: 'Canada/Europe',
+
+    // --- Airlines ---
+    airline_ua: 'United Airlines',
+    airline_dl: 'Delta Air Lines',
+    airline_ca: 'Air China',
+    airline_mu: 'China Eastern',
+    airline_cz: 'China Southern',
+    airline_ek: 'Emirates',
+    airline_sq: 'Singapore Airlines',
+    airline_qr: 'Qatar Airways',
+    airline_nh: 'ANA',
+    airline_lh: 'Lufthansa',
+    airline_ba: 'British Airways',
+    airline_af: 'Air France',
+    airline_ey: 'Etihad Airways',
+    airline_cx: 'Cathay Pacific',
+    airline_ay: 'Finnair',
+    airline_tk: 'Turkish Airlines',
+
+    // --- Airline Descriptions ---
+    desc_airline_ua: 'United Airlines, founded 1926, is one of the largest with the most extensive route network. Star Alliance founding member, HQ Chicago, 900+ aircraft.',
+    desc_airline_dl: 'Delta Air Lines, second-largest by passenger volume, SkyTeam founding member, HQ Atlanta, 900+ aircraft with renowned reliability.',
+    desc_airline_ca: 'Air China, flag carrier of China, Star Alliance member, HQ Beijing, largest wide-body fleet in China to nearly 200 destinations.',
+    desc_airline_mu: 'China Eastern Airlines, HQ Shanghai, SkyTeam member, 600+ modern aircraft. Launch commercial operator of the C919.',
+    desc_airline_cz: 'China Southern Airlines, HQ Guangzhou, Asia\'s largest fleet with 650+ aircraft, dual hubs Guangzhou and Beijing Daxing.',
+    desc_airline_ek: 'Emirates, world\'s largest A380 and B777 operator based in Dubai, renowned for "five-star hotel in the sky" luxury.',
+    desc_airline_sq: 'Singapore Airlines, world\'s highest-rated carrier, Star Alliance member known for service excellence.',
+    desc_airline_qr: 'Qatar Airways, oneworld member, HQ Doha, Qsuite business class, multiple Skytrax Airline of the Year awards.',
+    desc_airline_nh: 'ANA, Japan\'s largest airline, Star Alliance member, HQ Tokyo, world\'s largest 787 fleet, impeccable Japanese service.',
+    desc_airline_lh: 'Lufthansa, Europe\'s largest airline group, Star Alliance founding member, HQ Frankfurt, 300+ aircraft to 200+ destinations.',
+    desc_airline_ba: 'British Airways, UK flag carrier, oneworld founding member, London Heathrow hub to nearly 200 destinations.',
+    desc_airline_af: 'Air France, French flag carrier, SkyTeam founding member, HQ Paris, La Premiere among world\'s most luxurious cabins.',
+    desc_airline_ey: 'Etihad Airways, UAE national airline, HQ Abu Dhabi, The Residence suite, Arabian luxury hospitality.',
+    desc_airline_cx: 'Cathay Pacific, Hong Kong flag carrier, oneworld founding member, renowned Asian hospitality.',
+    desc_airline_ay: 'Finnair, Finland flag carrier, oneworld member, HQ Helsinki, shortest Arctic routes between Europe and Asia.',
+    desc_airline_tk: 'Turkish Airlines, Star Alliance member, HQ Istanbul, flies to more countries than any other airline.',
+
+    // --- Add Aircraft Form ---
+    addAircraft: 'Add Aircraft',
+    addAircraftSubtitle: 'Add a custom aircraft to the collection',
+    fieldNameZh: 'Name',
+    fieldCode: 'Manufacturer + Model',
+    fieldCategory: 'Category',
+    fieldCountry: 'Country',
+    fieldImage: 'Image URL',
+    fieldSpeed: 'Speed',
+    fieldRange: 'Range',
+    fieldCapacity: 'Capacity',
+    fieldWingspan: 'Wingspan',
+    fieldDescZh: 'Description',
+    fieldAirlines: 'Airlines',
+    fieldProdDate: 'Year',
+    btnSubmit: 'Submit',
+    btnCancel: 'Cancel',
+    catCivil: 'Airliner',
+    catFighter: 'Fighter',
+    catBomber: 'Bomber',
+    catTransport: 'Transport',
+    catHelicopter: 'Helicopter',
+    deleteCustom: 'Delete Aircraft',
+    deleteConfirm: 'Are you sure you want to delete this custom aircraft? This cannot be undone.',
   }
 };
 
@@ -2753,7 +2979,8 @@ const tagMeta = [
   { key: 'attack',        i18n: 'tag_attack' },
 ];
 
-function t(key) { return i18n.zh?.[key] || key; }
+var currentLang = 'zh';
+function t(key) { var lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh'; return (i18n[lang] && i18n[lang][key]) || (i18n.zh && i18n.zh[key]) || key; }
 const specLabelMap = {
   cruise_speed: 'specCruiseSpeed', max_speed: 'specMaxSpeed', max_range: 'specMaxRange',
   range: 'specRange', combat_radius: 'specCombatRadius', capacity: 'specCapacity',
@@ -3400,6 +3627,11 @@ function toggleWorldMap() {
   // Map is initialized on first toggle click, not on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
+      // 初始化 i18n 动态标签
+      var ejl = document.getElementById('exportJsonLabel');
+      var ijl = document.getElementById('importJsonLabel');
+      if (ejl) ejl.textContent = t('exportCollection');
+      if (ijl) ijl.textContent = t('importCollection');
       // Map init deferred to toggleWorldMap
     });
   }
@@ -3586,11 +3818,42 @@ function renderCards() {
   // Search filter
   if (searchQuery.trim()) {
     const q = searchQuery.trim().toLowerCase();
-    filtered = filtered.filter(a =>
-      t(a.name).toLowerCase().includes(q) ||
-      a.code.toLowerCase().includes(q) ||
-      t(a.desc).toLowerCase().includes(q)
-    );
+    filtered = filtered.filter(a => {
+      /* 匹配名称/型号/描述 */
+      if (t(a.name).toLowerCase().includes(q) ||
+          a.code.toLowerCase().includes(q) ||
+          t(a.desc).toLowerCase().includes(q)) return true;
+      /* 匹配制造国家 */
+      if (a.country.toLowerCase().includes(q)) return true;
+      var translated = a.country; try { translated = translateCountry(a.country); } catch(e) {}
+      if (translated.toLowerCase().includes(q)) return true;
+      /* 匹配航司名称（中英文） */
+      if (a.airlineIds && a.airlineIds.length) {
+        for (var ai = 0; ai < a.airlineIds.length; ai++) {
+          var al = airlines[a.airlineIds[ai]];
+          if (!al) continue;
+          if (al.nameEn && al.nameEn.toLowerCase().includes(q)) return true;
+          if (al.name && t(al.name).toLowerCase().includes(q)) return true;
+          if (al.code && al.code.toLowerCase().includes(q)) return true;
+        }
+      }
+      /* 匹配标签（中文） */
+      if (a.tags && a.tags.length) {
+        for (var ti = 0; ti < a.tags.length; ti++) {
+          var tagKey = 'tag_' + a.tags[ti];
+          if (t(tagKey).toLowerCase().includes(q)) return true;
+        }
+      }
+      return false;
+    });
+  }
+
+  /* 高亮关键词辅助函数 */
+  function highlightText(text, query) {
+    if (!query) return text;
+    var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var re = new RegExp('(' + escaped + ')', 'gi');
+    return text.replace(re, '<mark class="search-highlight">$1</mark>');
   }
 
   // Show/hide search clear button
@@ -3603,10 +3866,10 @@ function renderCards() {
   // Search results hint
   if (searchQuery.trim() && filtered.length === 0) {
     searchHint.style.display = 'block';
-    searchHint.textContent = `未找到匹配"${searchQuery.trim()}"的飞行器`;
+    searchHint.textContent = t('searchNoMatchFriendly');
   } else if (searchQuery.trim()) {
     searchHint.style.display = 'block';
-    searchHint.textContent = `找到 ${filtered.length} 款匹配飞行器`;
+    searchHint.textContent = t('searchFound').replace('N', filtered.length);
   } else {
     searchHint.style.display = 'none';
   }
@@ -3645,9 +3908,9 @@ function renderCards() {
         ${a._custom ? '<div class="custom-delete-btn" onclick="event.stopPropagation();deleteCustomAircraft('+a.id+')">'+t('deleteCustom')+'</div>' : ''}
       </div>
       <div class="card-body">
-        <h3>${t(a.name)}</h3>
-        <div class="model-code">${a.code}</div>
-        <div class="desc">${t(a.desc)}</div>
+        <h3>${highlightText(t(a.name), searchQuery.trim())}</h3>
+        <div class="model-code">${highlightText(a.code, searchQuery.trim())}</div>
+        <div class="desc">${highlightText(t(a.desc), searchQuery.trim())}</div>
         <div class="card-stats">
           <div class="stat"><div class="stat-value">${a.specs['cruise_speed'] || a.specs['max_speed'] || '--'}</div><div class="stat-label">${t('sortSpeed')}</div></div>
           <div class="stat"><div class="stat-value">${a.specs['wingspan'] || a.specs['rotor_diameter'] || '--'}</div><div class="stat-label">${t('specWingspan')}</div></div>
@@ -4551,10 +4814,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260802-v18', '1');
+  localStorage.setItem('aviation-update-20260803-v19', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260802-v18')) return;
+  if (localStorage.getItem('aviation-update-20260803-v19')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
@@ -5207,9 +5470,83 @@ function getCollectionData() {
   return collected;
 }
 
+/* ===== 导出收藏为 JSON ===== */
+function exportCollectionJSON() {
+  var data = getCollectionData();
+  if (data.length === 0) { alert(t('noCollectionData')); return; }
+  var ids = data.map(function(d) { return d.id; });
+  var exportObj = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    count: ids.length,
+    collectionIds: ids
+  };
+  var blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'aviation-collection-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  var msg = t('exportCount').replace('N', ids.length);
+  showTip(msg);
+}
+
+/* ===== 导入收藏 JSON ===== */
+function importCollectionJSON() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.addEventListener('change', function() {
+    var file = input.files && input.files[0];
+    if (!file) { alert(t('importNoFile')); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var obj = JSON.parse(e.target.result);
+        if (!obj || !Array.isArray(obj.collectionIds)) {
+          alert(t('importParseError')); return;
+        }
+        var existingIds = new Set(obj.collectionIds);
+        var currentIds = new Set(collection);
+        var newIds = [];
+        existingIds.forEach(function(id) {
+          if (!currentIds.has(id)) newIds.push(id);
+        });
+        if (newIds.length === 0) {
+          alert(t('importResult').replace('0', newIds.length));
+          return;
+        }
+        if (!confirm(t('importConfirm'))) return;
+        newIds.forEach(function(id) { collection.add(id); });
+        saveCollection();
+        updateCollectionCount();
+        renderCards();
+        var msg = t('importSuccess') + ' ' + newIds.length + ' ' + t('importResult');
+        alert(msg);
+      } catch(err) {
+        alert(t('importParseError'));
+      }
+    };
+    reader.readAsText(file);
+  });
+  input.click();
+}
+
+/* ===== 简易提示 ===== */
+function showTip(msg) {
+  var tip = document.createElement('div');
+  tip.style.cssText = 'position:fixed;z-index:99999;top:24px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:20px;background:rgba(79,195,247,0.95);color:#fff;font-size:0.85rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:opacity 0.4s;pointer-events:none;';
+  tip.textContent = msg;
+  document.body.appendChild(tip);
+  setTimeout(function() { tip.style.opacity = '0'; setTimeout(function() { tip.remove(); }, 400); }, 2000);
+}
+
 function exportCollectionImage() {
   var data = getCollectionData();
-  if (data.length === 0) { alert('收藏列表为空'); return; }
+  if (data.length === 0) { alert(t('noCollectionData')); return; }
 
   var btn = document.getElementById('exportCollectionBtn');
   var originalHTML = btn.innerHTML;
