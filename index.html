@@ -2,6 +2,9 @@
 <html lang="zh-CN" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>民航客机收藏馆 | Airliner Collection</title>
 <meta name="description" content="飞行器收藏馆 - 收录全球经典民航客机、战斗机、轰炸机、运输机与直升机，含详细参数与运营航司信息">
@@ -2378,7 +2381,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body>
+<body data-version="20260803-v19">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -6156,6 +6159,45 @@ function restoreColdFact() {
   /* 重新加载页面以重新启动冷知识机制 */
   location.reload();
 }
+</script>
+
+<!-- Auto version detection -->
+<script>
+(function() {
+  var currentVersion = document.body.getAttribute('data-version');
+  if (!currentVersion) return;
+
+  var CHECK_INTERVAL = 30000; // 30s
+  var RELOAD_DELAY = 2000;    // 2s countdown
+
+  function showToast(msg) {
+    var toast = document.createElement('div');
+    toast.id = 'versionToast';
+    toast.textContent = msg;
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;'
+      + 'background:rgba(10,25,47,0.95);color:#64ffda;padding:16px 32px;border-radius:8px;'
+      + 'font-size:16px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.5);'
+      + 'border:1px solid rgba(100,255,218,0.3);pointer-events:none;';
+    document.body.appendChild(toast);
+  }
+
+  function checkVersion() {
+    fetch('?v=' + Date.now(), { cache: 'no-store' })
+      .then(function(res) { return res.text(); })
+      .then(function(html) {
+        var match = html.match(/data-version="([^"]*)"/);
+        if (!match) return;
+        var remoteVersion = match[1];
+        if (remoteVersion !== currentVersion) {
+          showToast('\u53d1\u73b0\u65b0\u7248\u672c\uff0c\u5373\u5c06\u5237\u65b0...');
+          setTimeout(function() { location.reload(true); }, RELOAD_DELAY);
+        }
+      })
+      .catch(function() { /* network error, ignore */ });
+  }
+
+  setInterval(checkVersion, CHECK_INTERVAL);
+})();
 </script>
 
 </body>
