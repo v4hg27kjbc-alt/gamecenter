@@ -1348,6 +1348,18 @@ body.light-mode .search-input::placeholder { color: #999; }
 }
 .search-clear.visible { display: flex; }
 .search-clear:hover { background: rgba(255,255,255,0.2); color: #fff; }
+.fuzzy-toggle {
+  position: absolute; right: 44px; top: 50%; transform: translateY(-50%);
+  height: 26px; padding: 0 10px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05); color: var(--text-dim); cursor: pointer;
+  font-size: 0.72rem; white-space: nowrap; transition: all 0.3s;
+  font-family: inherit; line-height: 26px;
+}
+.fuzzy-toggle:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
+.fuzzy-toggle.active { background: rgba(255,152,0,0.18); border-color: rgba(255,152,0,0.4); color: #ffb74d; }
+body.light-mode .fuzzy-toggle { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.04); color: #888; }
+body.light-mode .fuzzy-toggle:hover { border-color: rgba(0,0,0,0.25); color: #333; }
+body.light-mode .fuzzy-toggle.active { background: rgba(255,152,0,0.15); border-color: rgba(255,152,0,0.4); color: #e65100; }
 .search-results-hint {
   color: var(--text-dim); font-size: 0.78rem; text-align: center;
   margin-bottom: 14px; display: none;
@@ -2447,6 +2459,7 @@ body.light-mode .map-container .leaflet-tile-pane {
       <input type="text" class="search-input" id="searchInput" placeholder="" id="searchInputPH" autocomplete="off">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <button class="search-clear" id="searchClear" onclick="clearSearch()">&times;</button>
+      <button class="fuzzy-toggle active" id="fuzzySearchBtn" onclick="toggleFuzzySearch()" title="模糊搜索：开（点击关闭）">模糊</button>
       <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
     </div>
     <div class="sort-group" id="sortGroup">
@@ -3760,6 +3773,30 @@ function getSortValue(a) {
   return 0;
 }
 
+// ===== 全局关键词高亮函数 =====
+function highlightText(text, query) {
+  if (!query) return text;
+  var esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  var re = new RegExp('(' + esc + ')', 'gi');
+  return text.replace(re, '<mark class="search-highlight">$1</mark>');
+}
+
+// ===== 模糊搜索开关状态 =====
+var fuzzySearchEnabled = true;
+function toggleFuzzySearch() {
+  fuzzySearchEnabled = !fuzzySearchEnabled;
+  var btn = document.getElementById('fuzzySearchBtn');
+  if (fuzzySearchEnabled) {
+    btn.classList.add('active');
+    btn.title = '模糊搜索：开（点击关闭）';
+  } else {
+    btn.classList.remove('active');
+    btn.title = '模糊搜索：关（点击开启）';
+  }
+  renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
+}
+
 function renderCards() {
   const grid = document.getElementById('grid');
   const countryBar = document.getElementById('countryBar');
@@ -3789,57 +3826,60 @@ function renderCards() {
   }
 
 
-  // ===== 搜索多字段模糊匹配 =====
+  // ===== 搜索过滤 =====
   if (searchQuery.trim()) {
     var q = searchQuery.trim().toLowerCase();
-    filtered = filtered.filter(function(a) {
-      // 1) 飞机名称：中文 + 英文
-      if (t(a.name).toLowerCase().indexOf(q) !== -1) return true;
-      var enName = (i18n.en && i18n.en[a.name]) || '';
-      if (enName.toLowerCase().indexOf(q) !== -1) return true;
-      // 2) 型号代码
-      if (a.code.toLowerCase().indexOf(q) !== -1) return true;
-      // 3) 描述：中文 + 英文
-      if (t(a.desc).toLowerCase().indexOf(q) !== -1) return true;
-      var enDesc = (i18n.en && i18n.en[a.desc]) || '';
-      if (enDesc.toLowerCase().indexOf(q) !== -1) return true;
-      // 4) 制造国家：中文 + 翻译
-      if (a.country.toLowerCase().indexOf(q) !== -1) return true;
-      try {
-        var trC = translateCountry(a.country);
-        if (trC && trC.toLowerCase().indexOf(q) !== -1) return true;
-      } catch(e) {}
-      // 5) 航司：英文名 / 中文名 / 代码
-      var ids = a.airlineIds;
-      if (ids && ids.length) {
-        for (var ai = 0; ai < ids.length; ai++) {
-          var al = airlines[ids[ai]];
-          if (!al) continue;
-          if (al.nameEn && al.nameEn.toLowerCase().indexOf(q) !== -1) return true;
-          if (al.name && t(al.name).toLowerCase().indexOf(q) !== -1) return true;
-          if (al.code && al.code.toLowerCase().indexOf(q) !== -1) return true;
+    if (fuzzySearchEnabled) {
+      // 模糊搜索：多字段匹配
+      filtered = filtered.filter(function(a) {
+        // 1) 飞机名称：中文 + 英文
+        if (t(a.name).toLowerCase().indexOf(q) !== -1) return true;
+        var enName = (i18n.en && i18n.en[a.name]) || '';
+        if (enName.toLowerCase().indexOf(q) !== -1) return true;
+        // 2) 型号代码
+        if (a.code.toLowerCase().indexOf(q) !== -1) return true;
+        // 3) 描述：中文 + 英文
+        if (t(a.desc).toLowerCase().indexOf(q) !== -1) return true;
+        var enDesc = (i18n.en && i18n.en[a.desc]) || '';
+        if (enDesc.toLowerCase().indexOf(q) !== -1) return true;
+        // 4) 制造国家：中文 + 翻译
+        if (a.country.toLowerCase().indexOf(q) !== -1) return true;
+        try {
+          var trC = translateCountry(a.country);
+          if (trC && trC.toLowerCase().indexOf(q) !== -1) return true;
+        } catch(e) {}
+        // 5) 航司：英文名 / 中文名 / 代码
+        var ids = a.airlineIds;
+        if (ids && ids.length) {
+          for (var ai = 0; ai < ids.length; ai++) {
+            var al = airlines[ids[ai]];
+            if (!al) continue;
+            if (al.nameEn && al.nameEn.toLowerCase().indexOf(q) !== -1) return true;
+            if (al.name && t(al.name).toLowerCase().indexOf(q) !== -1) return true;
+            if (al.code && al.code.toLowerCase().indexOf(q) !== -1) return true;
+          }
         }
-      }
-      // 6) 标签：中文 + 英文
-      var tags = a.tags;
-      if (tags && tags.length) {
-        for (var ti = 0; ti < tags.length; ti++) {
-          var tk = 'tag_' + tags[ti];
-          if (t(tk).toLowerCase().indexOf(q) !== -1) return true;
-          var enTag = (i18n.en && i18n.en[tk]) || '';
-          if (enTag.toLowerCase().indexOf(q) !== -1) return true;
+        // 6) 标签：中文 + 英文
+        var tags = a.tags;
+        if (tags && tags.length) {
+          for (var ti = 0; ti < tags.length; ti++) {
+            var tk = 'tag_' + tags[ti];
+            if (t(tk).toLowerCase().indexOf(q) !== -1) return true;
+            var enTag = (i18n.en && i18n.en[tk]) || '';
+            if (enTag.toLowerCase().indexOf(q) !== -1) return true;
+          }
         }
-      }
-      return false;
-    });
-  }
-
-  // ===== 关键词高亮 =====
-  function highlightText(text, query) {
-    if (!query) return text;
-    var esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    var re = new RegExp('(' + esc + ')', 'gi');
-    return text.replace(re, '<mark class="search-highlight">$1</mark>');
+        return false;
+      });
+    } else {
+      // 精确搜索：仅按飞机名称匹配
+      filtered = filtered.filter(function(a) {
+        if (t(a.name).toLowerCase().indexOf(q) !== -1) return true;
+        var enName = (i18n.en && i18n.en[a.name]) || '';
+        if (enName.toLowerCase().indexOf(q) !== -1) return true;
+        return false;
+      });
+    }
   }
 
   // Show/hide search clear button
@@ -4687,6 +4727,8 @@ function openDetail(id) {
   const a = aircrafts.find(x => x.id === id);
   if (!a) return;
 
+  var sq = searchQuery.trim();
+
   // P2: Set URL hash via pushState (no hashchange event)
   if (a.slug && !_skipHashHandler) {
     _skipHashHandler = true;
@@ -4705,8 +4747,8 @@ function openDetail(id) {
       <img class="airline-logo" src="${proxyUrl(al.logo)}" alt="${al.name}"
            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2252%22 height=%2252%22><rect fill=%22%23222%22 width=%2252%22 height=%2252%22 rx=%2214%22/><text fill=%22%23888%22 x=%2226%22 y=%2230%22 text-anchor=%22middle%22 font-size=%2210%22>${al.code}</text></svg>'">
       <div class="airline-info">
-        <div class="airline-name" style="cursor:pointer" onclick="event.stopPropagation();closeDetail();filterByAirline('${aid}')" title="查看该航司所有机型">${al.name} <span class="airline-country-tag">${al.country}</span></div>
-        <div class="airline-desc">${t(al.desc)}</div>
+        <div class="airline-name" style="cursor:pointer" onclick="event.stopPropagation();closeDetail();filterByAirline('${aid}')" title="查看该航司所有机型">${highlightText(al.name, sq)} <span class="airline-country-tag">${highlightText(al.country, sq)}</span></div>
+        <div class="airline-desc">${highlightText(t(al.desc), sq)}</div>
         <a class="airline-website" href="${al.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           ${t('visitWebsite')}
@@ -4726,13 +4768,13 @@ function openDetail(id) {
         <div class="modal-close" onclick="closeDetail()">&times;</div>
       </div>
       <div class="modal-body">
-        <h2 style="margin:0 0 2px 0">${t(a.name)}</h2>
-        <div class="modal-code">${a.code} · ${a.country}</div>
-        ${(a.tags && a.tags.length) ? '<div class="modal-tags"><span class="modal-tags-title">标签</span>' + a.tags.map(function(tag) { var m = tagMeta.find(function(m) { return m.key === tag; }); return m ? '<span class="modal-tag-chip">' + t(m.i18n) + '</span>' : ''; }).join('') + '</div>' : ''}
-        <div class="modal-desc">${t(a.desc)}</div>
+        <h2 style="margin:0 0 2px 0">${highlightText(t(a.name), sq)}</h2>
+        <div class="modal-code">${highlightText(a.code, sq)} · ${highlightText(a.country, sq)}</div>
+        ${(a.tags && a.tags.length) ? '<div class="modal-tags"><span class="modal-tags-title">标签</span>' + a.tags.map(function(tag) { var m = tagMeta.find(function(m) { return m.key === tag; }); return m ? '<span class="modal-tag-chip">' + highlightText(t(m.i18n), sq) + '</span>' : ''; }).join('') + '</div>' : ''}
+        <div class="modal-desc">${highlightText(t(a.desc), sq)}</div>
         <div class="modal-specs">
           ${Object.entries(a.specs).map(([k, v]) =>
-            `<div class="spec-item"><div class="spec-label">${specLabel(k)}</div><div class="spec-value">${v}</div></div>`
+            `<div class="spec-item"><div class="spec-label">${specLabel(k)}</div><div class="spec-value">${highlightText(v, sq)}</div></div>`
           ).join('')}
         </div>
         <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
