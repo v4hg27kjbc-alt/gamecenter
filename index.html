@@ -66,43 +66,129 @@
 
 <style>
 :root {
+  /* 航空蓝 (默认) */
+  --body-bg: linear-gradient(160deg, #0a1220 0%, #0e1a2e 35%, #162840 65%, #0c1628 100%);
+  --body-bg-fallback: #0a1220;
+  --body-bg-attachment: fixed;
+  --card-bg: rgba(255, 255, 255, 0.07);
+  --card-bg-hover: rgba(255, 255, 255, 0.11);
   --glass-bg: rgba(255, 255, 255, 0.07);
+  --glass-bg-solid: rgba(10, 18, 32, 0.85);
   --glass-border: rgba(255, 255, 255, 0.13);
+  --glass-border-hover: rgba(255, 255, 255, 0.28);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
   --accent: #4fc3f7;
+  --accent-bg: rgba(79, 195, 247, 0.12);
   --accent-glow: rgba(79, 195, 247, 0.45);
   --text: #e0e0e0;
   --text-dim: #9e9e9e;
-  --card-hover-bg: rgba(255, 255, 255, 0.11);
+  --text-heading: #f0f0f0;
+  --btn-ghost: rgba(255,255,255,0.08);
+  --btn-ghost-hover: rgba(255,255,255,0.16);
+  --primary: #42a5f5;
+  --primary-bg: rgba(66, 165, 245, 0.18);
+  --primary-light: #64b5f6;
+  --primary-border: rgba(66, 165, 245, 0.4);
+  --accent-border: rgba(79, 195, 247, 0.35);
+  --rank-gold-bg: linear-gradient(135deg, #ffd54f, #ffb300);
+  --rank-silver-bg: linear-gradient(135deg, #cfd8dc, #90a4ae);
+  --rank-bronze-bg: linear-gradient(135deg, #ffab91, #e64a19);
+  --rank-gray-bg: linear-gradient(135deg, #78909c, #546e7a);
+  --rank-text: #fff;
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-/* ===== 浅色模式变量覆盖 ===== */
-body.light-mode {
-  --glass-bg: rgba(0, 0, 0, 0.04);
-  --glass-border: rgba(0, 0, 0, 0.10);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
-  --accent: #1565c0;
-  --accent-glow: rgba(21, 101, 192, 0.30);
-  --text: #1a1a2e;
-  --text-dim: #666;
-  --card-hover-bg: rgba(0, 0, 0, 0.06);
+body.theme-silver {
+  --body-bg: linear-gradient(160deg, #1c1c20 0%, #2a2a30 35%, #222228 65%, #1c1c20 100%);
+  --body-bg-fallback: #1c1c20;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --card-bg-hover: rgba(255, 255, 255, 0.10);
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-solid: rgba(28, 28, 32, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --glass-border-hover: rgba(255, 255, 255, 0.24);
+  --accent: #b0bec5;
+  --accent-bg: rgba(176, 190, 197, 0.10);
+  --accent-glow: rgba(176, 190, 197, 0.35);
+  --text: #cfcfcf;
+  --text-dim: #8a8a8a;
+  --text-heading: #e0e0e0;
+  --btn-ghost: rgba(255,255,255,0.06);
+  --btn-ghost-hover: rgba(255,255,255,0.14);
+  --primary: #90a4ae;
+  --primary-bg: rgba(144, 164, 174, 0.15);
+  --primary-light: #b0bec5;
+  --primary-border: rgba(144, 164, 174, 0.35);
+  --accent-border: rgba(176, 190, 197, 0.30);
 }
+
+body.theme-midnight {
+  --body-bg: linear-gradient(160deg, #050510 0%, #0a0a1a 35%, #050515 65%, #050510 100%);
+  --body-bg-fallback: #050510;
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-solid: rgba(5, 5, 16, 0.90);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.18);
+  --accent: #7c4dff;
+  --accent-bg: rgba(124, 77, 255, 0.10);
+  --accent-glow: rgba(124, 77, 255, 0.45);
+  --text: #b8b8cc;
+  --text-dim: #6a6a80;
+  --text-heading: #d0d0e8;
+  --btn-ghost: rgba(255,255,255,0.04);
+  --btn-ghost-hover: rgba(255,255,255,0.10);
+  --primary: #b388ff;
+  --primary-bg: rgba(179, 136, 255, 0.15);
+  --primary-light: #ce93d8;
+  --primary-border: rgba(179, 136, 255, 0.35);
+  --accent-border: rgba(124, 77, 255, 0.30);
+}
+
+body.theme-minimal {
+  --body-bg: linear-gradient(160deg, #f5f5f7 0%, #ffffff 35%, #f0f0f2 65%, #f5f5f7 100%);
+  --body-bg-fallback: #f5f5f7;
+  --card-bg: rgba(0, 0, 0, 0.04);
+  --card-bg-hover: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(0, 0, 0, 0.04);
+  --glass-bg-solid: rgba(245, 245, 247, 0.88);
+  --glass-border: rgba(0, 0, 0, 0.10);
+  --glass-border-hover: rgba(0, 0, 0, 0.20);
+  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --glass-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --accent: #1a73e8;
+  --accent-bg: rgba(26, 115, 232, 0.08);
+  --accent-glow: rgba(26, 115, 232, 0.20);
+  --text: #1a1a1a;
+  --text-dim: #777;
+  --text-heading: #111;
+  --btn-ghost: rgba(0,0,0,0.05);
+  --btn-ghost-hover: rgba(0,0,0,0.10);
+  --primary: #1a73e8;
+  --primary-bg: rgba(26, 115, 232, 0.12);
+  --primary-light: #4285f4;
+  --primary-border: rgba(26, 115, 232, 0.35);
+  --accent-border: rgba(26, 115, 232, 0.25);
+}
+
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: -apple-system, 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', sans-serif;
-  background: linear-gradient(160deg, #0a1220 0%, #0e1a2e 35%, #162840 65%, #0c1628 100%);
-  background-attachment: fixed;
+  background: var(--body-bg);
+  background-attachment: var(--body-bg-attachment);
   min-height: 100vh;
   color: var(--text);
   overflow-x: hidden;
   transition: background 0.4s ease, color 0.4s ease;
 }
-body.light-mode {
-  background: linear-gradient(160deg, #e8edf5 0%, #f0f4f8 35%, #e4eaf2 65%, #e8edf5 100%);
-  color: var(--text);
-}
+body.theme-silver { background: var(--body-bg); background-attachment: fixed; }
+body.theme-midnight { background: var(--body-bg); background-attachment: fixed; }
+body.theme-minimal { background: var(--body-bg); background-attachment: fixed; }
 
 .stars-layer {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -172,183 +258,184 @@ body.light-mode .header h1 {
 .restore-coldfact:hover { color: var(--accent); }
 
 /* ===== 深色/浅色模式切换按钮 ===== */
-.theme-toggle {
+
+
+/* ===== 主题切换下拉菜单 ===== */
+.theme-toggle-btn {
   position: absolute; top: 20px; right: 24px; z-index: 10;
-  width: 42px; height: 42px;
-  backdrop-filter: blur(14px) saturate(180%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 50%;
+  border-radius: 50px;
+  padding: 8px 16px;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   box-shadow: var(--glass-shadow);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text);
-  font-size: 1.25rem;
-  padding: 0;
+  font-size: 0.88rem;
 }
-.theme-toggle:hover {
-  background: var(--card-hover-bg);
-  border-color: rgba(255,255,255,0.32);
-  transform: scale(1.08);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.35), 0 0 16px var(--accent-glow);
+.theme-toggle-btn:hover {
+  background: var(--card-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-md), 0 0 16px var(--accent-glow);
 }
-body.light-mode .theme-toggle:hover {
-  border-color: rgba(0,0,0,0.18);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-}
-.theme-toggle:active { transform: scale(0.92); }
+.theme-toggle-btn:active { transform: scale(0.96); }
+.theme-toggle-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
 
-/* —— 图标旋转弹出动画 —— */
-@keyframes iconSpinIn {
-  0%   { transform: rotate(0deg) scale(0.3); opacity: 0; }
-  100% { transform: rotate(360deg) scale(1); opacity: 1; }
-}
-.theme-toggle.no-animate svg { transition: none; }
-.theme-toggle.anim-icon svg { animation: iconSpinIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-/* 长按视觉反馈 */
-.theme-toggle.long-pressing { transform: scale(1.12); box-shadow: 0 0 22px var(--accent-glow); }
-
-.theme-toggle svg {
-  width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;
-  transition: transform 0.4s ease, opacity 0.3s ease;
-}
-
-/* ===== 主题选择弹窗 ===== */
-.theme-modal-overlay {
-  position: fixed; inset: 0; z-index: 10000;
-  background: rgba(10, 18, 32, 0.55);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  display: flex; align-items: center; justify-content: center;
-  animation: themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes themeModalIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.theme-modal-overlay.fade-out {
-  animation: themeModalOut 0.3s ease forwards;
-}
-@keyframes themeModalOut {
-  from { opacity: 1; transform: scale(1); }
-  to   { opacity: 0; transform: scale(0.95); }
-}
-.theme-modal-card {
-  position: relative;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 36px;
-  max-width: 440px; width: 90%;
-  box-shadow: var(--glass-shadow);
-  text-align: center;
-  color: var(--text);
+.theme-dropdown {
+  position: absolute; top: 62px; right: 24px; z-index: 110;
+  min-width: 180px;
   backdrop-filter: blur(22px) saturate(180%);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
+  background: var(--glass-bg-solid);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow-lg);
+  padding: 6px;
+  display: none;
+  animation: dropdownIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.theme-modal-card h3 {
-  font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.theme-modal-card .modal-sub {
-  font-size: 0.88rem; color: var(--text-dim); margin-bottom: 28px; line-height: 1.5;
+.theme-dropdown.visible { display: block; }
+
+.theme-dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 16px;
+  border: none; border-radius: 50px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
 }
-.theme-modal-choices {
-  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+.theme-dropdown-item:hover { background: var(--card-bg-hover); }
+.theme-dropdown-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+
+.theme-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid transparent;
 }
-.theme-modal-btn {
-  flex: 1; min-width: 140px; padding: 14px 20px;
-  border-radius: 14px; border: 2px solid transparent;
-  cursor: pointer; font-size: 0.95rem; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-  color: inherit;
-}
-.theme-modal-btn:hover { transform: scale(1.05); }
-.theme-modal-btn:active { transform: scale(0.96); }
-.theme-modal-btn.dark-btn {
-  background: #0a1220; color: #e3f2fd; border-color: rgba(255,255,255,0.15);
-}
-.theme-modal-btn.light-btn {
-  background: #e8edf5; color: #1a1a2e; border-color: rgba(0,0,0,0.1);
-}
-.theme-modal-close {
-  position: absolute; top: 12px; right: 14px;
-  width: 32px; height: 32px;
-  background: none; border: none;
-  font-size: 1.5rem; color: var(--text-dim);
-  cursor: pointer; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s ease; line-height: 1;
-}
-.theme-modal-close:hover {
-  background: var(--glass-bg); color: var(--text);
+.theme-dot.aviation { background: linear-gradient(135deg, #4fc3f7, #1565c0); }
+.theme-dot.silver { background: linear-gradient(135deg, #b0bec5, #607d8b); }
+.theme-dot.midnight { background: linear-gradient(135deg, #7c4dff, #311b92); }
+.theme-dot.minimal { background: linear-gradient(135deg, #e0e0e0, #fafafa); border-color: #ccc; }
+
+/* ===== 排行榜面板 ===== */
+.ranking-panel {
+  margin: 20px 0; padding: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ===== 热门排行 ===== */
-.ranking-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(6px); z-index: 10000;
-  display: flex; align-items: center; justify-content: center;
-  animation: fadeIn 0.2s ease;
+.ranking-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--glass-border);
 }
-.ranking-modal {
-  background: #0d1520; border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 28px 24px; width: 440px; max-height: 80vh;
-  overflow-y: auto; position: relative;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+.ranking-panel-title {
+  font-size: 1.1rem; font-weight: 700; color: var(--text-heading);
+  letter-spacing: 0.5px;
 }
-.ranking-modal h2 {
-  margin: 0 0 6px 0; font-size: 18px; color: #e0e0e0;
-  display: flex; align-items: center; gap: 8px;
+.ranking-panel-close {
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 6px 14px;
+  color: var(--text-dim);
+  font-size: 0.82rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap; user-select: none;
 }
-.ranking-modal .ranking-subtitle {
-  font-size: 12px; color: #607d8b; margin-bottom: 16px;
+.ranking-panel-close:hover {
+  background: var(--btn-ghost-hover);
+  border-color: var(--glass-border-hover);
+  color: var(--text);
 }
-.ranking-close {
-  position: absolute; top: 16px; right: 18px;
-  width: 32px; height: 32px; background: none; border: none;
-  font-size: 1.4rem; color: #78909c; cursor: pointer;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s;
+
+.ranking-tabs {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--glass-border);
 }
-.ranking-close:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.ranking-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 12px; border-radius: 10px; cursor: pointer;
-  transition: background 0.15s; margin-bottom: 6px;
+.ranking-tab {
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 7px 18px;
+  color: var(--text); cursor: pointer; font-size: 0.82rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap; user-select: none;
 }
-.ranking-item:hover { background: rgba(255,255,255,0.05); }
+.ranking-tab:hover {
+  background: var(--btn-ghost-hover);
+  border-color: var(--glass-border-hover);
+}
+.ranking-tab.active {
+  background: var(--primary-bg); color: var(--primary-light); border-color: var(--primary-border);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.ranking-list {
+  padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;
+}
+
+.ranking-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.ranking-card:hover {
+  background: var(--card-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
 .ranking-rank {
-  width: 28px; height: 28px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; flex-shrink: 0;
-  background: rgba(255,255,255,0.08); color: #78909c;
+  font-size: 0.85rem; font-weight: 800; color: var(--rank-text);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
-.ranking-rank.gold { background: linear-gradient(135deg, #f9a825, #f57f17); color: #fff; }
-.ranking-rank.silver { background: linear-gradient(135deg, #90a4ae, #607d8b); color: #fff; }
-.ranking-rank.bronze { background: linear-gradient(135deg, #8d6e63, #5d4037); color: #fff; }
-.ranking-thumb {
-  width: 44px; height: 32px; border-radius: 6px; object-fit: cover;
-  background: #1a2a3a; flex-shrink: 0;
-}
+.rank-1 { background: var(--rank-gold-bg); }
+.rank-2 { background: var(--rank-silver-bg); }
+.rank-3 { background: var(--rank-bronze-bg); }
+.rank-4, .rank-5 { background: var(--rank-gray-bg); }
+
 .ranking-info { flex: 1; min-width: 0; }
-.ranking-name { font-size: 14px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ranking-code { font-size: 11px; color: #607d8b; }
-.ranking-count { font-size: 13px; color: #ffb74d; font-weight: 600; flex-shrink: 0; }
-.ranking-empty {
-  text-align: center; padding: 32px 0; color: #607d8b; font-size: 14px;
+.ranking-name {
+  font-size: 0.9rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.ranking-clear {
-  text-align: right; margin-top: 8px; font-size: 11px;
+.ranking-meta {
+  font-size: 0.78rem; color: var(--text-dim); margin-top: 3px;
 }
-.ranking-clear a {
-  color: #546e7a; cursor: pointer; text-decoration: none;
-  transition: color 0.15s;
+.ranking-val {
+  font-size: 0.9rem; font-weight: 700; color: var(--accent);
+  white-space: nowrap; flex-shrink: 0;
 }
-.ranking-clear a:hover { color: #e57373; }
 
 /* ===== 冷知识弹幕 ===== */
 .cold-fact-toast {
@@ -2381,7 +2468,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260803-v19">
+<body data-version="20260804-v20">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -2399,10 +2486,13 @@ body.light-mode .map-container .leaflet-tile-pane {
     <h1 id="headerTitle" class="title-fade-in" style="animation-delay:0.1s">民航客机收藏馆</h1>
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
     <span class="restore-coldfact" id="restoreColdFact" onclick="restoreColdFact()" title="恢复冷知识弹幕" style="display:none">&#9733; 恢复冷知识</span>
-    <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式" title="切换深色/浅色模式">
-      <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <svg id="themeIconMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
+    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
+    <div class="theme-dropdown" id="themeDropdown">
+      <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
+      <button class="theme-dropdown-item" data-theme="silver"><span class="theme-dot silver"></span>经典银</button>
+      <button class="theme-dropdown-item" data-theme="midnight"><span class="theme-dot midnight"></span>午夜黑</button>
+      <button class="theme-dropdown-item" data-theme="minimal"><span class="theme-dot minimal"></span>极简白</button>
+    </div>
   </div>
 
   <div class="hero-banner" id="heroBanner">
@@ -2441,7 +2531,22 @@ body.light-mode .map-container .leaflet-tile-pane {
     </div>
   </div>
 
-  <!-- ===== 国家分布地图 ===== -->
+  
+  <!-- ===== 排行榜面板 ===== -->
+  <div class="ranking-panel" id="rankingPanel">
+    <div class="ranking-panel-header">
+      <div class="ranking-panel-title">排行榜</div>
+      <button class="ranking-panel-close" id="rankingClose" title="折叠排行榜">&#9650; 收起</button>
+    </div>
+    <div class="ranking-tabs">
+      <button class="ranking-tab active" data-rank="range">航程最长</button>
+      <button class="ranking-tab" data-rank="capacity">载客最多</button>
+      <button class="ranking-tab" data-rank="firstFlight">首飞最早</button>
+    </div>
+    <div class="ranking-list" id="rankingList"></div>
+  </div>
+
+<!-- ===== 国家分布地图 ===== -->
   <div class="map-section" id="mapSection" style="display:none">
     <div class="map-section-header">
       <h3>&#127758; 国家分布地图</h3>
@@ -2485,10 +2590,6 @@ body.light-mode .map-container .leaflet-tile-pane {
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
-    </button>
-    <button class="export-collection-btn" id="rankingBtn" onclick="showRanking()" title="热门排行">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10M12 3v14M8 7l4-4 4 4"/><polyline points="8 17 12 13 16 17"/></svg>
-      热门排行
     </button>
     <button class="export-collection-btn" id="mapToggleBtn" onclick="toggleWorldMap()" title="国家分布地图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
@@ -2603,14 +2704,8 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">搜索全面升级</span> + 支持航司/发动机/国家模糊搜索 + 关键词高亮 + 收藏JSON导出导入',
+    updateBanner: '<span class="banner-highlight">稳定性修复</span> + 修复页面崩溃/闪烁 + 移除热门排行 + 代码防御加固',
 
-    // --- 热门排行 ---
-    rankingTitle: '热门排行',
-    rankingSubtitle: '机型查看次数排名',
-    rankingViews: '次',
-    rankingEmpty: '暂无数据，快去浏览机型吧',
-    rankingClear: '清除排行数据',
 
     // --- 冷知识弹幕 ---
     coldFact_1: '波音 747 的垂直尾翼高达 19.4 米，相当于六层楼的高度',
@@ -2825,14 +2920,8 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Full mobile adaptation</span> + Cold fact dismiss + Long press disable + Flicker fix + Star fix',
+    updateBanner: '<span class="banner-highlight">Stability Fix</span> + Crash/flicker resolved + Ranking removed + Code hardening',
 
-    // --- Ranking ---
-    rankingTitle: 'Popular Ranking',
-    rankingSubtitle: 'Aircraft view count ranking',
-    rankingViews: 'views',
-    rankingEmpty: 'No data yet, browse aircraft to start',
-    rankingClear: 'Clear ranking data',
 
     // --- Cold Facts ---
     coldFact_1: 'The Boeing 747\'s tail fin stands 19.4m tall, equivalent to a six-story building',
@@ -3321,6 +3410,8 @@ aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
     var custom = JSON.parse(localStorage.getItem('custom_aircrafts') || '[]');
     _customIdCounter = 100;
     if (custom.length) {
+      // 过滤损坏数据：必须有 id 和 specs
+      custom = custom.filter(function(a) { return a.id != null && a.specs != null; });
       custom.forEach(function(a) { a.slug = ''; a._custom = true; });
       [].push.apply(aircrafts, custom);
       custom.forEach(function(a) { if (a.id >= _customIdCounter) _customIdCounter = a.id + 1; });
@@ -3763,6 +3854,7 @@ function extractNumeric(specStr) {
 }
 
 function getSortValue(a) {
+  if (!a.specs) return 0;
   if (sortBy === 'speed') {
     const speedKey = a.specs['cruise_speed'] || a.specs['max_speed'] || '0';
     return extractNumeric(speedKey);
@@ -3840,7 +3932,7 @@ function renderCards() {
         var enName = (i18n.en && i18n.en[a.name]) || '';
         if (enName.toLowerCase().indexOf(q) !== -1) return true;
         // 2) 型号代码
-        if (a.code.toLowerCase().indexOf(q) !== -1) return true;
+        if ((a.code || '').toLowerCase().indexOf(q) !== -1) return true;
         // 3) 描述：中文 + 英文
         if (t(a.desc).toLowerCase().indexOf(q) !== -1) return true;
         var enDesc = (i18n.en && i18n.en[a.desc]) || '';
@@ -3953,8 +4045,8 @@ function renderCards() {
         <div class="desc">${highlightText(t(a.desc), sq)}</div>
         ${tagsHtml}
         <div class="card-stats">
-          <div class="stat"><div class="stat-value">${a.specs['cruise_speed'] || a.specs['max_speed'] || '--'}</div><div class="stat-label">${t('sortSpeed')}</div></div>
-          <div class="stat"><div class="stat-value">${a.specs['wingspan'] || a.specs['rotor_diameter'] || '--'}</div><div class="stat-label">${t('specWingspan')}</div></div>
+          <div class="stat"><div class="stat-value">${(a.specs && a.specs['cruise_speed']) || (a.specs && a.specs['max_speed']) || '--'}</div><div class="stat-label">${t('sortSpeed')}</div></div>
+          <div class="stat"><div class="stat-value">${(a.specs && a.specs['wingspan']) || (a.specs && a.specs['rotor_diameter']) || '--'}</div><div class="stat-label">${t('specWingspan')}</div></div>
         </div>
       </div>
     </div>`;
@@ -4648,7 +4740,7 @@ function getRelatedAircraft(currentId, limit) {
   if (isCivil && sameCat.length < limit) {
     // Add same-manufacturer civil aircraft from different sub-types but still civil
     var sameMfr = aircrafts.filter(function(a) {
-      return a.id !== currentId && a.category === 'civil' && a.code.split(' ')[0] === manufacturer && !sameCat.some(function(s) { return s.id === a.id; });
+      return a.id !== currentId && a.category === 'civil' && (a.code || '').split(' ')[0] === manufacturer && !sameCat.some(function(s) { return s.id === a.id; });
     });
     sameCat = sameCat.concat(sameMfr);
   }
@@ -4740,7 +4832,6 @@ function openDetail(id) {
   }
 
   window._track('card_click', { aircraftId: a.id, name: t(a.name), code: a.code, category: a.category });
-  recordView(a.id);
 
   const airlineCards = (a.airlineIds || []).map(aid => {
     const al = airlines[aid];
@@ -4772,7 +4863,7 @@ function openDetail(id) {
       </div>
       <div class="modal-body">
         <h2 style="margin:0 0 2px 0">${highlightText(t(a.name), sq)}</h2>
-        <div class="modal-code">${highlightText(a.code, sq)} · ${highlightText(a.country, sq)}</div>
+        <div class="modal-code">${highlightText(a.code || '', sq)} · ${highlightText(a.country, sq)}</div>
         ${(a.tags && a.tags.length) ? '<div class="modal-tags"><span class="modal-tags-title">标签</span>' + a.tags.map(function(tag) { var m = tagMeta.find(function(m) { return m.key === tag; }); return m ? '<span class="modal-tag-chip">' + highlightText(t(m.i18n), sq) + '</span>' : ''; }).join('') + '</div>' : ''}
         <div class="modal-desc">${highlightText(t(a.desc), sq)}</div>
         <div class="modal-specs">
@@ -4857,10 +4948,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260803-v19', '1');
+  localStorage.setItem('aviation-update-20260804-v20', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260803-v19')) return;
+  if (localStorage.getItem('aviation-update-20260804-v20')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
@@ -5192,194 +5283,152 @@ document.getElementById('airlineFilterClose').addEventListener('click', function
 
 // ===== 深色/浅色模式切换 =====
 (function initTheme() {
-  var toggleBtn = document.getElementById('themeToggle');
-  var sunIcon = document.getElementById('themeIconSun');
-  var moonIcon = document.getElementById('themeIconMoon');
+  initRanking();
   var STORAGE_KEY = 'aviation-theme';
+  var toggleBtn = document.getElementById('themeToggleBtn');
+  var dropdown = document.getElementById('themeDropdown');
+  if (!toggleBtn || !dropdown) return;
 
-  // --- 图标动画辅助 ---
-  function triggerIconAnim(svgEl) {
-    toggleBtn.classList.add('anim-icon');
-    svgEl.addEventListener('animationend', function handler() {
-      svgEl.removeEventListener('animationend', handler);
-      toggleBtn.classList.remove('anim-icon');
-    }, { once: true });
-  }
+  var themes = ['aviation', 'silver', 'midnight', 'minimal'];
 
-  function setTheme(mode) {
-    var wasDifferent = (mode === 'light') !== document.body.classList.contains('light-mode');
-    if (mode === 'light') {
-      document.body.classList.add('light-mode');
-      if (wasDifferent) {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = '';
-        triggerIconAnim(moonIcon);
-      } else {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = '';
-      }
-    } else {
-      document.body.classList.remove('light-mode');
-      if (wasDifferent) {
-        sunIcon.style.display = '';
-        moonIcon.style.display = 'none';
-        triggerIconAnim(sunIcon);
-      } else {
-        sunIcon.style.display = '';
-        moonIcon.style.display = 'none';
-      }
-    }
-  }
-
-  // --- 弹窗 ---
-  function openThemeModal(context) {
-    var modalOverlay = document.getElementById('themeModalOverlay');
-    var modalTitle = document.getElementById('themeModalTitle');
-    var modalSub = document.getElementById('themeModalSub');
-    if (!modalOverlay || !modalTitle || !modalSub) return;
-    modalOverlay.setAttribute('data-context', context);
-    if (context === 'first-visit') {
-      modalTitle.textContent = '选择主题 / Choose Theme';
-      modalSub.textContent = '深色还是浅色模式？你随时可以长按右上角按钮更改';
-    } else {
-      modalTitle.textContent = '主题设置 / Theme Settings';
-      modalSub.textContent = '随时切换深浅模式 / Switch anytime';
-    }
-    modalOverlay.style.display = '';
-    modalOverlay.classList.remove('fade-out');
-    // 强制回流以重启动画
-    void modalOverlay.offsetWidth;
-    modalOverlay.style.animation = 'none';
-    void modalOverlay.offsetWidth;
-    modalOverlay.style.animation = 'themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
-  }
-
-  function closeThemeModal() {
-    var modalOverlay = document.getElementById('themeModalOverlay');
-    modalOverlay.style.animation = '';
-    modalOverlay.classList.add('fade-out');
-    modalOverlay.addEventListener('animationend', function handler() {
-      modalOverlay.removeEventListener('animationend', handler);
-      modalOverlay.style.display = 'none';
-      modalOverlay.classList.remove('fade-out');
-    }, { once: true });
-  }
-
-  // 弹窗内按钮点击 + overlay 关闭（延迟到 DOM 解析完成）
-  window.addEventListener('DOMContentLoaded', function() {
-    var modalOverlay = document.getElementById('themeModalOverlay');
-    if (!modalOverlay) return;
-    modalOverlay.querySelectorAll('.theme-modal-btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var mode = this.getAttribute('data-theme');
-        setTheme(mode);
-        try { localStorage.setItem(STORAGE_KEY, mode); } catch(e) {}
-        closeThemeModal();
-      });
+  function setTheme(theme) {
+    themes.forEach(function(t) {
+      if (t === 'aviation') return;
+      document.body.classList.remove('theme-' + t);
     });
-    var closeBtn = document.getElementById('themeModalClose');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        closeThemeModal();
-      });
+    if (theme !== 'aviation') {
+      document.body.classList.add('theme-' + theme);
     }
-    modalOverlay.addEventListener('click', function(e) {
-      if (e.target === modalOverlay && modalOverlay.getAttribute('data-context') !== 'first-visit') {
-        closeThemeModal();
-      }
+    dropdown.querySelectorAll('.theme-dropdown-item').forEach(function(item) {
+      item.classList.toggle('active', item.getAttribute('data-theme') === theme);
+    });
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+  }
+
+  toggleBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    dropdown.classList.toggle('visible');
+  });
+
+  dropdown.querySelectorAll('.theme-dropdown-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      setTheme(this.getAttribute('data-theme'));
+      dropdown.classList.remove('visible');
     });
   });
 
-  // --- 普通点击切换 ---
-  function toggleTheme() {
-    toggleBtn.classList.add('no-animate');
-    var isLight = document.body.classList.contains('light-mode');
-    var newMode = isLight ? 'dark' : 'light';
-    setTheme(newMode);
-    try { localStorage.setItem(STORAGE_KEY, newMode); } catch(e) {}
-    // 动画结束后移除 no-animate
-    setTimeout(function() { toggleBtn.classList.remove('no-animate'); }, 450);
-  }
-
-  // --- 长按检测 ---
-  var longPressTimer = null;
-  var longPressTriggered = false;
-  var pressStartX = 0, pressStartY = 0;
-
-  function onPressStart(e) {
-    longPressTriggered = false;
-    var pt = e.touches ? e.touches[0] : e;
-    pressStartX = pt.clientX;
-    pressStartY = pt.clientY;
-    toggleBtn.classList.add('long-pressing');
-    longPressTimer = setTimeout(function() {
-      longPressTriggered = true;
-      toggleBtn.classList.remove('long-pressing');
-      openThemeModal('settings');
-    }, 600);
-  }
-
-  function onPressMove(e) {
-    if (!longPressTimer) return;
-    var pt = e.touches ? e.touches[0] : e;
-    var dx = pt.clientX - pressStartX;
-    var dy = pt.clientY - pressStartY;
-    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-      toggleBtn.classList.remove('long-pressing');
+  document.addEventListener('click', function(e) {
+    if (!toggleBtn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('visible');
     }
-  }
-
-  function onPressEnd(e) {
-    toggleBtn.classList.remove('long-pressing');
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
-    if (!longPressTriggered) {
-      // 普通 click
-      toggleTheme();
-    }
-  }
-
-  // 桌面端
-  toggleBtn.addEventListener('mousedown', onPressStart);
-  toggleBtn.addEventListener('mousemove', onPressMove);
-  toggleBtn.addEventListener('mouseup', onPressEnd);
-  toggleBtn.addEventListener('mouseleave', function() {
-    toggleBtn.classList.remove('long-pressing');
-    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   });
 
-  // 移动端
-  toggleBtn.addEventListener('touchstart', onPressStart, { passive: false });
-  toggleBtn.addEventListener('touchmove', onPressMove, { passive: false });
-  toggleBtn.addEventListener('touchend', onPressEnd);
-
-  // 移除旧的 click 监听（用 mousedown+mouseup 已覆盖）
-  // toggleBtn 不再挂 click，由 pressEnd 处理短按
-
-  // --- 初始化 ---
   var saved = null;
   try { saved = localStorage.getItem(STORAGE_KEY); } catch(e) {}
-  if (saved === 'light') {
-    setTheme('light');
-  } else if (saved === 'dark') {
-    setTheme('dark');
-  } else {
-    // 无记录：首次访问，不应用任何主题，显示弹窗
-    openThemeModal('first-visit');
-  }
-  // 确保初始图标状态：深色模式下默认显示太阳，浅色模式默认显示月亮
-  // setTheme 已处理 display，此处仅兜底无记录场景
-  if (saved === null) {
-    sunIcon.style.display = '';
-    moonIcon.style.display = 'none';
+  if (saved && themes.indexOf(saved) >= 0) {
+    setTheme(saved);
   }
 })();
+
+/* ===== 排行榜 ===== */
+function parseRange(rangeStr) {
+  if (!rangeStr) return 0;
+  var s = String(rangeStr).replace(/,/g, '');
+  var m = s.match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : 0;
+}
+
+function parseCapacity(capStr) {
+  if (!capStr) return 0;
+  var parts = String(capStr).split(/[-–]/);
+  var last = parts[parts.length - 1];
+  var m = last.match(/\d+/);
+  return m ? parseInt(m[0]) : 0;
+}
+
+function parseFirstFlightYear(descStr) {
+  if (!descStr) return 9999;
+  var m = String(descStr).match(/(\d{4})\s*年\s*(首飞|投入运营|商业运营)/);
+  return m ? parseInt(m[1]) : 9999;
+}
+
+function renderRanking(type) {
+  var data = aircrafts.map(function(a) {
+    var val = 0;
+    if (type === 'range') {
+      val = parseRange(a.specs && a.specs.max_range);
+    } else if (type === 'capacity') {
+      val = parseCapacity(a.specs && a.specs.capacity);
+    } else if (type === 'firstFlight') {
+      var descKey = a.desc;
+      var desc = '';
+      try { desc = window.t ? window.t(descKey) : (i18n && i18n.zh && i18n.zh[descKey]) || ''; } catch(e) {}
+      val = parseFirstFlightYear(desc);
+    }
+    return { id: a.id, value: val, name: a.name, code: a.code };
+  });
+
+  data.sort(function(a, b) {
+    if (type === 'firstFlight') return a.value - b.value;
+    return b.value - a.value;
+  });
+
+  data = data.slice(0, 5);
+
+  var html = '';
+  data.forEach(function(item, i) {
+    var rankClass = 'rank-' + (i + 1);
+    var rankNum = i + 1;
+    var displayName = '';
+    try { displayName = window.t ? window.t(item.name) : item.name; } catch(e) { displayName = item.name; }
+    var displayVal = type === 'firstFlight' ? item.value + '\u5e74' : item.value;
+    html += '<div class=\"ranking-card\" onclick=\"openDetail(' + item.id + ')\">';
+    html += '<div class=\"ranking-rank ' + rankClass + '\">' + rankNum + '</div>';
+    html += '<div class=\"ranking-info\">';
+    html += '<div class=\"ranking-name\">' + displayName + '</div>';
+    html += '<div class=\"ranking-meta\">' + item.code + '</div>';
+    html += '</div>';
+    html += '<div class=\"ranking-val\">' + displayVal + '</div>';
+    html += '</div>';
+  });
+
+  document.getElementById('rankingList').innerHTML = html;
+}
+
+function initRanking() {
+  var tabs = document.querySelectorAll('.ranking-tab');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      this.classList.add('active');
+      renderRanking(this.getAttribute('data-rank'));
+    });
+  });
+
+  var closeBtn = document.getElementById('rankingClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+      var list = document.getElementById('rankingList');
+      var tabsEl = document.querySelector('.ranking-tabs');
+      var panel = document.getElementById('rankingPanel');
+      var isCollapsed = panel.getAttribute('data-collapsed') === 'true';
+      if (isCollapsed) {
+        panel.setAttribute('data-collapsed', 'false');
+        list.style.display = '';
+        tabsEl.style.display = '';
+        this.innerHTML = '&#9650; \u6536\u8d77';
+      } else {
+        panel.setAttribute('data-collapsed', 'true');
+        list.style.display = 'none';
+        tabsEl.style.display = 'none';
+        this.innerHTML = '&#9660; \u5c55\u5f00';
+      }
+    });
+  }
+
+  renderRanking('range');
+}
 
 // ===== 埋点系统 =====
 (function() {
@@ -5861,82 +5910,6 @@ function exportSingleAircraft(id) {
     alert('导出图片失败');
   }
 }
-
-// ===== 查看次数排行 =====
-var RANKING_KEY = 'aviation_view_counts';
-
-function recordView(id) {
-  try {
-    var counts = JSON.parse(localStorage.getItem(RANKING_KEY) || '{}');
-    counts[id] = (counts[id] || 0) + 1;
-    localStorage.setItem(RANKING_KEY, JSON.stringify(counts));
-  } catch(e) {}
-}
-
-function getViewCounts() {
-  try {
-    var counts = JSON.parse(localStorage.getItem(RANKING_KEY) || '{}');
-  } catch(e) { var counts = {}; }
-  var list = [];
-  Object.keys(counts).forEach(function(id) {
-    var a = aircrafts.find(function(x) { return x.id === parseInt(id); });
-    if (a) list.push({ id: a.id, name: t(a.name), code: a.code, category: a.category, image: a.image, count: counts[id] });
-  });
-  list.sort(function(a, b) { return b.count - a.count; });
-  return list.slice(0, 10);
-}
-
-function showRanking() {
-  var list = getViewCounts();
-  var rankClass = ['gold', 'silver', 'bronze'];
-  var itemsHtml = '';
-  if (list.length === 0) {
-    itemsHtml = '<div class="ranking-empty">' + t('rankingEmpty') + '</div>';
-  } else {
-    list.forEach(function(item, i) {
-      var rc = i < 3 ? ' ' + rankClass[i] : '';
-      itemsHtml += '<div class="ranking-item" onclick="closeRanking();openDetail(' + item.id + ')">' +
-        '<div class="ranking-rank' + rc + '">' + (i + 1) + '</div>' +
-        '<img class="ranking-thumb" src="' + proxyUrl(item.image) + '" alt="' + item.name + '" onerror="this.style.display=\'none\'">' +
-        '<div class="ranking-info">' +
-          '<div class="ranking-name">' + item.name + '</div>' +
-          '<div class="ranking-code">' + item.code + '</div>' +
-        '</div>' +
-        '<div class="ranking-count">' + item.count + ' ' + t('rankingViews') + '</div>' +
-      '</div>';
-    });
-  }
-
-  var overlay = document.createElement('div');
-  overlay.className = 'ranking-overlay';
-  overlay.id = 'rankingOverlay';
-  overlay.innerHTML =
-    '<div class="ranking-modal">' +
-      '<button class="ranking-close" onclick="closeRanking()">&times;</button>' +
-      '<h2>' + t('rankingTitle') + '</h2>' +
-      '<div class="ranking-subtitle">' + t('rankingSubtitle') + '</div>' +
-      itemsHtml +
-      (list.length > 0 ? '<div class="ranking-clear"><a onclick="clearRanking()">' + t('rankingClear') + '</a></div>' : '') +
-    '</div>';
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeRanking(); });
-  document.body.appendChild(overlay);
-  document.body.style.overflow = 'hidden';
-}
-
-function closeRanking() {
-  var ov = document.getElementById('rankingOverlay');
-  if (ov) { ov.remove(); }
-  document.body.style.overflow = '';
-}
-
-function clearRanking() {
-  if (confirm('确定清除所有排行数据？')) {
-    localStorage.removeItem(RANKING_KEY);
-    closeRanking();
-    showRanking();
-  }
-}
-
 </script>
 
 <button class="back-to-top" id="backToTop" onclick="scrollToTop()" title="">
@@ -5954,23 +5927,7 @@ function clearRanking() {
 </div>
 
 <!-- 主题选择弹窗 -->
-<div class="theme-modal-overlay" id="themeModalOverlay" style="display:none" data-context="">
-  <div class="theme-modal-card">
-    <button class="theme-modal-close" id="themeModalClose" aria-label="关闭">&times;</button>
-    <h3 id="themeModalTitle">选择主题 / Choose Theme</h3>
-    <p class="modal-sub" id="themeModalSub">深色还是浅色模式？你随时可以长按右上角按钮更改</p>
-    <div class="theme-modal-choices">
-      <button class="theme-modal-btn dark-btn" data-theme="dark">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        深色模式 / Dark
-      </button>
-      <button class="theme-modal-btn light-btn" data-theme="light">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        浅色模式 / Light
-      </button>
-    </div>
-  </div>
-</div>
+/div>
 
 <script>
 // ===== 冷知识弹幕 =====
