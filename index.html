@@ -3695,21 +3695,42 @@ function initWorldMap() {
     attributionControl: false
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  // 主瓦片源：OpenStreetMap（兼容性最好），失败自动降级备用源并重试
+  var _worldTileRetry = {};
+  var _worldTileFallback = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     maxNativeZoom: 18,
     minZoom: 2,
-    noWrap: true
+    noWrap: true,
+    crossOrigin: true
   }).addTo(_worldMap);
 
-  // 瓦片加载失败时的备用处理
   _worldMap.on('tileerror', function(evt) {
+    var src = evt.tile.src;
+    // 填充深色纯色块避免白块
     var canvas = document.createElement('canvas');
     canvas.width = 256; canvas.height = 256;
     var ctx = canvas.getContext('2d');
     ctx.fillStyle = '#0d1520';
     ctx.fillRect(0, 0, 256, 256);
     evt.tile.src = canvas.toDataURL();
+
+    // 主源失败时降级到备用源并重试
+    if (src.indexOf('tile.openstreetmap.org') > -1 && src.indexOf('{s}.tile') === -1) {
+      var tileUrl = _worldTileFallback.replace('{s}', ['a','b','c'][Math.floor(Math.random()*3)]);
+      tileUrl = tileUrl.replace('{z}', evt.tile._tileCoords.z);
+      tileUrl = tileUrl.replace('{x}', evt.tile._tileCoords.x);
+      tileUrl = tileUrl.replace('{y}', evt.tile._tileCoords.y);
+      var key = evt.tile._tileCoords.z + '_' + evt.tile._tileCoords.x + '_' + evt.tile._tileCoords.y;
+      if (!_worldTileRetry[key]) {
+        _worldTileRetry[key] = true;
+        setTimeout(function() {
+          evt.tile.src = tileUrl;
+        }, 1000);
+      }
+    }
   });
 
   // Also add light tiles option - we'll use dark tiles for dark mode
@@ -5654,8 +5675,8 @@ function initRouteMap(airlineId, el) {
     doubleClickZoom: false, touchZoom: false
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 18, maxNativeZoom: 18, minZoom: 2, noWrap: true
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18, maxNativeZoom: 18, minZoom: 2, noWrap: true, crossOrigin: true
   }).addTo(map);
 
   // Fit bounds with padding
