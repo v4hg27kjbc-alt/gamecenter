@@ -2,6 +2,9 @@
 <html lang="zh-CN" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>民航客机收藏馆 | Airliner Collection</title>
 <meta name="description" content="飞行器收藏馆 - 收录全球经典民航客机、战斗机、轰炸机、运输机与直升机，含详细参数与运营航司信息">
@@ -63,43 +66,129 @@
 
 <style>
 :root {
+  /* 航空蓝 (默认) */
+  --body-bg: linear-gradient(160deg, #0a1220 0%, #0e1a2e 35%, #162840 65%, #0c1628 100%);
+  --body-bg-fallback: #0a1220;
+  --body-bg-attachment: fixed;
+  --card-bg: rgba(255, 255, 255, 0.07);
+  --card-bg-hover: rgba(255, 255, 255, 0.11);
   --glass-bg: rgba(255, 255, 255, 0.07);
+  --glass-bg-solid: rgba(10, 18, 32, 0.85);
   --glass-border: rgba(255, 255, 255, 0.13);
+  --glass-border-hover: rgba(255, 255, 255, 0.28);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
   --accent: #4fc3f7;
+  --accent-bg: rgba(79, 195, 247, 0.12);
   --accent-glow: rgba(79, 195, 247, 0.45);
   --text: #e0e0e0;
   --text-dim: #9e9e9e;
-  --card-hover-bg: rgba(255, 255, 255, 0.11);
+  --text-heading: #f0f0f0;
+  --btn-ghost: rgba(255,255,255,0.08);
+  --btn-ghost-hover: rgba(255,255,255,0.16);
+  --primary: #42a5f5;
+  --primary-bg: rgba(66, 165, 245, 0.18);
+  --primary-light: #64b5f6;
+  --primary-border: rgba(66, 165, 245, 0.4);
+  --accent-border: rgba(79, 195, 247, 0.35);
+  --rank-gold-bg: linear-gradient(135deg, #ffd54f, #ffb300);
+  --rank-silver-bg: linear-gradient(135deg, #cfd8dc, #90a4ae);
+  --rank-bronze-bg: linear-gradient(135deg, #ffab91, #e64a19);
+  --rank-gray-bg: linear-gradient(135deg, #78909c, #546e7a);
+  --rank-text: #fff;
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-/* ===== 浅色模式变量覆盖 ===== */
-body.light-mode {
-  --glass-bg: rgba(0, 0, 0, 0.04);
-  --glass-border: rgba(0, 0, 0, 0.10);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
-  --accent: #1565c0;
-  --accent-glow: rgba(21, 101, 192, 0.30);
-  --text: #1a1a2e;
-  --text-dim: #666;
-  --card-hover-bg: rgba(0, 0, 0, 0.06);
+body.theme-silver {
+  --body-bg: linear-gradient(160deg, #1c1c20 0%, #2a2a30 35%, #222228 65%, #1c1c20 100%);
+  --body-bg-fallback: #1c1c20;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --card-bg-hover: rgba(255, 255, 255, 0.10);
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-solid: rgba(28, 28, 32, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --glass-border-hover: rgba(255, 255, 255, 0.24);
+  --accent: #b0bec5;
+  --accent-bg: rgba(176, 190, 197, 0.10);
+  --accent-glow: rgba(176, 190, 197, 0.35);
+  --text: #cfcfcf;
+  --text-dim: #8a8a8a;
+  --text-heading: #e0e0e0;
+  --btn-ghost: rgba(255,255,255,0.06);
+  --btn-ghost-hover: rgba(255,255,255,0.14);
+  --primary: #90a4ae;
+  --primary-bg: rgba(144, 164, 174, 0.15);
+  --primary-light: #b0bec5;
+  --primary-border: rgba(144, 164, 174, 0.35);
+  --accent-border: rgba(176, 190, 197, 0.30);
 }
+
+body.theme-midnight {
+  --body-bg: linear-gradient(160deg, #050510 0%, #0a0a1a 35%, #050515 65%, #050510 100%);
+  --body-bg-fallback: #050510;
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-solid: rgba(5, 5, 16, 0.90);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.18);
+  --accent: #7c4dff;
+  --accent-bg: rgba(124, 77, 255, 0.10);
+  --accent-glow: rgba(124, 77, 255, 0.45);
+  --text: #b8b8cc;
+  --text-dim: #6a6a80;
+  --text-heading: #d0d0e8;
+  --btn-ghost: rgba(255,255,255,0.04);
+  --btn-ghost-hover: rgba(255,255,255,0.10);
+  --primary: #b388ff;
+  --primary-bg: rgba(179, 136, 255, 0.15);
+  --primary-light: #ce93d8;
+  --primary-border: rgba(179, 136, 255, 0.35);
+  --accent-border: rgba(124, 77, 255, 0.30);
+}
+
+body.theme-minimal {
+  --body-bg: linear-gradient(160deg, #f5f5f7 0%, #ffffff 35%, #f0f0f2 65%, #f5f5f7 100%);
+  --body-bg-fallback: #f5f5f7;
+  --card-bg: rgba(0, 0, 0, 0.04);
+  --card-bg-hover: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(0, 0, 0, 0.04);
+  --glass-bg-solid: rgba(245, 245, 247, 0.88);
+  --glass-border: rgba(0, 0, 0, 0.10);
+  --glass-border-hover: rgba(0, 0, 0, 0.20);
+  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --glass-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --accent: #1a73e8;
+  --accent-bg: rgba(26, 115, 232, 0.08);
+  --accent-glow: rgba(26, 115, 232, 0.20);
+  --text: #1a1a1a;
+  --text-dim: #777;
+  --text-heading: #111;
+  --btn-ghost: rgba(0,0,0,0.05);
+  --btn-ghost-hover: rgba(0,0,0,0.10);
+  --primary: #1a73e8;
+  --primary-bg: rgba(26, 115, 232, 0.12);
+  --primary-light: #4285f4;
+  --primary-border: rgba(26, 115, 232, 0.35);
+  --accent-border: rgba(26, 115, 232, 0.25);
+}
+
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: -apple-system, 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', sans-serif;
-  background: linear-gradient(160deg, #0a1220 0%, #0e1a2e 35%, #162840 65%, #0c1628 100%);
-  background-attachment: fixed;
+  background: var(--body-bg);
+  background-attachment: var(--body-bg-attachment);
   min-height: 100vh;
   color: var(--text);
   overflow-x: hidden;
   transition: background 0.4s ease, color 0.4s ease;
 }
-body.light-mode {
-  background: linear-gradient(160deg, #e8edf5 0%, #f0f4f8 35%, #e4eaf2 65%, #e8edf5 100%);
-  color: var(--text);
-}
+body.theme-silver { background: var(--body-bg); background-attachment: fixed; }
+body.theme-midnight { background: var(--body-bg); background-attachment: fixed; }
+body.theme-minimal { background: var(--body-bg); background-attachment: fixed; }
 
 .stars-layer {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -159,200 +248,245 @@ body.light-mode .header h1 {
   letter-spacing: 5px; text-transform: uppercase;
 }
 
+/* ===== 恢复冷知识链接 ===== */
+.restore-coldfact {
+  display: inline-block; margin-top: 8px;
+  font-size: 0.72rem; color: var(--text-dim);
+  cursor: pointer; letter-spacing: 1px;
+  transition: color 0.3s; user-select: none;
+}
+.restore-coldfact:hover { color: var(--accent); }
+
 /* ===== 深色/浅色模式切换按钮 ===== */
-.theme-toggle {
+
+
+/* ===== 主题切换下拉菜单 ===== */
+.theme-toggle-btn {
   position: absolute; top: 20px; right: 24px; z-index: 10;
-  width: 42px; height: 42px;
-  backdrop-filter: blur(14px) saturate(180%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 50%;
+  border-radius: 50px;
+  padding: 8px 16px;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   box-shadow: var(--glass-shadow);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text);
-  font-size: 1.25rem;
-  padding: 0;
+  font-size: 0.88rem;
 }
-.theme-toggle:hover {
-  background: var(--card-hover-bg);
-  border-color: rgba(255,255,255,0.32);
-  transform: scale(1.08);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.35), 0 0 16px var(--accent-glow);
+.theme-toggle-btn:hover {
+  background: var(--card-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-md), 0 0 16px var(--accent-glow);
 }
-body.light-mode .theme-toggle:hover {
-  border-color: rgba(0,0,0,0.18);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-}
-.theme-toggle:active { transform: scale(0.92); }
+.theme-toggle-btn:active { transform: scale(0.96); }
+.theme-toggle-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
 
-/* —— 图标旋转弹出动画 —— */
-@keyframes iconSpinIn {
-  0%   { transform: rotate(0deg) scale(0.3); opacity: 0; }
-  100% { transform: rotate(360deg) scale(1); opacity: 1; }
-}
-.theme-toggle.no-animate svg { transition: none; }
-.theme-toggle.anim-icon svg { animation: iconSpinIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-/* 长按视觉反馈 */
-.theme-toggle.long-pressing { transform: scale(1.12); box-shadow: 0 0 22px var(--accent-glow); }
-
-.theme-toggle svg {
-  width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;
-  transition: transform 0.4s ease, opacity 0.3s ease;
-}
-
-/* ===== 主题选择弹窗 ===== */
-.theme-modal-overlay {
-  position: fixed; inset: 0; z-index: 10000;
-  background: rgba(10, 18, 32, 0.55);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  display: flex; align-items: center; justify-content: center;
-  animation: themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes themeModalIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.theme-modal-overlay.fade-out {
-  animation: themeModalOut 0.3s ease forwards;
-}
-@keyframes themeModalOut {
-  from { opacity: 1; transform: scale(1); }
-  to   { opacity: 0; transform: scale(0.95); }
-}
-.theme-modal-card {
-  position: relative;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 36px;
-  max-width: 440px; width: 90%;
-  box-shadow: var(--glass-shadow);
-  text-align: center;
-  color: var(--text);
+.theme-dropdown {
+  position: absolute; top: 62px; right: 24px; z-index: 110;
+  min-width: 180px;
   backdrop-filter: blur(22px) saturate(180%);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
+  background: var(--glass-bg-solid);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow-lg);
+  padding: 6px;
+  display: none;
+  animation: dropdownIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.theme-modal-card h3 {
-  font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.theme-modal-card .modal-sub {
-  font-size: 0.88rem; color: var(--text-dim); margin-bottom: 28px; line-height: 1.5;
+.theme-dropdown.visible { display: block; }
+
+.theme-dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 16px;
+  border: none; border-radius: 50px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
 }
-.theme-modal-choices {
-  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+.theme-dropdown-item:hover { background: var(--card-bg-hover); }
+.theme-dropdown-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+
+.theme-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid transparent;
 }
-.theme-modal-btn {
-  flex: 1; min-width: 140px; padding: 14px 20px;
-  border-radius: 14px; border: 2px solid transparent;
-  cursor: pointer; font-size: 0.95rem; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-  color: inherit;
-}
-.theme-modal-btn:hover { transform: scale(1.05); }
-.theme-modal-btn:active { transform: scale(0.96); }
-.theme-modal-btn.dark-btn {
-  background: #0a1220; color: #e3f2fd; border-color: rgba(255,255,255,0.15);
-}
-.theme-modal-btn.light-btn {
-  background: #e8edf5; color: #1a1a2e; border-color: rgba(0,0,0,0.1);
-}
-.theme-modal-close {
-  position: absolute; top: 12px; right: 14px;
-  width: 32px; height: 32px;
-  background: none; border: none;
-  font-size: 1.5rem; color: var(--text-dim);
-  cursor: pointer; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s ease; line-height: 1;
-}
-.theme-modal-close:hover {
-  background: var(--glass-bg); color: var(--text);
+.theme-dot.aviation { background: linear-gradient(135deg, #4fc3f7, #1565c0); }
+.theme-dot.silver { background: linear-gradient(135deg, #b0bec5, #607d8b); }
+.theme-dot.midnight { background: linear-gradient(135deg, #7c4dff, #311b92); }
+.theme-dot.minimal { background: linear-gradient(135deg, #e0e0e0, #fafafa); border-color: #ccc; }
+
+/* ===== 排行榜面板 ===== */
+.ranking-panel {
+  margin: 20px 0; padding: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ===== 热门排行 ===== */
-.ranking-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(6px); z-index: 10000;
-  display: flex; align-items: center; justify-content: center;
-  animation: fadeIn 0.2s ease;
+.ranking-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--glass-border);
 }
-.ranking-modal {
-  background: #0d1520; border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 28px 24px; width: 440px; max-height: 80vh;
-  overflow-y: auto; position: relative;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+.ranking-panel-title {
+  font-size: 1.1rem; font-weight: 700; color: var(--text-heading);
+  letter-spacing: 0.5px;
 }
-.ranking-modal h2 {
-  margin: 0 0 6px 0; font-size: 18px; color: #e0e0e0;
-  display: flex; align-items: center; gap: 8px;
+.ranking-panel-close {
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 6px 14px;
+  color: var(--text-dim);
+  font-size: 0.82rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap; user-select: none;
 }
-.ranking-modal .ranking-subtitle {
-  font-size: 12px; color: #607d8b; margin-bottom: 16px;
+.ranking-panel-close:hover {
+  background: var(--btn-ghost-hover);
+  border-color: var(--glass-border-hover);
+  color: var(--text);
 }
-.ranking-close {
-  position: absolute; top: 16px; right: 18px;
-  width: 32px; height: 32px; background: none; border: none;
-  font-size: 1.4rem; color: #78909c; cursor: pointer;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s;
+
+.ranking-tabs {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--glass-border);
 }
-.ranking-close:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.ranking-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 12px; border-radius: 10px; cursor: pointer;
-  transition: background 0.15s; margin-bottom: 6px;
+.ranking-tab {
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 7px 18px;
+  color: var(--text); cursor: pointer; font-size: 0.82rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap; user-select: none;
 }
-.ranking-item:hover { background: rgba(255,255,255,0.05); }
+.ranking-tab:hover {
+  background: var(--btn-ghost-hover);
+  border-color: var(--glass-border-hover);
+}
+.ranking-tab.active {
+  background: var(--primary-bg); color: var(--primary-light); border-color: var(--primary-border);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.ranking-list {
+  padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;
+}
+
+.ranking-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.ranking-card:hover {
+  background: var(--card-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
 .ranking-rank {
-  width: 28px; height: 28px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; flex-shrink: 0;
-  background: rgba(255,255,255,0.08); color: #78909c;
+  font-size: 0.85rem; font-weight: 800; color: var(--rank-text);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
-.ranking-rank.gold { background: linear-gradient(135deg, #f9a825, #f57f17); color: #fff; }
-.ranking-rank.silver { background: linear-gradient(135deg, #90a4ae, #607d8b); color: #fff; }
-.ranking-rank.bronze { background: linear-gradient(135deg, #8d6e63, #5d4037); color: #fff; }
-.ranking-thumb {
-  width: 44px; height: 32px; border-radius: 6px; object-fit: cover;
-  background: #1a2a3a; flex-shrink: 0;
-}
+.rank-1 { background: var(--rank-gold-bg); }
+.rank-2 { background: var(--rank-silver-bg); }
+.rank-3 { background: var(--rank-bronze-bg); }
+.rank-4, .rank-5 { background: var(--rank-gray-bg); }
+
 .ranking-info { flex: 1; min-width: 0; }
-.ranking-name { font-size: 14px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ranking-code { font-size: 11px; color: #607d8b; }
-.ranking-count { font-size: 13px; color: #ffb74d; font-weight: 600; flex-shrink: 0; }
-.ranking-empty {
-  text-align: center; padding: 32px 0; color: #607d8b; font-size: 14px;
+.ranking-name {
+  font-size: 0.9rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.ranking-clear {
-  text-align: right; margin-top: 8px; font-size: 11px;
+.ranking-meta {
+  font-size: 0.78rem; color: var(--text-dim); margin-top: 3px;
 }
-.ranking-clear a {
-  color: #546e7a; cursor: pointer; text-decoration: none;
-  transition: color 0.15s;
+.ranking-val {
+  font-size: 0.9rem; font-weight: 700; color: var(--accent);
+  white-space: nowrap; flex-shrink: 0;
 }
-.ranking-clear a:hover { color: #e57373; }
+
+
+/* ===== 航线动画地图 ===== */
+.airline-route-toggle {
+  display: inline-flex; align-items: center; gap: 4px; margin-top: 6px;
+  font-size: 11px; color: #607d8b; cursor: pointer; user-select: none;
+  border: 1px solid rgba(255,255,255,0.06); border-radius: 50px;
+  padding: 3px 10px; transition: all 0.15s;
+}
+.airline-route-toggle:hover { color: #90a4ae; border-color: rgba(255,255,255,0.15); }
+.airline-route-toggle svg { width: 14px; height: 14px; transition: transform 0.25s; }
+.airline-route-toggle.expanded svg { transform: rotate(180deg); }
+
+.airline-route-map {
+  display: none; width: 100%; height: 180px; margin-top: 8px;
+  border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);
+  background: #070e17; position: relative; overflow: hidden;
+}
+.airline-route-map.visible { display: block; }
 
 /* ===== 冷知识弹幕 ===== */
 .cold-fact-toast {
   position: fixed; z-index: 9999;
   bottom: 90px; right: -100%;
-  max-width: 420px; padding: 10px 16px;
+  max-width: 420px; padding: 10px 36px 10px 16px;
   background: rgba(13, 21, 32, 0.92); border: 1px solid rgba(255, 152, 0, 0.4);
   border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
   color: #e0e0e0; font-size: 13px; line-height: 1.5;
-  pointer-events: none; white-space: nowrap;
+  white-space: normal; user-select: none;
   animation: coldFactSlide 16s linear;
+  cursor: default;
 }
 .cold-fact-toast::before {
   content: '✈ 冷知识';
   display: block; font-size: 10px; color: #ff9800;
   margin-bottom: 2px; letter-spacing: 1px;
+}
+.cold-fact-toast .cold-fact-toast-close {
+  position: absolute; top: 8px; right: 8px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: none; color: #999;
+  font-size: 11px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.2s; line-height: 1; padding: 0;
+}
+.cold-fact-toast .cold-fact-toast-close:hover {
+  background: rgba(255,255,255,0.25); color: #fff;
+}
+.cold-fact-toast .cold-fact-toast-hint {
+  display: block; font-size: 9px; color: rgba(255,255,255,0.3);
+  margin-top: 4px; letter-spacing: 0.5px;
 }
 @keyframes coldFactSlide {
   0%   { right: -100%; }
@@ -941,6 +1075,13 @@ body.light-mode .card:hover {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.card-tag {
+  font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;
+  background: rgba(255,255,255,0.07); color: var(--text-dim);
+  border: 1px solid rgba(255,255,255,0.08); line-height: 1.4;
+}
+.card-tag .search-highlight { padding: 0 1px; }
 .card-stats {
   display: flex; gap: 16px; margin-top: 12px; padding-top: 12px;
   border-top: 1px solid rgba(255,255,255,0.05);
@@ -1088,13 +1229,86 @@ body.light-mode .airline-name { color: #1a1a2e; }
 .airline-website svg { width: 13px; height: 13px; }
 
 @media (max-width: 768px) {
-  .header { padding: 28px 18px; }
-  .header h1 { font-size: 1.9rem; }
-  .grid { grid-template-columns: 1fr; gap: 18px; }
-  .detail-modal { width: 96%; max-height: 92vh; }
-  .modal-specs { grid-template-columns: 1fr; }
+  .app-container { padding: 20px 12px 40px; }
+  .header { padding: 24px 16px; margin-bottom: 20px; border-radius: 18px; }
+  .header h1 { font-size: 1.7rem; }
+  .header .subtitle { font-size: 0.8rem; }
+  .hero-banner { height: 260px; border-radius: 18px; margin-bottom: 20px; }
+  .hero-content { flex-direction: column; }
+  .hero-text { width: 100%; min-width: 0; padding: 12px 14px 6px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+  .hero-text h2 { font-size: 1.1rem; }
+  .hero-text .hero-manufacturer { font-size: 0.7rem; margin-bottom: 2px; }
+  .hero-text .hero-desc { font-size: 0.68rem; -webkit-line-clamp: 2; }
+  .hero-image { flex: 1; padding: 6px 14px; }
+  .hero-image img { max-height: 120px; }
+  .hero-arrow { width: 32px; height: 32px; font-size: 1.2rem; }
+  .hero-dots { bottom: 8px; gap: 6px; }
+  .hero-dot { width: 6px; height: 6px; }
+  .stats-panel { gap: 8px; padding: 12px; flex-wrap: wrap; justify-content: center; }
+  .stat-card { min-width: 80px; padding: 12px 8px; border-radius: 14px; }
+  .stat-card .stat-number { font-size: 1.2rem; }
+  .stat-card .stat-label { font-size: 0.65rem; }
+  .stat-card .stat-icon { font-size: 1.1rem; }
+  .search-sort-row { flex-direction: column; gap: 10px; }
+  .search-wrap { max-width: 100%; }
+  .sort-group { justify-content: center; width: 100%; flex-wrap: wrap; }
+  .sort-chip { padding: 6px 10px; font-size: 0.7rem; }
+  #luckyButton { padding: 6px 12px; font-size: 0.72rem; }
+  .view-switch-bar { margin-left: 0; width: 100%; justify-content: center; }
+  .filter-bar { gap: 6px; padding: 10px; flex-wrap: wrap; justify-content: center; }
+  .filter-chip { padding: 5px 12px; font-size: 0.7rem; }
+  .airline-country-bar { flex-direction: column; gap: 8px; padding: 10px 14px; }
+  .airline-logos-bar { gap: 8px; padding: 8px 12px; justify-content: center; flex-wrap: wrap; }
+  .airline-logos-bar img { width: 28px; height: 28px; }
+  .grid { grid-template-columns: 1fr; gap: 16px; }
+  .card { border-radius: 16px; }
+  .card-image-wrap img { height: 180px; }
+  .card-body { padding: 14px 16px 16px; }
+  .card-body h3 { font-size: 1rem; }
+  .detail-modal { width: 96%; max-height: 92vh; border-radius: 20px; }
+  .modal-header-img img { height: 180px; border-radius: 20px 20px 0 0; }
+  .modal-body { padding: 16px 18px 20px; }
+  .modal-body h2 { font-size: 1.3rem; }
+  .modal-specs { grid-template-columns: 1fr; gap: 6px; }
+  .compare-bar { flex-wrap: wrap; justify-content: center; padding: 10px 14px; gap: 8px; }
+  .compare-bar .compare-slot { min-width: 100px; font-size: 0.72rem; padding: 6px 10px; }
+  .compare-bar .compare-btn { padding: 8px 16px; font-size: 0.75rem; }
+  .compare-bar .compare-clear { font-size: 0.7rem; }
   .airline-card { flex-direction: column; align-items: center; text-align: center; }
-  .airline-logo { width: 44px; height: 44px; }
+  .airline-logo { width: 40px; height: 40px; }
+  .cold-fact-toast { max-width: 320px; bottom: 70px; font-size: 12px; padding: 8px 30px 8px 12px; }
+  .cold-fact-toast .cold-fact-toast-hint { font-size: 8px; margin-top: 2px; }
+  .export-collection-btn { padding: 5px 10px; font-size: 0.7rem; margin-left: 4px; }
+}
+
+@media (max-width: 480px) {
+  .header h1 { font-size: 1.4rem; }
+  .header .subtitle { font-size: 0.72rem; }
+  .hero-banner { height: 200px; border-radius: 14px; }
+  .hero-arrow { width: 26px; height: 26px; font-size: 1rem; }
+  .hero-text h2 { font-size: 0.95rem; }
+  .hero-image img { max-height: 90px; }
+  .stat-card { min-width: 65px; padding: 10px 6px; border-radius: 10px; }
+  .stat-card .stat-number { font-size: 1rem; }
+  .stat-card .stat-label { font-size: 0.6rem; }
+  .stat-card .stat-icon { font-size: 0.9rem; }
+  .stats-panel { gap: 6px; padding: 8px; }
+  .card-image-wrap img { height: 160px; }
+  .card-body { padding: 10px 12px 14px; }
+  .card-body h3 { font-size: 0.9rem; }
+  .detail-modal { border-radius: 16px; }
+  .modal-header-img img { height: 140px; border-radius: 16px 16px 0 0; }
+  .modal-body h2 { font-size: 1.15rem; }
+  .modal-body { padding: 12px 14px 16px; }
+  .filter-chip { padding: 4px 8px; font-size: 0.65rem; }
+  .search-input { font-size: 0.8rem; padding: 8px 36px 8px 14px; }
+  .sort-chip { padding: 5px 8px; font-size: 0.65rem; }
+  .cold-fact-toast { max-width: 260px; bottom: 60px; font-size: 11px; right: 10px; }
+  .back-to-top { bottom: 16px; right: 10px; width: 36px; height: 36px; }
+  .fab-add { bottom: 66px; right: 10px; width: 36px; height: 36px; }
+  .compare-bar { padding: 8px 10px; }
+  .cold-fact-toast .cold-fact-toast-close { width: 18px; height: 18px; top: 6px; right: 6px; font-size: 10px; }
+  .cold-fact-toast .cold-fact-toast-hint { font-size: 7px; }
 }
 .announcement-toast {
   position: fixed; top: -80px; left: 50%; transform: translateX(-50%); z-index: 200;
@@ -1243,9 +1457,34 @@ body.light-mode .search-input::placeholder { color: #999; }
 }
 .search-clear.visible { display: flex; }
 .search-clear:hover { background: rgba(255,255,255,0.2); color: #fff; }
+.fuzzy-toggle {
+  position: absolute; right: 44px; top: 50%; transform: translateY(-50%);
+  height: 26px; padding: 0 10px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05); color: var(--text-dim); cursor: pointer;
+  font-size: 0.72rem; white-space: nowrap; transition: all 0.3s;
+  font-family: inherit; line-height: 26px;
+}
+.fuzzy-toggle:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
+.fuzzy-toggle.active { background: rgba(255,152,0,0.18); border-color: rgba(255,152,0,0.4); color: #ffb74d; }
+body.light-mode .fuzzy-toggle { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.04); color: #888; }
+body.light-mode .fuzzy-toggle:hover { border-color: rgba(0,0,0,0.25); color: #333; }
+body.light-mode .fuzzy-toggle.active { background: rgba(255,152,0,0.15); border-color: rgba(255,152,0,0.4); color: #e65100; }
 .search-results-hint {
   color: var(--text-dim); font-size: 0.78rem; text-align: center;
   margin-bottom: 14px; display: none;
+}
+
+/* ===== 搜索高亮 ===== */
+.search-highlight {
+  background: rgba(255, 152, 0, 0.35);
+  color: #ffb74d;
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 600;
+}
+body.light-mode .search-highlight {
+  background: rgba(255, 152, 0, 0.25);
+  color: #e65100;
 }
 
 /* ===== 搜索建议下拉 ===== */
@@ -2248,7 +2487,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body>
+<body data-version="20260804-v21">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -2265,10 +2504,14 @@ body.light-mode .map-container .leaflet-tile-pane {
   <div class="header">
     <h1 id="headerTitle" class="title-fade-in" style="animation-delay:0.1s">民航客机收藏馆</h1>
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
-    <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色模式" title="切换深色/浅色模式">
-      <svg id="themeIconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <svg id="themeIconMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
+    <span class="restore-coldfact" id="restoreColdFact" onclick="restoreColdFact()" title="恢复冷知识弹幕" style="display:none">&#9733; 恢复冷知识</span>
+    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
+    <div class="theme-dropdown" id="themeDropdown">
+      <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
+      <button class="theme-dropdown-item" data-theme="silver"><span class="theme-dot silver"></span>经典银</button>
+      <button class="theme-dropdown-item" data-theme="midnight"><span class="theme-dot midnight"></span>午夜黑</button>
+      <button class="theme-dropdown-item" data-theme="minimal"><span class="theme-dot minimal"></span>极简白</button>
+    </div>
   </div>
 
   <div class="hero-banner" id="heroBanner">
@@ -2307,7 +2550,22 @@ body.light-mode .map-container .leaflet-tile-pane {
     </div>
   </div>
 
-  <!-- ===== 国家分布地图 ===== -->
+  
+  <!-- ===== 排行榜面板 ===== -->
+  <div class="ranking-panel" id="rankingPanel" data-collapsed="true">
+    <div class="ranking-panel-header">
+      <div class="ranking-panel-title">排行榜</div>
+      <button class="ranking-panel-close" id="rankingClose" title="展开排行榜">&#9660; 展开</button>
+    </div>
+    <div class="ranking-tabs">
+      <button class="ranking-tab active" data-rank="range">航程最长</button>
+      <button class="ranking-tab" data-rank="capacity">载客最多</button>
+      <button class="ranking-tab" data-rank="firstFlight">首飞最早</button>
+    </div>
+    <div class="ranking-list" id="rankingList"></div>
+  </div>
+
+<!-- ===== 国家分布地图 ===== -->
   <div class="map-section" id="mapSection" style="display:none">
     <div class="map-section-header">
       <h3>&#127758; 国家分布地图</h3>
@@ -2328,6 +2586,7 @@ body.light-mode .map-container .leaflet-tile-pane {
       <input type="text" class="search-input" id="searchInput" placeholder="" id="searchInputPH" autocomplete="off">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <button class="search-clear" id="searchClear" onclick="clearSearch()">&times;</button>
+      <button class="fuzzy-toggle active" id="fuzzySearchBtn" onclick="toggleFuzzySearch()" title="模糊搜索：开（点击关闭）">模糊</button>
       <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
     </div>
     <div class="sort-group" id="sortGroup">
@@ -2351,14 +2610,11 @@ body.light-mode .map-container .leaflet-tile-pane {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
     </button>
-    <button class="export-collection-btn" id="rankingBtn" onclick="showRanking()" title="热门排行">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10M12 3v14M8 7l4-4 4 4"/><polyline points="8 17 12 13 16 17"/></svg>
-      热门排行
-    </button>
     <button class="export-collection-btn" id="mapToggleBtn" onclick="toggleWorldMap()" title="国家分布地图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
       国家分布地图
     </button>
+
     <div class="view-switch-bar" id="viewSwitchBar">
       <button class="view-switch-btn" id="viewToggleBtn">时间线</button>
 </div>
@@ -2441,6 +2697,9 @@ const i18n = {
     searchMatch: '款匹配飞行器',
     searchNoMatch1: '未找到匹配"',
     searchNoMatch2: '"的飞行器',
+    searchNoMatchFriendly: '未找到匹配的飞机，试试其他关键词',
+    searchFound: '找到 N 款匹配飞行器',
+
 
     // --- 公告 ---
     announcement: '16家航司Logo全新设计款上线，点击卡片查看详情',
@@ -2464,14 +2723,8 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">国家分布地图</span> + 修复冷知识弹幕卡死 + 热门排行 + 冷知识弹幕',
+    updateBanner: '<span class="banner-highlight">航线飞行</span> + 航司经典航线动画地图 + 排行榜默认收起',
 
-    // --- 热门排行 ---
-    rankingTitle: '热门排行',
-    rankingSubtitle: '机型查看次数排名',
-    rankingViews: '次',
-    rankingEmpty: '暂无数据，快去浏览机型吧',
-    rankingClear: '清除排行数据',
 
     // --- 冷知识弹幕 ---
     coldFact_1: '波音 747 的垂直尾翼高达 19.4 米，相当于六层楼的高度',
@@ -2632,6 +2885,181 @@ const i18n = {
     catHelicopter: '直升机',
     deleteCustom: '删除此机型',
     deleteConfirm: '确定要删除这款自定义机型吗？此操作不可撤销。',
+  },
+
+  en: {
+    // --- Page Base ---
+    pageTitle: 'Airliner Collection',
+    headerTitle: 'Airliner Collection',
+    headerSubtitle: 'by Marvis & Henry',
+    searchPlaceholder: 'Search aircraft model or name...',
+    backToTop: 'Back to Top',
+
+    // --- Sort ---
+    sortSpeed: 'Speed',
+    sortRange: 'Range',
+    sortCap: 'Capacity',
+
+    // --- Filter ---
+    filterCivil: 'Airliners',
+    filterFighter: 'Fighters',
+    filterBomber: 'Bombers',
+    filterTransport: 'Transports',
+    filterHelicopter: 'Helicopters',
+    filterAll: 'All',
+
+    // --- Search ---
+    searchNoMatch: 'No matching aircraft found',
+    searchNoMatchFriendly: 'No matching aircraft found, try a different keyword',
+    searchFound: 'Found N matching aircraft',
+    searchHintEmpty: 'Displaying all aircraft',
+
+    // --- Collection ---
+    collected: 'Collected',
+    noCollection: 'No collection yet',
+
+    // --- Announcement ---
+    announcement: '16 airlines with new logo design now live, click cards for details',
+
+    // --- Tags ---
+    tag_double_deck: 'Double Deck',
+    tag_super_jumbo: 'Super Jumbo',
+    tag_quad_engine: 'Quad Engine',
+    tag_twin_engine: 'Twin Engine',
+    tag_composite: 'Composite',
+    tag_ultra_range: 'Ultra Long Range',
+    tag_narrow_body: 'Narrow Body',
+    tag_wide_body: 'Wide Body',
+    tag_domestic: 'Domestic',
+    tag_fuel_efficient: 'Fuel Efficient',
+    tag_regional: 'Regional',
+    tag_fifth_gen: '5th Gen',
+    tag_stealth: 'Stealth',
+    tag_strategic: 'Strategic',
+    tag_attack: 'Armed',
+
+    // --- Update Banner ---
+    updateBanner: '<span class="banner-highlight">Flight Routes</span> + Animated airline route maps + Ranking collapsed',
+
+
+    // --- Cold Facts ---
+    coldFact_1: 'The Boeing 747\'s tail fin stands 19.4m tall, equivalent to a six-story building',
+    coldFact_2: 'The Airbus A380\'s wing area is about 845 sqm, roughly 3 tennis courts',
+    coldFact_3: 'Airline food tastes bland because high altitude reduces taste sensitivity by ~30%',
+    coldFact_4: 'Black boxes are actually bright orange for easier recovery after accidents',
+    coldFact_5: 'At cruising altitude, outside temperature drops to -50; cabin A/C maintains 20\u00b0C',
+    coldFact_6: 'The tiny hole in airplane windows balances pressure differentials to protect the window',
+    coldFact_7: 'When lightning strikes an aircraft, current travels along the metal skin safely away',
+    coldFact_8: 'Concorde stretched about 30cm during supersonic flight due to frictional heating',
+    coldFact_9: 'Cabin air is completely replaced every 2-3 minutes through HEPA filtration',
+    coldFact_10: 'Aircraft tires are filled with nitrogen not air, preventing high-temp blowouts',
+    coldFact_11: 'A single Boeing 747 is assembled from approximately 6 million individual parts',
+    coldFact_12: 'The shortest commercial flight in Scotland lasts only 47 seconds',
+    coldFact_13: 'Takeoff and landing account for 25% of total fuel consumption per flight',
+    coldFact_14: 'Airliners typically land against the wind to increase lift and shorten rollout',
+    coldFact_15: 'Pilots and co-pilots eat different meals to avoid simultaneous food poisoning',
+    coldFact_16: 'Bird strikes occur when engines ingest birds, 90% happen during takeoff/landing',
+    coldFact_17: 'A single runway can support a maximum takeoff weight exceeding 500 tons',
+    coldFact_18: 'Key cockpit difference: Airbus uses sidestick, Boeing uses central yoke',
+    coldFact_19: 'The A350 fuselage is 53% carbon fiber composite, 20% lighter than peers',
+    coldFact_20: 'For every hour of flight, an airliner requires about 12 hours of ground maintenance',
+
+    // --- Spec Labels ---
+    specCruiseSpeed: 'Cruise Speed',
+    specMaxSpeed: 'Max Speed',
+    specMaxRange: 'Max Range',
+    specRange: 'Range',
+    specCombatRadius: 'Combat Radius',
+    specCapacity: 'Capacity',
+    specLoad: 'Payload',
+    specWingspan: 'Wingspan',
+    specCeiling: 'Ceiling',
+    specRotorDiameter: 'Rotor Diameter',
+
+    // --- Category Labels ---
+    catCivil: 'Airliner',
+    catFighter: 'Fighter',
+    catBomber: 'Bomber',
+    catTransport: 'Transport',
+    catHelicopter: 'Helicopter',
+
+    // --- Country Names ---
+    country_US: 'USA',
+    country_CN: 'China',
+    country_JP: 'Japan',
+    country_DE: 'Germany',
+    country_GB: 'UK',
+    country_FR: 'France',
+    country_AE: 'UAE',
+    country_SG: 'Singapore',
+    country_QA: 'Qatar',
+    country_HK: 'Hong Kong',
+    country_FI: 'Finland',
+    country_TR: 'Turkey',
+    country_EU: 'Europe',
+    country_BR: 'Brazil',
+    country_CA: 'Canada/Europe',
+
+    // --- Airlines ---
+    airline_ua: 'United Airlines',
+    airline_dl: 'Delta Air Lines',
+    airline_ca: 'Air China',
+    airline_mu: 'China Eastern',
+    airline_cz: 'China Southern',
+    airline_ek: 'Emirates',
+    airline_sq: 'Singapore Airlines',
+    airline_qr: 'Qatar Airways',
+    airline_nh: 'ANA',
+    airline_lh: 'Lufthansa',
+    airline_ba: 'British Airways',
+    airline_af: 'Air France',
+    airline_ey: 'Etihad Airways',
+    airline_cx: 'Cathay Pacific',
+    airline_ay: 'Finnair',
+    airline_tk: 'Turkish Airlines',
+
+    // --- Airline Descriptions ---
+    desc_airline_ua: 'United Airlines, founded 1926, is one of the largest with the most extensive route network. Star Alliance founding member, HQ Chicago, 900+ aircraft.',
+    desc_airline_dl: 'Delta Air Lines, second-largest by passenger volume, SkyTeam founding member, HQ Atlanta, 900+ aircraft with renowned reliability.',
+    desc_airline_ca: 'Air China, flag carrier of China, Star Alliance member, HQ Beijing, largest wide-body fleet in China to nearly 200 destinations.',
+    desc_airline_mu: 'China Eastern Airlines, HQ Shanghai, SkyTeam member, 600+ modern aircraft. Launch commercial operator of the C919.',
+    desc_airline_cz: 'China Southern Airlines, HQ Guangzhou, Asia\'s largest fleet with 650+ aircraft, dual hubs Guangzhou and Beijing Daxing.',
+    desc_airline_ek: 'Emirates, world\'s largest A380 and B777 operator based in Dubai, renowned for "five-star hotel in the sky" luxury.',
+    desc_airline_sq: 'Singapore Airlines, world\'s highest-rated carrier, Star Alliance member known for service excellence.',
+    desc_airline_qr: 'Qatar Airways, oneworld member, HQ Doha, Qsuite business class, multiple Skytrax Airline of the Year awards.',
+    desc_airline_nh: 'ANA, Japan\'s largest airline, Star Alliance member, HQ Tokyo, world\'s largest 787 fleet, impeccable Japanese service.',
+    desc_airline_lh: 'Lufthansa, Europe\'s largest airline group, Star Alliance founding member, HQ Frankfurt, 300+ aircraft to 200+ destinations.',
+    desc_airline_ba: 'British Airways, UK flag carrier, oneworld founding member, London Heathrow hub to nearly 200 destinations.',
+    desc_airline_af: 'Air France, French flag carrier, SkyTeam founding member, HQ Paris, La Premiere among world\'s most luxurious cabins.',
+    desc_airline_ey: 'Etihad Airways, UAE national airline, HQ Abu Dhabi, The Residence suite, Arabian luxury hospitality.',
+    desc_airline_cx: 'Cathay Pacific, Hong Kong flag carrier, oneworld founding member, renowned Asian hospitality.',
+    desc_airline_ay: 'Finnair, Finland flag carrier, oneworld member, HQ Helsinki, shortest Arctic routes between Europe and Asia.',
+    desc_airline_tk: 'Turkish Airlines, Star Alliance member, HQ Istanbul, flies to more countries than any other airline.',
+
+    // --- Add Aircraft Form ---
+    addAircraft: 'Add Aircraft',
+    addAircraftSubtitle: 'Add a custom aircraft to the collection',
+    fieldNameZh: 'Name',
+    fieldCode: 'Manufacturer + Model',
+    fieldCategory: 'Category',
+    fieldCountry: 'Country',
+    fieldImage: 'Image URL',
+    fieldSpeed: 'Speed',
+    fieldRange: 'Range',
+    fieldCapacity: 'Capacity',
+    fieldWingspan: 'Wingspan',
+    fieldDescZh: 'Description',
+    fieldAirlines: 'Airlines',
+    fieldProdDate: 'Year',
+    btnSubmit: 'Submit',
+    btnCancel: 'Cancel',
+    catCivil: 'Airliner',
+    catFighter: 'Fighter',
+    catBomber: 'Bomber',
+    catTransport: 'Transport',
+    catHelicopter: 'Helicopter',
+    deleteCustom: 'Delete Aircraft',
+    deleteConfirm: 'Are you sure you want to delete this custom aircraft? This cannot be undone.',
   }
 };
 
@@ -2654,7 +3082,8 @@ const tagMeta = [
   { key: 'attack',        i18n: 'tag_attack' },
 ];
 
-function t(key) { return i18n.zh?.[key] || key; }
+var currentLang = 'zh';
+function t(key) { var lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh'; return (i18n[lang] && i18n[lang][key]) || (i18n.zh && i18n.zh[key]) || key; }
 const specLabelMap = {
   cruise_speed: 'specCruiseSpeed', max_speed: 'specMaxSpeed', max_range: 'specMaxRange',
   range: 'specRange', combat_radius: 'specCombatRadius', capacity: 'specCapacity',
@@ -2727,6 +3156,76 @@ function proxyUrl(url) {
 }
 
 // ===== 航空公司数据库 =====
+// ===== 航线机场坐标 =====
+const airports = {
+  'PEK': { name: '北京', lat: 40.08, lng: 116.58 },
+  'PVG': { name: '上海', lat: 31.14, lng: 121.81 },
+  'HND': { name: '东京', lat: 35.55, lng: 139.78 },
+  'NRT': { name: '东京', lat: 35.76, lng: 140.39 },
+  'SIN': { name: '新加坡', lat: 1.36, lng: 103.99 },
+  'DXB': { name: '迪拜', lat: 25.25, lng: 55.36 },
+  'LHR': { name: '伦敦', lat: 51.47, lng: -0.46 },
+  'CDG': { name: '巴黎', lat: 49.01, lng: 2.55 },
+  'FRA': { name: '法兰克福', lat: 50.03, lng: 8.57 },
+  'JFK': { name: '纽约', lat: 40.64, lng: -73.78 },
+  'LAX': { name: '洛杉矶', lat: 33.94, lng: -118.41 },
+  'SFO': { name: '旧金山', lat: 37.62, lng: -122.38 },
+  'ORD': { name: '芝加哥', lat: 41.98, lng: -87.90 },
+  'DOH': { name: '多哈', lat: 25.26, lng: 51.61 },
+  'ICN': { name: '首尔', lat: 37.46, lng: 126.44 },
+  'HKG': { name: '香港', lat: 22.31, lng: 113.91 },
+  'SYD': { name: '悉尼', lat: -33.95, lng: 151.18 },
+  'AMS': { name: '阿姆斯特丹', lat: 52.31, lng: 4.76 },
+  'MUC': { name: '慕尼黑', lat: 48.35, lng: 11.79 },
+  'DEL': { name: '德里', lat: 28.57, lng: 77.10 },
+  'GRU': { name: '圣保罗', lat: -23.43, lng: -46.47 },
+  'CAN': { name: '广州', lat: 23.39, lng: 113.30 },
+  'BKK': { name: '曼谷', lat: 13.69, lng: 100.75 },
+  'ATL': { name: '亚特兰大', lat: 33.64, lng: -84.43 },
+  'EWR': { name: '纽瓦克', lat: 40.69, lng: -74.17 },
+  'MEL': { name: '墨尔本', lat: -37.67, lng: 144.84 },
+  'ZRH': { name: '苏黎世', lat: 47.46, lng: 8.55 },
+  'MAD': { name: '马德里', lat: 40.49, lng: -3.57 },
+  'FCO': { name: '罗马', lat: 41.80, lng: 12.25 },
+  'CPH': { name: '哥本哈根', lat: 55.62, lng: 12.66 },
+  'VIE': { name: '维也纳', lat: 48.11, lng: 16.57 },
+  'IST': { name: '伊斯坦布尔', lat: 41.28, lng: 28.75 },
+  'SEA': { name: '西雅图', lat: 47.45, lng: -122.31 },
+  'IAH': { name: '休斯顿', lat: 29.99, lng: -95.34 },
+  'BOS': { name: '波士顿', lat: 42.37, lng: -71.02 },
+  'MIA': { name: '迈阿密', lat: 25.79, lng: -80.29 },
+  'SCL': { name: '圣地亚哥', lat: -33.39, lng: -70.79 },
+  'EZE': { name: '布宜诺斯', lat: -34.82, lng: -58.54 },
+  'BNE': { name: '布里斯班', lat: -27.38, lng: 153.12 },
+  'AKL': { name: '奥克兰', lat: -37.01, lng: 174.79 },
+  'JNB': { name: '约翰内斯堡', lat: -26.13, lng: 28.23 },
+  'CAI': { name: '开罗', lat: 30.12, lng: 31.41 },
+  'TLV': { name: '特拉维夫', lat: 32.01, lng: 34.88 },
+  'BOM': { name: '孟买', lat: 19.09, lng: 72.87 },
+  'KIX': { name: '大阪', lat: 34.43, lng: 135.24 },
+  'GMP': { name: '首尔金浦', lat: 37.56, lng: 126.79 },
+  'TPE': { name: '台北', lat: 25.08, lng: 121.23 },
+  'CTS': { name: '札幌', lat: 42.78, lng: 141.69 },
+  'FUK': { name: '福冈', lat: 33.59, lng: 130.45 },
+};
+
+// ===== 航司真实经典航线 ====
+const airlineRoutes = {
+  'ca': { hub: 'PEK', routes: [['PEK','LHR'],['PEK','JFK'],['PEK','CDG'],['PEK','SYD'],['PEK','FRA']] },
+  'mu': { hub: 'PVG', routes: [['PVG','JFK'],['PVG','CDG'],['PVG','LHR'],['PVG','SIN'],['PVG','SYD']] },
+  'cz': { hub: 'CAN', routes: [['CAN','LAX'],['CAN','AMS'],['CAN','SYD'],['CAN','LHR'],['CAN','DXB']] },
+  'ek': { hub: 'DXB', routes: [['DXB','LHR'],['DXB','JFK'],['DXB','SYD'],['DXB','LAX'],['DXB','SIN']] },
+  'sq': { hub: 'SIN', routes: [['SIN','LHR'],['SIN','JFK'],['SIN','SYD'],['SIN','HND'],['SIN','LAX']] },
+  'qr': { hub: 'DOH', routes: [['DOH','LHR'],['DOH','JFK'],['DOH','CDG'],['DOH','SYD'],['DOH','BKK']] },
+  'nh': { hub: 'HND', routes: [['HND','JFK'],['HND','LHR'],['HND','SFO'],['HND','SIN'],['HND','SYD']] },
+  'lh': { hub: 'FRA', routes: [['FRA','JFK'],['FRA','PEK'],['FRA','SIN'],['FRA','GRU'],['FRA','DEL']] },
+  'ba': { hub: 'LHR', routes: [['LHR','JFK'],['LHR','SIN'],['LHR','HKG'],['LHR','SYD'],['LHR','DXB']] },
+  'af': { hub: 'CDG', routes: [['CDG','JFK'],['CDG','PEK'],['CDG','GRU'],['CDG','SIN'],['CDG','DEL']] },
+  'ua': { hub: 'SFO', routes: [['SFO','LHR'],['SFO','NRT'],['SFO','SYD'],['EWR','SIN'],['ORD','CDG']] },
+  'dl': { hub: 'ATL', routes: [['ATL','AMS'],['ATL','CDG'],['ATL','HND'],['JFK','LHR'],['LAX','SYD']] }
+};
+
+
 const airlines = {
   'ua': {
     id: 'ua', name: t('airline_ua'), nameEn: 'United Airlines',
@@ -3000,6 +3499,8 @@ aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
     var custom = JSON.parse(localStorage.getItem('custom_aircrafts') || '[]');
     _customIdCounter = 100;
     if (custom.length) {
+      // 过滤损坏数据：必须有 id 和 specs
+      custom = custom.filter(function(a) { return a.id != null && a.specs != null; });
       custom.forEach(function(a) { a.slug = ''; a._custom = true; });
       [].push.apply(aircrafts, custom);
       custom.forEach(function(a) { if (a.id >= _customIdCounter) _customIdCounter = a.id + 1; });
@@ -3442,6 +3943,7 @@ function extractNumeric(specStr) {
 }
 
 function getSortValue(a) {
+  if (!a.specs) return 0;
   if (sortBy === 'speed') {
     const speedKey = a.specs['cruise_speed'] || a.specs['max_speed'] || '0';
     return extractNumeric(speedKey);
@@ -3453,6 +3955,30 @@ function getSortValue(a) {
     return extractNumeric(capKey);
   }
   return 0;
+}
+
+// ===== 全局关键词高亮函数 =====
+function highlightText(text, query) {
+  if (!query) return text;
+  var esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  var re = new RegExp('(' + esc + ')', 'gi');
+  return text.replace(re, '<mark class="search-highlight">$1</mark>');
+}
+
+// ===== 模糊搜索开关状态 =====
+var fuzzySearchEnabled = true;
+function toggleFuzzySearch() {
+  fuzzySearchEnabled = !fuzzySearchEnabled;
+  var btn = document.getElementById('fuzzySearchBtn');
+  if (fuzzySearchEnabled) {
+    btn.classList.add('active');
+    btn.title = '模糊搜索：开（点击关闭）';
+  } else {
+    btn.classList.remove('active');
+    btn.title = '模糊搜索：关（点击开启）';
+  }
+  renderCards();
+  if (document.getElementById('timeline').style.display !== 'none') initTimeline();
 }
 
 function renderCards() {
@@ -3484,14 +4010,60 @@ function renderCards() {
   }
 
 
-  // Search filter
+  // ===== 搜索过滤 =====
   if (searchQuery.trim()) {
-    const q = searchQuery.trim().toLowerCase();
-    filtered = filtered.filter(a =>
-      t(a.name).toLowerCase().includes(q) ||
-      a.code.toLowerCase().includes(q) ||
-      t(a.desc).toLowerCase().includes(q)
-    );
+    var q = searchQuery.trim().toLowerCase();
+    if (fuzzySearchEnabled) {
+      // 模糊搜索：多字段匹配
+      filtered = filtered.filter(function(a) {
+        // 1) 飞机名称：中文 + 英文
+        if (t(a.name).toLowerCase().indexOf(q) !== -1) return true;
+        var enName = (i18n.en && i18n.en[a.name]) || '';
+        if (enName.toLowerCase().indexOf(q) !== -1) return true;
+        // 2) 型号代码
+        if ((a.code || '').toLowerCase().indexOf(q) !== -1) return true;
+        // 3) 描述：中文 + 英文
+        if (t(a.desc).toLowerCase().indexOf(q) !== -1) return true;
+        var enDesc = (i18n.en && i18n.en[a.desc]) || '';
+        if (enDesc.toLowerCase().indexOf(q) !== -1) return true;
+        // 4) 制造国家：中文 + 翻译
+        if (a.country.toLowerCase().indexOf(q) !== -1) return true;
+        try {
+          var trC = translateCountry(a.country);
+          if (trC && trC.toLowerCase().indexOf(q) !== -1) return true;
+        } catch(e) {}
+        // 5) 航司：英文名 / 中文名 / 代码
+        var ids = a.airlineIds;
+        if (ids && ids.length) {
+          for (var ai = 0; ai < ids.length; ai++) {
+            var al = airlines[ids[ai]];
+            if (!al) continue;
+            if (al.nameEn && al.nameEn.toLowerCase().indexOf(q) !== -1) return true;
+            if (al.name && t(al.name).toLowerCase().indexOf(q) !== -1) return true;
+            if (al.code && al.code.toLowerCase().indexOf(q) !== -1) return true;
+          }
+        }
+        // 6) 标签：中文 + 英文
+        var tags = a.tags;
+        if (tags && tags.length) {
+          for (var ti = 0; ti < tags.length; ti++) {
+            var tk = 'tag_' + tags[ti];
+            if (t(tk).toLowerCase().indexOf(q) !== -1) return true;
+            var enTag = (i18n.en && i18n.en[tk]) || '';
+            if (enTag.toLowerCase().indexOf(q) !== -1) return true;
+          }
+        }
+        return false;
+      });
+    } else {
+      // 精确搜索：仅按飞机名称匹配
+      filtered = filtered.filter(function(a) {
+        if (t(a.name).toLowerCase().indexOf(q) !== -1) return true;
+        var enName = (i18n.en && i18n.en[a.name]) || '';
+        if (enName.toLowerCase().indexOf(q) !== -1) return true;
+        return false;
+      });
+    }
   }
 
   // Show/hide search clear button
@@ -3504,10 +4076,10 @@ function renderCards() {
   // Search results hint
   if (searchQuery.trim() && filtered.length === 0) {
     searchHint.style.display = 'block';
-    searchHint.textContent = `未找到匹配"${searchQuery.trim()}"的飞行器`;
+    searchHint.textContent = t('searchNoMatchFriendly');
   } else if (searchQuery.trim()) {
     searchHint.style.display = 'block';
-    searchHint.textContent = `找到 ${filtered.length} 款匹配飞行器`;
+    searchHint.textContent = t('searchFound').replace('N', filtered.length);
   } else {
     searchHint.style.display = 'none';
   }
@@ -3524,8 +4096,19 @@ function renderCards() {
   }
 
   // Build card HTML items array (no DOM write yet)
+  var sq = searchQuery.trim();
   const items = filtered.map((a, i) => {
     const isCompared = compareSet.has(a.id);
+    // 标签标签（最多 3 个）
+    var tagsHtml = '';
+    if (a.tags && a.tags.length) {
+      var tagSpans = [];
+      for (var tIdx = 0; tIdx < a.tags.length && tIdx < 3; tIdx++) {
+        var tk = a.tags[tIdx];
+        tagSpans.push('<span class="card-tag">' + highlightText(t('tag_' + tk), sq) + '</span>');
+      }
+      tagsHtml = '<div class="card-tags">' + tagSpans.join('') + '</div>';
+    }
     return `
     <div class="card card-animate tilt-active${a._custom ? ' custom-card' : ''}" data-id="${a.id}" style="--i:${i}" onclick="openDetail(${a.id})" oncontextmenu="if(${!!a._custom}){event.preventDefault();toggleCustomDeleteMode(${a.id});}">
       <div class="card-image-wrap">
@@ -3533,7 +4116,7 @@ function renderCards() {
         <img src="${proxyUrl(a.image)}" alt="${t(a.name)}" loading="lazy"
              onload="this.classList.add('loaded'); this.previousElementSibling.classList.add('hidden')"
              onerror="placeholdImage(this,'${t(a.name)}','${a.code}','${a.category}'); this.previousElementSibling.classList.add('hidden')">
-        <div class="card-badge">${a.country}</div>
+        <div class="card-badge">${highlightText(a.country, sq)}</div>
         <div class="card-compare-check ${isCompared ? 'checked' : ''}"
              onclick="event.stopPropagation(); toggleCompare(${a.id})"
              title="${isCompared ? t('cancelCompare') : t('addCompare')}">
@@ -3546,12 +4129,13 @@ function renderCards() {
         ${a._custom ? '<div class="custom-delete-btn" onclick="event.stopPropagation();deleteCustomAircraft('+a.id+')">'+t('deleteCustom')+'</div>' : ''}
       </div>
       <div class="card-body">
-        <h3>${t(a.name)}</h3>
-        <div class="model-code">${a.code}</div>
-        <div class="desc">${t(a.desc)}</div>
+        <h3>${highlightText(t(a.name), sq)}</h3>
+        <div class="model-code">${highlightText(a.code, sq)}</div>
+        <div class="desc">${highlightText(t(a.desc), sq)}</div>
+        ${tagsHtml}
         <div class="card-stats">
-          <div class="stat"><div class="stat-value">${a.specs['cruise_speed'] || a.specs['max_speed'] || '--'}</div><div class="stat-label">${t('sortSpeed')}</div></div>
-          <div class="stat"><div class="stat-value">${a.specs['wingspan'] || a.specs['rotor_diameter'] || '--'}</div><div class="stat-label">${t('specWingspan')}</div></div>
+          <div class="stat"><div class="stat-value">${(a.specs && a.specs['cruise_speed']) || (a.specs && a.specs['max_speed']) || '--'}</div><div class="stat-label">${t('sortSpeed')}</div></div>
+          <div class="stat"><div class="stat-value">${(a.specs && a.specs['wingspan']) || (a.specs && a.specs['rotor_diameter']) || '--'}</div><div class="stat-label">${t('specWingspan')}</div></div>
         </div>
       </div>
     </div>`;
@@ -3576,22 +4160,22 @@ function renderCards() {
 
   // Batch progressive rendering: 6 cards per frame to avoid main-thread jank
   const BATCH_SIZE = 6;
-  grid.innerHTML = skeletonHTML;
-  updateCollectionCount();
-  updateCompareBar();
 
   if (items.length === 0) {
-    // Clear skeletons after a brief delay when no results
-    setTimeout(function() { if (grid.querySelector('.skeleton-card')) grid.innerHTML = ''; }, 350);
+    grid.innerHTML = '';
+    updateCollectionCount();
+    updateCompareBar();
     return;
   }
 
+  // Direct batch render without skeleton to avoid flash
   let batchIndex = 0;
   function renderBatch() {
     try {
       if (batchIndex === 0) {
-        // Replace skeletons with first batch of real cards
         grid.innerHTML = items.slice(0, BATCH_SIZE).join('');
+        updateCollectionCount();
+        updateCompareBar();
       } else {
         const start = batchIndex * BATCH_SIZE;
         const end = Math.min(start + BATCH_SIZE, items.length);
@@ -3606,7 +4190,6 @@ function renderCards() {
       }
     } catch (e) {
       console.error('renderBatch error:', e);
-      // Fallback: render all cards at once
       grid.innerHTML = items.join('');
       requestAnimationFrame(function() { initCardAnimation(); });
     }
@@ -3769,18 +4352,31 @@ function showCompare() {
 
 // ===== 3D 倾斜效果 =====
 function initTiltEffect() {
+  let tiltRAF = null;
+  let lastEvent = null;
+
   document.addEventListener('mousemove', (e) => {
-    const cards = document.querySelectorAll('.card.tilt-active:hover');
-    cards.forEach(card => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -8;
-      const rotateY = ((x - centerX) / centerX) * 8;
-      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-7px) scale(1.015)`;
-    });
+    lastEvent = e;
+    if (!tiltRAF) {
+      tiltRAF = requestAnimationFrame(() => {
+        tiltRAF = null;
+        if (!lastEvent) return;
+        const e = lastEvent;
+        const cards = document.querySelectorAll('.card.tilt-active:hover');
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          // Cache rect per card during this frame to avoid multiple forced layouts
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -8;
+          const rotateY = ((x - centerX) / centerX) * 8;
+          card.style.transform = 'perspective(800px) rotateX(' + rotateX.toFixed(1) + 'deg) rotateY(' + rotateY.toFixed(1) + 'deg) translateY(-7px) scale(1.015)';
+        }
+      });
+    }
   });
 
   document.addEventListener('mouseleave', (e) => {
@@ -4233,7 +4829,7 @@ function getRelatedAircraft(currentId, limit) {
   if (isCivil && sameCat.length < limit) {
     // Add same-manufacturer civil aircraft from different sub-types but still civil
     var sameMfr = aircrafts.filter(function(a) {
-      return a.id !== currentId && a.category === 'civil' && a.code.split(' ')[0] === manufacturer && !sameCat.some(function(s) { return s.id === a.id; });
+      return a.id !== currentId && a.category === 'civil' && (a.code || '').split(' ')[0] === manufacturer && !sameCat.some(function(s) { return s.id === a.id; });
     });
     sameCat = sameCat.concat(sameMfr);
   }
@@ -4315,6 +4911,8 @@ function openDetail(id) {
   const a = aircrafts.find(x => x.id === id);
   if (!a) return;
 
+  var sq = searchQuery.trim();
+
   // P2: Set URL hash via pushState (no hashchange event)
   if (a.slug && !_skipHashHandler) {
     _skipHashHandler = true;
@@ -4323,7 +4921,6 @@ function openDetail(id) {
   }
 
   window._track('card_click', { aircraftId: a.id, name: t(a.name), code: a.code, category: a.category });
-  recordView(a.id);
 
   const airlineCards = (a.airlineIds || []).map(aid => {
     const al = airlines[aid];
@@ -4333,13 +4930,20 @@ function openDetail(id) {
       <img class="airline-logo" src="${proxyUrl(al.logo)}" alt="${al.name}"
            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2252%22 height=%2252%22><rect fill=%22%23222%22 width=%2252%22 height=%2252%22 rx=%2214%22/><text fill=%22%23888%22 x=%2226%22 y=%2230%22 text-anchor=%22middle%22 font-size=%2210%22>${al.code}</text></svg>'">
       <div class="airline-info">
-        <div class="airline-name" style="cursor:pointer" onclick="event.stopPropagation();closeDetail();filterByAirline('${aid}')" title="查看该航司所有机型">${al.name} <span class="airline-country-tag">${al.country}</span></div>
-        <div class="airline-desc">${t(al.desc)}</div>
+        <div class="airline-name" style="cursor:pointer" onclick="event.stopPropagation();closeDetail();filterByAirline('${aid}')" title="查看该航司所有机型">${highlightText(al.name, sq)} <span class="airline-country-tag">${highlightText(al.country, sq)}</span></div>
+        <div class="airline-desc">${highlightText(t(al.desc), sq)}</div>
         <a class="airline-website" href="${al.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           ${t('visitWebsite')}
         </a>
       </div>
+    </div>
+    <div class="airline-route-section">
+      <div class="airline-route-toggle" onclick="event.stopPropagation();toggleAirlineRoute('${aid}',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <span>经典航线</span>
+      </div>
+      <div class="airline-route-map"></div>
     </div>`;
   }).join('');
 
@@ -4354,13 +4958,13 @@ function openDetail(id) {
         <div class="modal-close" onclick="closeDetail()">&times;</div>
       </div>
       <div class="modal-body">
-        <h2 style="margin:0 0 2px 0">${t(a.name)}</h2>
-        <div class="modal-code">${a.code} · ${a.country}</div>
-        ${(a.tags && a.tags.length) ? '<div class="modal-tags"><span class="modal-tags-title">标签</span>' + a.tags.map(function(tag) { var m = tagMeta.find(function(m) { return m.key === tag; }); return m ? '<span class="modal-tag-chip">' + t(m.i18n) + '</span>' : ''; }).join('') + '</div>' : ''}
-        <div class="modal-desc">${t(a.desc)}</div>
+        <h2 style="margin:0 0 2px 0">${highlightText(t(a.name), sq)}</h2>
+        <div class="modal-code">${highlightText(a.code || '', sq)} · ${highlightText(a.country, sq)}</div>
+        ${(a.tags && a.tags.length) ? '<div class="modal-tags"><span class="modal-tags-title">标签</span>' + a.tags.map(function(tag) { var m = tagMeta.find(function(m) { return m.key === tag; }); return m ? '<span class="modal-tag-chip">' + highlightText(t(m.i18n), sq) + '</span>' : ''; }).join('') + '</div>' : ''}
+        <div class="modal-desc">${highlightText(t(a.desc), sq)}</div>
         <div class="modal-specs">
           ${Object.entries(a.specs).map(([k, v]) =>
-            `<div class="spec-item"><div class="spec-label">${specLabel(k)}</div><div class="spec-value">${v}</div></div>`
+            `<div class="spec-item"><div class="spec-label">${specLabel(k)}</div><div class="spec-value">${highlightText(v, sq)}</div></div>`
           ).join('')}
         </div>
         <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
@@ -4415,7 +5019,7 @@ document.addEventListener('keydown', (e) => {
 function createStars() {
   const layer = document.getElementById('starsLayer');
   const frag = document.createDocumentFragment();
-  for (let i = 0; i < 110; i++) {
+  for (let i = 0; i < 50; i++) {
     const star = document.createElement('div');
     star.className = 'star';
     star.style.left = Math.random() * 100 + '%';
@@ -4440,10 +5044,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260801-v17', '1');
+  localStorage.setItem('aviation-update-20260804-v21', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260801-v17')) return;
+  if (localStorage.getItem('aviation-update-20260804-v21')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
@@ -4775,194 +5379,495 @@ document.getElementById('airlineFilterClose').addEventListener('click', function
 
 // ===== 深色/浅色模式切换 =====
 (function initTheme() {
-  var toggleBtn = document.getElementById('themeToggle');
-  var sunIcon = document.getElementById('themeIconSun');
-  var moonIcon = document.getElementById('themeIconMoon');
+  initRanking();
   var STORAGE_KEY = 'aviation-theme';
+  var toggleBtn = document.getElementById('themeToggleBtn');
+  var dropdown = document.getElementById('themeDropdown');
+  if (!toggleBtn || !dropdown) return;
 
-  // --- 图标动画辅助 ---
-  function triggerIconAnim(svgEl) {
-    toggleBtn.classList.add('anim-icon');
-    svgEl.addEventListener('animationend', function handler() {
-      svgEl.removeEventListener('animationend', handler);
-      toggleBtn.classList.remove('anim-icon');
-    }, { once: true });
-  }
+  var themes = ['aviation', 'silver', 'midnight', 'minimal'];
 
-  function setTheme(mode) {
-    var wasDifferent = (mode === 'light') !== document.body.classList.contains('light-mode');
-    if (mode === 'light') {
-      document.body.classList.add('light-mode');
-      if (wasDifferent) {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = '';
-        triggerIconAnim(moonIcon);
-      } else {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = '';
-      }
-    } else {
-      document.body.classList.remove('light-mode');
-      if (wasDifferent) {
-        sunIcon.style.display = '';
-        moonIcon.style.display = 'none';
-        triggerIconAnim(sunIcon);
-      } else {
-        sunIcon.style.display = '';
-        moonIcon.style.display = 'none';
-      }
-    }
-  }
-
-  // --- 弹窗 ---
-  function openThemeModal(context) {
-    var modalOverlay = document.getElementById('themeModalOverlay');
-    var modalTitle = document.getElementById('themeModalTitle');
-    var modalSub = document.getElementById('themeModalSub');
-    if (!modalOverlay || !modalTitle || !modalSub) return;
-    modalOverlay.setAttribute('data-context', context);
-    if (context === 'first-visit') {
-      modalTitle.textContent = '选择主题 / Choose Theme';
-      modalSub.textContent = '深色还是浅色模式？你随时可以长按右上角按钮更改';
-    } else {
-      modalTitle.textContent = '主题设置 / Theme Settings';
-      modalSub.textContent = '随时切换深浅模式 / Switch anytime';
-    }
-    modalOverlay.style.display = '';
-    modalOverlay.classList.remove('fade-out');
-    // 强制回流以重启动画
-    void modalOverlay.offsetWidth;
-    modalOverlay.style.animation = 'none';
-    void modalOverlay.offsetWidth;
-    modalOverlay.style.animation = 'themeModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
-  }
-
-  function closeThemeModal() {
-    var modalOverlay = document.getElementById('themeModalOverlay');
-    modalOverlay.style.animation = '';
-    modalOverlay.classList.add('fade-out');
-    modalOverlay.addEventListener('animationend', function handler() {
-      modalOverlay.removeEventListener('animationend', handler);
-      modalOverlay.style.display = 'none';
-      modalOverlay.classList.remove('fade-out');
-    }, { once: true });
-  }
-
-  // 弹窗内按钮点击 + overlay 关闭（延迟到 DOM 解析完成）
-  window.addEventListener('DOMContentLoaded', function() {
-    var modalOverlay = document.getElementById('themeModalOverlay');
-    if (!modalOverlay) return;
-    modalOverlay.querySelectorAll('.theme-modal-btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var mode = this.getAttribute('data-theme');
-        setTheme(mode);
-        try { localStorage.setItem(STORAGE_KEY, mode); } catch(e) {}
-        closeThemeModal();
-      });
+  function setTheme(theme) {
+    themes.forEach(function(t) {
+      if (t === 'aviation') return;
+      document.body.classList.remove('theme-' + t);
     });
-    var closeBtn = document.getElementById('themeModalClose');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        closeThemeModal();
-      });
+    if (theme !== 'aviation') {
+      document.body.classList.add('theme-' + theme);
     }
-    modalOverlay.addEventListener('click', function(e) {
-      if (e.target === modalOverlay && modalOverlay.getAttribute('data-context') !== 'first-visit') {
-        closeThemeModal();
-      }
+    dropdown.querySelectorAll('.theme-dropdown-item').forEach(function(item) {
+      item.classList.toggle('active', item.getAttribute('data-theme') === theme);
+    });
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+  }
+
+  toggleBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    dropdown.classList.toggle('visible');
+  });
+
+  dropdown.querySelectorAll('.theme-dropdown-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      setTheme(this.getAttribute('data-theme'));
+      dropdown.classList.remove('visible');
     });
   });
 
-  // --- 普通点击切换 ---
-  function toggleTheme() {
-    toggleBtn.classList.add('no-animate');
-    var isLight = document.body.classList.contains('light-mode');
-    var newMode = isLight ? 'dark' : 'light';
-    setTheme(newMode);
-    try { localStorage.setItem(STORAGE_KEY, newMode); } catch(e) {}
-    // 动画结束后移除 no-animate
-    setTimeout(function() { toggleBtn.classList.remove('no-animate'); }, 450);
-  }
-
-  // --- 长按检测 ---
-  var longPressTimer = null;
-  var longPressTriggered = false;
-  var pressStartX = 0, pressStartY = 0;
-
-  function onPressStart(e) {
-    longPressTriggered = false;
-    var pt = e.touches ? e.touches[0] : e;
-    pressStartX = pt.clientX;
-    pressStartY = pt.clientY;
-    toggleBtn.classList.add('long-pressing');
-    longPressTimer = setTimeout(function() {
-      longPressTriggered = true;
-      toggleBtn.classList.remove('long-pressing');
-      openThemeModal('settings');
-    }, 600);
-  }
-
-  function onPressMove(e) {
-    if (!longPressTimer) return;
-    var pt = e.touches ? e.touches[0] : e;
-    var dx = pt.clientX - pressStartX;
-    var dy = pt.clientY - pressStartY;
-    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-      toggleBtn.classList.remove('long-pressing');
+  document.addEventListener('click', function(e) {
+    if (!toggleBtn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('visible');
     }
-  }
-
-  function onPressEnd(e) {
-    toggleBtn.classList.remove('long-pressing');
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
-    if (!longPressTriggered) {
-      // 普通 click
-      toggleTheme();
-    }
-  }
-
-  // 桌面端
-  toggleBtn.addEventListener('mousedown', onPressStart);
-  toggleBtn.addEventListener('mousemove', onPressMove);
-  toggleBtn.addEventListener('mouseup', onPressEnd);
-  toggleBtn.addEventListener('mouseleave', function() {
-    toggleBtn.classList.remove('long-pressing');
-    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   });
 
-  // 移动端
-  toggleBtn.addEventListener('touchstart', onPressStart, { passive: false });
-  toggleBtn.addEventListener('touchmove', onPressMove, { passive: false });
-  toggleBtn.addEventListener('touchend', onPressEnd);
-
-  // 移除旧的 click 监听（用 mousedown+mouseup 已覆盖）
-  // toggleBtn 不再挂 click，由 pressEnd 处理短按
-
-  // --- 初始化 ---
   var saved = null;
   try { saved = localStorage.getItem(STORAGE_KEY); } catch(e) {}
-  if (saved === 'light') {
-    setTheme('light');
-  } else if (saved === 'dark') {
-    setTheme('dark');
-  } else {
-    // 无记录：首次访问，不应用任何主题，显示弹窗
-    openThemeModal('first-visit');
-  }
-  // 确保初始图标状态：深色模式下默认显示太阳，浅色模式默认显示月亮
-  // setTheme 已处理 display，此处仅兜底无记录场景
-  if (saved === null) {
-    sunIcon.style.display = '';
-    moonIcon.style.display = 'none';
+  if (saved && themes.indexOf(saved) >= 0) {
+    setTheme(saved);
   }
 })();
+
+/* ===== 排行榜 ===== */
+function parseRange(rangeStr) {
+  if (!rangeStr) return 0;
+  var s = String(rangeStr).replace(/,/g, '');
+  var m = s.match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : 0;
+}
+
+function parseCapacity(capStr) {
+  if (!capStr) return 0;
+  var parts = String(capStr).split(/[-–]/);
+  var last = parts[parts.length - 1];
+  var m = last.match(/\d+/);
+  return m ? parseInt(m[0]) : 0;
+}
+
+function parseFirstFlightYear(descStr) {
+  if (!descStr) return 9999;
+  var m = String(descStr).match(/(\d{4})\s*年\s*(首飞|投入运营|商业运营)/);
+  return m ? parseInt(m[1]) : 9999;
+}
+
+function renderRanking(type) {
+  var data = aircrafts.map(function(a) {
+    var val = 0;
+    if (type === 'range') {
+      val = parseRange(a.specs && a.specs.max_range);
+    } else if (type === 'capacity') {
+      val = parseCapacity(a.specs && a.specs.capacity);
+    } else if (type === 'firstFlight') {
+      var descKey = a.desc;
+      var desc = '';
+      try { desc = window.t ? window.t(descKey) : (i18n && i18n.zh && i18n.zh[descKey]) || ''; } catch(e) {}
+      val = parseFirstFlightYear(desc);
+    }
+    return { id: a.id, value: val, name: a.name, code: a.code };
+  });
+
+  data.sort(function(a, b) {
+    if (type === 'firstFlight') return a.value - b.value;
+    return b.value - a.value;
+  });
+
+  data = data.slice(0, 5);
+
+  var html = '';
+  data.forEach(function(item, i) {
+    var rankClass = 'rank-' + (i + 1);
+    var rankNum = i + 1;
+    var displayName = '';
+    try { displayName = window.t ? window.t(item.name) : item.name; } catch(e) { displayName = item.name; }
+    var displayVal = type === 'firstFlight' ? item.value + '\u5e74' : item.value;
+    html += '<div class=\"ranking-card\" onclick=\"openDetail(' + item.id + ')\">';
+    html += '<div class=\"ranking-rank ' + rankClass + '\">' + rankNum + '</div>';
+    html += '<div class=\"ranking-info\">';
+    html += '<div class=\"ranking-name\">' + displayName + '</div>';
+    html += '<div class=\"ranking-meta\">' + item.code + '</div>';
+    html += '</div>';
+    html += '<div class=\"ranking-val\">' + displayVal + '</div>';
+    html += '</div>';
+  });
+
+  document.getElementById('rankingList').innerHTML = html;
+}
+
+function initRanking() {
+  var tabs = document.querySelectorAll('.ranking-tab');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      this.classList.add('active');
+      renderRanking(this.getAttribute('data-rank'));
+    });
+  });
+
+  var closeBtn = document.getElementById('rankingClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+      var list = document.getElementById('rankingList');
+      var tabsEl = document.querySelector('.ranking-tabs');
+      var panel = document.getElementById('rankingPanel');
+      var isCollapsed = panel.getAttribute('data-collapsed') === 'true';
+      if (isCollapsed) {
+        panel.setAttribute('data-collapsed', 'false');
+        list.style.display = '';
+        tabsEl.style.display = '';
+        this.innerHTML = '&#9650; \u6536\u8d77';
+      } else {
+        panel.setAttribute('data-collapsed', 'true');
+        list.style.display = 'none';
+        tabsEl.style.display = 'none';
+        this.innerHTML = '&#9660; \u5c55\u5f00';
+      }
+    });
+  }
+
+  renderRanking('range');
+
+  // 初始折叠状态
+  var panel = document.getElementById('rankingPanel');
+  if (panel && panel.getAttribute('data-collapsed') === 'true') {
+    document.getElementById('rankingList').style.display = 'none';
+    document.querySelector('.ranking-tabs').style.display = 'none';
+  }
+}
+
+
+// ===== 航线动画地图 =====
+var routeAnimations = {};
+
+function sanitizeId(id) {
+  return id.replace(/[^a-zA-Z0-9]/g, '');
+}
+
+// 简化世界地图轮廓 (Canvas绘制)
+function drawWorldMapBg(ctx, W, H, minLng, maxLng, minLat, maxLat, pad) {
+  var projx = function(lng) { return pad + (lng - minLng) / (maxLng - minLng) * (W - pad * 2); };
+  var projy = function(lat) { return pad + (maxLat - lat) / (maxLat - minLat) * (H - pad * 2); };
+
+  // 淡色陆地填充
+  ctx.fillStyle = 'rgba(255,255,255,0.025)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+
+  // 简化的大陆轮廓 (equirectangular投影坐标)
+  var continents = [
+    // 北美洲 (简化)
+    [[-168,66],[-140,60],[-125,50],[-125,30],[-117,33],[-105,20],[-97,18],[-97,29],[-82,26],[-82,41],[-90,47],[-83,65],[-55,47],[-55,46],[-65,44],[-53,47],[-43,47],[-43,46],[-65,45],[-67,45],[-67,43],[-70,44],[-75,41],[-79,43],[-80,43],[-82,45],[-170,53],[-168,66]],
+    // 南美洲 (简化)
+    [[-80,10],[-75,12],[-70,12],[-60,5],[-53,4],[-50,0],[-44,-2],[-35,-6],[-35,-15],[-38,-18],[-42,-23],[-48,-27],[-52,-33],[-57,-35],[-58,-40],[-65,-40],[-70,-40],[-73,-40],[-73,-45],[-75,-48],[-72,-50],[-70,-55],[-70,-54],[-75,-47],[-71,-40],[-72,-35],[-75,-30],[-78,-27],[-80,-5],[-80,10]],
+    // 欧洲 (简化)
+    [[-10,36],[0,43],[3,43],[5,47],[8,47],[12,42],[13,41],[16,42],[19,46],[23,46],[27,48],[32,47],[36,50],[40,42],[42,42],[42,40],[51,38],[50,35],[30,32],[26,34],[22,36],[20,39],[16,42],[14,40],[14,38],[12,36],[10,37],[0,36],[-10,36]],
+    // 非洲 (简化)
+    [[-17,15],[-16,15],[-16,18],[-5,5],[8,6],[10,6],[12,4],[15,2],[18,-4],[20,-5],[28,-6],[32,-4],[34,-4],[36,-7],[38,-12],[41,-15],[43,-15],[44,-13],[44,-16],[40,-19],[35,-23],[33,-25],[33,-28],[32,-31],[28,-33],[25,-35],[26,-35],[18,-35],[15,-35],[13,-35],[10,-34],[8,-32],[8,-33],[5,-33],[-5,-34],[-10,-35],[-12,-35],[-17,-23],[-17,-15],[-20,-15],[-20,15],[-17,15]],
+    // 亚洲 (简化)
+    [[40,42],[48,42],[52,36],[55,36],[60,36],[65,40],[70,42],[72,42],[75,37],[70,34],[75,30],[72,24],[73,18],[77,14],[78,10],[80,12],[85,24],[90,10],[92,5],[95,10],[97,15],[100,22],[102,17],[104,12],[105,20],[108,32],[110,30],[110,25],[107,20],[105,18],[106,12],[104,10],[105,6],[107,1],[103,2],[100,8],[98,16],[95,22],[92,22],[90,22],[82,8],[78,8],[75,8],[72,6],[70,6],[68,25],[69,30],[68,36],[60,39],[55,42],[50,42],[43,42],[40,42]],
+    // 澳大利亚 (简化)
+    [[115,-15],[120,-13],[125,-12],[130,-12],[137,-12],[140,-11],[145,-15],[150,-22],[153,-25],[153,-30],[150,-36],[148,-39],[145,-39],[140,-38],[136,-38],[130,-38],[125,-36],[120,-35],[118,-36],[116,-35],[115,-34],[115,-34],[114,-33],[114,-22],[115,-16],[115,-15]],
+    // 日本
+    [[130,31],[130,34],[130,35],[130,37],[131,38],[135,35],[139,35],[140,36],[141,42],[141,45],[140,44],[138,40],[136,38],[135,35],[132,34],[131,31]],
+  ];
+
+  continents.forEach(function(poly) {
+    ctx.beginPath();
+    for (var i = 0; i < poly.length; i++) {
+      var x = projx(poly[i][0]), y = projy(poly[i][1]);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  });
+}
+
+function initRouteMap(airlineId, el) {
+  var key = sanitizeId(airlineId);
+  var ar = airlineRoutes[airlineId];
+  if (!ar) return;
+
+  var mapEl = el.parentElement.querySelector('.airline-route-map');
+  if (!mapEl) return;
+  mapEl.classList.add('visible');
+
+  // Avoid double init - remove old canvas
+  var oldCanvas = mapEl.querySelector('canvas');
+  if (oldCanvas) oldCanvas.remove();
+  if (routeAnimations[key] && routeAnimations[key].animId) {
+    cancelAnimationFrame(routeAnimations[key].animId);
+    delete routeAnimations[key];
+  }
+
+  var canvas = document.createElement('canvas');
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.width = mapEl.clientWidth * 2;
+  canvas.height = mapEl.clientHeight * 2;
+  mapEl.appendChild(canvas);
+
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var pad = 35;
+
+  // Collect all points for bounding box
+  var points = [];
+  var hubAp = airports[ar.hub];
+  if (hubAp) points.push(hubAp);
+  ar.routes.forEach(function(r) {
+    var a = airports[r[0]], b = airports[r[1]];
+    if (a) { points.push(a); }
+    if (b) { points.push(b); }
+  });
+
+  var minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+  points.forEach(function(p) {
+    if (p.lat < minLat) minLat = p.lat;
+    if (p.lat > maxLat) maxLat = p.lat;
+    if (p.lng < minLng) minLng = p.lng;
+    if (p.lng > maxLng) maxLng = p.lng;
+  });
+
+  var latRange = maxLat - minLat || 40;
+  var lngRange = maxLng - minLng || 80;
+  minLat -= latRange * 0.15; maxLat += latRange * 0.15;
+  minLng -= lngRange * 0.15; maxLng += lngRange * 0.15;
+
+  function proj(lat, lng) {
+    var x = pad + (lng - minLng) / (maxLng - minLng) * (W - pad * 2);
+    var y = pad + (maxLat - lat) / (maxLat - minLat) * (H - pad * 2);
+    return { x: x, y: y };
+  }
+
+  // Ocean background
+  var oceanGrad = ctx.createLinearGradient(0, 0, 0, H);
+  oceanGrad.addColorStop(0, '#0a1628');
+  oceanGrad.addColorStop(1, '#0d1a30');
+  ctx.fillStyle = oceanGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw world map
+  drawWorldMapBg(ctx, W, H, minLng, maxLng, minLat, maxLat, pad);
+
+  // Build route data + draw paths
+  var routeGeos = [];
+  var routeColors = ['rgba(79,195,247,0.25)', 'rgba(129,212,250,0.22)', 'rgba(100,181,246,0.2)', 'rgba(144,202,249,0.2)', 'rgba(79,195,247,0.18)'];
+
+  ar.routes.forEach(function(r, ri) {
+    var a = airports[r[0]], b = airports[r[1]];
+    if (!a || !b) return;
+    var pa = proj(a.lat, a.lng), pb = proj(b.lat, b.lng);
+    var midX = (pa.x + pb.x) / 2;
+    var midY = (pa.y + pb.y) / 2;
+    var dx = pb.x - pa.x, dy = pb.y - pa.y;
+    var len = Math.sqrt(dx * dx + dy * dy);
+    var offset = len * 0.22;
+    var cpX = midX - dy / len * offset;
+    var cpY = midY + dx / len * offset;
+
+    // Route line
+    ctx.strokeStyle = routeColors[ri % 5];
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(pa.x, pa.y);
+    ctx.quadraticCurveTo(cpX, cpY, pb.x, pb.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    routeGeos.push({ pa: pa, pb: pb, cpX: cpX, cpY: cpY, ri: ri });
+  });
+
+  // Draw airports
+  var drawn = {};
+  points.forEach(function(p) {
+    var k = p.name;
+    if (drawn[k]) return;
+    drawn[k] = true;
+    var pos = proj(p.lat, p.lng);
+    var isHub = (p === hubAp);
+
+    if (isHub) {
+      // Hub: larger glowing ring
+      var g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 8);
+      g.addColorStop(0, 'rgba(79,195,247,0.5)');
+      g.addColorStop(1, 'rgba(79,195,247,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#4fc3f7';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Label
+    ctx.fillStyle = isHub ? '#4fc3f7' : 'rgba(255,255,255,0.5)';
+    ctx.font = (isHub ? 'bold ' : '') + '9px -apple-system, sans-serif';
+    ctx.fillText(p.name, pos.x + 5, pos.y - 4);
+  });
+
+  // Store for animation
+  routeAnimations[key] = {
+    canvas: canvas, ctx: ctx, routes: routeGeos,
+    animId: null, t: 0,
+    proj: proj, minLat: minLat, maxLat: maxLat,
+    minLng: minLng, maxLng: maxLng, pad: pad,
+    points: points, hubAp: hubAp, ar: ar
+  };
+  startRouteAnimation(key);
+}
+
+function startRouteAnimation(key) {
+  var st = routeAnimations[key];
+  if (!st) return;
+  st.t = 0;
+
+  var colors = ['#4fc3f7', '#81d4fa', '#64b5f6', '#90caf9', '#4fc3f7'];
+  var routeColors = ['rgba(79,195,247,0.25)', 'rgba(129,212,250,0.22)', 'rgba(100,181,246,0.2)', 'rgba(144,202,249,0.2)', 'rgba(79,195,247,0.18)'];
+
+  function frame() {
+    var W = st.canvas.width, H = st.canvas.height, pad = st.pad;
+
+    // Redraw everything
+    var oceanGrad = st.ctx.createLinearGradient(0, 0, 0, H);
+    oceanGrad.addColorStop(0, '#0a1628');
+    oceanGrad.addColorStop(1, '#0d1a30');
+    st.ctx.fillStyle = oceanGrad;
+    st.ctx.fillRect(0, 0, W, H);
+
+    drawWorldMapBg(st.ctx, W, H, st.minLng, st.maxLng, st.minLat, st.maxLat, pad);
+
+    // Redraw route lines
+    st.routes.forEach(function(r, ri) {
+      st.ctx.strokeStyle = routeColors[ri % 5];
+      st.ctx.lineWidth = 1.2;
+      st.ctx.setLineDash([6, 4]);
+      st.ctx.beginPath();
+      st.ctx.moveTo(r.pa.x, r.pa.y);
+      st.ctx.quadraticCurveTo(r.cpX, r.cpY, r.pb.x, r.pb.y);
+      st.ctx.stroke();
+      st.ctx.setLineDash([]);
+    });
+
+    // Redraw airports
+    var drawn = {};
+    st.points.forEach(function(p) {
+      var k = p.name;
+      if (drawn[k]) return;
+      drawn[k] = true;
+      var pos = st.proj(p.lat, p.lng);
+      var isHub = (p === st.hubAp);
+      if (isHub) {
+        var g = st.ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 8);
+        g.addColorStop(0, 'rgba(79,195,247,0.5)');
+        g.addColorStop(1, 'rgba(79,195,247,0)');
+        st.ctx.fillStyle = g;
+        st.ctx.beginPath(); st.ctx.arc(pos.x, pos.y, 8, 0, Math.PI*2); st.ctx.fill();
+        st.ctx.fillStyle = '#4fc3f7';
+        st.ctx.beginPath(); st.ctx.arc(pos.x, pos.y, 3.5, 0, Math.PI*2); st.ctx.fill();
+        st.ctx.strokeStyle = '#fff'; st.ctx.lineWidth = 1; st.ctx.stroke();
+      } else {
+        st.ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        st.ctx.beginPath(); st.ctx.arc(pos.x, pos.y, 2, 0, Math.PI*2); st.ctx.fill();
+      }
+      st.ctx.fillStyle = isHub ? '#4fc3f7' : 'rgba(255,255,255,0.5)';
+      st.ctx.font = (isHub ? 'bold ' : '') + '9px -apple-system, sans-serif';
+      st.ctx.fillText(p.name, pos.x + 5, pos.y - 4);
+    });
+
+    // Animated dots with trail
+    if (st.t < 1) {
+      st.routes.forEach(function(r, ri) {
+        // Each route dot moves from 0→1 over the animation, staggered start
+        var tRoute = Math.min(1, Math.max(0, st.t - ri * 0.08) / 0.88);
+        if (tRoute <= 0 || tRoute >= 1) return;
+
+        var x = (1 - tRoute) * (1 - tRoute) * r.pa.x + 2 * (1 - tRoute) * tRoute * r.cpX + tRoute * tRoute * r.pb.x;
+        var y = (1 - tRoute) * (1 - tRoute) * r.pa.y + 2 * (1 - tRoute) * tRoute * r.cpY + tRoute * tRoute * r.pb.y;
+
+        // Trail
+        for (var tr = 0.02; tr <= 0.1; tr += 0.02) {
+          var tBack = Math.max(0, tRoute - tr);
+          if (tBack <= 0) continue;
+          var bx = (1 - tBack) * (1 - tBack) * r.pa.x + 2 * (1 - tBack) * tBack * r.cpX + tBack * tBack * r.pb.x;
+          var by = (1 - tBack) * (1 - tBack) * r.pa.y + 2 * (1 - tBack) * tBack * r.cpY + tBack * tBack * r.pb.y;
+          st.ctx.fillStyle = 'rgba(79,195,247,' + (0.15 - tr * 1.5) + ')';
+          st.ctx.beginPath(); st.ctx.arc(bx, by, 2.5, 0, Math.PI*2); st.ctx.fill();
+        }
+
+        // Glow
+        var grad = st.ctx.createRadialGradient(x, y, 0, x, y, 10);
+        grad.addColorStop(0, 'rgba(79,195,247,0.9)');
+        grad.addColorStop(0.3, 'rgba(79,195,247,0.4)');
+        grad.addColorStop(1, 'rgba(79,195,247,0)');
+        st.ctx.fillStyle = grad;
+        st.ctx.beginPath(); st.ctx.arc(x, y, 10, 0, Math.PI*2); st.ctx.fill();
+
+        // Core
+        st.ctx.fillStyle = '#ffffff';
+        st.ctx.beginPath(); st.ctx.arc(x, y, 3, 0, Math.PI*2); st.ctx.fill();
+      });
+
+      st.t += 0.012;
+      st.animId = requestAnimationFrame(frame);
+    } else {
+      // Animation complete - just show final dots at destination
+      st.routes.forEach(function(r) {
+        var grad = st.ctx.createRadialGradient(r.pb.x, r.pb.y, 0, r.pb.x, r.pb.y, 6);
+        grad.addColorStop(0, 'rgba(79,195,247,0.5)');
+        grad.addColorStop(1, 'rgba(79,195,247,0)');
+        st.ctx.fillStyle = grad;
+        st.ctx.beginPath(); st.ctx.arc(r.pb.x, r.pb.y, 6, 0, Math.PI*2); st.ctx.fill();
+        st.ctx.fillStyle = 'rgba(79,195,247,0.7)';
+        st.ctx.beginPath(); st.ctx.arc(r.pb.x, r.pb.y, 2, 0, Math.PI*2); st.ctx.fill();
+      });
+    }
+  }
+
+  st.animId = requestAnimationFrame(frame);
+  // Auto-stop after animation
+  setTimeout(function() {
+    if (routeAnimations[key] && routeAnimations[key].animId) {
+      routeAnimations[key].t = 1;
+    }
+  }, 2800);
+}
+
+function toggleAirlineRoute(airlineId, el) {
+  var key = sanitizeId(airlineId);
+  var mapEl = el.parentElement.querySelector('.airline-route-map');
+  var toggleEl = el;
+  if (!mapEl || !toggleEl) return;
+
+  if (mapEl.classList.contains('visible')) {
+    mapEl.classList.remove('visible');
+    toggleEl.classList.remove('expanded');
+    toggleEl.querySelector('span').textContent = '经典航线';
+    if (routeAnimations[key] && routeAnimations[key].animId) {
+      cancelAnimationFrame(routeAnimations[key].animId);
+      delete routeAnimations[key];
+    }
+    // Clear canvas
+    var c = mapEl.querySelector('canvas');
+    if (c) c.remove();
+  } else {
+    toggleEl.classList.add('expanded');
+    toggleEl.querySelector('span').textContent = '收起航线';
+    initRouteMap(airlineId, el);
+  }
+}
+
 
 // ===== 埋点系统 =====
 (function() {
@@ -5096,9 +6001,11 @@ function getCollectionData() {
   return collected;
 }
 
+
+
 function exportCollectionImage() {
   var data = getCollectionData();
-  if (data.length === 0) { alert('收藏列表为空'); return; }
+  if (data.length === 0) { alert(t('noCollectionData')); return; }
 
   var btn = document.getElementById('exportCollectionBtn');
   var originalHTML = btn.innerHTML;
@@ -5442,82 +6349,6 @@ function exportSingleAircraft(id) {
     alert('导出图片失败');
   }
 }
-
-// ===== 查看次数排行 =====
-var RANKING_KEY = 'aviation_view_counts';
-
-function recordView(id) {
-  try {
-    var counts = JSON.parse(localStorage.getItem(RANKING_KEY) || '{}');
-    counts[id] = (counts[id] || 0) + 1;
-    localStorage.setItem(RANKING_KEY, JSON.stringify(counts));
-  } catch(e) {}
-}
-
-function getViewCounts() {
-  try {
-    var counts = JSON.parse(localStorage.getItem(RANKING_KEY) || '{}');
-  } catch(e) { var counts = {}; }
-  var list = [];
-  Object.keys(counts).forEach(function(id) {
-    var a = aircrafts.find(function(x) { return x.id === parseInt(id); });
-    if (a) list.push({ id: a.id, name: t(a.name), code: a.code, category: a.category, image: a.image, count: counts[id] });
-  });
-  list.sort(function(a, b) { return b.count - a.count; });
-  return list.slice(0, 10);
-}
-
-function showRanking() {
-  var list = getViewCounts();
-  var rankClass = ['gold', 'silver', 'bronze'];
-  var itemsHtml = '';
-  if (list.length === 0) {
-    itemsHtml = '<div class="ranking-empty">' + t('rankingEmpty') + '</div>';
-  } else {
-    list.forEach(function(item, i) {
-      var rc = i < 3 ? ' ' + rankClass[i] : '';
-      itemsHtml += '<div class="ranking-item" onclick="closeRanking();openDetail(' + item.id + ')">' +
-        '<div class="ranking-rank' + rc + '">' + (i + 1) + '</div>' +
-        '<img class="ranking-thumb" src="' + proxyUrl(item.image) + '" alt="' + item.name + '" onerror="this.style.display=\'none\'">' +
-        '<div class="ranking-info">' +
-          '<div class="ranking-name">' + item.name + '</div>' +
-          '<div class="ranking-code">' + item.code + '</div>' +
-        '</div>' +
-        '<div class="ranking-count">' + item.count + ' ' + t('rankingViews') + '</div>' +
-      '</div>';
-    });
-  }
-
-  var overlay = document.createElement('div');
-  overlay.className = 'ranking-overlay';
-  overlay.id = 'rankingOverlay';
-  overlay.innerHTML =
-    '<div class="ranking-modal">' +
-      '<button class="ranking-close" onclick="closeRanking()">&times;</button>' +
-      '<h2>' + t('rankingTitle') + '</h2>' +
-      '<div class="ranking-subtitle">' + t('rankingSubtitle') + '</div>' +
-      itemsHtml +
-      (list.length > 0 ? '<div class="ranking-clear"><a onclick="clearRanking()">' + t('rankingClear') + '</a></div>' : '') +
-    '</div>';
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeRanking(); });
-  document.body.appendChild(overlay);
-  document.body.style.overflow = 'hidden';
-}
-
-function closeRanking() {
-  var ov = document.getElementById('rankingOverlay');
-  if (ov) { ov.remove(); }
-  document.body.style.overflow = '';
-}
-
-function clearRanking() {
-  if (confirm('确定清除所有排行数据？')) {
-    localStorage.removeItem(RANKING_KEY);
-    closeRanking();
-    showRanking();
-  }
-}
-
 </script>
 
 <button class="back-to-top" id="backToTop" onclick="scrollToTop()" title="">
@@ -5535,28 +6366,31 @@ function clearRanking() {
 </div>
 
 <!-- 主题选择弹窗 -->
-<div class="theme-modal-overlay" id="themeModalOverlay" style="display:none" data-context="">
-  <div class="theme-modal-card">
-    <button class="theme-modal-close" id="themeModalClose" aria-label="关闭">&times;</button>
-    <h3 id="themeModalTitle">选择主题 / Choose Theme</h3>
-    <p class="modal-sub" id="themeModalSub">深色还是浅色模式？你随时可以长按右上角按钮更改</p>
-    <div class="theme-modal-choices">
-      <button class="theme-modal-btn dark-btn" data-theme="dark">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        深色模式 / Dark
-      </button>
-      <button class="theme-modal-btn light-btn" data-theme="light">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        浅色模式 / Light
-      </button>
-    </div>
-  </div>
-</div>
+/div>
 
 <script>
 // ===== 冷知识弹幕 =====
+/* global restoreColdFact */
 (function() {
   'use strict';
+
+  /* 检查用户是否已关闭冷知识 */
+  function isDisabled() {
+    try { return localStorage.getItem('coldFactDisabled') === 'true'; } catch(e) { return false; }
+  }
+
+  /* 更新恢复链接显示状态 */
+  function updateRestoreLink() {
+    var link = document.getElementById('restoreColdFact');
+    if (link) { link.style.display = isDisabled() ? 'inline-block' : 'none'; }
+  }
+
+  /* 初始化时更新链接 */
+  updateRestoreLink();
+
+  /* 如果已关闭，不执行后续逻辑 */
+  if (isDisabled()) return;
+
   var pool = (function() {
     var f = [];
     for (var i = 1; i <= 20; i++) { f.push(i18n.zh['coldFact_' + i]); }
@@ -5564,7 +6398,16 @@ function clearRanking() {
   })();
   var lastIdx = -1, timer = null, _spawning = false;
 
+  /* 长按处理器 */
+  var _longPressTimer = null;
+  function cancelLongPress() {
+    if (_longPressTimer) { clearTimeout(_longPressTimer); _longPressTimer = null; }
+  }
+
   function spawn() {
+    /* 每次 spawn 前检查是否被禁用 */
+    if (isDisabled()) return;
+
     var idx;
     do { idx = Math.floor(Math.random() * pool.length); }
     while (pool.length > 1 && idx === lastIdx);
@@ -5572,17 +6415,99 @@ function clearRanking() {
 
     var el = document.createElement('div');
     el.className = 'cold-fact-toast';
-    el.textContent = pool[idx];
+
+    /* 文字内容 */
+    var textSpan = document.createElement('span');
+    textSpan.textContent = pool[idx];
+    el.appendChild(textSpan);
+
+    /* 长按提示 */
+    var hint = document.createElement('span');
+    hint.className = 'cold-fact-toast-hint';
+    hint.textContent = '长按可关闭冷知识';
+    el.appendChild(hint);
+
+    /* 关闭按钮 */
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'cold-fact-toast-close';
+    closeBtn.textContent = '×';
+    closeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      el.remove();
+    });
+    el.appendChild(closeBtn);
+
+    /* 长按检测 */
+    el.addEventListener('touchstart', function(e) {
+      cancelLongPress();
+      _longPressTimer = setTimeout(function() {
+        _longPressTimer = null;
+        showColdFactConfirm();
+      }, 800);
+    }, { passive: true });
+    el.addEventListener('mousedown', function(e) {
+      cancelLongPress();
+      _longPressTimer = setTimeout(function() {
+        _longPressTimer = null;
+        showColdFactConfirm();
+      }, 800);
+    });
+    el.addEventListener('touchend', cancelLongPress);
+    el.addEventListener('touchmove', cancelLongPress);
+    el.addEventListener('mouseup', cancelLongPress);
+    el.addEventListener('mouseleave', cancelLongPress);
+
     document.body.appendChild(el);
-    el.addEventListener('animationend', function() { el.remove(); });
+
+    el.addEventListener('animationend', function() {
+      el.remove();
+      cancelLongPress();
+    });
 
     _spawning = false;
     var next = 15000 + Math.random() * 25000; /* 15~40 秒间隔 */
     timer = setTimeout(function() { _spawning = false; spawn(); }, next);
   }
 
+  /* 展示关闭冷知识的确认弹窗 */
+  function showColdFactConfirm() {
+    /* 避免重复弹出 */
+    if (document.getElementById('coldFactConfirmOverlay')) return;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'coldFactConfirmOverlay';
+    overlay.style.cssText = 'position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;animation:overlayIn 0.2s ease;';
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:rgba(22,33,52,0.95);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:28px 24px;max-width:340px;width:88%;text-align:center;color:#e0e0e0;box-shadow:0 12px 40px rgba(0,0,0,0.5);';
+    box.innerHTML = '<p style="margin:0 0 6px;font-size:1.05rem;font-weight:600;">冷知识弹幕</p>' +
+      '<p style="margin:0 0 20px;font-size:0.85rem;color:#999;">确定不再显示冷知识弹幕吗？<br>可随时在标题下方恢复。</p>' +
+      '<button id="cfDisableBtn" style="margin:0 8px;padding:10px 28px;border-radius:22px;border:1px solid #ff5252;background:rgba(255,82,82,0.15);color:#ff5252;font-size:0.85rem;cursor:pointer;">不再显示</button>' +
+      '<button id="cfKeepBtn" style="margin:0 8px;padding:10px 28px;border-radius:22px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#ccc;font-size:0.85rem;cursor:pointer;">继续显示</button>';
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    document.getElementById('cfDisableBtn').addEventListener('click', function() {
+      try { localStorage.setItem('coldFactDisabled', 'true'); } catch(e) {}
+      updateRestoreLink();
+      /* 移除所有现有弹幕并清空定时器 */
+      if (timer) { clearTimeout(timer); timer = null; }
+      var toasts = document.querySelectorAll('.cold-fact-toast');
+      for (var t = 0; t < toasts.length; t++) { toasts[t].remove(); }
+      overlay.remove();
+    });
+    document.getElementById('cfKeepBtn').addEventListener('click', function() {
+      overlay.remove();
+    });
+  }
+
   /* 首页展示弹幕，详情页暂停 */
   function checkAndStart() {
+    if (isDisabled()) return;
     if (_spawning) return;
     _spawning = true;
     if (timer) { clearTimeout(timer); timer = null; }
@@ -5592,28 +6517,82 @@ function clearRanking() {
 
   checkAndStart();
   /* 监听 detail-panel 的出现 / 消失，忽略 toast 自身的 DOM 变动 */
+  var _obsDebounce = null;
   var obs = new MutationObserver(function(mutations) {
-    for (var i = 0; i < mutations.length; i++) {
-      var m = mutations[i];
-      if (m.type !== 'childList') continue;
-      for (var j = 0; j < m.addedNodes.length; j++) {
-        var node = m.addedNodes[j];
-        if (node.nodeType !== 1) continue;
-        if (node.classList && node.classList.contains('cold-fact-toast')) continue;
-        if (node.id === 'detail-panel' || (node.querySelector && node.querySelector('#detail-panel'))) {
-          checkAndStart(); return;
+    if (_obsDebounce) return;
+    _obsDebounce = setTimeout(function() {
+      _obsDebounce = null;
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        if (m.type !== 'childList') continue;
+        for (var j = 0; j < m.addedNodes.length; j++) {
+          var node = m.addedNodes[j];
+          if (node.nodeType !== 1) continue;
+          if (node.classList && node.classList.contains('cold-fact-toast')) continue;
+          if (node.id === 'coldFactConfirmOverlay') continue;
+          if (node.id === 'detail-panel' || (node.querySelector && node.querySelector('#detail-panel'))) {
+            checkAndStart(); return;
+          }
+        }
+        for (var k = 0; k < m.removedNodes.length; k++) {
+          var rn = m.removedNodes[k];
+          if (rn.nodeType !== 1) continue;
+          if (rn.id === 'detail-panel' || (rn.querySelector && rn.querySelector('#detail-panel'))) {
+            checkAndStart(); return;
+          }
         }
       }
-      for (var k = 0; k < m.removedNodes.length; k++) {
-        var rn = m.removedNodes[k];
-        if (rn.nodeType !== 1) continue;
-        if (rn.id === 'detail-panel' || (rn.querySelector && rn.querySelector('#detail-panel'))) {
-          checkAndStart(); return;
-        }
-      }
-    }
+    }, 100);
   });
   obs.observe(document.body, { childList: true, subtree: true, attributes: false });
+})();
+
+/* 恢复冷知识（全局函数，供 HTML onclick 调用） */
+function restoreColdFact() {
+  try { localStorage.removeItem('coldFactDisabled'); } catch(e) {}
+  var link = document.getElementById('restoreColdFact');
+  if (link) { link.style.display = 'none'; }
+  /* 重新加载页面以重新启动冷知识机制 */
+  location.reload();
+}
+</script>
+
+<!-- Auto version detection -->
+<script>
+(function() {
+  var currentVersion = document.body.getAttribute('data-version');
+  if (!currentVersion) return;
+
+  var CHECK_INTERVAL = 30000; // 30s
+  var RELOAD_DELAY = 2000;    // 2s countdown
+
+  function showToast(msg) {
+    var toast = document.createElement('div');
+    toast.id = 'versionToast';
+    toast.textContent = msg;
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;'
+      + 'background:rgba(10,25,47,0.95);color:#64ffda;padding:16px 32px;border-radius:8px;'
+      + 'font-size:16px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.5);'
+      + 'border:1px solid rgba(100,255,218,0.3);pointer-events:none;';
+    document.body.appendChild(toast);
+  }
+
+  function checkVersion() {
+    fetch('?v=' + Date.now(), { cache: 'no-store' })
+      .then(function(res) { return res.text(); })
+      .then(function(html) {
+        var match = html.match(/data-version="([^"]*)"/);
+        if (!match) return;
+        var remoteVersion = match[1];
+        if (remoteVersion !== currentVersion) {
+          showToast('\u53d1\u73b0\u65b0\u7248\u672c\uff0c\u5373\u5c06\u5237\u65b0...');
+          setTimeout(function() { location.reload(true); }, RELOAD_DELAY);
+        }
+      })
+      .catch(function() { /* network error, ignore */ });
+  }
+
+  setInterval(checkVersion, CHECK_INTERVAL);
 })();
 </script>
 

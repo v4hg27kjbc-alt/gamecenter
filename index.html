@@ -3161,6 +3161,7 @@ const airports = {
   'PEK': { name: '北京', lat: 40.08, lng: 116.58 },
   'PVG': { name: '上海', lat: 31.14, lng: 121.81 },
   'HND': { name: '东京', lat: 35.55, lng: 139.78 },
+  'NRT': { name: '东京', lat: 35.76, lng: 140.39 },
   'SIN': { name: '新加坡', lat: 1.36, lng: 103.99 },
   'DXB': { name: '迪拜', lat: 25.25, lng: 55.36 },
   'LHR': { name: '伦敦', lat: 51.47, lng: -0.46 },
@@ -3182,24 +3183,48 @@ const airports = {
   'BKK': { name: '曼谷', lat: 13.69, lng: 100.75 },
   'ATL': { name: '亚特兰大', lat: 33.64, lng: -84.43 },
   'EWR': { name: '纽瓦克', lat: 40.69, lng: -74.17 },
-  'NRT': { name: '成田', lat: 35.76, lng: 140.39 }
+  'MEL': { name: '墨尔本', lat: -37.67, lng: 144.84 },
+  'ZRH': { name: '苏黎世', lat: 47.46, lng: 8.55 },
+  'MAD': { name: '马德里', lat: 40.49, lng: -3.57 },
+  'FCO': { name: '罗马', lat: 41.80, lng: 12.25 },
+  'CPH': { name: '哥本哈根', lat: 55.62, lng: 12.66 },
+  'VIE': { name: '维也纳', lat: 48.11, lng: 16.57 },
+  'IST': { name: '伊斯坦布尔', lat: 41.28, lng: 28.75 },
+  'SEA': { name: '西雅图', lat: 47.45, lng: -122.31 },
+  'IAH': { name: '休斯顿', lat: 29.99, lng: -95.34 },
+  'BOS': { name: '波士顿', lat: 42.37, lng: -71.02 },
+  'MIA': { name: '迈阿密', lat: 25.79, lng: -80.29 },
+  'SCL': { name: '圣地亚哥', lat: -33.39, lng: -70.79 },
+  'EZE': { name: '布宜诺斯', lat: -34.82, lng: -58.54 },
+  'BNE': { name: '布里斯班', lat: -27.38, lng: 153.12 },
+  'AKL': { name: '奥克兰', lat: -37.01, lng: 174.79 },
+  'JNB': { name: '约翰内斯堡', lat: -26.13, lng: 28.23 },
+  'CAI': { name: '开罗', lat: 30.12, lng: 31.41 },
+  'TLV': { name: '特拉维夫', lat: 32.01, lng: 34.88 },
+  'BOM': { name: '孟买', lat: 19.09, lng: 72.87 },
+  'KIX': { name: '大阪', lat: 34.43, lng: 135.24 },
+  'GMP': { name: '首尔金浦', lat: 37.56, lng: 126.79 },
+  'TPE': { name: '台北', lat: 25.08, lng: 121.23 },
+  'CTS': { name: '札幌', lat: 42.78, lng: 141.69 },
+  'FUK': { name: '福冈', lat: 33.59, lng: 130.45 },
 };
 
-// ===== 航司经典航线 =====
+// ===== 航司真实经典航线 ====
 const airlineRoutes = {
-  'ca': { hub: 'PEK', routes: [['PEK','LHR'],['PEK','JFK'],['PEK','CDG'],['PEK','SYD']] },
-  'mu': { hub: 'PVG', routes: [['PVG','JFK'],['PVG','CDG'],['PVG','SIN'],['PVG','SYD']] },
-  'cz': { hub: 'CAN', routes: [['CAN','LAX'],['CAN','AMS'],['CAN','SYD'],['CAN','LHR']] },
-  'ek': { hub: 'DXB', routes: [['DXB','LHR'],['DXB','JFK'],['DXB','SYD'],['DXB','LAX']] },
-  'sq': { hub: 'SIN', routes: [['SIN','LHR'],['SIN','JFK'],['SIN','SYD'],['SIN','HND']] },
-  'qr': { hub: 'DOH', routes: [['DOH','LHR'],['DOH','JFK'],['DOH','CDG'],['DOH','SYD']] },
-  'nh': { hub: 'HND', routes: [['HND','JFK'],['HND','LHR'],['HND','SFO'],['HND','SIN']] },
-  'lh': { hub: 'FRA', routes: [['FRA','JFK'],['FRA','PEK'],['FRA','SIN'],['FRA','GRU']] },
-  'ba': { hub: 'LHR', routes: [['LHR','JFK'],['LHR','SIN'],['LHR','HKG'],['LHR','SYD']] },
-  'af': { hub: 'CDG', routes: [['CDG','JFK'],['CDG','PEK'],['CDG','GRU'],['CDG','SIN']] },
-  'ua': { hub: 'SFO', routes: [['SFO','LHR'],['SFO','NRT'],['SFO','SYD'],['EWR','SIN']] },
-  'dl': { hub: 'ATL', routes: [['ATL','AMS'],['ATL','CDG'],['ATL','HND'],['JFK','LHR']] }
+  'ca': { hub: 'PEK', routes: [['PEK','LHR'],['PEK','JFK'],['PEK','CDG'],['PEK','SYD'],['PEK','FRA']] },
+  'mu': { hub: 'PVG', routes: [['PVG','JFK'],['PVG','CDG'],['PVG','LHR'],['PVG','SIN'],['PVG','SYD']] },
+  'cz': { hub: 'CAN', routes: [['CAN','LAX'],['CAN','AMS'],['CAN','SYD'],['CAN','LHR'],['CAN','DXB']] },
+  'ek': { hub: 'DXB', routes: [['DXB','LHR'],['DXB','JFK'],['DXB','SYD'],['DXB','LAX'],['DXB','SIN']] },
+  'sq': { hub: 'SIN', routes: [['SIN','LHR'],['SIN','JFK'],['SIN','SYD'],['SIN','HND'],['SIN','LAX']] },
+  'qr': { hub: 'DOH', routes: [['DOH','LHR'],['DOH','JFK'],['DOH','CDG'],['DOH','SYD'],['DOH','BKK']] },
+  'nh': { hub: 'HND', routes: [['HND','JFK'],['HND','LHR'],['HND','SFO'],['HND','SIN'],['HND','SYD']] },
+  'lh': { hub: 'FRA', routes: [['FRA','JFK'],['FRA','PEK'],['FRA','SIN'],['FRA','GRU'],['FRA','DEL']] },
+  'ba': { hub: 'LHR', routes: [['LHR','JFK'],['LHR','SIN'],['LHR','HKG'],['LHR','SYD'],['LHR','DXB']] },
+  'af': { hub: 'CDG', routes: [['CDG','JFK'],['CDG','PEK'],['CDG','GRU'],['CDG','SIN'],['CDG','DEL']] },
+  'ua': { hub: 'SFO', routes: [['SFO','LHR'],['SFO','NRT'],['SFO','SYD'],['EWR','SIN'],['ORD','CDG']] },
+  'dl': { hub: 'ATL', routes: [['ATL','AMS'],['ATL','CDG'],['ATL','HND'],['JFK','LHR'],['LAX','SYD']] }
 };
+
 
 const airlines = {
   'ua': {
@@ -5508,11 +5533,53 @@ function initRanking() {
   }
 }
 
-// ===== 航线动画 =====
+
+// ===== 航线动画地图 =====
 var routeAnimations = {};
 
 function sanitizeId(id) {
   return id.replace(/[^a-zA-Z0-9]/g, '');
+}
+
+// 简化世界地图轮廓 (Canvas绘制)
+function drawWorldMapBg(ctx, W, H, minLng, maxLng, minLat, maxLat, pad) {
+  var projx = function(lng) { return pad + (lng - minLng) / (maxLng - minLng) * (W - pad * 2); };
+  var projy = function(lat) { return pad + (maxLat - lat) / (maxLat - minLat) * (H - pad * 2); };
+
+  // 淡色陆地填充
+  ctx.fillStyle = 'rgba(255,255,255,0.025)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+
+  // 简化的大陆轮廓 (equirectangular投影坐标)
+  var continents = [
+    // 北美洲 (简化)
+    [[-168,66],[-140,60],[-125,50],[-125,30],[-117,33],[-105,20],[-97,18],[-97,29],[-82,26],[-82,41],[-90,47],[-83,65],[-55,47],[-55,46],[-65,44],[-53,47],[-43,47],[-43,46],[-65,45],[-67,45],[-67,43],[-70,44],[-75,41],[-79,43],[-80,43],[-82,45],[-170,53],[-168,66]],
+    // 南美洲 (简化)
+    [[-80,10],[-75,12],[-70,12],[-60,5],[-53,4],[-50,0],[-44,-2],[-35,-6],[-35,-15],[-38,-18],[-42,-23],[-48,-27],[-52,-33],[-57,-35],[-58,-40],[-65,-40],[-70,-40],[-73,-40],[-73,-45],[-75,-48],[-72,-50],[-70,-55],[-70,-54],[-75,-47],[-71,-40],[-72,-35],[-75,-30],[-78,-27],[-80,-5],[-80,10]],
+    // 欧洲 (简化)
+    [[-10,36],[0,43],[3,43],[5,47],[8,47],[12,42],[13,41],[16,42],[19,46],[23,46],[27,48],[32,47],[36,50],[40,42],[42,42],[42,40],[51,38],[50,35],[30,32],[26,34],[22,36],[20,39],[16,42],[14,40],[14,38],[12,36],[10,37],[0,36],[-10,36]],
+    // 非洲 (简化)
+    [[-17,15],[-16,15],[-16,18],[-5,5],[8,6],[10,6],[12,4],[15,2],[18,-4],[20,-5],[28,-6],[32,-4],[34,-4],[36,-7],[38,-12],[41,-15],[43,-15],[44,-13],[44,-16],[40,-19],[35,-23],[33,-25],[33,-28],[32,-31],[28,-33],[25,-35],[26,-35],[18,-35],[15,-35],[13,-35],[10,-34],[8,-32],[8,-33],[5,-33],[-5,-34],[-10,-35],[-12,-35],[-17,-23],[-17,-15],[-20,-15],[-20,15],[-17,15]],
+    // 亚洲 (简化)
+    [[40,42],[48,42],[52,36],[55,36],[60,36],[65,40],[70,42],[72,42],[75,37],[70,34],[75,30],[72,24],[73,18],[77,14],[78,10],[80,12],[85,24],[90,10],[92,5],[95,10],[97,15],[100,22],[102,17],[104,12],[105,20],[108,32],[110,30],[110,25],[107,20],[105,18],[106,12],[104,10],[105,6],[107,1],[103,2],[100,8],[98,16],[95,22],[92,22],[90,22],[82,8],[78,8],[75,8],[72,6],[70,6],[68,25],[69,30],[68,36],[60,39],[55,42],[50,42],[43,42],[40,42]],
+    // 澳大利亚 (简化)
+    [[115,-15],[120,-13],[125,-12],[130,-12],[137,-12],[140,-11],[145,-15],[150,-22],[153,-25],[153,-30],[150,-36],[148,-39],[145,-39],[140,-38],[136,-38],[130,-38],[125,-36],[120,-35],[118,-36],[116,-35],[115,-34],[115,-34],[114,-33],[114,-22],[115,-16],[115,-15]],
+    // 日本
+    [[130,31],[130,34],[130,35],[130,37],[131,38],[135,35],[139,35],[140,36],[141,42],[141,45],[140,44],[138,40],[136,38],[135,35],[132,34],[131,31]],
+  ];
+
+  continents.forEach(function(poly) {
+    ctx.beginPath();
+    for (var i = 0; i < poly.length; i++) {
+      var x = projx(poly[i][0]), y = projy(poly[i][1]);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  });
 }
 
 function initRouteMap(airlineId, el) {
@@ -5524,8 +5591,13 @@ function initRouteMap(airlineId, el) {
   if (!mapEl) return;
   mapEl.classList.add('visible');
 
-  // Avoid double init
-  if (mapEl.querySelector('canvas')) return;
+  // Avoid double init - remove old canvas
+  var oldCanvas = mapEl.querySelector('canvas');
+  if (oldCanvas) oldCanvas.remove();
+  if (routeAnimations[key] && routeAnimations[key].animId) {
+    cancelAnimationFrame(routeAnimations[key].animId);
+    delete routeAnimations[key];
+  }
 
   var canvas = document.createElement('canvas');
   canvas.style.width = '100%';
@@ -5536,19 +5608,18 @@ function initRouteMap(airlineId, el) {
 
   var ctx = canvas.getContext('2d');
   var W = canvas.width, H = canvas.height;
-  var pad = 30;
+  var pad = 35;
 
-  // Collect all points
+  // Collect all points for bounding box
   var points = [];
   var hubAp = airports[ar.hub];
   if (hubAp) points.push(hubAp);
   ar.routes.forEach(function(r) {
     var a = airports[r[0]], b = airports[r[1]];
-    if (a) points.push(a);
-    if (b) points.push(b);
+    if (a) { points.push(a); }
+    if (b) { points.push(b); }
   });
 
-  // Bounding box
   var minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
   points.forEach(function(p) {
     if (p.lat < minLat) minLat = p.lat;
@@ -5557,11 +5628,10 @@ function initRouteMap(airlineId, el) {
     if (p.lng > maxLng) maxLng = p.lng;
   });
 
-  // Add padding
-  var latRange = maxLat - minLat || 1;
-  var lngRange = maxLng - minLng || 1;
-  minLat -= latRange * 0.2; maxLat += latRange * 0.2;
-  minLng -= lngRange * 0.2; maxLng += lngRange * 0.2;
+  var latRange = maxLat - minLat || 40;
+  var lngRange = maxLng - minLng || 80;
+  minLat -= latRange * 0.15; maxLat += latRange * 0.15;
+  minLng -= lngRange * 0.15; maxLng += lngRange * 0.15;
 
   function proj(lat, lng) {
     var x = pad + (lng - minLng) / (maxLng - minLng) * (W - pad * 2);
@@ -5569,72 +5639,91 @@ function initRouteMap(airlineId, el) {
     return { x: x, y: y };
   }
 
-  // Draw background grid
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-  ctx.lineWidth = 0.5;
-  for (var i = 0; i < 6; i++) {
-    ctx.beginPath();
-    ctx.moveTo(pad, pad + i * (H - pad * 2) / 5);
-    ctx.lineTo(W - pad, pad + i * (H - pad * 2) / 5);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(pad + i * (W - pad * 2) / 5, pad);
-    ctx.lineTo(pad + i * (W - pad * 2) / 5, H - pad);
-    ctx.stroke();
-  }
+  // Ocean background
+  var oceanGrad = ctx.createLinearGradient(0, 0, 0, H);
+  oceanGrad.addColorStop(0, '#0a1628');
+  oceanGrad.addColorStop(1, '#0d1a30');
+  ctx.fillStyle = oceanGrad;
+  ctx.fillRect(0, 0, W, H);
 
-  // Draw routes
-  var routeLines = [];
-  ar.routes.forEach(function(r) {
+  // Draw world map
+  drawWorldMapBg(ctx, W, H, minLng, maxLng, minLat, maxLat, pad);
+
+  // Build route data + draw paths
+  var routeGeos = [];
+  var routeColors = ['rgba(79,195,247,0.25)', 'rgba(129,212,250,0.22)', 'rgba(100,181,246,0.2)', 'rgba(144,202,249,0.2)', 'rgba(79,195,247,0.18)'];
+
+  ar.routes.forEach(function(r, ri) {
     var a = airports[r[0]], b = airports[r[1]];
     if (!a || !b) return;
     var pa = proj(a.lat, a.lng), pb = proj(b.lat, b.lng);
-    // Quadratic bezier for curve
     var midX = (pa.x + pb.x) / 2;
     var midY = (pa.y + pb.y) / 2;
     var dx = pb.x - pa.x, dy = pb.y - pa.y;
     var len = Math.sqrt(dx * dx + dy * dy);
-    var cpX = midX - dy / len * len * 0.25;
-    var cpY = midY + dx / len * len * 0.25;
+    var offset = len * 0.22;
+    var cpX = midX - dy / len * offset;
+    var cpY = midY + dx / len * offset;
 
-    // Draw line
-    ctx.strokeStyle = 'rgba(79,195,247,0.2)';
-    ctx.lineWidth = 1.5;
+    // Route line
+    ctx.strokeStyle = routeColors[ri % 5];
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([6, 4]);
     ctx.beginPath();
     ctx.moveTo(pa.x, pa.y);
     ctx.quadraticCurveTo(cpX, cpY, pb.x, pb.y);
     ctx.stroke();
+    ctx.setLineDash([]);
 
-    routeLines.push({ pa: pa, pb: pb, cpX: cpX, cpY: cpY });
+    routeGeos.push({ pa: pa, pb: pb, cpX: cpX, cpY: cpY, ri: ri });
   });
 
   // Draw airports
-  var allPoints = {};
-  points.forEach(function(p, i) {
+  var drawn = {};
+  points.forEach(function(p) {
+    var k = p.name;
+    if (drawn[k]) return;
+    drawn[k] = true;
     var pos = proj(p.lat, p.lng);
     var isHub = (p === hubAp);
-    // Dot
-    ctx.fillStyle = isHub ? '#4fc3f7' : 'rgba(255,255,255,0.25)';
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, isHub ? 4 : 2.5, 0, Math.PI * 2);
-    ctx.fill();
+
     if (isHub) {
-      ctx.strokeStyle = 'rgba(79,195,247,0.4)';
+      // Hub: larger glowing ring
+      var g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 8);
+      g.addColorStop(0, 'rgba(79,195,247,0.5)');
+      g.addColorStop(1, 'rgba(79,195,247,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#4fc3f7';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
       ctx.lineWidth = 1;
       ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
+      ctx.fill();
     }
+
     // Label
-    ctx.fillStyle = isHub ? '#4fc3f7' : 'rgba(255,255,255,0.45)';
-    ctx.font = (isHub ? 'bold ' : '') + '10px -apple-system, sans-serif';
-    ctx.fillText(p.name, pos.x + 5, pos.y - 5);
-    allPoints[p.name] = pos;
+    ctx.fillStyle = isHub ? '#4fc3f7' : 'rgba(255,255,255,0.5)';
+    ctx.font = (isHub ? 'bold ' : '') + '9px -apple-system, sans-serif';
+    ctx.fillText(p.name, pos.x + 5, pos.y - 4);
   });
 
   // Store for animation
   routeAnimations[key] = {
-    canvas: canvas, ctx: ctx, routes: routeLines,
-    animId: null, t: 0, proj: proj, minLat: minLat, maxLat: maxLat,
-    minLng: minLng, maxLng: maxLng, pad: pad
+    canvas: canvas, ctx: ctx, routes: routeGeos,
+    animId: null, t: 0,
+    proj: proj, minLat: minLat, maxLat: maxLat,
+    minLng: minLng, maxLng: maxLng, pad: pad,
+    points: points, hubAp: hubAp, ar: ar
   };
   startRouteAnimation(key);
 }
@@ -5642,65 +5731,117 @@ function initRouteMap(airlineId, el) {
 function startRouteAnimation(key) {
   var st = routeAnimations[key];
   if (!st) return;
-  var dotCount = st.routes.length;
+  st.t = 0;
+
+  var colors = ['#4fc3f7', '#81d4fa', '#64b5f6', '#90caf9', '#4fc3f7'];
+  var routeColors = ['rgba(79,195,247,0.25)', 'rgba(129,212,250,0.22)', 'rgba(100,181,246,0.2)', 'rgba(144,202,249,0.2)', 'rgba(79,195,247,0.18)'];
 
   function frame() {
-    st.t += 0.008;
-    // Clear dots only (redraw routes area)
-    st.ctx.clearRect(0, 0, st.canvas.width, st.canvas.height);
-
-    // Redraw background
     var W = st.canvas.width, H = st.canvas.height, pad = st.pad;
-    st.ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    st.ctx.lineWidth = 0.5;
-    for (var i = 0; i < 6; i++) {
-      st.ctx.beginPath();
-      st.ctx.moveTo(pad, pad + i * (H - pad * 2) / 5);
-      st.ctx.lineTo(W - pad, pad + i * (H - pad * 2) / 5);
-      st.ctx.stroke();
-      st.ctx.beginPath();
-      st.ctx.moveTo(pad + i * (W - pad * 2) / 5, pad);
-      st.ctx.lineTo(pad + i * (W - pad * 2) / 5, H - pad);
-      st.ctx.stroke();
-    }
 
-    // Redraw routes
-    var routeLines = [];
-    st.ctx.strokeStyle = 'rgba(79,195,247,0.2)';
-    st.ctx.lineWidth = 1.5;
-    st.routes.forEach(function(r) {
+    // Redraw everything
+    var oceanGrad = st.ctx.createLinearGradient(0, 0, 0, H);
+    oceanGrad.addColorStop(0, '#0a1628');
+    oceanGrad.addColorStop(1, '#0d1a30');
+    st.ctx.fillStyle = oceanGrad;
+    st.ctx.fillRect(0, 0, W, H);
+
+    drawWorldMapBg(st.ctx, W, H, st.minLng, st.maxLng, st.minLat, st.maxLat, pad);
+
+    // Redraw route lines
+    st.routes.forEach(function(r, ri) {
+      st.ctx.strokeStyle = routeColors[ri % 5];
+      st.ctx.lineWidth = 1.2;
+      st.ctx.setLineDash([6, 4]);
       st.ctx.beginPath();
       st.ctx.moveTo(r.pa.x, r.pa.y);
       st.ctx.quadraticCurveTo(r.cpX, r.cpY, r.pb.x, r.pb.y);
       st.ctx.stroke();
+      st.ctx.setLineDash([]);
     });
 
-    // Draw animated dots
-    st.routes.forEach(function(r, i) {
-      var t = (st.t + i * 0.35) % 1;
-      var x = (1 - t) * (1 - t) * r.pa.x + 2 * (1 - t) * t * r.cpX + t * t * r.pb.x;
-      var y = (1 - t) * (1 - t) * r.pa.y + 2 * (1 - t) * t * r.cpY + t * t * r.pb.y;
-
-      // Glow
-      var grad = st.ctx.createRadialGradient(x, y, 0, x, y, 8);
-      grad.addColorStop(0, 'rgba(79,195,247,0.8)');
-      grad.addColorStop(0.4, 'rgba(79,195,247,0.3)');
-      grad.addColorStop(1, 'rgba(79,195,247,0)');
-      st.ctx.fillStyle = grad;
-      st.ctx.beginPath();
-      st.ctx.arc(x, y, 8, 0, Math.PI * 2);
-      st.ctx.fill();
-
-      // Core dot
-      st.ctx.fillStyle = '#fff';
-      st.ctx.beginPath();
-      st.ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-      st.ctx.fill();
+    // Redraw airports
+    var drawn = {};
+    st.points.forEach(function(p) {
+      var k = p.name;
+      if (drawn[k]) return;
+      drawn[k] = true;
+      var pos = st.proj(p.lat, p.lng);
+      var isHub = (p === st.hubAp);
+      if (isHub) {
+        var g = st.ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 8);
+        g.addColorStop(0, 'rgba(79,195,247,0.5)');
+        g.addColorStop(1, 'rgba(79,195,247,0)');
+        st.ctx.fillStyle = g;
+        st.ctx.beginPath(); st.ctx.arc(pos.x, pos.y, 8, 0, Math.PI*2); st.ctx.fill();
+        st.ctx.fillStyle = '#4fc3f7';
+        st.ctx.beginPath(); st.ctx.arc(pos.x, pos.y, 3.5, 0, Math.PI*2); st.ctx.fill();
+        st.ctx.strokeStyle = '#fff'; st.ctx.lineWidth = 1; st.ctx.stroke();
+      } else {
+        st.ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        st.ctx.beginPath(); st.ctx.arc(pos.x, pos.y, 2, 0, Math.PI*2); st.ctx.fill();
+      }
+      st.ctx.fillStyle = isHub ? '#4fc3f7' : 'rgba(255,255,255,0.5)';
+      st.ctx.font = (isHub ? 'bold ' : '') + '9px -apple-system, sans-serif';
+      st.ctx.fillText(p.name, pos.x + 5, pos.y - 4);
     });
 
-    st.animId = requestAnimationFrame(frame);
+    // Animated dots with trail
+    if (st.t < 1) {
+      st.routes.forEach(function(r, ri) {
+        // Each route dot moves from 0→1 over the animation, staggered start
+        var tRoute = Math.min(1, Math.max(0, st.t - ri * 0.08) / 0.88);
+        if (tRoute <= 0 || tRoute >= 1) return;
+
+        var x = (1 - tRoute) * (1 - tRoute) * r.pa.x + 2 * (1 - tRoute) * tRoute * r.cpX + tRoute * tRoute * r.pb.x;
+        var y = (1 - tRoute) * (1 - tRoute) * r.pa.y + 2 * (1 - tRoute) * tRoute * r.cpY + tRoute * tRoute * r.pb.y;
+
+        // Trail
+        for (var tr = 0.02; tr <= 0.1; tr += 0.02) {
+          var tBack = Math.max(0, tRoute - tr);
+          if (tBack <= 0) continue;
+          var bx = (1 - tBack) * (1 - tBack) * r.pa.x + 2 * (1 - tBack) * tBack * r.cpX + tBack * tBack * r.pb.x;
+          var by = (1 - tBack) * (1 - tBack) * r.pa.y + 2 * (1 - tBack) * tBack * r.cpY + tBack * tBack * r.pb.y;
+          st.ctx.fillStyle = 'rgba(79,195,247,' + (0.15 - tr * 1.5) + ')';
+          st.ctx.beginPath(); st.ctx.arc(bx, by, 2.5, 0, Math.PI*2); st.ctx.fill();
+        }
+
+        // Glow
+        var grad = st.ctx.createRadialGradient(x, y, 0, x, y, 10);
+        grad.addColorStop(0, 'rgba(79,195,247,0.9)');
+        grad.addColorStop(0.3, 'rgba(79,195,247,0.4)');
+        grad.addColorStop(1, 'rgba(79,195,247,0)');
+        st.ctx.fillStyle = grad;
+        st.ctx.beginPath(); st.ctx.arc(x, y, 10, 0, Math.PI*2); st.ctx.fill();
+
+        // Core
+        st.ctx.fillStyle = '#ffffff';
+        st.ctx.beginPath(); st.ctx.arc(x, y, 3, 0, Math.PI*2); st.ctx.fill();
+      });
+
+      st.t += 0.012;
+      st.animId = requestAnimationFrame(frame);
+    } else {
+      // Animation complete - just show final dots at destination
+      st.routes.forEach(function(r) {
+        var grad = st.ctx.createRadialGradient(r.pb.x, r.pb.y, 0, r.pb.x, r.pb.y, 6);
+        grad.addColorStop(0, 'rgba(79,195,247,0.5)');
+        grad.addColorStop(1, 'rgba(79,195,247,0)');
+        st.ctx.fillStyle = grad;
+        st.ctx.beginPath(); st.ctx.arc(r.pb.x, r.pb.y, 6, 0, Math.PI*2); st.ctx.fill();
+        st.ctx.fillStyle = 'rgba(79,195,247,0.7)';
+        st.ctx.beginPath(); st.ctx.arc(r.pb.x, r.pb.y, 2, 0, Math.PI*2); st.ctx.fill();
+      });
+    }
   }
+
   st.animId = requestAnimationFrame(frame);
+  // Auto-stop after animation
+  setTimeout(function() {
+    if (routeAnimations[key] && routeAnimations[key].animId) {
+      routeAnimations[key].t = 1;
+    }
+  }, 2800);
 }
 
 function toggleAirlineRoute(airlineId, el) {
@@ -5712,14 +5853,17 @@ function toggleAirlineRoute(airlineId, el) {
   if (mapEl.classList.contains('visible')) {
     mapEl.classList.remove('visible');
     toggleEl.classList.remove('expanded');
-    toggleEl.querySelector('span').textContent = '\u7ecf\u5178\u822a\u7ebf';
+    toggleEl.querySelector('span').textContent = '经典航线';
     if (routeAnimations[key] && routeAnimations[key].animId) {
       cancelAnimationFrame(routeAnimations[key].animId);
       delete routeAnimations[key];
     }
+    // Clear canvas
+    var c = mapEl.querySelector('canvas');
+    if (c) c.remove();
   } else {
     toggleEl.classList.add('expanded');
-    toggleEl.querySelector('span').textContent = '\u6536\u8d77\u822a\u7ebf';
+    toggleEl.querySelector('span').textContent = '收起航线';
     initRouteMap(airlineId, el);
   }
 }
