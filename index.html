@@ -2487,7 +2487,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260804-v20">
+<body data-version="20260804-v21">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -2723,7 +2723,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">稳定性修复</span> + 修复页面崩溃/闪烁 + 移除热门排行 + 代码防御加固',
+    updateBanner: '<span class="banner-highlight">航线飞行</span> + 航司经典航线动画地图 + 排行榜默认收起',
 
 
     // --- 冷知识弹幕 ---
@@ -2939,7 +2939,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Stability Fix</span> + Crash/flicker resolved + Ranking removed + Code hardening',
+    updateBanner: '<span class="banner-highlight">Flight Routes</span> + Animated airline route maps + Ranking collapsed',
 
 
     // --- Cold Facts ---
@@ -5019,10 +5019,10 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260804-v20', '1');
+  localStorage.setItem('aviation-update-20260804-v21', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260804-v20')) return;
+  if (localStorage.getItem('aviation-update-20260804-v21')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
