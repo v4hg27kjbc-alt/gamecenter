@@ -326,6 +326,161 @@ body.light-mode .header h1 {
 .theme-dot.midnight { background: linear-gradient(135deg, #7c4dff, #311b92); }
 .theme-dot.minimal { background: linear-gradient(135deg, #e0e0e0, #fafafa); border-color: #ccc; }
 
+/* ===== AI 航空问答 Overlay ===== */
+#aiChatOverlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: var(--bg-primary);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#aiChatOverlay.visible { display: flex; }
+
+.ai-chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+.ai-chat-title {
+  font-size: 1.1rem; font-weight: 600; color: var(--text);
+  letter-spacing: 1px;
+}
+.ai-chat-close {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+}
+.ai-chat-close:hover { background: var(--card-bg-hover); color: var(--text); }
+.ai-chat-close svg { width: 20px; height: 20px; }
+
+.ai-chat-messages {
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+  max-width: 700px; margin: 0 auto; width: 100%;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.ai-msg {
+  max-width: 80%; padding: 12px 16px;
+  font-size: 0.9rem; line-height: 1.6;
+  word-break: break-word;
+  animation: aiMsgIn 0.3s ease;
+}
+@keyframes aiMsgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.ai-msg-user {
+  align-self: flex-end; text-align: right;
+  background: #3b82f6; color: #fff;
+  border-radius: 16px 16px 4px 16px;
+}
+.ai-msg-ai {
+  align-self: flex-start; text-align: left;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border-radius: 16px 16px 16px 4px;
+}
+body.light-mode .ai-msg-ai {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.ai-msg-time {
+  font-size: 0.68rem; color: var(--text-dim); margin-top: 4px;
+  opacity: 0.6;
+}
+.ai-msg-user .ai-msg-time { text-align: right; }
+
+/* AI 消息 Markdown 渲染 */
+.ai-msg-ai h1, .ai-msg-ai h2, .ai-msg-ai h3 {
+  font-size: 1rem; font-weight: 600; margin: 6px 0 4px;
+  color: var(--accent);
+}
+.ai-msg-ai strong { font-weight: 600; }
+.ai-msg-ai ul, .ai-msg-ai ol { margin: 4px 0; padding-left: 18px; }
+.ai-msg-ai li { margin: 2px 0; }
+.ai-msg-ai code {
+  background: rgba(255,255,255,0.1); padding: 1px 5px;
+  border-radius: 4px; font-size: 0.82rem;
+}
+body.light-mode .ai-msg-ai code { background: rgba(0,0,0,0.06); }
+.ai-msg-ai pre {
+  background: rgba(0,0,0,0.3); padding: 10px 14px;
+  border-radius: 8px; overflow-x: auto; font-size: 0.8rem;
+  margin: 6px 0;
+}
+body.light-mode .ai-msg-ai pre { background: #e2e8f0; }
+.ai-msg-ai a { color: var(--accent); text-decoration: underline; }
+.ai-msg-ai p { margin: 3px 0; }
+
+/* Loading 动画 */
+.ai-loading {
+  display: flex; align-items: center; gap: 6px;
+  padding: 12px 16px;
+  align-self: flex-start;
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px 16px 16px 4px;
+}
+body.light-mode .ai-loading { background: #f1f5f9; }
+.ai-loading span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  animation: aiDot 1.4s ease-in-out infinite;
+}
+.ai-loading span:nth-child(2) { animation-delay: 0.2s; }
+.ai-loading span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes aiDot { 0%,80%,100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+
+/* 底部输入区 */
+.ai-chat-input-area {
+  flex-shrink: 0; padding: 12px 24px 16px;
+  max-width: 700px; margin: 0 auto; width: 100%;
+  border-top: 1px solid var(--glass-border);
+}
+.ai-chat-input-row {
+  display: flex; gap: 10px; align-items: center;
+}
+.ai-chat-input-row input {
+  flex: 1; padding: 12px 18px;
+  border-radius: 50px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.ai-chat-input-row input:focus {
+  border-color: var(--accent);
+}
+.ai-chat-input-row input::placeholder { color: var(--text-dim); opacity: 0.5; }
+
+.ai-chat-send-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+  font-size: 1rem;
+}
+.ai-chat-send-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+.ai-chat-send-btn:active { transform: scale(0.95); }
+.ai-chat-send-btn:disabled {
+  opacity: 0.4; cursor: not-allowed; transform: none;
+}
+
+.ai-char-count {
+  text-align: right; font-size: 0.7rem; color: var(--text-dim);
+  margin-top: 4px;
+}
+.ai-disclaimer {
+  text-align: center; font-size: 0.68rem; color: var(--text-dim);
+  margin-top: 2px; opacity: 0.5;
+}
+
 /* ===== 排行榜面板 ===== */
 .ranking-panel {
   margin: 20px 0; padding: 0;
@@ -2510,7 +2665,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260805-v25">
+<body data-version="20260806-v26">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -2529,6 +2684,7 @@ body.light-mode .map-container .leaflet-tile-pane {
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
     <span class="restore-coldfact" id="restoreColdFact" onclick="restoreColdFact()" title="恢复冷知识弹幕" style="display:none">&#9733; 恢复冷知识</span>
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
+    <button class="filter-chip ai-chat-btn" id="aiChatBtn" style="position:absolute;top:20px;right:152px;z-index:10;border-radius:50px;padding:8px 16px;font-size:0.88rem;cursor:pointer;" onclick="openAiChat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="aiChatBtnText">问 AI</span></button>
     <div class="theme-dropdown" id="themeDropdown">
       <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
       <button class="theme-dropdown-item" data-theme="silver"><span class="theme-dot silver"></span>经典银</button>
@@ -2663,6 +2819,27 @@ body.light-mode .map-container .leaflet-tile-pane {
 </div>
 
 
+<!-- ===== AI 航空问答 Overlay ===== -->
+<div id="aiChatOverlay">
+  <div class="ai-chat-header">
+    <span class="ai-chat-title">AI 航空问答</span>
+    <button class="ai-chat-close" onclick="closeAiChat()" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="ai-chat-messages" id="aiChatMessages"></div>
+  <div class="ai-chat-input-area">
+    <div class="ai-chat-input-row">
+      <input type="text" id="aiChatInput" placeholder="输入航空问题..." maxlength="150" onkeydown="if(event.key==='Enter')sendAiMessage()" oninput="updateAiCharCount()">
+      <button class="ai-chat-send-btn" id="aiChatSendBtn" onclick="sendAiMessage()" title="发送">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="ai-char-count" id="aiCharCount">0/150</div>
+    <div class="ai-disclaimer" id="aiDisclaimer">AI 回答仅供参考</div>
+  </div>
+</div>
+
 <div class="compare-bar" id="compareBar">
   <span class="compare-slot" id="compareSlot1" data-default="selectAircraft1">选择机型 1</span>
   <span class="compare-vs">VS</span>
@@ -2746,7 +2923,16 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">航线飞行</span> + 航司经典航线动画地图 + 排行榜默认收起',
+    updateBanner: '<span class="banner-highlight">AI 航空问答</span>',
+
+    // --- AI 问答 ---
+    aiChat: '问 AI',
+    aiPlaceholder: '输入航空问题...',
+    aiSend: '发送',
+    aiDisclaimer: 'AI 回答仅供参考',
+    aiTimeout: '请求超时，请重试',
+    aiError: 'AI 暂时不可用，请稍后重试',
+    aiClose: '关闭',
 
 
     // --- 冷知识弹幕 ---
@@ -2962,7 +3148,16 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Flight Routes</span> + Animated airline route maps + Ranking collapsed',
+    updateBanner: '<span class="banner-highlight">AI Aviation Q&A</span>',
+
+    // --- AI Chat ---
+    aiChat: 'Ask AI',
+    aiPlaceholder: 'Ask aviation questions...',
+    aiSend: 'Send',
+    aiDisclaimer: 'AI responses are for reference only',
+    aiTimeout: 'Request timeout, please retry',
+    aiError: 'AI is unavailable, please try later',
+    aiClose: 'Close',
 
 
     // --- Cold Facts ---
@@ -5153,15 +5348,199 @@ function dismissToast() {
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260804-v21', '1');
+  localStorage.setItem('aviation-update-20260806-v26', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260804-v21')) return;
+  if (localStorage.getItem('aviation-update-20260806-v26')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   bannerText.innerHTML = t('updateBanner');
   banner.classList.add('visible');
 }
+
+// ===== AI 航空问答 =====
+const AI_CONFIG = {
+  endpoint: 'https://api.siliconflow.cn/v1/chat/completions',
+  apiKey: 'sk-PZtLeB_87Kuo8E5yRFuuVccSslWypn9ZVIgUG-Fn6Y8',
+  model: 'Qwen/Qwen2.5-7B-Instruct',
+  timeout: 15000
+};
+const AI_SYSTEM_PROMPTS = {
+  zh: '你是航空知识专家，精通民航客机、航空公司、机场、飞行原理、航空历史等知识。回答简洁专业，不超过300字。',
+  en: 'You are an aviation expert, proficient in civil aircraft, airlines, airports, flight principles, and aviation history. Keep answers concise and professional, under 200 words.'
+};
+
+function openAiChat() {
+  document.getElementById('aiChatOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('aiChatInput').focus();
+}
+
+function closeAiChat() {
+  document.getElementById('aiChatOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  // 清空对话
+  document.getElementById('aiChatMessages').innerHTML = '';
+}
+
+function updateAiCharCount() {
+  const input = document.getElementById('aiChatInput');
+  const count = input.value.length;
+  document.getElementById('aiCharCount').textContent = count + '/150';
+}
+
+function formatTime() {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return hh + ':' + mm;
+}
+
+function addMessage(content, role) {
+  const container = document.getElementById('aiChatMessages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ai-msg-' + role;
+  div.innerHTML = '<div class="ai-msg-text">' + (role === 'ai' ? renderMarkdown(content) : escapeHtml(content)) + '</div><div class="ai-msg-time">' + formatTime() + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addLoadingIndicator() {
+  const container = document.getElementById('aiChatMessages');
+  const div = document.createElement('div');
+  div.className = 'ai-loading';
+  div.id = 'aiLoadingIndicator';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeLoadingIndicator() {
+  const el = document.getElementById('aiLoadingIndicator');
+  if (el) el.remove();
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function renderMarkdown(text) {
+  // 简易 Markdown 渲染
+  let html = escapeHtml(text);
+  // 代码块 ```
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  // 行内代码 `
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // 粗体 **
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // 斜体 *
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  // 标题 ###-
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  // 无序列表 -
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>');
+  // 有序列表 1.
+  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  // 链接 [text](url)
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // 段落间双换行
+  html = html.replace(/\n\n/g, '</p><p>');
+  // 单换行 → <br>
+  html = html.replace(/\n/g, '<br>');
+  return '<p>' + html + '</p>';
+}
+
+async function sendAiMessage() {
+  const input = document.getElementById('aiChatInput');
+  const sendBtn = document.getElementById('aiChatSendBtn');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // 显示用户消息
+  addMessage(text, 'user');
+  input.value = '';
+  updateAiCharCount();
+  sendBtn.disabled = true;
+
+  // 显示 loading
+  addLoadingIndicator();
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
+
+  try {
+    const lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh';
+    const response = await fetch(AI_CONFIG.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + AI_CONFIG.apiKey
+      },
+      body: JSON.stringify({
+        model: AI_CONFIG.model,
+        messages: [
+          { role: 'system', content: AI_SYSTEM_PROMPTS[lang] || AI_SYSTEM_PROMPTS.zh },
+          { role: 'user', content: text }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    removeLoadingIndicator();
+
+    if (!response.ok) {
+      throw new Error('API error: ' + response.status);
+    }
+
+    const data = await response.json();
+    const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (reply) {
+      addMessage(reply, 'ai');
+    } else {
+      addMessage(t('aiError'), 'ai');
+    }
+  } catch (err) {
+    clearTimeout(timeoutId);
+    removeLoadingIndicator();
+    if (err.name === 'AbortError') {
+      addMessage(t('aiTimeout'), 'ai');
+    } else {
+      addMessage(t('aiError'), 'ai');
+    }
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+// Escape 键关闭
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('aiChatOverlay').classList.contains('visible')) {
+    closeAiChat();
+  }
+});
+
+// 语言切换时更新 AI 面板文本
+var _origSetLang = window.setLang;
+window.setLang = function(lang) {
+  if (_origSetLang) _origSetLang(lang);
+  // 更新 AI 面板
+  var titleEl = document.querySelector('.ai-chat-title');
+  if (titleEl) titleEl.textContent = t('aiChat');
+  var inputEl = document.getElementById('aiChatInput');
+  if (inputEl) inputEl.placeholder = t('aiPlaceholder');
+  var disEl = document.getElementById('aiDisclaimer');
+  if (disEl) disEl.textContent = t('aiDisclaimer');
+  var btnEl = document.getElementById('aiChatBtnText');
+  if (btnEl) btnEl.textContent = t('aiChat');
+};
 
 // ===== Hero Banner 轮播 =====
 function initHeroBanner() {
@@ -6659,5 +7038,3 @@ function restoreColdFact() {
 
 </body>
 </html>
-
-<!-- v25 rebuild trigger -->
