@@ -3793,6 +3793,7 @@ function translateCountry(cn) { const k = _countryNameMap[cn]; return k ? t('cou
 
 function renderCountryBar() {
   const bar = document.getElementById('countryBar');
+  if (!bar) return;
   const countries = getAirlineCountries();
   bar.innerHTML = '<div class="country-chip active" data-country="all" id="countryAllChip">'+t('countryAll')+'</div>' +
     countries.map(c => '<div class="country-chip" data-country="'+c+'">'+translateCountry(c)+'</div>').join('');
@@ -3824,6 +3825,7 @@ var _longPressTarget = null;
 
 function renderAirlineLogosBar() {
   var bar = document.getElementById('airlineLogosBar');
+  if (!bar) return;
   var ids = Object.keys(airlines);
   var html = '';
   for (var i = 0; i < ids.length; i++) {
@@ -5350,6 +5352,7 @@ document.addEventListener('keydown', (e) => {
 
 function createStars() {
   const layer = document.getElementById('starsLayer');
+  if (!layer) return;
   const frag = document.createDocumentFragment();
   for (let i = 0; i < 50; i++) {
     const star = document.createElement('div');
@@ -5366,22 +5369,26 @@ function createStars() {
 
 function showToast() {
   const toast = document.getElementById('announceToast');
+  if (!toast) return;
   setTimeout(() => toast.classList.add('show'), 400);
   setTimeout(() => dismissToast(), 6000);
 }
 function dismissToast() {
-  document.getElementById('announceToast').classList.remove('show');
+  const toast = document.getElementById('announceToast');
+  if (toast) toast.classList.remove('show');
 }
 
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
-  document.getElementById('updateBanner').classList.remove('visible');
-  localStorage.setItem('aviation-update-20260806-v26', '1');
+  const banner = document.getElementById('updateBanner');
+  if (banner) banner.classList.remove('visible');
+  localStorage.setItem('aviation-update-20260806-v27', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260806-v26')) return;
+  if (localStorage.getItem('aviation-update-20260806-v27')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
+  if (!banner || !bannerText) return;
   bannerText.innerHTML = t('updateBanner');
   banner.classList.add('visible');
 }
@@ -5581,6 +5588,9 @@ function initHeroBanner() {
 
   const banner = document.getElementById('heroBanner');
   const dotsContainer = document.getElementById('heroDots');
+  const heroPrev = document.getElementById('heroPrev');
+  const heroNext = document.getElementById('heroNext');
+  if (!banner || !dotsContainer || !heroPrev || !heroNext) return;
   let currentIndex = 0;
   let autoTimer = null;
   const INTERVAL = 4000;
@@ -5649,8 +5659,8 @@ function initHeroBanner() {
     startTimer();
   }
 
-  document.getElementById('heroPrev').addEventListener('click', prevSlide);
-  document.getElementById('heroNext').addEventListener('click', nextSlide);
+  heroPrev.addEventListener('click', prevSlide);
+  heroNext.addEventListener('click', nextSlide);
 
   // Pause on hover
   banner.addEventListener('mouseenter', stopTimer);
