@@ -326,10 +326,37 @@ body.light-mode .header h1 {
 .theme-dot.midnight { background: linear-gradient(135deg, #7c4dff, #311b92); }
 .theme-dot.minimal { background: linear-gradient(135deg, #e0e0e0, #fafafa); border-color: #ccc; }
 
+
+/* ===== AI 按钮样式 ===== */
+.ai-chat-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2)) !important;
+  border-color: rgba(99,102,241,0.35) !important;
+}
+.ai-chat-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
+  pointer-events: none;
+}
+@keyframes aiBtnGlow {
+  0% { left: -100%; }
+  40% { left: 100%; }
+  100% { left: 100%; }
+}
+.ai-chat-btn:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35)) !important;
+  border-color: rgba(99,102,241,0.55) !important;
+  transform: translateY(-2px);
+}
+
 /* ===== AI 航空问答 Overlay ===== */
 #aiChatOverlay {
   position: fixed; inset: 0; z-index: 10000;
-  background: var(--bg-primary);
+  background: var(--body-bg);
   display: none;
   flex-direction: column;
   font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
@@ -2684,7 +2711,7 @@ body.light-mode .map-container .leaflet-tile-pane {
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
     <span class="restore-coldfact" id="restoreColdFact" onclick="restoreColdFact()" title="恢复冷知识弹幕" style="display:none">&#9733; 恢复冷知识</span>
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
-    <button class="filter-chip ai-chat-btn" id="aiChatBtn" style="position:absolute;top:20px;right:152px;z-index:10;border-radius:50px;padding:8px 16px;font-size:0.88rem;cursor:pointer;" onclick="openAiChat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="aiChatBtnText">问 AI</span></button>
+    
     <div class="theme-dropdown" id="themeDropdown">
       <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
       <button class="theme-dropdown-item" data-theme="silver"><span class="theme-dot silver"></span>经典银</button>
@@ -2784,6 +2811,7 @@ body.light-mode .map-container .leaflet-tile-pane {
     <div class="filter-chip" data-filter="transport"><span class="filter-label" id="filterTransport">运输机</span></div>
     <div class="filter-chip" data-filter="helicopter"><span class="filter-label" id="filterHelicopter">直升机</span></div>
     <div class="filter-chip active" data-filter="all"><span class="filter-label" id="filterAll">全部</span></div>
+    <button class="filter-chip ai-chat-btn" id="aiChatBtn" onclick="openAiChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="aiChatBtnText">问 AI</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
