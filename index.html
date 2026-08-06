@@ -2692,7 +2692,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260806-v27">
+<body data-version="20260806-v28">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -5382,10 +5382,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260806-v27', '1');
+  localStorage.setItem('aviation-update-20260806-v28', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260806-v27')) return;
+  if (localStorage.getItem('aviation-update-20260806-v28')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -7041,10 +7041,16 @@ function restoreColdFact() {
   var currentVersion = document.body.getAttribute('data-version');
   if (!currentVersion) return;
 
-  var CHECK_INTERVAL = 30000; // 30s
-  var RELOAD_DELAY = 2000;    // 2s countdown
+  var CHECK_INTERVAL = 15000;  // 15s 基础间隔
+  var RELOAD_DELAY = 1500;     // 1.5s 倒计时
+  var RETRY_BACKOFF = 60000;   // 失败后退避 60s
+  var timerId = null;
+  var failCount = 0;
+  var checking = false;
 
   function showToast(msg) {
+    var existing = document.getElementById('versionToast');
+    if (existing) existing.remove();
     var toast = document.createElement('div');
     toast.id = 'versionToast';
     toast.textContent = msg;
@@ -7055,22 +7061,49 @@ function restoreColdFact() {
     document.body.appendChild(toast);
   }
 
-  function checkVersion() {
-    fetch('?v=' + Date.now(), { cache: 'no-store' })
-      .then(function(res) { return res.text(); })
-      .then(function(html) {
-        var match = html.match(/data-version="([^"]*)"/);
-        if (!match) return;
-        var remoteVersion = match[1];
-        if (remoteVersion !== currentVersion) {
-          showToast('\u53d1\u73b0\u65b0\u7248\u672c\uff0c\u5373\u5c06\u5237\u65b0...');
-          setTimeout(function() { location.reload(true); }, RELOAD_DELAY);
-        }
-      })
-      .catch(function() { /* network error, ignore */ });
+  function scheduleNext(delay) {
+    if (timerId) clearTimeout(timerId);
+    timerId = setTimeout(checkVersion, delay);
   }
 
-  setInterval(checkVersion, CHECK_INTERVAL);
+  function checkVersion() {
+    if (checking) return;
+    checking = true;
+    fetch(location.pathname + '?v=' + Date.now() + '&' + Math.random().toString(36).slice(2), {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function(html) {
+        failCount = 0;
+        var match = html.match(/data-version="([^"]*)"/);
+        if (match && match[1] !== currentVersion) {
+          showToast('\u53d1\u73b0\u65b0\u7248\u672c\uff0c\u5373\u5c06\u5237\u65b0...');
+          setTimeout(function() { location.reload(true); }, RELOAD_DELAY);
+          return;
+        }
+        scheduleNext(CHECK_INTERVAL);
+      })
+      .catch(function() {
+        failCount++;
+        var delay = failCount >= 3 ? RETRY_BACKOFF : CHECK_INTERVAL * failCount;
+        scheduleNext(delay);
+      })
+      .finally(function() { checking = false; });
+  }
+
+  // 页面从后台切回前台时立即检测
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && !checking) {
+      if (timerId) { clearTimeout(timerId); timerId = null; }
+      checkVersion();
+    }
+  });
+
+  checkVersion();
 })();
 </script>
 
