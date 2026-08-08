@@ -2686,6 +2686,142 @@ body.light-mode .map-container .leaflet-tile-pane {
   }
 }
 
+/* ===== AI 机型评价面板 ===== */
+#aiReviewOverlay {
+  position: fixed; inset: 0; z-index: 10001;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#aiReviewOverlay.visible { display: flex; }
+
+.ai-review-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+.ai-review-title {
+  font-size: 1.1rem; font-weight: 600; color: var(--text);
+  letter-spacing: 1px;
+  display: flex; align-items: center; gap: 10px;
+}
+.ai-review-title .ai-review-model {
+  font-size: 0.85rem; font-weight: 400; color: var(--accent);
+  background: rgba(59,130,246,0.15); padding: 4px 12px; border-radius: 50px;
+}
+.ai-review-close {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+}
+.ai-review-close:hover { background: var(--card-bg-hover); color: var(--text); }
+.ai-review-close svg { width: 20px; height: 20px; }
+
+.ai-review-content {
+  flex: 1; overflow-y: auto; padding: 24px 28px;
+  max-width: 700px; margin: 0 auto; width: 100%;
+  font-size: 0.92rem; line-height: 1.8; color: var(--text);
+  white-space: pre-wrap;
+}
+
+.ai-review-footer {
+  flex-shrink: 0; padding: 12px 24px 16px;
+  max-width: 700px; margin: 0 auto; width: 100%;
+  border-top: 1px solid var(--glass-border);
+}
+.ai-review-aspects {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+}
+.ai-review-aspect-chip {
+  padding: 6px 14px; border-radius: 50px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-dim);
+  font-size: 0.8rem; cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+.ai-review-aspect-chip:hover {
+  border-color: var(--accent); color: var(--text);
+  background: rgba(59,130,246,0.1);
+}
+.ai-review-aspect-chip.selected {
+  background: rgba(59,130,246,0.2); color: #93c5fd;
+  border-color: rgba(59,130,246,0.5);
+}
+.ai-review-btn-row {
+  display: flex; gap: 10px;
+}
+.ai-review-gen-btn {
+  flex: 1; padding: 10px 20px; border-radius: 50px;
+  border: none; font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; transition: all 0.3s ease;
+  background: linear-gradient(135deg, #5b7fb8, #4a6799);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(90,120,180,0.25), 0 3px 10px rgba(70,100,160,0.15);
+  position: relative; overflow: hidden;
+}
+.ai-review-gen-btn:hover {
+  box-shadow: 0 0 20px rgba(90,120,180,0.35), 0 4px 14px rgba(70,100,160,0.25);
+  transform: translateY(-1px);
+}
+.ai-review-gen-btn:active { transform: scale(0.98); }
+.ai-review-gen-btn:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none;
+  box-shadow: none;
+}
+.ai-review-gen-btn::after {
+  content: '';
+  position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.ai-review-gen-btn:hover::after { opacity: 1; }
+
+.ai-review-shuffle-btn {
+  padding: 10px 16px; border-radius: 50px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-dim);
+  font-size: 0.85rem; cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex; align-items: center; gap: 4px;
+  flex-shrink: 0;
+}
+.ai-review-shuffle-btn:hover {
+  color: var(--text); border-color: rgba(255,255,255,0.3);
+  background: var(--card-bg-hover);
+}
+
+/* AI评按钮 - 机型详情弹窗 */
+.ai-review-entry-btn {
+  background: linear-gradient(135deg, #5b7fb8, #4a6799) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 0 10px rgba(90,120,180,0.2), 0 2px 6px rgba(70,100,160,0.1);
+  position: relative; overflow: hidden;
+}
+.ai-review-entry-btn:hover {
+  box-shadow: 0 0 16px rgba(90,120,180,0.35), 0 3px 10px rgba(70,100,160,0.2) !important;
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #5b7fb8, #4a6799) !important;
+}
+.ai-review-entry-btn::before {
+  content: ''; position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 60%);
+  animation: aiReviewGlow 2.5s ease-in-out infinite;
+}
+@keyframes aiReviewGlow {
+  0%, 100% { opacity: 0.4; transform: translate(0, 0); }
+  50% { opacity: 0.8; transform: translate(3%, 3%); }
+}
+
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -2865,6 +3001,33 @@ body.light-mode .map-container .leaflet-tile-pane {
     </div>
     <div class="ai-char-count" id="aiCharCount">0/150</div>
     <div class="ai-disclaimer" id="aiDisclaimer">AI 回答仅供参考</div>
+  </div>
+</div>
+
+<div id="aiReviewOverlay">
+  <div class="ai-review-header">
+    <span class="ai-review-title">AI 机型评价<span class="ai-review-model" id="aiReviewModelName"></span></span>
+    <button class="ai-review-close" onclick="closeAiReview()" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="ai-review-content" id="aiReviewContent"></div>
+  <div class="ai-review-footer">
+    <div class="ai-review-aspects" id="aiReviewAspects">
+      <div class="ai-review-aspect-chip selected" data-aspect="综合" onclick="toggleAiAspect(this)">综合</div>
+      <div class="ai-review-aspect-chip" data-aspect="性能与飞行参数" onclick="toggleAiAspect(this)">性能与飞行参数</div>
+      <div class="ai-review-aspect-chip" data-aspect="舒适性与客舱体验" onclick="toggleAiAspect(this)">舒适性与客舱体验</div>
+      <div class="ai-review-aspect-chip" data-aspect="技术创新与航电" onclick="toggleAiAspect(this)">技术创新与航电</div>
+      <div class="ai-review-aspect-chip" data-aspect="市场地位与运营历史" onclick="toggleAiAspect(this)">市场地位与运营历史</div>
+      <div class="ai-review-aspect-chip" data-aspect="安全记录" onclick="toggleAiAspect(this)">安全记录</div>
+    </div>
+    <div class="ai-review-btn-row">
+      <button class="ai-review-gen-btn" id="aiReviewGenBtn" onclick="generateAiReview()">生成评价</button>
+      <button class="ai-review-shuffle-btn" onclick="shuffleAiReview()" title="换个角度">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+        换角度
+      </button>
+    </div>
   </div>
 </div>
 
@@ -3176,7 +3339,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">AI Aviation Q&A</span>',
+    updateBanner: '<span class="banner-highlight">AI Aircraft Review</span> now live in detail modals—tap "AI 评" for multi-angle analysis. AI Q&A now supports multi-turn conversation context.',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -5306,6 +5469,8 @@ function openDetail(id) {
                   onclick="event.stopPropagation();toggleCollect(${a.id});var b=this;b.style.background=collection.has(${a.id})?'#1565c0':'rgba(255,255,255,0.08)';b.style.color=collection.has(${a.id})?'#fff':'#ccc';b.textContent=collection.has(${a.id})?'已收藏':'收藏'">${collection.has(a.id) ? '已收藏' : '收藏'}</button>
           <button class="modal-action-btn"
                   onclick="event.stopPropagation();exportSingleAircraft(${a.id})">导出为图片</button>
+          <button class="modal-action-btn ai-review-entry-btn"
+                  onclick="event.stopPropagation();openAiReview(${a.id})">AI 评</button>
         </div>
         ${airlineCards ? `<div class="airlines-section"><h3>${t('operatingAirlines')}</h3>${airlineCards}</div>` : ''}
         ${renderRelatedSection(a.id)}
@@ -5347,6 +5512,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   // 优先关闭最顶层弹窗
   if (document.querySelector('.image-lightbox')) { closeImageLightbox(); return; }
+  if (document.getElementById('aiReviewOverlay').classList.contains('visible')) { closeAiReview(); return; }
   closeDetail();
 });
 
@@ -5404,10 +5570,12 @@ const AI_SYSTEM_PROMPTS = {
   zh: '你是航空知识专家，精通民航客机、航空公司、机场、飞行原理、航空历史等知识。回答简洁专业，不超过300字。',
   en: 'You are an aviation expert, proficient in civil aircraft, airlines, airports, flight principles, and aviation history. Keep answers concise and professional, under 200 words.'
 };
+let aiConversationHistory = [];
 
 function openAiChat() {
   document.getElementById('aiChatOverlay').classList.add('visible');
   document.body.style.overflow = 'hidden';
+  aiConversationHistory = [];
   document.getElementById('aiChatInput').focus();
 }
 
@@ -5520,6 +5688,7 @@ async function sendAiMessage() {
         model: AI_CONFIG.model,
         messages: [
           { role: 'system', content: AI_SYSTEM_PROMPTS[lang] || AI_SYSTEM_PROMPTS.zh },
+          ...aiConversationHistory.slice(-20),
           { role: 'user', content: text }
         ],
         max_tokens: 500,
@@ -5538,6 +5707,8 @@ async function sendAiMessage() {
     const data = await response.json();
     const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
     if (reply) {
+      aiConversationHistory.push({ role: 'user', content: text });
+      if (reply) aiConversationHistory.push({ role: 'assistant', content: reply });
       addMessage(reply, 'ai');
     } else {
       addMessage(t('aiError'), 'ai');
@@ -5553,6 +5724,140 @@ async function sendAiMessage() {
   } finally {
     sendBtn.disabled = false;
   }
+}
+
+// ===== AI 机型评价 =====
+let aiReviewContext = null;
+
+function openAiReview(id) {
+  const a = aircrafts.find(x => x.id === id);
+  if (!a) return;
+  aiReviewContext = {
+    id: a.id,
+    name: t(a.name),
+    code: a.code || '',
+    country: a.country || '',
+    desc: t(a.desc),
+    specs: a.specs || {}
+  };
+
+  document.getElementById('aiReviewModelName').textContent = t(a.name);
+  document.getElementById('aiReviewContent').innerHTML = '';
+  document.getElementById('aiReviewOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+
+  // 重置评价角度：取消所有选中，默认选「综合」
+  var chips = document.querySelectorAll('#aiReviewAspects .ai-review-aspect-chip');
+  chips.forEach(function(c) { c.classList.remove('selected'); });
+  var firstChip = document.querySelector('#aiReviewAspects .ai-review-aspect-chip');
+  if (firstChip) firstChip.classList.add('selected');
+  generateAiReview();
+}
+
+function closeAiReview() {
+  document.getElementById('aiReviewOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  document.getElementById('aiReviewContent').innerHTML = '';
+  aiReviewContext = null;
+}
+
+function toggleAiAspect(chip) {
+  var total = document.querySelectorAll('#aiReviewAspects .ai-review-aspect-chip');
+  var selected = document.querySelectorAll('#aiReviewAspects .ai-review-aspect-chip.selected');
+  if (selected.length === 1 && selected[0] === chip) return; // 至少保留一个选中
+  chip.classList.toggle('selected');
+}
+
+async function generateAiReview() {
+  if (!aiReviewContext) return;
+
+  var selectedChips = document.querySelectorAll('#aiReviewAspects .ai-review-aspect-chip.selected');
+  var aspects = [];
+  selectedChips.forEach(function(c) { aspects.push(c.dataset.aspect); });
+  if (aspects.length === 0) aspects = ['综合'];
+
+  var contentEl = document.getElementById('aiReviewContent');
+  var genBtn = document.getElementById('aiReviewGenBtn');
+  contentEl.innerHTML = '<div class="ai-loading"><span></span><span></span><span></span></div>';
+  genBtn.disabled = true;
+  genBtn.textContent = '生成中...';
+
+  var a = aiReviewContext;
+  var specsText = '';
+  if (a.specs) {
+    specsText = Object.entries(a.specs).map(function(e) { return e[0] + ': ' + e[1]; }).join(', ');
+  }
+
+  var prompt = '请对以下机型进行专业评价，聚焦于【' + aspects.join('、') + '】方面，约150字。机型信息：名称=' + a.name + '，型号=' + a.code + '，国家=' + a.country + '，简介=' + a.desc + '，规格=' + specsText + '。请直接输出评价内容，不要前缀说明，保持专业客观的语言风格。';
+
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
+
+  try {
+    var lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh';
+    var response = await fetch(AI_CONFIG.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + AI_CONFIG.apiKey
+      },
+      body: JSON.stringify({
+        model: AI_CONFIG.model,
+        messages: [
+          { role: 'system', content: '你是航空领域资深评论员，擅长从多维度对民航客机进行专业、客观、简练的评价。字数严格控制在150字左右。' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 400,
+        temperature: 0.8
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) throw new Error('API error');
+
+    var data = await response.json();
+    var reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (reply) {
+      contentEl.textContent = reply;
+    } else {
+      contentEl.textContent = '评价生成失败，请重试';
+    }
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      contentEl.textContent = '请求超时，请重试';
+    } else {
+      contentEl.textContent = '评价生成失败，请重试';
+    }
+  } finally {
+    genBtn.disabled = false;
+    genBtn.textContent = '生成评价';
+  }
+}
+
+function shuffleAiReview() {
+  var allChips = document.querySelectorAll('#aiReviewAspects .ai-review-aspect-chip');
+  var arr = Array.from(allChips);
+  var count = arr.length;
+
+  // 清除全部
+  arr.forEach(function(c) { c.classList.remove('selected'); });
+
+  // 随机选1~3个维度
+  var n = Math.floor(Math.random() * 3) + 1;
+  // Fisher-Yates shuffle
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  for (var k = 0; k < n; k++) {
+    arr[k].classList.add('selected');
+  }
+
+  // 自动生成
+  generateAiReview();
 }
 
 // Escape 键关闭
@@ -5575,6 +5880,11 @@ window.setLang = function(lang) {
   if (disEl) disEl.textContent = t('aiDisclaimer');
   var btnEl = document.getElementById('aiChatBtnText');
   if (btnEl) btnEl.textContent = t('aiChat');
+  var reviewTitleEl = document.querySelector('.ai-review-title');
+  if (reviewTitleEl) {
+    var node = reviewTitleEl.firstChild;
+    if (node && node.nodeType === 3) node.textContent = (lang === 'en' ? 'AI Review' : 'AI 机型评价');
+  }
 };
 
 // ===== Hero Banner 轮播 =====
