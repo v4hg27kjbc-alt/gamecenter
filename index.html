@@ -374,6 +374,27 @@ body.light-mode .header h1 {
   transform: translateY(-2px);
 }
 
+/* ===== AI 知识图谱按钮（与问AI/快讯同风格同动画） ===== */
+.kg-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2)) !important;
+  border-color: rgba(99,102,241,0.35) !important;
+}
+.kg-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
+  pointer-events: none;
+}
+.kg-btn:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35)) !important;
+  border-color: rgba(99,102,241,0.55) !important;
+  transform: translateY(-2px);
+}
+
 /* ===== 新闻面板底部按钮 ===== */
 .news-summary-btn {
   padding: 9px 20px;
@@ -1569,6 +1590,15 @@ body.light-mode .airline-name { color: #1a1a2e; }
   /* filter-bar 快讯按钮 */
   .news-btn { font-size: 0.7rem; padding: 4px 8px; }
   .news-btn svg { width: 12px; height: 12px; }
+  .kg-btn { font-size: 0.7rem; padding: 4px 8px; }
+  .kg-btn svg { width: 12px; height: 12px; }
+  .kg-overlay .kg-header { padding: 12px 16px; }
+  .kg-overlay .kg-title { font-size: 0.9rem; }
+  .kg-overlay .kg-legend { padding: 6px 16px; font-size: 0.7rem; }
+  .kg-detail-popup { width: 220px; padding: 12px; }
+  .kg-detail-img { height: 100px; }
+  .kg-detail-name { font-size: 0.9rem; }
+  .kg-detail-desc { font-size: 0.72rem; }
 }
 .announcement-toast {
   position: fixed; top: -80px; left: 50%; transform: translateX(-50%); z-index: 200;
@@ -2759,6 +2789,86 @@ body.light-mode .map-container .leaflet-tile-pane {
 }
 #aiReviewOverlay.visible { display: flex; }
 
+/* ===== AI 知识图谱全屏面板 ===== */
+.kg-overlay {
+  position: fixed; inset: 0; z-index: 10002;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+.kg-overlay.active { display: flex; }
+
+.kg-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+.kg-title { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 600; color: var(--text); }
+.kg-title-icon { color: var(--accent); display: flex; align-items: center; }
+.kg-close {
+  background: none; border: none; color: var(--text-dim); font-size: 1.8rem;
+  cursor: pointer; line-height: 1; padding: 0 4px; transition: color 0.2s;
+}
+.kg-close:hover { color: var(--text); }
+
+.kg-legend {
+  display: flex; align-items: center; gap: 16px;
+  padding: 8px 24px; border-bottom: 1px solid var(--glass-border);
+  font-size: 0.8rem; color: var(--text-dim); flex-shrink: 0;
+}
+.kg-legend-item { display: flex; align-items: center; gap: 6px; }
+.kg-legend-line { width: 24px; height: 2px; border-radius: 1px; }
+.kg-legend-line.derived { background: var(--accent); }
+.kg-legend-line.competitor { background: rgba(239,68,68,0.6); border-top: 2px dashed rgba(239,68,68,0.4); }
+
+/* 知识图谱卡片网格 */
+.kg-scroll-wrap {
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+  scroll-behavior: smooth;
+}
+.kg-family-group { margin-bottom: 28px; }
+.kg-family-title {
+  font-size: 0.95rem; font-weight: 700; color: var(--accent);
+  margin-bottom: 12px; padding-left: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.kg-family-title::before {
+  content: ''; width: 4px; height: 18px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), rgba(99,102,241,0.4));
+}
+.kg-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+}
+.kg-card {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px; overflow: hidden;
+  cursor: pointer; transition: all 0.25s ease;
+}
+.kg-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.15);
+}
+.kg-card-img {
+  width: 100%; height: 110px; object-fit: cover;
+  background: var(--card-bg-hover);
+}
+.kg-card-body {
+  padding: 10px 12px;
+}
+.kg-card-code {
+  font-size: 0.82rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kg-card-year {
+  font-size: 0.7rem; color: var(--accent); margin-top: 2px;
+}
+
 /* ===== 航空快讯全屏面板 ===== */
 #newsPanelOverlay {
   position: fixed; inset: 0; z-index: 10001;
@@ -3022,6 +3132,7 @@ body.light-mode .map-container .leaflet-tile-pane {
     <div class="filter-chip active" data-filter="all"><span class="filter-label" id="filterAll">全部</span></div>
     <button class="filter-chip ai-chat-btn" id="aiChatBtn" onclick="openAiChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="aiChatBtnText">问 AI</span></button>
     <button class="filter-chip news-btn" id="newsBtn" onclick="openNewsPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg><span id="newsBtnText">航空快讯</span></button>
+    <button class="filter-chip kg-btn" id="kgBtn" onclick="openKgPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="19" r="2"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/></svg><span id="kgBtnText">AI 知识图谱</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -3104,6 +3215,22 @@ body.light-mode .map-container .leaflet-tile-pane {
     </div>
   </div>
 </div>
+
+
+<!-- AI 知识图谱全屏面板 -->
+<div class="kg-overlay" id="kgOverlay">
+  <div class="kg-header">
+    <div class="kg-title">
+      <div class="kg-title-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="19" r="2"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/></svg></div>
+      <span>AI 知识图谱 · 波音 & 空客族谱</span>
+    </div>
+    <button class="kg-close" onclick="closeKgPanel()">&times;</button>
+  </div>
+  <div class="kg-scroll-wrap">
+    <div id="kgCardGrid"></div>
+  </div>
+</div>
+
 
 <div id="newsPanelOverlay">
   <div class="ai-review-header">
@@ -3297,7 +3424,26 @@ const i18n = {
     desc_y20: '中国自主研发大型运输机，最大起飞重量220吨，填补战略运输空白。',
     desc_ah64: '全球最先进武装直升机之一，可挂载16枚地狱火导弹，被誉为坦克杀手。',
     name_747: '波音 747-8',
+    name_707_120: 'Boeing 707-120',    name_707_320: 'Boeing 707-320',
+    name_727_100: 'Boeing 727-100',    name_727_200: 'Boeing 727-200',
+    name_737_100: 'Boeing 737-100',    name_737_200: 'Boeing 737-200',
+    name_747_100: 'Boeing 747-100',    name_747_200: 'Boeing 747-200',
+    name_747_sp: 'Boeing 747-SP',      name_747_300: 'Boeing 747-300',
+    name_a300b2: 'Airbus A300B2',      name_a300b4: 'Airbus A300B4',
+    desc_707_120: 'The Boeing 707-120, first flown in 1958, was Boeing\'s first jet airliner. It ushered in the Jet Age and made Pan Am the leader of transatlantic travel.',    desc_707_320: 'The 707-320 is the intercontinental stretched variant, featuring extended fuselage and significantly improved range for transatlantic routes.',
+    desc_727_100: 'The Boeing 727-100, introduced in 1964, featured a unique tri-jet rear-engine layout enabling short-field operations. Its quiet performance made it a U.S. airport staple.',    desc_727_200: 'The 727-200 is the stretched variant, seating up to 189 passengers, becoming one of the best-selling aircraft of the 1970s.',
+    desc_737_100: 'The Boeing 737-100 is the original 737 model, first delivered to Lufthansa in 1968. This twin-engine short-haul design laid the foundation for the best-selling 737 series.',    desc_737_200: 'The 737-200 featured an extended fuselage and more powerful engines, improving both range and capacity in the short-haul market.',
+    desc_747_100: 'The Boeing 747-100 entered service in 1970, with its iconic hump and double-deck design defining the wide-body era. Pan Am operated the inaugural flight.',    desc_747_200: 'The 747-200 upgraded engines and landing gear, achieving over 12,000 km range, making trans-Pacific nonstop flights routine.',
+    desc_747_sp: 'The 747-SP (Special Performance) is a shortened 747 variant with exceptional range of 15,400 km, designed for ultra-long-haul routes.',    desc_747_300: 'The 747-300 introduced the extended upper deck, boosting capacity to nearly 500 passengers, with Swissair as the launch customer.',
+    desc_a300b2: 'The Airbus A300B2, introduced in 1974, was the world\'s first twin-engine wide-body aircraft, proving the viability of twin-engine long-haul flight.',    desc_a300b4: 'The A300B4 improved range and payload, becoming Airbus\' first aircraft exported to North America and establishing Airbus in the wide-body market.',
     desc_747: '波音747-8是"空中女王"747系列最新一代，2010年首飞，2012年投入运营。机身长76.3米，为全球最长客机，标志性鹅头双层设计延续半世纪经典，搭载四台GEnx-2B67发动机，节油16%、噪声降低30%。',
+    desc_707_120: '波音707-120是波音首款喷气式客机，1958年首飞，开创了喷气时代。Pan Am首批运营，四发窄体设计成为洲际飞行的先驱。',    desc_707_320: '707-320是707的洲际加长版，机身加长，航程大幅提升，可跨大西洋飞行。',
+    desc_727_100: '波音727-100于1964年首飞，独特的后三发设计使其可在短跑道起降。因其低噪音和优秀起降性能成为美国机场的常客。',    desc_727_200: '727-200是加长版，载客量提升至189座，成为1970年代最畅销的客机之一。',
+    desc_737_100: '波音737-100是737家族的鼻祖，1968年交付汉莎航空。双发短途设计简洁高效，为后来最畅销的737系列奠基。',    desc_737_200: '737-200加长机身并换装更强引擎，航程和载客双提升，在短途市场中大获成功。',
+    desc_747_100: '波音747-100于1970年投入运营，以独特的驼峰外形和双层客舱定义宽体时代。Pan Am首航，开创大型客机新纪元。',    desc_747_200: '747-200升级引擎和起落架，航程突破12000公里，使跨太平洋直飞成为常态。',
+    desc_747_sp: '747-SP（Special Performance）是缩短版747，机身更短但航程更长，专为超远程航线设计，续航可达15400公里。',    desc_747_300: '747-300引入加长上层客舱，载客量提升至近500人，瑞士航空为首家运营航司。',
+    desc_a300b2: '空客A300B2于1974年投入运营，是全球首款双发宽体客机，证明了双发远程飞行的可行性，为空客打开市场大门。',    desc_a300b4: 'A300B4升级航程和载荷，成为空客首个出口北美的机型，确立了空客在宽体市场的地位。',
+
 
     // --- P4: 相关推荐 ---
     relatedTitle: '相关推荐',
@@ -3382,6 +3528,12 @@ const i18n = {
   },
 
   en: {
+    name_707_120: 'Boeing 707-120',    name_707_320: 'Boeing 707-320',
+    name_727_100: 'Boeing 727-100',    name_727_200: 'Boeing 727-200',
+    name_737_100: 'Boeing 737-100',    name_737_200: 'Boeing 737-200',
+    name_747_100: 'Boeing 747-100',    name_747_200: 'Boeing 747-200',
+    name_747_sp: 'Boeing 747-SP',      name_747_300: 'Boeing 747-300',
+    name_a300b2: 'Airbus A300B2',      name_a300b4: 'Airbus A300B4',
     // --- Page Base ---
     pageTitle: 'Airliner Collection',
     headerTitle: 'Airliner Collection',
@@ -3978,15 +4130,101 @@ const aircrafts = [
     desc: 'desc_747', airlineIds: ['lh', 'ca'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
     specs: { 'cruise_speed': '0.855 马赫', 'range': '14,816 km', 'capacity': '410-467 人', 'wingspan': '68.4 m' }
+  },
+
+  {
+    id: 27, name: 'name_707_120', code: 'Boeing 707-120', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Boeing_707_-_Pan_American_%2817502264526%29.jpg/960px-Boeing_707_-_Pan_American_%2817502264526%29.jpg',
+    desc: 'desc_707_120', airlineIds: ['ua', 'dl'],
+    tags: ['quad_engine', 'narrow_body', 'pioneer'],
+    specs: { 'cruise_speed': '0.82 马赫', 'range': '5,000 km', 'capacity': '140-179 人', 'wingspan': '39.9 m' }
+  },
+  {
+    id: 28, name: 'name_707_320', code: 'Boeing 707-320', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Boeing_707-321B_Pan_Am_Freer.jpg/960px-Boeing_707-321B_Pan_Am_Freer.jpg',
+    desc: 'desc_707_320', airlineIds: ['ua', 'ba'],
+    tags: ['quad_engine', 'narrow_body', 'ultra_range'],
+    specs: { 'cruise_speed': '0.82 马赫', 'range': '9,300 km', 'capacity': '141-189 人', 'wingspan': '44.4 m' }
+  },
+  {
+    id: 29, name: 'name_727_100', code: 'Boeing 727-100', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Boeing_727-100_N7017U_of_United_Airlines.jpg/960px-Boeing_727-100_N7017U_of_United_Airlines.jpg',
+    desc: 'desc_727_100', airlineIds: ['ua', 'dl'],
+    tags: ['tri_engine', 'narrow_body', 'regional'],
+    specs: { 'cruise_speed': '0.81 马赫', 'range': '3,500 km', 'capacity': '106-131 人', 'wingspan': '32.9 m' }
+  },
+  {
+    id: 30, name: 'name_727_200', code: 'Boeing 727-200', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Boeing_727-2J4-Adv%2C_Dan-Air_London_AN0654211.jpg/960px-Boeing_727-2J4-Adv%2C_Dan-Air_London_AN0654211.jpg',
+    desc: 'desc_727_200', airlineIds: ['dl', 'ua'],
+    tags: ['tri_engine', 'narrow_body', 'regional'],
+    specs: { 'cruise_speed': '0.81 马赫', 'range': '4,800 km', 'capacity': '145-189 人', 'wingspan': '32.9 m' }
+  },
+  {
+    id: 31, name: 'name_737_100', code: 'Boeing 737-100', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lufthansa_737-130_D-ABEL.jpg/960px-Lufthansa_737-130_D-ABEL.jpg',
+    desc: 'desc_737_100', airlineIds: ['lh'],
+    tags: ['twin_engine', 'narrow_body', 'short_haul'],
+    specs: { 'cruise_speed': '0.78 马赫', 'range': '2,850 km', 'capacity': '85-103 人', 'wingspan': '28.35 m' }
+  },
+  {
+    id: 32, name: 'name_737_200', code: 'Boeing 737-200', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/British_Airtours_Boeing_737-200_Marmet.jpg/960px-British_Airtours_Boeing_737-200_Marmet.jpg',
+    desc: 'desc_737_200', airlineIds: ['ua', 'dl'],
+    tags: ['twin_engine', 'narrow_body', 'short_haul'],
+    specs: { 'cruise_speed': '0.78 马赫', 'range': '4,200 km', 'capacity': '115-130 人', 'wingspan': '28.35 m' }
+  },
+  {
+    id: 33, name: 'name_747_100', code: 'Boeing 747-100', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Boeing_747-1...%2C_Pan_American_World_Airways_-_Pan_Am_AN0071397.jpg/960px-Boeing_747-1...%2C_Pan_American_World_Airways_-_Pan_Am_AN0071397.jpg',
+    desc: 'desc_747_100', airlineIds: ['ua', 'ba'],
+    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body', 'pioneer'],
+    specs: { 'cruise_speed': '0.84 马赫', 'range': '8,560 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
+  },
+  {
+    id: 34, name: 'name_747_200', code: 'Boeing 747-200', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/KLM_Boeing_747-200_PH-BUF_%287491686916%29.jpg/960px-KLM_Boeing_747-200_PH-BUF_%287491686916%29.jpg',
+    desc: 'desc_747_200', airlineIds: ['ua', 'ba'],
+    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body', 'ultra_range'],
+    specs: { 'cruise_speed': '0.84 马赫', 'range': '12,700 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
+  },
+  {
+    id: 35, name: 'name_747_sp', code: 'Boeing 747-SP', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Boeing_747SP-21%2C_Pan_Am_JP5893131.jpg/960px-Boeing_747SP-21%2C_Pan_Am_JP5893131.jpg',
+    desc: 'desc_747_sp', airlineIds: ['ua'],
+    tags: ['quad_engine', 'wide_body', 'ultra_range'],
+    specs: { 'cruise_speed': '0.85 马赫', 'range': '15,400 km', 'capacity': '276-331 人', 'wingspan': '59.6 m' }
+  },
+  {
+    id: 36, name: 'name_747_300', code: 'Boeing 747-300', category: 'civil', country: '美国',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Swissair_Boeing_747-300_at_Zurich_Airport_in_May_1985_version2.jpg/960px-Swissair_Boeing_747-300_at_Zurich_Airport_in_May_1985_version2.jpg',
+    desc: 'desc_747_300', airlineIds: ['sq', 'ba'],
+    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
+    specs: { 'cruise_speed': '0.85 马赫', 'range': '11,000 km', 'capacity': '400-496 人', 'wingspan': '59.6 m' }
+  },
+  {
+    id: 37, name: 'name_a300b2', code: 'Airbus A300B2', category: 'civil', country: '欧洲',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Air_France_Airbus_A300B2_Volpati.jpg/960px-Air_France_Airbus_A300B2_Volpati.jpg',
+    desc: 'desc_a300b2', airlineIds: ['af', 'lh'],
+    tags: ['twin_engine', 'wide_body', 'pioneer'],
+    specs: { 'cruise_speed': '0.78 马赫', 'range': '3,400 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
+  },
+  {
+    id: 38, name: 'name_a300b4', code: 'Airbus A300B4', category: 'civil', country: '欧洲',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Airbus_A300B4-603%2C_Lufthansa_AN0520385.jpg/960px-Airbus_A300B4-603%2C_Lufthansa_AN0520385.jpg',
+    desc: 'desc_a300b4', airlineIds: ['af', 'ba'],
+    tags: ['twin_engine', 'wide_body', 'regional'],
+    specs: { 'cruise_speed': '0.78 马赫', 'range': '5,300 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
   }
+
 ];
 
 // P2: URL slug mapping for hash routing
 const aircraftSlugs = {
   1: 'a380', 2: '787-9', 3: 'a350-900', 4: '777-300er', 5: 'c919',
   6: 'a320neo', 7: '737-max-8', 8: 'a330-300', 9: 'e195-e2', 10: 'a220-300',
-  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64', 26: '747-8'
-};
+  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64', 26: '747-8',
+27: '707-120', 28: '707-320', 29: '727-100', 30: '727-200', 31: '737-100', 32: '737-200', 33: '747-100', 34: '747-200', 35: '747-sp', 36: '747-300', 37: 'a300b2', 38: 'a300b4', };
 aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
 
 (function() {
@@ -5705,6 +5943,7 @@ function openAiChat() {
 function closeAiChat() {
   document.getElementById('aiChatOverlay').classList.remove('visible');
   document.body.style.overflow = '';
+  if (typeof renderCards === 'function') renderCards();
 }
 
 function updateAiCharCount() {
@@ -6008,6 +6247,7 @@ window.setLang = function(lang) {
   }
   var newsBtnEl = document.getElementById('newsBtnText');
   if (newsBtnEl) newsBtnEl.textContent = (lang === 'en' ? 'Aviation News' : '航空快讯');
+  var kgBtnEl = document.getElementById('kgBtnText'); if (kgBtnEl) kgBtnEl.textContent = (lang === 'en' ? 'AI Knowledge Graph' : 'AI 知识图谱');
   var npTitle = document.querySelector('#newsPanelOverlay .ai-review-title');
   if (npTitle) { var n = npTitle.firstChild; while (n && n.nodeType !== 3) n = n.nextSibling; if (n) n.textContent = (lang === 'en' ? 'Aviation News' : '航空快讯'); }
 };
@@ -6223,8 +6463,28 @@ toggleCollect = function(id) {
 var prodYearLookup = {
   '1':'2007','2':'2013','3':'2015','4':'2004','5':'2023',
   '6':'2016','7':'2017','8':'1994','9':'2019','10':'2016',
-  '20':'2005','21':'2017','22':'1997','23':'1995','24':'2016','25':'1986','26':'2012'
+  '20':'2005','21':'2017','22':'1997','23':'1995','24':'2016','25':'1986','26':'2012',
+  '27':'1958','28':'1960','29':'1964','30':'1967','31':'1968','32':'1967','33':'1970','34':'1971','35':'1976','36':'1983','37':'1974','38':'1975'
 };
+// Family relationships for knowledge graph
+const kgRelations = [
+  { from: 31, to: 32, type: 'derivative' },
+  { from: 32, to: 7, type: 'derivative' },
+  { from: 33, to: 34, type: 'derivative' },
+  { from: 34, to: 35, type: 'derivative' },
+  { from: 34, to: 36, type: 'derivative' },
+  { from: 36, to: 26, type: 'derivative' },
+  { from: 27, to: 28, type: 'derivative' },
+  { from: 29, to: 30, type: 'derivative' },
+  { from: 37, to: 38, type: 'derivative' },
+  { from: 38, to: 8, type: 'derivative' },
+  { from: 8, to: 1, type: 'derivative' },
+  { from: 4, to: 2, type: 'derivative' },
+  { from: 37, to: 34, type: 'competitor' },
+  { from: 28, to: 37, type: 'competitor' },
+  { from: 30, to: 32, type: 'competitor' }
+];
+
 
 // ===== 时间线视图 =====
 function initTimeline() {
@@ -7263,6 +7523,107 @@ function exportSingleAircraft(id) {
   }
 }
 
+
+// ===== AI 知识图谱 =====
+
+function openKgPanel() {
+  var overlay = document.getElementById('kgOverlay');
+  overlay.classList.add('active');
+  buildKgCardGrid();
+}
+
+function closeKgPanel() {
+  document.getElementById('kgOverlay').classList.remove('active');
+  if (typeof renderCards === 'function') renderCards();
+}
+
+function buildKgCardGrid() {
+  var grid = document.getElementById('kgCardGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  // Group civil Boeing/Airbus aircraft by family
+  var families = {};
+  aircrafts.forEach(function(a) {
+    if (a.category !== 'civil') return;
+    var code = (a.code || '').toLowerCase();
+    var famKey = '';
+    var famLabel = '';
+    var isBoeing = code.includes('boeing') || code.startsWith('b7');
+    var isAirbus = code.includes('airbus') || code.startsWith('a3') || code.startsWith('a2');
+    if (isBoeing) {
+      var m = code.match(/boeing\s*(\d+)/i) || code.match(/b(\d+)/i);
+      if (m) { famKey = 'boeing-' + m[1]; famLabel = '\u6ce2\u97f3 ' + m[1]; }
+    } else if (isAirbus) {
+      var am = code.match(/a(\d+)/i);
+      if (am) { famKey = 'airbus-a' + am[1].substring(0,3); famLabel = '\u7a7a\u5ba2 A' + am[1].substring(0,3); }
+    }
+    if (!famKey) return;
+    if (!families[famKey]) families[famKey] = { label: famLabel, isBoeing: isBoeing, list: [] };
+    families[famKey].list.push(a);
+  });
+
+  // Sort families: Boeing first, then Airbus; within each by model number
+  var famKeys = Object.keys(families).sort(function(a, b) {
+    var aIsB = families[a].isBoeing, bIsB = families[b].isBoeing;
+    if (aIsB && !bIsB) return -1;
+    if (!aIsB && bIsB) return 1;
+    return a.localeCompare(b);
+  });
+
+  famKeys.forEach(function(fk) {
+    var group = families[fk];
+    group.list.sort(function(a, b) {
+      return (parseInt(prodYearLookup[a.id] || '9999')) - (parseInt(prodYearLookup[b.id] || '9999'));
+    });
+
+    var groupEl = document.createElement('div');
+    groupEl.className = 'kg-family-group';
+
+    var titleEl = document.createElement('div');
+    titleEl.className = 'kg-family-title';
+    titleEl.textContent = group.label;
+    groupEl.appendChild(titleEl);
+
+    var cardGrid = document.createElement('div');
+    cardGrid.className = 'kg-card-grid';
+
+    group.list.forEach(function(a) {
+      var card = document.createElement('div');
+      card.className = 'kg-card';
+      card.onclick = function() { closeKgPanel(); openDetail(a.id); };
+
+      var img = document.createElement('img');
+      img.className = 'kg-card-img';
+      img.src = proxyUrl(a.image);
+      img.alt = a.code;
+      img.loading = 'lazy';
+      img.onerror = function() {
+        this.src = 'data:image/svg+xml,' + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130">' +
+          '<rect fill="#1a1f3a" width="200" height="130"/>' +
+          '<text fill="#555" x="100" y="70" text-anchor="middle" font-size="14">' + (a.code || '?') + '</text></svg>'
+        );
+      };
+      card.appendChild(img);
+
+      var body = document.createElement('div');
+      body.className = 'kg-card-body';
+      body.innerHTML = '<div class="kg-card-code">' + a.code + '</div><div class="kg-card-year">' + (prodYearLookup[a.id] || '--') + '</div>';
+      card.appendChild(body);
+
+      cardGrid.appendChild(card);
+    });
+
+    groupEl.appendChild(cardGrid);
+    grid.appendChild(groupEl);
+  });
+
+  if (famKeys.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">暂无知谱数据</div>';
+  }
+}
+
 // ===== 航空快讯全屏面板 =====
 let newsPanelItems = [];
 
@@ -7299,6 +7660,7 @@ function closeNewsPanel() {
   document.getElementById('newsPanelOverlay').classList.remove('visible');
   document.body.style.overflow = '';
   if (window._newsRefreshInterval) { clearInterval(window._newsRefreshInterval); window._newsRefreshInterval = null; }
+  if (typeof renderCards === 'function') renderCards();
 }
 
 function renderNewsContent(content, items) {
