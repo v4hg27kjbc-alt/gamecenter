@@ -353,74 +353,6 @@ body.light-mode .header h1 {
   transform: translateY(-2px);
 }
 
-/* ===== 航空快讯按钮（与问AI同色同动画） ===== */
-.news-btn {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2)) !important;
-  border-color: rgba(99,102,241,0.35) !important;
-}
-.news-btn::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
-  pointer-events: none;
-}
-.news-btn:hover {
-  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35)) !important;
-  border-color: rgba(99,102,241,0.55) !important;
-  transform: translateY(-2px);
-}
-
-/* ===== AI 知识图谱按钮（与问AI/快讯同风格同动画） ===== */
-.kg-btn {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2)) !important;
-  border-color: rgba(99,102,241,0.35) !important;
-}
-.kg-btn::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
-  pointer-events: none;
-}
-.kg-btn:hover {
-  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35)) !important;
-  border-color: rgba(99,102,241,0.55) !important;
-  transform: translateY(-2px);
-}
-
-/* ===== 新闻面板底部按钮 ===== */
-.news-summary-btn {
-  padding: 9px 20px;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(91,127,184,0.15), rgba(74,103,153,0.15));
-  color: var(--text);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: 0.5px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-.news-summary-btn:hover {
-  background: linear-gradient(135deg, rgba(91,127,184,0.3), rgba(74,103,153,0.3));
-  border-color: rgba(91,127,184,0.5);
-  transform: translateY(-1px);
-}
-.news-summary-btn:active { transform: scale(0.97); }
-.news-summary-btn.active {
-  background: linear-gradient(135deg, rgba(91,127,184,0.4), rgba(74,103,153,0.4));
-  border-color: rgba(99,102,241,0.6);
-}
-
 /* ===== AI 航空问答 Overlay ===== */
 #aiChatOverlay {
   position: fixed; inset: 0; z-index: 10000;
@@ -1582,23 +1514,6 @@ body.light-mode .airline-name { color: #1a1a2e; }
   .compare-bar { padding: 8px 10px; }
   .cold-fact-toast .cold-fact-toast-close { width: 18px; height: 18px; top: 6px; right: 6px; font-size: 10px; }
   .cold-fact-toast .cold-fact-toast-hint { font-size: 7px; }
-  /* 航空快讯面板 */
-  #newsPanelOverlay .ai-review-title { font-size: 0.95rem; }
-  #newsPanelOverlay .news-summary-btn { font-size: 0.72rem; padding: 6px 10px; }
-  #newsPanelOverlay .ai-review-footer { flex-wrap: wrap; gap: 6px; }
-  #newsPanelOverlay .ai-review-content p strong { font-size: 0.9rem; }
-  /* filter-bar 快讯按钮 */
-  .news-btn { font-size: 0.7rem; padding: 4px 8px; }
-  .news-btn svg { width: 12px; height: 12px; }
-  .kg-btn { font-size: 0.7rem; padding: 4px 8px; }
-  .kg-btn svg { width: 12px; height: 12px; }
-  .kg-overlay .kg-header { padding: 12px 16px; }
-  .kg-overlay .kg-title { font-size: 0.9rem; }
-  .kg-overlay .kg-legend { padding: 6px 16px; font-size: 0.7rem; }
-  .kg-detail-popup { width: 220px; padding: 12px; }
-  .kg-detail-img { height: 100px; }
-  .kg-detail-name { font-size: 0.9rem; }
-  .kg-detail-desc { font-size: 0.72rem; }
 }
 .announcement-toast {
   position: fixed; top: -80px; left: 50%; transform: translateX(-50%); z-index: 200;
@@ -2771,14 +2686,6 @@ body.light-mode .map-container .leaflet-tile-pane {
   }
 }
 
-/* ===== 航空快讯面板 - 768px 响应式 ===== */
-@media (max-width: 768px) {
-  #newsPanelOverlay .ai-review-content { padding: 16px 14px; max-width: 100%; }
-  #newsPanelOverlay .ai-review-header { padding: 12px 14px; }
-  #newsPanelOverlay .ai-review-footer { padding: 10px 14px; flex-wrap: wrap; }
-  #newsPanelOverlay .news-summary-btn { font-size: 0.78rem; padding: 7px 14px; }
-}
-
 /* ===== AI 机型评价面板 ===== */
 #aiReviewOverlay {
   position: fixed; inset: 0; z-index: 10001;
@@ -2788,96 +2695,6 @@ body.light-mode .map-container .leaflet-tile-pane {
   font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
 }
 #aiReviewOverlay.visible { display: flex; }
-
-/* ===== AI 知识图谱全屏面板 ===== */
-.kg-overlay {
-  position: fixed; inset: 0; z-index: 10002;
-  background: var(--body-bg);
-  display: none;
-  flex-direction: column;
-  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
-}
-.kg-overlay.active { display: flex; }
-
-.kg-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--glass-border);
-  flex-shrink: 0;
-}
-.kg-title { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 600; color: var(--text); }
-.kg-title-icon { color: var(--accent); display: flex; align-items: center; }
-.kg-close {
-  background: none; border: none; color: var(--text-dim); font-size: 1.8rem;
-  cursor: pointer; line-height: 1; padding: 0 4px; transition: color 0.2s;
-}
-.kg-close:hover { color: var(--text); }
-
-.kg-legend {
-  display: flex; align-items: center; gap: 16px;
-  padding: 8px 24px; border-bottom: 1px solid var(--glass-border);
-  font-size: 0.8rem; color: var(--text-dim); flex-shrink: 0;
-}
-.kg-legend-item { display: flex; align-items: center; gap: 6px; }
-.kg-legend-line { width: 24px; height: 2px; border-radius: 1px; }
-.kg-legend-line.derived { background: var(--accent); }
-.kg-legend-line.competitor { background: rgba(239,68,68,0.6); border-top: 2px dashed rgba(239,68,68,0.4); }
-
-/* 知识图谱卡片网格 */
-.kg-scroll-wrap {
-  flex: 1; overflow-y: auto; padding: 20px 24px;
-  scroll-behavior: smooth;
-}
-.kg-family-group { margin-bottom: 28px; }
-.kg-family-title {
-  font-size: 0.95rem; font-weight: 700; color: var(--accent);
-  margin-bottom: 12px; padding-left: 4px;
-  display: flex; align-items: center; gap: 8px;
-}
-.kg-family-title::before {
-  content: ''; width: 4px; height: 18px; border-radius: 2px;
-  background: linear-gradient(180deg, var(--accent), rgba(99,102,241,0.4));
-}
-.kg-card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 12px;
-}
-.kg-card {
-  background: var(--card-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px; overflow: hidden;
-  cursor: pointer; transition: all 0.25s ease;
-}
-.kg-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(99,102,241,0.15);
-}
-.kg-card-img {
-  width: 100%; height: 110px; object-fit: cover;
-  background: var(--card-bg-hover);
-}
-.kg-card-body {
-  padding: 10px 12px;
-}
-.kg-card-code {
-  font-size: 0.82rem; font-weight: 600; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.kg-card-year {
-  font-size: 0.7rem; color: var(--accent); margin-top: 2px;
-}
-
-/* ===== 航空快讯全屏面板 ===== */
-#newsPanelOverlay {
-  position: fixed; inset: 0; z-index: 10001;
-  background: var(--body-bg);
-  display: none;
-  flex-direction: column;
-  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
-}
-#newsPanelOverlay.visible { display: flex; }
 
 .ai-review-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -3011,7 +2828,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260810-v33">
+<body data-version="20260806-v28">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -3131,8 +2948,6 @@ body.light-mode .map-container .leaflet-tile-pane {
     <div class="filter-chip" data-filter="helicopter"><span class="filter-label" id="filterHelicopter">直升机</span></div>
     <div class="filter-chip active" data-filter="all"><span class="filter-label" id="filterAll">全部</span></div>
     <button class="filter-chip ai-chat-btn" id="aiChatBtn" onclick="openAiChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="aiChatBtnText">问 AI</span></button>
-    <button class="filter-chip news-btn" id="newsBtn" onclick="openNewsPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg><span id="newsBtnText">航空快讯</span></button>
-    <button class="filter-chip kg-btn" id="kgBtn" onclick="openKgPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="19" r="2"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/></svg><span id="kgBtnText">AI 知识图谱</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -3213,42 +3028,6 @@ body.light-mode .map-container .leaflet-tile-pane {
         换角度
       </button>
     </div>
-  </div>
-</div>
-
-
-<!-- AI 知识图谱全屏面板 -->
-<div class="kg-overlay" id="kgOverlay">
-  <div class="kg-header">
-    <div class="kg-title">
-      <div class="kg-title-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="19" r="2"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/></svg></div>
-      <span>AI 知识图谱 · 波音 & 空客族谱</span>
-    </div>
-    <button class="kg-close" onclick="closeKgPanel()">&times;</button>
-  </div>
-  <div class="kg-scroll-wrap">
-    <div id="kgCardGrid"></div>
-  </div>
-</div>
-
-
-<div id="newsPanelOverlay">
-  <div class="ai-review-header">
-    <span class="ai-review-title">航空快讯</span>
-    <button class="ai-review-close" onclick="closeNewsPanel()" title="关闭">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-  <div class="ai-review-content" id="newsPanelContent">
-    <div style="text-align:center;color:var(--text-dim);padding:40px 0;">加载中...</div>
-  </div>
-  <div class="ai-review-footer" style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;">
-    <button class="news-summary-btn" onclick="refreshNewsPanel()">换一换</button>
-    <span style="color:var(--text-dim);font-size:0.8rem;margin:0 4px;">AI总结字数:</span>
-    <button class="news-summary-btn wordcount-btn" id="wc200" onclick="selectWordCount(200)">200字</button>
-    <button class="news-summary-btn wordcount-btn active" id="wc400" onclick="selectWordCount(400)">400字</button>
-    <button class="news-summary-btn wordcount-btn" id="wc600" onclick="selectWordCount(600)">600字</button>
-    <button class="news-summary-btn" onclick="generateNewsSummaryInPanel()" style="background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.3));border-color:rgba(99,102,241,0.5);">生成</button>
   </div>
 </div>
 
@@ -3335,7 +3114,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">航空快讯 & 体验优化</span>',
+    updateBanner: '<span class="banner-highlight">AI 航空问答</span>',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -3424,26 +3203,7 @@ const i18n = {
     desc_y20: '中国自主研发大型运输机，最大起飞重量220吨，填补战略运输空白。',
     desc_ah64: '全球最先进武装直升机之一，可挂载16枚地狱火导弹，被誉为坦克杀手。',
     name_747: '波音 747-8',
-    name_707_120: 'Boeing 707-120',    name_707_320: 'Boeing 707-320',
-    name_727_100: 'Boeing 727-100',    name_727_200: 'Boeing 727-200',
-    name_737_100: 'Boeing 737-100',    name_737_200: 'Boeing 737-200',
-    name_747_100: 'Boeing 747-100',    name_747_200: 'Boeing 747-200',
-    name_747_sp: 'Boeing 747-SP',      name_747_300: 'Boeing 747-300',
-    name_a300b2: 'Airbus A300B2',      name_a300b4: 'Airbus A300B4',
-    desc_707_120: 'The Boeing 707-120, first flown in 1958, was Boeing\'s first jet airliner. It ushered in the Jet Age and made Pan Am the leader of transatlantic travel.',    desc_707_320: 'The 707-320 is the intercontinental stretched variant, featuring extended fuselage and significantly improved range for transatlantic routes.',
-    desc_727_100: 'The Boeing 727-100, introduced in 1964, featured a unique tri-jet rear-engine layout enabling short-field operations. Its quiet performance made it a U.S. airport staple.',    desc_727_200: 'The 727-200 is the stretched variant, seating up to 189 passengers, becoming one of the best-selling aircraft of the 1970s.',
-    desc_737_100: 'The Boeing 737-100 is the original 737 model, first delivered to Lufthansa in 1968. This twin-engine short-haul design laid the foundation for the best-selling 737 series.',    desc_737_200: 'The 737-200 featured an extended fuselage and more powerful engines, improving both range and capacity in the short-haul market.',
-    desc_747_100: 'The Boeing 747-100 entered service in 1970, with its iconic hump and double-deck design defining the wide-body era. Pan Am operated the inaugural flight.',    desc_747_200: 'The 747-200 upgraded engines and landing gear, achieving over 12,000 km range, making trans-Pacific nonstop flights routine.',
-    desc_747_sp: 'The 747-SP (Special Performance) is a shortened 747 variant with exceptional range of 15,400 km, designed for ultra-long-haul routes.',    desc_747_300: 'The 747-300 introduced the extended upper deck, boosting capacity to nearly 500 passengers, with Swissair as the launch customer.',
-    desc_a300b2: 'The Airbus A300B2, introduced in 1974, was the world\'s first twin-engine wide-body aircraft, proving the viability of twin-engine long-haul flight.',    desc_a300b4: 'The A300B4 improved range and payload, becoming Airbus\' first aircraft exported to North America and establishing Airbus in the wide-body market.',
     desc_747: '波音747-8是"空中女王"747系列最新一代，2010年首飞，2012年投入运营。机身长76.3米，为全球最长客机，标志性鹅头双层设计延续半世纪经典，搭载四台GEnx-2B67发动机，节油16%、噪声降低30%。',
-    desc_707_120: '波音707-120是波音首款喷气式客机，1958年首飞，开创了喷气时代。Pan Am首批运营，四发窄体设计成为洲际飞行的先驱。',    desc_707_320: '707-320是707的洲际加长版，机身加长，航程大幅提升，可跨大西洋飞行。',
-    desc_727_100: '波音727-100于1964年首飞，独特的后三发设计使其可在短跑道起降。因其低噪音和优秀起降性能成为美国机场的常客。',    desc_727_200: '727-200是加长版，载客量提升至189座，成为1970年代最畅销的客机之一。',
-    desc_737_100: '波音737-100是737家族的鼻祖，1968年交付汉莎航空。双发短途设计简洁高效，为后来最畅销的737系列奠基。',    desc_737_200: '737-200加长机身并换装更强引擎，航程和载客双提升，在短途市场中大获成功。',
-    desc_747_100: '波音747-100于1970年投入运营，以独特的驼峰外形和双层客舱定义宽体时代。Pan Am首航，开创大型客机新纪元。',    desc_747_200: '747-200升级引擎和起落架，航程突破12000公里，使跨太平洋直飞成为常态。',
-    desc_747_sp: '747-SP（Special Performance）是缩短版747，机身更短但航程更长，专为超远程航线设计，续航可达15400公里。',    desc_747_300: '747-300引入加长上层客舱，载客量提升至近500人，瑞士航空为首家运营航司。',
-    desc_a300b2: '空客A300B2于1974年投入运营，是全球首款双发宽体客机，证明了双发远程飞行的可行性，为空客打开市场大门。',    desc_a300b4: 'A300B4升级航程和载荷，成为空客首个出口北美的机型，确立了空客在宽体市场的地位。',
-
 
     // --- P4: 相关推荐 ---
     relatedTitle: '相关推荐',
@@ -3528,12 +3288,6 @@ const i18n = {
   },
 
   en: {
-    name_707_120: 'Boeing 707-120',    name_707_320: 'Boeing 707-320',
-    name_727_100: 'Boeing 727-100',    name_727_200: 'Boeing 727-200',
-    name_737_100: 'Boeing 737-100',    name_737_200: 'Boeing 737-200',
-    name_747_100: 'Boeing 747-100',    name_747_200: 'Boeing 747-200',
-    name_747_sp: 'Boeing 747-SP',      name_747_300: 'Boeing 747-300',
-    name_a300b2: 'Airbus A300B2',      name_a300b4: 'Airbus A300B4',
     // --- Page Base ---
     pageTitle: 'Airliner Collection',
     headerTitle: 'Airliner Collection',
@@ -3585,7 +3339,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Aircraft Photos Upgrade</span> — 12 classic Boeing/Airbus models with complete real photos, family card knowledge graph, new visuals for 707-120/727-100/747-100/747-300',
+    updateBanner: '<span class="banner-highlight">AI Aircraft Review</span> now live in detail modals—tap "AI 评" for multi-angle analysis. AI Q&A now supports multi-turn conversation context.',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -4130,101 +3884,15 @@ const aircrafts = [
     desc: 'desc_747', airlineIds: ['lh', 'ca'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
     specs: { 'cruise_speed': '0.855 马赫', 'range': '14,816 km', 'capacity': '410-467 人', 'wingspan': '68.4 m' }
-  },
-
-  {
-    id: 27, name: 'name_707_120', code: 'Boeing 707-120', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Boeing_707-121,_Pan_Am_JP6888703.jpg',
-    desc: 'desc_707_120', airlineIds: ['ua', 'dl'],
-    tags: ['quad_engine', 'narrow_body', 'pioneer'],
-    specs: { 'cruise_speed': '0.82 马赫', 'range': '5,000 km', 'capacity': '140-179 人', 'wingspan': '39.9 m' }
-  },
-  {
-    id: 28, name: 'name_707_320', code: 'Boeing 707-320', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/0/06/Boeing_707-321B_Pan_Am_Freer.jpg',
-    desc: 'desc_707_320', airlineIds: ['ua', 'ba'],
-    tags: ['quad_engine', 'narrow_body', 'ultra_range'],
-    specs: { 'cruise_speed': '0.82 马赫', 'range': '9,300 km', 'capacity': '141-189 人', 'wingspan': '44.4 m' }
-  },
-  {
-    id: 29, name: 'name_727_100', code: 'Boeing 727-100', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Boeing_727-100_N7017U_of_United_Airlines.jpg',
-    desc: 'desc_727_100', airlineIds: ['ua', 'dl'],
-    tags: ['tri_engine', 'narrow_body', 'regional'],
-    specs: { 'cruise_speed': '0.81 马赫', 'range': '3,500 km', 'capacity': '106-131 人', 'wingspan': '32.9 m' }
-  },
-  {
-    id: 30, name: 'name_727_200', code: 'Boeing 727-200', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Boeing_727-2J4-Adv%2C_Dan-Air_London_AN0654211.jpg',
-    desc: 'desc_727_200', airlineIds: ['dl', 'ua'],
-    tags: ['tri_engine', 'narrow_body', 'regional'],
-    specs: { 'cruise_speed': '0.81 马赫', 'range': '4,800 km', 'capacity': '145-189 人', 'wingspan': '32.9 m' }
-  },
-  {
-    id: 31, name: 'name_737_100', code: 'Boeing 737-100', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Lufthansa_737-130_D-ABEL.jpg',
-    desc: 'desc_737_100', airlineIds: ['lh'],
-    tags: ['twin_engine', 'narrow_body', 'short_haul'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '2,850 km', 'capacity': '85-103 人', 'wingspan': '28.35 m' }
-  },
-  {
-    id: 32, name: 'name_737_200', code: 'Boeing 737-200', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/d/d3/British_Airtours_Boeing_737-200_Marmet.jpg',
-    desc: 'desc_737_200', airlineIds: ['ua', 'dl'],
-    tags: ['twin_engine', 'narrow_body', 'short_haul'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '4,200 km', 'capacity': '115-130 人', 'wingspan': '28.35 m' }
-  },
-  {
-    id: 33, name: 'name_747_100', code: 'Boeing 747-100', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Boeing_747-121%2C_Pan_Am_JP5894156.jpg',
-    desc: 'desc_747_100', airlineIds: ['ua', 'ba'],
-    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body', 'pioneer'],
-    specs: { 'cruise_speed': '0.84 马赫', 'range': '8,560 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
-  },
-  {
-    id: 34, name: 'name_747_200', code: 'Boeing 747-200', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/KLM_Boeing_747-200_PH-BUF_%287491686916%29.jpg',
-    desc: 'desc_747_200', airlineIds: ['ua', 'ba'],
-    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body', 'ultra_range'],
-    specs: { 'cruise_speed': '0.84 马赫', 'range': '12,700 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
-  },
-  {
-    id: 35, name: 'name_747_sp', code: 'Boeing 747-SP', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Boeing_747SP-21%2C_Pan_Am_JP5893131.jpg',
-    desc: 'desc_747_sp', airlineIds: ['ua'],
-    tags: ['quad_engine', 'wide_body', 'ultra_range'],
-    specs: { 'cruise_speed': '0.85 马赫', 'range': '15,400 km', 'capacity': '276-331 人', 'wingspan': '59.6 m' }
-  },
-  {
-    id: 36, name: 'name_747_300', code: 'Boeing 747-300', category: 'civil', country: '美国',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/GENEVA_MARCH_1988_SWISSAIR_BOEING_747-300_N221GF_%2815326066783%29.jpg',
-    desc: 'desc_747_300', airlineIds: ['sq', 'ba'],
-    tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
-    specs: { 'cruise_speed': '0.85 马赫', 'range': '11,000 km', 'capacity': '400-496 人', 'wingspan': '59.6 m' }
-  },
-  {
-    id: 37, name: 'name_a300b2', code: 'Airbus A300B2', category: 'civil', country: '欧洲',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Air_France_Airbus_A300B2_Volpati.jpg',
-    desc: 'desc_a300b2', airlineIds: ['af', 'lh'],
-    tags: ['twin_engine', 'wide_body', 'pioneer'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '3,400 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
-  },
-  {
-    id: 38, name: 'name_a300b4', code: 'Airbus A300B4', category: 'civil', country: '欧洲',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Airbus_A300B4-603%2C_Lufthansa_AN0520385.jpg',
-    desc: 'desc_a300b4', airlineIds: ['af', 'ba'],
-    tags: ['twin_engine', 'wide_body', 'regional'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '5,300 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
   }
-
 ];
 
 // P2: URL slug mapping for hash routing
 const aircraftSlugs = {
   1: 'a380', 2: '787-9', 3: 'a350-900', 4: '777-300er', 5: 'c919',
   6: 'a320neo', 7: '737-max-8', 8: 'a330-300', 9: 'e195-e2', 10: 'a220-300',
-  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64', 26: '747-8',
-27: '707-120', 28: '707-320', 29: '727-100', 30: '727-200', 31: '737-100', 32: '737-200', 33: '747-100', 34: '747-200', 35: '747-sp', 36: '747-300', 37: 'a300b2', 38: 'a300b4', };
+  20: 'f22', 21: 'j20', 22: 'b2', 23: 'c17', 24: 'y20', 25: 'ah64', 26: '747-8'
+};
 aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
 
 (function() {
@@ -5845,7 +5513,6 @@ document.addEventListener('keydown', (e) => {
   // 优先关闭最顶层弹窗
   if (document.querySelector('.image-lightbox')) { closeImageLightbox(); return; }
   if (document.getElementById('aiReviewOverlay').classList.contains('visible')) { closeAiReview(); return; }
-  if (document.getElementById('newsPanelOverlay') && document.getElementById('newsPanelOverlay').classList.contains('visible')) { closeNewsPanel(); return; }
   closeDetail();
 });
 
@@ -5881,10 +5548,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260810-v33', '1');
+  localStorage.setItem('aviation-update-20260806-v28', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260810-v33')) return;
+  if (localStorage.getItem('aviation-update-20260806-v28')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -5899,33 +5566,6 @@ const AI_CONFIG = {
   model: 'glm-4-flash',
   timeout: 15000
 };
-const NEWS_FEEDS = [
-  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fsimpleflying.com%2Ffeed',
-  'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Faviationweek.com%2Frss.xml'
-];
-
-// 内置中文航空新闻兜底（≥15条），确保离线/file://协议下100%可显示
-const NEWS_STATIC = [
-  { title: '新加坡航空A380航班增加25%运力 全球航线一览', snippet: '新加坡航空作为空客A380的启动客户和全球最大运营商之一，近日宣布将大幅提升A380执飞航班的运力，增幅高达25%。此次调整覆盖了新加坡至伦敦、悉尼、东京成田、上海浦东及孟买等核心航线，以满足年末旅行旺季的强劲客流需求。尽管超大型客机在全球部分市场逐渐被新一代双发宽体机替代，新航仍坚持发挥A380在枢纽机场高密度航线上的独特优势，尤其在樟宜机场的航班波衔接方面表现突出。新航目前运营着12架A380客机，均配置了全新一代套房、商务舱及优选经济舱产品，持续为高端旅客提供差异化服务。', pubDate: '2026-08-09', link: '#' },
-  { title: '空客A350商务舱与头等舱对比：差价是否真的值得？', snippet: '随着航空业为旅客提供比以往更多的舱位选择，空客A350作为全球旗舰远程宽体客机，已成为各大航空公司展示最先进客舱产品的舞台。商务舱与头等舱之间的差距近年来显著扩大——头等舱通常提供封闭式套间、私人迷你吧、专属管家服务和米其林级别机上餐食，而商务舱则普遍配置全平躺座椅和直通过道。本文从座椅宽度、娱乐系统、餐饮品质、地面服务及价格差异五个维度，对比了新加坡航空、卡塔尔航空和汉莎航空等运营商的A350两舱产品，指出对于大多数远程航线，商务舱的性价比远高于头等舱，但对于追求极致空间和隐私的旅客来说，头等舱依然有其不可替代的价值。', pubDate: '2026-08-09', link: '#' },
-  { title: '美国航空向1205名空乘提供9月无薪休假 应对航班削减', snippet: '美国航空公司近日宣布，将向旗下十座机组基地共计1205名空乘人员提供9月份的无薪休假选项，约占其空乘总人数的4%。此举与公司提前进入秋季淡季航班计划直接相关——今年美国航空将秋季航班表启动时间较往年提前了约三周，主要受返校客流分散、商务出行季节性回落以及航空燃油价格持续攀升等多重因素影响。受影响最大的基地包括达拉斯-沃斯堡、迈阿密和芝加哥奥黑尔等核心枢纽。公司强调此次为自愿性质，不涉及强制裁员，并预计随着感恩节和圣诞假期的临近，运力将在11月全面恢复至正常水平。', pubDate: '2026-08-09', link: '#' },
-  { title: '远程机长与短途机长对燃油储备的考量为何截然不同', snippet: '一架执行45分钟短途支线任务的涡桨飞机，其法定最终储备燃油加上应急燃油可能占装载总油量的近三分之一，而飞越太平洋的14小时远程航班则是完全不同的计算逻辑。本文从国际民航组织标准出发，深入解析了最终储备燃油、应急燃油、备降燃油和额外燃油的层级结构，指出远程机长必须将航路高空风、目的地天气趋势、备降场可用性以及二次放行策略纳入综合决策模型，而短途机长更关注备降场的物理距离和终端区空中交通流量。两位资深机长分享了实际运行中的燃油管理案例，揭示同一套法规在不同飞行场景下如何产生截然不同的操作策略。', pubDate: '2026-08-09', link: '#' },
-  { title: '波音787梦想客机交付量创新高 全年预计突破150架', snippet: '波音公司位于南卡罗来纳州北查尔斯顿和华盛顿州埃弗雷特的两条787总装线在8月进入满负荷生产状态，月交付速率已稳定在14架以上，全年交付量有望突破150架大关。这一强劲表现得益于供应链瓶颈的逐步缓解——尤其是普惠和罗尔斯·罗伊斯发动机的按时交付率显著改善。卡塔尔航空、阿联酋航空和美联航是本季度最大的接机客户，其中美联航一次性接收了5架787-10。分析师指出，宽体机市场的复苏速度远超预期，波音目前在远程宽体机领域对空客形成了明显的交付量领先优势。', pubDate: '2026-08-08', link: '#' },
-  { title: '中国商飞C919首次执飞国际航线 上海至新加坡成功首航', snippet: '8月8日上午，中国东方航空使用国产C919大型客机执飞的MU545航班从上海浦东国际机场起飞，经过约五个半小时的飞行后平稳降落在新加坡樟宜国际机场，标志着C919机型首次正式投入国际商业航线运营。此次国际首航航班搭载了158名旅客，客座率达到96%，航程约3800公里。新加坡民航局于今年7月正式向C919颁发了型号认可证。中国商飞表示，目前已累计交付东航、国航和南航共计12架C919，国内航线网络覆盖上海、北京、成都、广州等十多个城市，累计安全运营超过一万小时。', pubDate: '2026-08-08', link: '#' },
-  { title: '欧洲航空安全局正式批准空客A321XLR投入商业运营', snippet: '欧洲航空安全局于8月7日向空客颁发了A321XLR的最终型号合格证，为这款航程达4700海里的革命性窄体客机全面投入商业运营扫清了最后一道监管障碍。A321XLR配备了创新型一体式后部中央油箱，可在执飞跨大西洋航线时提供与宽体机相当的经济性。启动客户爱尔兰航空和靛蓝航空已准备在9月份分别开通都柏林至纽约以及德里至伦敦盖特威克航线。行业分析认为，A321XLR将深刻改变全球中等密度远程市场的竞争格局，使窄体机首次具备了在大西洋航线上对宽体机形成有效替代的能力。', pubDate: '2026-08-07', link: '#' },
-  { title: '日本航空2026财年第一季度净利润同比增长22%', snippet: '日本航空集团公布了2026财年第一季度（4-6月）财报，合并营业收入达到4580亿日元，同比增长18.3%，净利润为420亿日元，同比增长22%。国际客运收入增幅尤为显著，北美和东南亚航线贡献了最大增量，其中东京至纽约、洛杉矶及曼谷航线的客座率均超过90%。入境旅游需求的持续旺盛是核心驱动力——6月份访日外国游客人数达314万人次，再次刷新单月历史纪录。日航同时上调了全年盈利指引，并宣布将在年内新增东京成田至西雅图、大阪关西至墨尔本两条远程航线。', pubDate: '2026-08-07', link: '#' },
-  { title: '阿联酋航空宣布订购50架波音777X 总价值超200亿美元', snippet: '阿联酋航空在迪拜总部宣布，已与波音公司签署确认订单，增购50架波音777X系列客机，按目录价格计算总价值超过200亿美元。其中包括35架777-9和15架777-8货机，交付时间从2029年开始持续至2035年。此次订单意味着阿联酋航空的777X确认订单总数已增至205架，巩固了其作为该机型全球最大客户的地位。阿联酋航空总裁表示，777X将逐步替换机队中老旧的777-300ER和A380机型，是公司2035年机队战略的核心支柱。该订单对波音而言也是一剂强心针，777X项目此前因认证进度多次推迟而面临压力。', pubDate: '2026-08-07', link: '#' },
-  { title: '国际航协预测2026年全球航空客运量将首次突破50亿人次', snippet: '国际航空运输协会发布最新预测报告，预计2026年全球航空客运总量将达到50.4亿人次，首次突破50亿大关，较2025年增长约6.7%。亚太地区将成为增长最快的区域市场，中国国内市场和印度市场合计贡献全球增量的近四成。报告同时指出，行业面临的主要挑战包括可持续航空燃料供应严重不足、全球空中交通管理系统现代化滞后以及部分地区机场基础设施瓶颈日益突出。IATA总干事呼吁各国政府加大对SAF生产设施和空管系统升级的投资力度，以避免基础设施短板成为制约行业复苏的瓶颈。', pubDate: '2026-08-06', link: '#' },
-  { title: 'NASA X-59静音超音速验证机完成首次地面滑行测试', snippet: '美国国家航空航天局与洛克希德-马丁臭鼬工厂联合研制的X-59 QueSST静音超音速验证机，于8月5日在加州帕姆代尔基地成功完成首次地面滑行测试。X-59的设计目标是将音爆噪音降低至约75分贝——相当于关车门的声音水平，远低于协和号客机曾引发的105分贝震耳欲聋的音爆。本次测试验证了起落架、制动系统和航电设备在地面操作条件下的性能表现。NASA计划于今年四季度启动首次试飞，随后将飞越美国多个居民社区收集公众对低音爆的主观感受数据，为监管机构解除跨大陆超音速民用飞行禁令提供科学依据。', pubDate: '2026-08-06', link: '#' },
-  { title: '韩国仁川国际机场第四跑道正式启用 年吞吐能力提升至1.3亿人次', snippet: '韩国仁川国际机场8月5日举行了第四跑道启用仪式，韩国国土交通部长官及仁川机场公社社长共同出席。这条全长4000米的新跑道总投资约3.8万亿韩元，历经五年建设，配备了CAT IIIB精密进近系统和高级场面滑行引导系统。投运后，仁川机场的年航班起降容量从73万架次提升至100万架次，年旅客吞吐能力跃升至1.3亿人次，进一步巩固其作为东北亚核心航空枢纽的地位。大韩航空和韩亚航空均宣布将借助新增跑道容量，将欧洲和北美航线频次提高约15%至20%。', pubDate: '2026-08-05', link: '#' },
-  { title: '电动航空里程碑：Beta Technologies获FAA型号认证', snippet: '美国联邦航空管理局于8月5日向Beta Technologies颁发了其Alia eCTOL电动常规起降飞机的型号合格证，标志着全球首款获得FAA认证的全电动实用类飞机正式诞生。Alia eCTOL采用纯电推进系统，航程约250海里，充电时间约50分钟，主要瞄准城市间短途货运、医疗物资运输和空中出租车场景。Beta Technologies已从UPS、亚马逊Prime Air、美国空军及United Therapeutics等客户处获得超过600架确认订单及意向订单。公司创始人表示，FAA的认证是电动航空商业化的重大转折点，预计首架交付客户的飞机将在2027年初投入运营。', pubDate: '2026-08-05', link: '#' },
-  { title: '法航-荷航集团启动史上最大规模机队更新计划', snippet: '法航-荷航集团首席执行官在巴黎举行的战略发布会上宣布，集团将启动一项总额达120亿欧元的机队更新计划，在未来十年内引进超过160架新一代客机，以取代老旧的波音777-200ER、空客A330和A320ceo系列。新引进机型涵盖空客A350-900/1000、A321XLR以及波音787-10，A320neo系列也将作为中短程主力机队大规模引入。集团同时承诺，新机队将全部具备使用50%可持续航空燃料的能力，预计到2035年单位碳排放将较2019年下降30%。该计划不仅将显著降低燃油成本和维护支出，还将为乘客提供更安静、更舒适的客舱体验。', pubDate: '2026-08-04', link: '#' },
-  { title: '巴西航空工业公司E2系列全球确认订单突破400架', snippet: '巴西航空工业公司在圣若泽杜斯坎普斯总部宣布，E195-E2和E190-E2组成的E2系列客机全球确认订单已累计突破400架大关。最新一笔订单来自尼日利亚的和平航空，确认采购5架E195-E2。巴航工业目前月均交付5至6架E2系列飞机，积压订单可覆盖约三年的生产周期。E2系列凭借其行业领先的燃油效率——较上一代E-jet降低约25%的单座油耗——和出色的短跑道性能，在北美、欧洲和非洲的区域航空市场中持续获得航空公司青睐。波特航空是目前最大的E2运营商，已接收了38架E195-E2。', pubDate: '2026-08-04', link: '#' },
-  { title: '香港国际机场三跑道系统全面投入运营 旅客容量翻倍', snippet: '香港国际机场8月3日正式宣布，第三条跑道及配套的T2客运廊、新旅客捷运系统和行李处理系统已全部投入全面运营，历时近八年的三跑道系统建设项目至此圆满完成。新系统投运后，香港机场的年旅客吞吐量将从约7500万人次提升至1.2亿人次，货运能力从约500万吨提升至1000万吨，有望重新夺回全球最繁忙货运机场的头衔。国泰航空已同步宣布将在2027年之前新增包括达拉斯、西雅图、阿姆斯特丹在内的多条远程航线。香港机场管理局表示，第三条跑道是在填海造地基础上建造的，全长3800米，耗资约1415亿港元。', pubDate: '2026-08-03', link: '#' },
-  { title: '达美航空率先在跨大西洋航线实现免费高速WiFi全覆盖', snippet: '达美航空宣布，已在全部执飞跨大西洋航线的宽体机队上完成Viasat高通量卫星WiFi系统的安装和调试工作，成为全球首家在跨大西洋航线上对所有乘客实行免费高速WiFi全覆盖的主流航空公司。该系统提供每位乘客约15Mbps的下行带宽，足以支持高清视频串流和视频会议。达美航空此前已在国内干线上推行免费WiFi一年，获得了旅客高度认可。公司CEO表示，免费上网将不再是头等舱和商务舱的特权，未来两年内达美的全球所有航班都将部署免费WiFi，预计总投入超过10亿美元。', pubDate: '2026-08-03', link: '#' },
-  { title: '俄罗斯MC21客机搭载国产PD14发动机完成高寒测试', snippet: '俄罗斯联合航空制造集团宣布，搭载俄制PD-14涡扇发动机的MC-21-310客机已在雅库茨克地区成功完成零下45摄氏度极端高寒环境验证测试。测试内容包括发动机冷启动、辅助动力系统在极寒条件下的连续运行以及飞控系统防冰性能验证。MC-21是目前俄罗斯最先进的中程窄体客机，最大载客量211人，航程约6000公里，主翼采用复合材料整体成型技术，在全球同类机型中处于领先水平。PD-14发动机由联合发动机公司研制，是苏联解体后俄罗斯首款从零开始自主研制的民用大推力涡扇发动机，旨在完全替代普惠PW1400G进口型号。', pubDate: '2026-08-03', link: '#' }
-];
-
 const AI_SYSTEM_PROMPTS = {
   zh: '你是航空知识专家，精通民航客机、航空公司、机场、飞行原理、航空历史等知识。回答简洁专业，不超过300字。',
   en: 'You are an aviation expert, proficient in civil aircraft, airlines, airports, flight principles, and aviation history. Keep answers concise and professional, under 200 words.'
@@ -5935,15 +5575,15 @@ let aiConversationHistory = [];
 function openAiChat() {
   document.getElementById('aiChatOverlay').classList.add('visible');
   document.body.style.overflow = 'hidden';
+  aiConversationHistory = [];
   document.getElementById('aiChatInput').focus();
-  var msgContainer = document.getElementById('aiChatMessages');
-  if (msgContainer) msgContainer.scrollTop = 0;
 }
 
 function closeAiChat() {
   document.getElementById('aiChatOverlay').classList.remove('visible');
   document.body.style.overflow = '';
-  if (typeof renderCards === 'function') renderCards();
+  // 清空对话
+  document.getElementById('aiChatMessages').innerHTML = '';
 }
 
 function updateAiCharCount() {
@@ -6245,11 +5885,6 @@ window.setLang = function(lang) {
     var node = reviewTitleEl.firstChild;
     if (node && node.nodeType === 3) node.textContent = (lang === 'en' ? 'AI Review' : 'AI 机型评价');
   }
-  var newsBtnEl = document.getElementById('newsBtnText');
-  if (newsBtnEl) newsBtnEl.textContent = (lang === 'en' ? 'Aviation News' : '航空快讯');
-  var kgBtnEl = document.getElementById('kgBtnText'); if (kgBtnEl) kgBtnEl.textContent = (lang === 'en' ? 'AI Knowledge Graph' : 'AI 知识图谱');
-  var npTitle = document.querySelector('#newsPanelOverlay .ai-review-title');
-  if (npTitle) { var n = npTitle.firstChild; while (n && n.nodeType !== 3) n = n.nextSibling; if (n) n.textContent = (lang === 'en' ? 'Aviation News' : '航空快讯'); }
 };
 
 // ===== Hero Banner 轮播 =====
@@ -6463,28 +6098,8 @@ toggleCollect = function(id) {
 var prodYearLookup = {
   '1':'2007','2':'2013','3':'2015','4':'2004','5':'2023',
   '6':'2016','7':'2017','8':'1994','9':'2019','10':'2016',
-  '20':'2005','21':'2017','22':'1997','23':'1995','24':'2016','25':'1986','26':'2012',
-  '27':'1958','28':'1960','29':'1964','30':'1967','31':'1968','32':'1967','33':'1970','34':'1971','35':'1976','36':'1983','37':'1974','38':'1975'
+  '20':'2005','21':'2017','22':'1997','23':'1995','24':'2016','25':'1986','26':'2012'
 };
-// Family relationships for knowledge graph
-const kgRelations = [
-  { from: 31, to: 32, type: 'derivative' },
-  { from: 32, to: 7, type: 'derivative' },
-  { from: 33, to: 34, type: 'derivative' },
-  { from: 34, to: 35, type: 'derivative' },
-  { from: 34, to: 36, type: 'derivative' },
-  { from: 36, to: 26, type: 'derivative' },
-  { from: 27, to: 28, type: 'derivative' },
-  { from: 29, to: 30, type: 'derivative' },
-  { from: 37, to: 38, type: 'derivative' },
-  { from: 38, to: 8, type: 'derivative' },
-  { from: 8, to: 1, type: 'derivative' },
-  { from: 4, to: 2, type: 'derivative' },
-  { from: 37, to: 34, type: 'competitor' },
-  { from: 28, to: 37, type: 'competitor' },
-  { from: 30, to: 32, type: 'competitor' }
-];
-
 
 // ===== 时间线视图 =====
 function initTimeline() {
@@ -7522,334 +7137,6 @@ function exportSingleAircraft(id) {
     alert('导出图片失败');
   }
 }
-
-
-// ===== AI 知识图谱 =====
-
-function openKgPanel() {
-  var overlay = document.getElementById('kgOverlay');
-  overlay.classList.add('active');
-  buildKgCardGrid();
-}
-
-function closeKgPanel() {
-  document.getElementById('kgOverlay').classList.remove('active');
-  if (typeof renderCards === 'function') renderCards();
-}
-
-function buildKgCardGrid() {
-  var grid = document.getElementById('kgCardGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  // Group civil Boeing/Airbus aircraft by family
-  var families = {};
-  aircrafts.forEach(function(a) {
-    if (a.category !== 'civil') return;
-    var code = (a.code || '').toLowerCase();
-    var famKey = '';
-    var famLabel = '';
-    var isBoeing = code.includes('boeing') || code.startsWith('b7');
-    var isAirbus = code.includes('airbus') || code.startsWith('a3') || code.startsWith('a2');
-    if (isBoeing) {
-      var m = code.match(/boeing\s*(\d+)/i) || code.match(/b(\d+)/i);
-      if (m) { famKey = 'boeing-' + m[1]; famLabel = '\u6ce2\u97f3 ' + m[1]; }
-    } else if (isAirbus) {
-      var am = code.match(/a(\d+)/i);
-      if (am) { famKey = 'airbus-a' + am[1].substring(0,3); famLabel = '\u7a7a\u5ba2 A' + am[1].substring(0,3); }
-    }
-    if (!famKey) return;
-    if (!families[famKey]) families[famKey] = { label: famLabel, isBoeing: isBoeing, list: [] };
-    families[famKey].list.push(a);
-  });
-
-  // Sort families: Boeing first, then Airbus; within each by model number
-  var famKeys = Object.keys(families).sort(function(a, b) {
-    var aIsB = families[a].isBoeing, bIsB = families[b].isBoeing;
-    if (aIsB && !bIsB) return -1;
-    if (!aIsB && bIsB) return 1;
-    return a.localeCompare(b);
-  });
-
-  famKeys.forEach(function(fk) {
-    var group = families[fk];
-    group.list.sort(function(a, b) {
-      return (parseInt(prodYearLookup[a.id] || '9999')) - (parseInt(prodYearLookup[b.id] || '9999'));
-    });
-
-    var groupEl = document.createElement('div');
-    groupEl.className = 'kg-family-group';
-
-    var titleEl = document.createElement('div');
-    titleEl.className = 'kg-family-title';
-    titleEl.textContent = group.label;
-    groupEl.appendChild(titleEl);
-
-    var cardGrid = document.createElement('div');
-    cardGrid.className = 'kg-card-grid';
-
-    group.list.forEach(function(a) {
-      var card = document.createElement('div');
-      card.className = 'kg-card';
-      card.onclick = function() { closeKgPanel(); openDetail(a.id); };
-
-      var img = document.createElement('img');
-      img.className = 'kg-card-img';
-      img.src = proxyUrl(a.image);
-      img.alt = a.code;
-      img.loading = 'lazy';
-      img.onerror = function() {
-        this.src = 'data:image/svg+xml,' + encodeURIComponent(
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130">' +
-          '<rect fill="#1a1f3a" width="200" height="130"/>' +
-          '<text fill="#555" x="100" y="70" text-anchor="middle" font-size="14">' + (a.code || '?') + '</text></svg>'
-        );
-      };
-      card.appendChild(img);
-
-      var body = document.createElement('div');
-      body.className = 'kg-card-body';
-      body.innerHTML = '<div class="kg-card-code">' + a.code + '</div><div class="kg-card-year">' + (prodYearLookup[a.id] || '--') + '</div>';
-      card.appendChild(body);
-
-      cardGrid.appendChild(card);
-    });
-
-    groupEl.appendChild(cardGrid);
-    grid.appendChild(groupEl);
-  });
-
-  if (famKeys.length === 0) {
-    grid.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">暂无知谱数据</div>';
-  }
-}
-
-// ===== 航空快讯全屏面板 =====
-let newsPanelItems = [];
-
-async function openNewsPanel() {
-  document.getElementById('newsPanelOverlay').classList.add('visible');
-  document.body.style.overflow = 'hidden';
-  if (newsPanelItems.length === 0) { await loadNewsPanel(); }
-  var nc = document.getElementById('newsPanelContent');
-  if (nc) nc.scrollTop = 0;
-  if (window._newsRefreshInterval) clearInterval(window._newsRefreshInterval);
-  window._newsRefreshInterval = setInterval(async function() {
-    try {
-      var results = await Promise.allSettled(NEWS_FEEDS.map(function(url) {
-        return fetch(url, { signal: AbortSignal.timeout(12000) }).then(function(r) { return r.json(); });
-      }));
-      var allItems = [];
-      results.forEach(function(r) {
-        if (r.status === 'fulfilled' && r.value && r.value.items) {
-          allItems = allItems.concat(r.value.items.map(function(item) {
-            var rawText = (item.content || item.contentSnippet || '').replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
-            return { title: item.title || '', link: item.link || '', pubDate: item.pubDate || '', snippet: rawText.substring(0, 350) };
-          }));
-        }
-      });
-      if (allItems.length > 0) {
-        allItems.sort(function(a, b) { return new Date(b.pubDate) - new Date(a.pubDate); });
-        newsPanelItems = allItems.slice(0, 15);
-      }
-    } catch(e) {}
-  }, 180000);
-}
-
-function closeNewsPanel() {
-  document.getElementById('newsPanelOverlay').classList.remove('visible');
-  document.body.style.overflow = '';
-  if (window._newsRefreshInterval) { clearInterval(window._newsRefreshInterval); window._newsRefreshInterval = null; }
-  if (typeof renderCards === 'function') renderCards();
-}
-
-function renderNewsContent(content, items) {
-  if (items.length === 0) {
-    content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">暂无快讯，下拉刷新试试</div>';
-    return;
-  }
-  var paragraph = items.map(function(item, i) {
-    var dateStr = item.pubDate ? new Date(item.pubDate).toLocaleDateString('zh-CN') : '';
-    return '<div style="margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--glass-border);"><p style="margin:0 0 8px 0;"><strong style="color:var(--accent);font-size:1.05rem;">' + (i + 1) + '. ' + escapeHtml(item.title) + '</strong>' + (dateStr ? ' <span style="color:var(--text-dim);font-size:0.75rem;">' + dateStr + '</span>' : '') + '</p><p style="margin:0;color:var(--text-dim);font-size:0.9rem;line-height:1.8;">' + escapeHtml(item.snippet || '暂无摘要') + '</p></div>';
-  }).join('');
-  content.innerHTML = '<div style="line-height:1.8;padding:10px 0;">' + paragraph + '</div>';
-}
-
-async function tryFetchRSSAndUpdate(content, today, shownTitles, shownUrls) {
-  try {
-    var results = await Promise.allSettled(NEWS_FEEDS.map(function(url) {
-      return fetch(url, { signal: AbortSignal.timeout(12000) }).then(function(r) { return r.json(); });
-    }));
-    var allItems = [];
-    results.forEach(function(r) {
-      if (r.status === 'fulfilled' && r.value && r.value.items) {
-        allItems = allItems.concat(r.value.items.map(function(item) {
-          var rawText = (item.content || item.contentSnippet || '').replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim();
-          return { title: item.title || '', link: item.link || '', pubDate: item.pubDate || '', snippet: rawText.substring(0, 350) };
-        }));
-      }
-    });
-    if (allItems.length === 0) return; // RSS全失败，保留静态内容
-
-    allItems.sort(function(a, b) { return new Date(b.pubDate) - new Date(a.pubDate); });
-    var pool = allItems.slice(0, Math.min(15, allItems.length));
-
-    // RSS按link去重
-    var freshPool = pool.filter(function(item) { return shownUrls.indexOf(item.link) === -1; });
-    var rssSelected = [];
-    var fpCopy = freshPool.slice();
-    while (rssSelected.length < 5 && fpCopy.length > 0) {
-      var idx = Math.floor(Math.random() * fpCopy.length);
-      rssSelected.push(fpCopy.splice(idx, 1)[0]);
-    }
-    if (rssSelected.length < 5) {
-      var remaining = pool.filter(function(item) {
-        return !rssSelected.some(function(s) { return s.link === item.link; });
-      });
-      var rCopy = remaining.slice();
-      while (rssSelected.length < 5 && rCopy.length > 0) {
-        var ri = Math.floor(Math.random() * rCopy.length);
-        rssSelected.push(rCopy.splice(ri, 1)[0]);
-      }
-    }
-    if (rssSelected.length === 0) return;
-
-    // AI翻译
-    try {
-      var translatePrompt = '将以下5条英文航空新闻标题和摘要翻译成中文，返回严格JSON格式：[{"title":"中文标题","snippet":"中文摘要"},...]，只输出JSON不要任何解释，snippet字段不要包含换行符。\n' + JSON.stringify(rssSelected.map(function(item) { return { title: item.title, snippet: item.snippet }; }));
-      var tCtrl = new AbortController();
-      var tTimeout = setTimeout(function() { tCtrl.abort(); }, 20000);
-      var tResp = await fetch(AI_CONFIG.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
-        body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'user', content: translatePrompt }], max_tokens: 2000, temperature: 0.3 }),
-        signal: tCtrl.signal
-      });
-      clearTimeout(tTimeout);
-      if (tResp.ok) {
-        var tData = await tResp.json();
-        var tReply = tData.choices && tData.choices[0] && tData.choices[0].message && tData.choices[0].message.content;
-        if (tReply) {
-          var translated = JSON.parse(tReply.trim().replace(/\n/g, ' '));
-          if (Array.isArray(translated)) {
-            for (var ti = 0; ti < Math.min(translated.length, rssSelected.length); ti++) {
-              if (translated[ti].title) rssSelected[ti].title = translated[ti].title;
-              if (translated[ti].snippet) rssSelected[ti].snippet = translated[ti].snippet;
-            }
-          }
-        }
-      }
-    } catch(e) { /* 翻译失败，保留原文标题/摘要 */ }
-
-    // 更新 RSS 去重记录
-    rssSelected.forEach(function(item) { shownUrls.push(item.link); });
-    shownUrls = shownUrls.slice(-100);
-    try {
-      // 合并 shownUrls 和 shownTitles，保留两个维度的去重
-      var mergedHistory = {};
-      var stored = localStorage.getItem('aviationNewsHistory');
-      if (stored) { mergedHistory = JSON.parse(stored); }
-      localStorage.setItem('aviationNewsHistory', JSON.stringify({
-        date: today,
-        shownTitles: mergedHistory.shownTitles || shownTitles,
-        shownUrls: shownUrls
-      }));
-    } catch(e) {}
-
-    newsPanelItems = rssSelected;
-    renderNewsContent(content, rssSelected);
-  } catch(e) { /* RSS全失败，保留静态内容不变 */ }
-}
-
-async function loadNewsPanel() {
-  var content = document.getElementById('newsPanelContent');
-  var today = new Date().toISOString().slice(0, 10);
-
-  // 读取去重历史
-  var history = { date: today, shownTitles: [], shownUrls: [] };
-  try {
-    var stored = localStorage.getItem('aviationNewsHistory');
-    if (stored) {
-      var parsed = JSON.parse(stored);
-      if (parsed.date === today) {
-        history.shownTitles = parsed.shownTitles || [];
-        history.shownUrls = parsed.shownUrls || [];
-      }
-    }
-  } catch(e) {}
-
-  // ===== 阶段一：立即展示静态中文新闻兜底 =====
-  var shownTitles = history.shownTitles;
-  var staticPool = NEWS_STATIC.slice();
-  var available = staticPool.filter(function(item) { return shownTitles.indexOf(item.title) === -1; });
-  var selected = [];
-  var availCopy = available.slice();
-  while (selected.length < 5 && availCopy.length > 0) {
-    var idx = Math.floor(Math.random() * availCopy.length);
-    selected.push(availCopy.splice(idx, 1)[0]);
-  }
-  // 不够时从全池补
-  if (selected.length < 5) {
-    var remaining = staticPool.filter(function(item) {
-      return !selected.some(function(s) { return s.title === item.title; });
-    });
-    var remCopy = remaining.slice();
-    while (selected.length < 5 && remCopy.length > 0) {
-      var ri = Math.floor(Math.random() * remCopy.length);
-      selected.push(remCopy.splice(ri, 1)[0]);
-    }
-  }
-
-  // 更新静态去重记录
-  selected.forEach(function(item) { shownTitles.push(item.title); });
-  shownTitles = shownTitles.slice(-200);
-  try { localStorage.setItem('aviationNewsHistory', JSON.stringify({ date: today, shownTitles: shownTitles, shownUrls: history.shownUrls })); } catch(e) {}
-
-  newsPanelItems = selected;
-  renderNewsContent(content, selected);
-
-  // ===== 阶段二：后台异步尝试RSS获取，成功后替换 =====
-  tryFetchRSSAndUpdate(content, today, shownTitles, history.shownUrls);
-}
-
-async function refreshNewsPanel() {
-  await loadNewsPanel();
-}
-
-let newsPanelWordCount = 400;
-
-function selectWordCount(wc) {
-  newsPanelWordCount = wc;
-  document.querySelectorAll('#newsPanelOverlay .wordcount-btn').forEach(function(b) { b.classList.remove('active'); });
-  var btn = document.getElementById('wc' + wc);
-  if (btn) btn.classList.add('active');
-}
-
-async function generateNewsSummaryInPanel() {
-  var wordCount = newsPanelWordCount;
-  var content = document.getElementById('newsPanelContent');
-  if (newsPanelItems.length === 0) {
-    content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">暂无快讯，无法生成总结</div>';
-    return;
-  }
-  content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;"><div class="ai-loading" style="display:inline-flex"><span></span><span></span><span></span></div></div>';
-  var titles = newsPanelItems.map(function(item) { return item.title; }).join('\n');
-  var prompt = '以下是今日民航航空新闻标题，请写一篇约' + wordCount + '字的航空新闻综合摘要，按主题归类，直接陈述事实不要开场白和结束语，不要称呼观众，单纯输出内容，自然段落不要列点序号。\n\n' + titles;
-  var systemPrompt = '你是资深航空编辑。用中文输出约' + wordCount + '字的航空新闻综合摘要，直接讲内容，不要任何寒暄或情感表达，段落形式流畅自然，不列点。';
-  var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, 20000);
-  try {
-    var response = await fetch(AI_CONFIG.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey }, body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }], max_tokens: Math.max(wordCount * 3, 800), temperature: 0.6 }), signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!response.ok) throw new Error('API error ' + response.status);
-    var data = await response.json();
-    var reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-    content.innerHTML = reply ? '<div style="white-space:pre-wrap;line-height:2;padding:10px 0;font-size:1rem;">' + escapeHtml(reply) + '</div>' : '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">生成失败，请重试</div>';
-  } catch (err) {
-    clearTimeout(timeoutId);
-    content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">' + (err.name === 'AbortError' ? '请求超时' : '生成失败') + '，请重试</div>';
-  }
-}
 </script>
 
 <button class="back-to-top" id="backToTop" onclick="scrollToTop()" title="">
@@ -7899,34 +7186,6 @@ async function generateNewsSummaryInPanel() {
   })();
   var lastIdx = -1, timer = null, _spawning = false;
 
-  /* 空闲检测：用户超过1分钟无操作自动暂停冷知识 */
-  var _idlePaused = false, _idleTimer = null, _idleTimeout = 60000;
-
-  function clearIdleTimer() {
-    if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null; }
-    if (_idlePaused) {
-      _idlePaused = false;
-      spawn();
-    }
-  }
-
-  function startIdleTimer() {
-    clearIdleTimer();
-    _idleTimer = setTimeout(function() {
-      _idlePaused = true;
-      cancelLongPress();
-      if (timer) { clearTimeout(timer); timer = null; }
-      var existing = document.querySelector('.cold-fact-toast');
-      if (existing) existing.remove();
-    }, _idleTimeout);
-  }
-
-  /* 监听用户活动恢复冷知识 */
-  ['click', 'touchstart', 'scroll', 'keydown', 'mousemove'].forEach(function(evt) {
-    document.addEventListener(evt, function() { if (!isDisabled()) startIdleTimer(); }, { passive: true });
-  });
-  startIdleTimer();
-
   /* 长按处理器 */
   var _longPressTimer = null;
   function cancelLongPress() {
@@ -7934,8 +7193,8 @@ async function generateNewsSummaryInPanel() {
   }
 
   function spawn() {
-    /* 每次 spawn 前检查是否被禁用或空闲暂停 */
-    if (isDisabled() || _idlePaused) return;
+    /* 每次 spawn 前检查是否被禁用 */
+    if (isDisabled()) return;
 
     var idx;
     do { idx = Math.floor(Math.random() * pool.length); }
