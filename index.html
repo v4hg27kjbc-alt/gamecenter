@@ -1581,6 +1581,11 @@ body.light-mode .airline-name { color: #1a1a2e; }
   .back-to-top { bottom: 16px; right: 10px; width: 36px; height: 36px; }
   .fab-add { bottom: 66px; right: 10px; width: 36px; height: 36px; }
   .compare-bar { padding: 8px 10px; }
+  .compare-table { padding: 4px 14px 18px; }
+  .compare-table-head, .compare-table-row { grid-template-columns: 84px 1fr 1fr; }
+  .compare-table-val { font-size: 0.75rem; padding: 2px 4px; }
+  .compare-table-param { font-size: 0.66rem; }
+  .compare-table-head .compare-table-name { font-size: 0.7rem; }
   .cold-fact-toast .cold-fact-toast-close { width: 18px; height: 18px; top: 6px; right: 6px; font-size: 10px; }
   .cold-fact-toast .cold-fact-toast-hint { font-size: 7px; }
   /* 航空快讯面板 */
@@ -1975,6 +1980,56 @@ body.light-mode .compare-modal .compare-header h2 { color: #1a1a2e; }
 .compare-spec-row .spec-value { font-size: 0.95rem; color: #fff; font-weight: 700; }
 .compare-spec-row .spec-value.better { color: #69f0ae; }
 
+/* ===== 对比规格并排表格 ===== */
+.compare-table {
+  padding: 4px 28px 28px;
+}
+.compare-table-head,
+.compare-table-row {
+  display: grid;
+  grid-template-columns: 132px 1fr 1fr;
+  align-items: center;
+}
+.compare-table-head {
+  padding: 10px 0 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: sticky; top: 0; z-index: 2;
+  background: rgba(18, 28, 46, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 10px 10px 0 0;
+}
+body.light-mode .compare-table-head { background: rgba(255,255,255,0.94); }
+.compare-table-head .compare-table-param {
+  color: var(--text-dim); font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase;
+}
+.compare-table-head .compare-table-name {
+  font-size: 0.8rem; font-weight: 700; color: var(--accent);
+  letter-spacing: 0.5px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.compare-table-row {
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.compare-table-param {
+  font-size: 0.74rem; color: var(--text-dim); letter-spacing: 0.5px;
+  padding-right: 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.compare-table-val {
+  font-size: 0.9rem; color: #fff; font-weight: 700; text-align: center;
+  padding: 2px 8px; line-height: 1.4;
+  word-break: break-word;
+}
+.compare-table-val.better {
+  color: #69f0ae;
+  background: rgba(105, 240, 174, 0.12);
+  border-radius: 10px;
+}
+body.light-mode .compare-table-val { color: #1a1a2e; }
+body.light-mode .compare-table-val.better { color: #0c8a4d; background: rgba(12, 138, 77, 0.08); }
+
 /* ===== 骨架屏 ===== */
 .skeleton-img {
   position: absolute; inset: 0; z-index: 5;
@@ -2248,6 +2303,10 @@ body.light-mode .add-modal .form-group select option { background: #fff; color: 
   .sort-chip { padding: 7px 12px; font-size: 0.72rem; }
   .compare-modal .compare-grid { grid-template-columns: 1fr; }
   .compare-col:first-child { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .compare-table { padding: 4px 20px 22px; }
+  .compare-table-head, .compare-table-row { grid-template-columns: 96px 1fr 1fr; }
+  .compare-table-val { font-size: 0.82rem; }
+  .compare-table-param { font-size: 0.7rem; }
   .compare-bar { flex-wrap: wrap; justify-content: center; padding: 12px 16px; }
   .back-to-top { bottom: 20px; right: 16px; width: 40px; height: 40px; }
   .card-compare-check { opacity: 1; transform: scale(1); }
@@ -3012,7 +3071,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260810-v34">
+<body data-version="20260814-v35">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -3336,7 +3395,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">航空快讯 & 体验优化</span>',
+    updateBanner: '<span class="banner-highlight">机型对比表 & 完整机身 & 快讯刷新</span> — 新增发动机/座位数/MTOW等硬指标并排对比表，全部机型图片改为完整机身显示，航空快讯同步更新为最新新闻',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -3381,6 +3440,15 @@ const i18n = {
     specWingspan: '翼展',
     specCeiling: '升限',
     specRotorDiameter: '旋翼直径',
+    specEngine: '发动机型号',
+    specSeats: '座位数',
+    specMTOW: '最大起飞重量',
+    specLength: '机身长度',
+    specHeight: '机身高度',
+    specSpeed: '速度',
+    specCapacityLoad: '载客量/载重',
+    specParam: '参数',
+    compareHint: '绿色数值为更优者',
 
     // --- 分类标签（用于 SVG 占位图） ---
     catCivil: '民航客机',
@@ -3586,7 +3654,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Aircraft Photos Upgrade</span> — 12 classic Boeing/Airbus models with complete real photos, family card knowledge graph, new visuals for 707-120/727-100/747-100/747-300',
+    updateBanner: '<span class="banner-highlight">Compare Table & Full Aircraft View</span> — New side-by-side spec table with engine/seats/MTOW, all photos now show the complete aircraft body',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -3631,6 +3699,15 @@ const i18n = {
     specWingspan: 'Wingspan',
     specCeiling: 'Ceiling',
     specRotorDiameter: 'Rotor Diameter',
+    specEngine: 'Engine',
+    specSeats: 'Seats',
+    specMTOW: 'MTOW',
+    specLength: 'Length',
+    specHeight: 'Height',
+    specSpeed: 'Speed',
+    specCapacityLoad: 'Capacity/Payload',
+    specParam: 'Parameter',
+    compareHint: 'Green values indicate better performance',
 
     // --- Category Labels ---
     catCivil: 'Airliner',
@@ -3744,7 +3821,8 @@ const specLabelMap = {
   cruise_speed: 'specCruiseSpeed', max_speed: 'specMaxSpeed', max_range: 'specMaxRange',
   range: 'specRange', combat_radius: 'specCombatRadius', capacity: 'specCapacity',
   payload: 'specLoad', wingspan: 'specWingspan', ceiling: 'specCeiling',
-  rotor_diameter: 'specRotorDiameter'
+  rotor_diameter: 'specRotorDiameter', engine: 'specEngine', seats: 'specSeats',
+  mtow: 'specMTOW', length: 'specLength', height: 'specHeight'
 };
 function specLabel(key) { return t(specLabelMap[key]) || key; }
 
@@ -4004,7 +4082,7 @@ const aircrafts = [
     category: 'civil', country: '欧洲',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=A6-EDY_A380_Emirates_31_jan_2013_jfk_(8442269364).jpg&w=800',
     desc: 'desc_a380',
-    specs: { 'cruise_speed': '0.85 马赫', 'max_range': '15,200 km', 'capacity': '525–853 人', 'wingspan': '79.75 m' },
+    specs: { 'engine': '4× Engine Alliance GP7200 / Rolls-Royce Trent 900', 'seats': '525 人', 'mtow': '575 吨', 'length': '72.72 m', 'height': '24.09 m', 'cruise_speed': '0.85 马赫', 'max_range': '15,200 km', 'capacity': '525–853 人', 'wingspan': '79.75 m' },
     airlineIds: ['ek', 'sq', 'ba', 'af', 'lh', 'ey'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body']
   },
@@ -4013,7 +4091,7 @@ const aircrafts = [
     category: 'civil', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Japan_Airlines_Boeing_787-9_JA861J.jpg&w=800',
     desc: 'desc_787',
-    specs: { 'cruise_speed': '0.85 马赫', 'max_range': '14,140 km', 'capacity': '242–330 人', 'wingspan': '60.12 m' },
+    specs: { 'engine': '2× GE GEnx-1B / Rolls-Royce Trent 1000', 'seats': '290 人', 'mtow': '254 吨', 'length': '62.81 m', 'height': '17.02 m', 'cruise_speed': '0.85 马赫', 'max_range': '14,140 km', 'capacity': '242–330 人', 'wingspan': '60.12 m' },
     airlineIds: ['ua', 'nh', 'ba', 'cz'],
     tags: ['twin_engine', 'composite', 'ultra_range', 'wide_body', 'fuel_efficient']
   },
@@ -4022,7 +4100,7 @@ const aircrafts = [
     category: 'civil', country: '欧洲',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Airbus_A350-941_F-WWCF_MSN002_ILA_Berlin_2016_17.jpg&w=800',
     desc: 'desc_a350',
-    specs: { 'cruise_speed': '0.85 马赫', 'max_range': '15,000 km', 'capacity': '300–440 人', 'wingspan': '64.75 m' },
+    specs: { 'engine': '2× Rolls-Royce Trent XWB-84', 'seats': '325 人', 'mtow': '283 吨', 'length': '66.8 m', 'height': '17.05 m', 'cruise_speed': '0.85 马赫', 'max_range': '15,000 km', 'capacity': '300–440 人', 'wingspan': '64.75 m' },
     airlineIds: ['sq', 'qr', 'cx', 'ay', 'lh', 'tk'],
     tags: ['twin_engine', 'composite', 'ultra_range', 'wide_body', 'fuel_efficient']
   },
@@ -4031,7 +4109,7 @@ const aircrafts = [
     category: 'civil', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Qatar_Boeing_777-300ER_A7-BEP_IAD_VA1.jpg&w=800',
     desc: 'desc_777',
-    specs: { 'cruise_speed': '0.84 马赫', 'max_range': '13,650 km', 'capacity': '368–550 人', 'wingspan': '64.8 m' },
+    specs: { 'engine': '2× GE GE90-115B', 'seats': '368 人', 'mtow': '351.5 吨', 'length': '73.9 m', 'height': '18.5 m', 'cruise_speed': '0.84 马赫', 'max_range': '13,650 km', 'capacity': '368–550 人', 'wingspan': '64.8 m' },
     airlineIds: ['ek', 'ua', 'cx', 'af', 'tk', 'ba'],
     tags: ['twin_engine', 'ultra_range', 'wide_body']
   },
@@ -4040,7 +4118,7 @@ const aircrafts = [
     category: 'civil', country: '中国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=COMAC_B-001A_May_2017.jpg&w=800',
     desc: 'desc_c919',
-    specs: { 'cruise_speed': '0.785 马赫', 'max_range': '5,555 km', 'capacity': '158–192 人', 'wingspan': '35.8 m' },
+    specs: { 'engine': '2× CFM International LEAP-1C', 'seats': '168 人', 'mtow': '77.3 吨', 'length': '38.9 m', 'height': '11.95 m', 'cruise_speed': '0.785 马赫', 'max_range': '5,555 km', 'capacity': '158–192 人', 'wingspan': '35.8 m' },
     airlineIds: ['mu', 'ca', 'cz'],
     tags: ['twin_engine', 'narrow_body', 'domestic']
   },
@@ -4049,7 +4127,7 @@ const aircrafts = [
     category: 'civil', country: '欧洲',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Frontier_Airbus_A320neo_N353FR_BWI_MD1.jpg&w=800',
     desc: 'desc_a320neo',
-    specs: { 'cruise_speed': '0.78 马赫', 'max_range': '6,300 km', 'capacity': '150–194 人', 'wingspan': '35.8 m' },
+    specs: { 'engine': '2× CFM International LEAP-1A / Pratt & Whitney PW1100G', 'seats': '165 人', 'mtow': '79 吨', 'length': '37.57 m', 'height': '11.76 m', 'cruise_speed': '0.78 马赫', 'max_range': '6,300 km', 'capacity': '150–194 人', 'wingspan': '35.8 m' },
     airlineIds: ['ca', 'cz', 'lh', 'tk', 'ba'],
     tags: ['twin_engine', 'narrow_body', 'fuel_efficient']
   },
@@ -4058,7 +4136,7 @@ const aircrafts = [
     category: 'civil', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Southwest_Boeing_737-8_MAX_N8847Q_BWI_MD2.jpg&w=800',
     desc: 'desc_737max',
-    specs: { 'cruise_speed': '0.79 马赫', 'max_range': '6,570 km', 'capacity': '162–210 人', 'wingspan': '35.92 m' },
+    specs: { 'engine': '2× CFM International LEAP-1B', 'seats': '178 人', 'mtow': '82.2 吨', 'length': '39.52 m', 'height': '12.3 m', 'cruise_speed': '0.79 马赫', 'max_range': '6,570 km', 'capacity': '162–210 人', 'wingspan': '35.92 m' },
     airlineIds: ['ua', 'cz', 'tk'],
     tags: ['twin_engine', 'narrow_body']
   },
@@ -4067,7 +4145,7 @@ const aircrafts = [
     category: 'civil', country: '欧洲',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Swiss_Airbus_A330-300_HB-JHM_IAD_VA1.jpg&w=800',
     desc: 'desc_a330',
-    specs: { 'cruise_speed': '0.82 马赫', 'max_range': '11,750 km', 'capacity': '277–440 人', 'wingspan': '60.3 m' },
+    specs: { 'engine': '2× Rolls-Royce Trent 700 / GE CF6-80E1', 'seats': '277 人', 'mtow': '242 吨', 'length': '63.66 m', 'height': '16.83 m', 'cruise_speed': '0.82 马赫', 'max_range': '11,750 km', 'capacity': '277–440 人', 'wingspan': '60.3 m' },
     airlineIds: ['ca', 'mu', 'cz', 'tk', 'cx'],
     tags: ['twin_engine', 'wide_body']
   },
@@ -4076,7 +4154,7 @@ const aircrafts = [
     category: 'civil', country: '巴西',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Embraer_E195-E2_PR-ZIQ.jpg&w=800',
     desc: 'desc_e195',
-    specs: { 'cruise_speed': '0.8 马赫', 'max_range': '4,800 km', 'capacity': '120–146 人', 'wingspan': '35.1 m' },
+    specs: { 'engine': '2× Pratt & Whitney PW1900G', 'seats': '132 人', 'mtow': '61.5 吨', 'length': '41.51 m', 'height': '10.9 m', 'cruise_speed': '0.8 马赫', 'max_range': '4,800 km', 'capacity': '120–146 人', 'wingspan': '35.1 m' },
     airlineIds: ['lh'],
     tags: ['twin_engine', 'regional']
   },
@@ -4085,7 +4163,7 @@ const aircrafts = [
     category: 'civil', country: '加拿大/欧洲',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Airbus_A220-300.jpg&w=800',
     desc: 'desc_a220',
-    specs: { 'cruise_speed': '0.82 马赫', 'max_range': '6,300 km', 'capacity': '130–160 人', 'wingspan': '35.1 m' },
+    specs: { 'engine': '2× Pratt & Whitney PW1500G', 'seats': '130 人', 'mtow': '67.6 吨', 'length': '38.71 m', 'height': '11.5 m', 'cruise_speed': '0.82 马赫', 'max_range': '6,300 km', 'capacity': '130–160 人', 'wingspan': '35.1 m' },
     airlineIds: ['ay', 'dl'],
     tags: ['twin_engine', 'narrow_body', 'regional', 'fuel_efficient']
   },
@@ -4093,44 +4171,44 @@ const aircrafts = [
     id: 20, name: 'name_f22', code: 'F-22 Raptor', category: 'fighter', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Lockheed_Martin_F-22A_Raptor_JSOH.jpg&w=800',
     desc: 'desc_f22',
-    specs: { 'max_speed': '2.25 马赫', 'combat_radius': '850 km', 'ceiling': '20,000 m', 'wingspan': '13.56 m' }
+    specs: { 'engine': '2× Pratt & Whitney F119-PW-100', 'seats': '1 人', 'mtow': '38 吨', 'length': '18.92 m', 'height': '5.08 m', 'max_speed': '2.25 马赫', 'combat_radius': '850 km', 'ceiling': '20,000 m', 'wingspan': '13.56 m' }
   },
   {
     id: 21, name: 'name_j20', code: 'J-20', category: 'fighter', country: '中国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=J-20_at_Airshow_China_2016.jpg&w=800',
     desc: 'desc_j20',
-    specs: { 'max_speed': '2.0 马赫', 'combat_radius': '1,200 km', 'ceiling': '20,000 m', 'wingspan': '13.01 m' }
+    specs: { 'engine': '2× WS-10C 太行', 'seats': '1 人', 'mtow': '37 吨', 'length': '21.2 m', 'height': '4.69 m', 'max_speed': '2.0 马赫', 'combat_radius': '1,200 km', 'ceiling': '20,000 m', 'wingspan': '13.01 m' }
   },
   {
     id: 22, name: 'name_b2', code: 'B-2 Spirit', category: 'bomber', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=B-2_Spirit_original.jpg&w=800',
     desc: 'desc_b2',
-    specs: { 'max_speed': '0.95 马赫', 'combat_radius': '11,000 km', 'ceiling': '15,200 m', 'wingspan': '52.4 m' }
+    specs: { 'engine': '4× GE F118-GE-100', 'seats': '2 人', 'mtow': '170.6 吨', 'length': '21 m', 'height': '5.18 m', 'max_speed': '0.95 马赫', 'combat_radius': '11,000 km', 'ceiling': '15,200 m', 'wingspan': '52.4 m' }
   },
   {
     id: 23, name: 'name_c17', code: 'C-17', category: 'transport', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=C-17_Globemaster_III_4.jpg&w=800',
     desc: 'desc_c17',
-    specs: { 'cruise_speed': '0.74 马赫', 'range': '10,390 km', 'payload': '77 吨', 'wingspan': '51.75 m' }
+    specs: { 'engine': '4× Pratt & Whitney F117-PW-100', 'seats': '3 人', 'mtow': '265 吨', 'length': '53.04 m', 'height': '16.79 m', 'cruise_speed': '0.74 马赫', 'range': '10,390 km', 'payload': '77 吨', 'wingspan': '51.75 m' }
   },
   {
     id: 24, name: 'name_y20', code: 'Y-20', category: 'transport', country: '中国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Y-20_at_Airshow_China_2016.jpg&w=800',
     desc: 'desc_y20',
-    specs: { 'cruise_speed': '0.75 马赫', 'range': '7,800 km', 'payload': '66 吨', 'wingspan': '45 m' }
+    specs: { 'engine': '4× WS-20 / D-30KP-2', 'seats': '3 人', 'mtow': '220 吨', 'length': '47 m', 'height': '15 m', 'cruise_speed': '0.75 马赫', 'range': '7,800 km', 'payload': '66 吨', 'wingspan': '45 m' }
   },
   {
     id: 25, name: 'name_ah64', code: 'AH-64 Apache', category: 'helicopter', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=AH-64D_Apache_Longbow.jpg&w=800',
     desc: 'desc_ah64',
-    specs: { 'max_speed': '293 km/h', 'combat_radius': '480 km', 'ceiling': '6,400 m', 'rotor_diameter': '14.63 m' }
+    specs: { 'engine': '2× GE T700-GE-701D', 'seats': '2 人', 'mtow': '10.4 吨', 'length': '17.73 m', 'height': '3.87 m', 'max_speed': '293 km/h', 'combat_radius': '480 km', 'ceiling': '6,400 m', 'rotor_diameter': '14.63 m' }
   },
   {
     id: 26, name: 'name_747', code: 'Boeing 747-8', category: 'civil', country: '美国',
     image: 'https://commons.wikimedia.org/w/thumb.php?f=Lufthansa_Boeing_747-8_(16278601112).jpg&w=800',
     desc: 'desc_747', airlineIds: ['lh', 'ca'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
-    specs: { 'cruise_speed': '0.855 马赫', 'range': '14,816 km', 'capacity': '410-467 人', 'wingspan': '68.4 m' }
+    specs: { 'engine': '4× GE GEnx-2B67', 'seats': '410 人', 'mtow': '447.7 吨', 'length': '76.25 m', 'height': '19.4 m', 'cruise_speed': '0.855 马赫', 'range': '14,816 km', 'capacity': '410-467 人', 'wingspan': '68.4 m' }
   },
 
   {
@@ -4138,84 +4216,84 @@ const aircrafts = [
     image: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Boeing_707-121,_Pan_Am_JP6888703.jpg',
     desc: 'desc_707_120', airlineIds: ['ua', 'dl'],
     tags: ['quad_engine', 'narrow_body', 'pioneer'],
-    specs: { 'cruise_speed': '0.82 马赫', 'range': '5,000 km', 'capacity': '140-179 人', 'wingspan': '39.9 m' }
+    specs: { 'engine': '4× Pratt & Whitney JT3C', 'seats': '140 人', 'mtow': '112 吨', 'length': '44.22 m', 'height': '12.81 m', 'cruise_speed': '0.82 马赫', 'range': '5,000 km', 'capacity': '140-179 人', 'wingspan': '39.9 m' }
   },
   {
     id: 28, name: 'name_707_320', code: 'Boeing 707-320', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/0/06/Boeing_707-321B_Pan_Am_Freer.jpg',
     desc: 'desc_707_320', airlineIds: ['ua', 'ba'],
     tags: ['quad_engine', 'narrow_body', 'ultra_range'],
-    specs: { 'cruise_speed': '0.82 马赫', 'range': '9,300 km', 'capacity': '141-189 人', 'wingspan': '44.4 m' }
+    specs: { 'engine': '4× Pratt & Whitney JT4A / JT3D', 'seats': '141 人', 'mtow': '151 吨', 'length': '46.61 m', 'height': '12.93 m', 'cruise_speed': '0.82 马赫', 'range': '9,300 km', 'capacity': '141-189 人', 'wingspan': '44.4 m' }
   },
   {
     id: 29, name: 'name_727_100', code: 'Boeing 727-100', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Boeing_727_N72700_%28P38325%29.jpg',
     desc: 'desc_727_100', airlineIds: ['ua', 'dl'],
     tags: ['tri_engine', 'narrow_body', 'regional'],
-    specs: { 'cruise_speed': '0.81 马赫', 'range': '3,500 km', 'capacity': '106-131 人', 'wingspan': '32.9 m' }
+    specs: { 'engine': '3× Pratt & Whitney JT8D', 'seats': '106 人', 'mtow': '72.5 吨', 'length': '40.59 m', 'height': '10.36 m', 'cruise_speed': '0.81 马赫', 'range': '3,500 km', 'capacity': '106-131 人', 'wingspan': '32.9 m' }
   },
   {
     id: 30, name: 'name_727_200', code: 'Boeing 727-200', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Boeing_727-2J4-Adv%2C_Dan-Air_London_AN0654211.jpg',
     desc: 'desc_727_200', airlineIds: ['dl', 'ua'],
     tags: ['tri_engine', 'narrow_body', 'regional'],
-    specs: { 'cruise_speed': '0.81 马赫', 'range': '4,800 km', 'capacity': '145-189 人', 'wingspan': '32.9 m' }
+    specs: { 'engine': '3× Pratt & Whitney JT8D', 'seats': '145 人', 'mtow': '95 吨', 'length': '46.69 m', 'height': '10.36 m', 'cruise_speed': '0.81 马赫', 'range': '4,800 km', 'capacity': '145-189 人', 'wingspan': '32.9 m' }
   },
   {
     id: 31, name: 'name_737_100', code: 'Boeing 737-100', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Lufthansa_737-130_D-ABEL.jpg',
     desc: 'desc_737_100', airlineIds: ['lh'],
     tags: ['twin_engine', 'narrow_body', 'short_haul'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '2,850 km', 'capacity': '85-103 人', 'wingspan': '28.35 m' }
+    specs: { 'engine': '2× Pratt & Whitney JT8D', 'seats': '85 人', 'mtow': '49.9 吨', 'length': '28.63 m', 'height': '11.3 m', 'cruise_speed': '0.78 马赫', 'range': '2,850 km', 'capacity': '85-103 人', 'wingspan': '28.35 m' }
   },
   {
     id: 32, name: 'name_737_200', code: 'Boeing 737-200', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/d/d3/British_Airtours_Boeing_737-200_Marmet.jpg',
     desc: 'desc_737_200', airlineIds: ['ua', 'dl'],
     tags: ['twin_engine', 'narrow_body', 'short_haul'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '4,200 km', 'capacity': '115-130 人', 'wingspan': '28.35 m' }
+    specs: { 'engine': '2× Pratt & Whitney JT8D', 'seats': '115 人', 'mtow': '52.4 吨', 'length': '30.53 m', 'height': '11.3 m', 'cruise_speed': '0.78 马赫', 'range': '4,200 km', 'capacity': '115-130 人', 'wingspan': '28.35 m' }
   },
   {
     id: 33, name: 'name_747_100', code: 'Boeing 747-100', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Boeing_747-121%2C_Pan_Am_JP5894156.jpg',
     desc: 'desc_747_100', airlineIds: ['ua', 'ba'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body', 'pioneer'],
-    specs: { 'cruise_speed': '0.84 马赫', 'range': '8,560 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
+    specs: { 'engine': '4× Pratt & Whitney JT9D', 'seats': '366 人', 'mtow': '333 吨', 'length': '70.66 m', 'height': '19.33 m', 'cruise_speed': '0.84 马赫', 'range': '8,560 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
   },
   {
     id: 34, name: 'name_747_200', code: 'Boeing 747-200', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/KLM_Boeing_747-200_PH-BUF_%287491686916%29.jpg',
     desc: 'desc_747_200', airlineIds: ['ua', 'ba'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body', 'ultra_range'],
-    specs: { 'cruise_speed': '0.84 马赫', 'range': '12,700 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
+    specs: { 'engine': '4× Pratt & Whitney JT9D / GE CF6-50', 'seats': '366 人', 'mtow': '378 吨', 'length': '70.66 m', 'height': '19.33 m', 'cruise_speed': '0.84 马赫', 'range': '12,700 km', 'capacity': '366-452 人', 'wingspan': '59.6 m' }
   },
   {
     id: 35, name: 'name_747_sp', code: 'Boeing 747-SP', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Boeing_747SP-21%2C_Pan_Am_JP5893131.jpg',
     desc: 'desc_747_sp', airlineIds: ['ua'],
     tags: ['quad_engine', 'wide_body', 'ultra_range'],
-    specs: { 'cruise_speed': '0.85 马赫', 'range': '15,400 km', 'capacity': '276-331 人', 'wingspan': '59.6 m' }
+    specs: { 'engine': '4× Pratt & Whitney JT9D', 'seats': '276 人', 'mtow': '315 吨', 'length': '56.31 m', 'height': '20.06 m', 'cruise_speed': '0.85 马赫', 'range': '15,400 km', 'capacity': '276-331 人', 'wingspan': '59.6 m' }
   },
   {
     id: 36, name: 'name_747_300', code: 'Boeing 747-300', category: 'civil', country: '美国',
     image: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/GENEVA_MARCH_1988_SWISSAIR_BOEING_747-300_N221GF_%2815326066783%29.jpg',
     desc: 'desc_747_300', airlineIds: ['sq', 'ba'],
     tags: ['double_deck', 'super_jumbo', 'quad_engine', 'wide_body'],
-    specs: { 'cruise_speed': '0.85 马赫', 'range': '11,000 km', 'capacity': '400-496 人', 'wingspan': '59.6 m' }
+    specs: { 'engine': '4× Pratt & Whitney JT9D / GE CF6 / Rolls-Royce RB211', 'seats': '400 人', 'mtow': '378 吨', 'length': '70.66 m', 'height': '19.33 m', 'cruise_speed': '0.85 马赫', 'range': '11,000 km', 'capacity': '400-496 人', 'wingspan': '59.6 m' }
   },
   {
     id: 37, name: 'name_a300b2', code: 'Airbus A300B2', category: 'civil', country: '欧洲',
     image: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Air_France_Airbus_A300B2_Volpati.jpg',
     desc: 'desc_a300b2', airlineIds: ['af', 'lh'],
     tags: ['twin_engine', 'wide_body', 'pioneer'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '3,400 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
+    specs: { 'engine': '2× GE CF6-50C / Pratt & Whitney JT9D', 'seats': '270 人', 'mtow': '137 吨', 'length': '53.62 m', 'height': '16.53 m', 'cruise_speed': '0.78 马赫', 'range': '3,400 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
   },
   {
     id: 38, name: 'name_a300b4', code: 'Airbus A300B4', category: 'civil', country: '欧洲',
     image: 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Airbus_A300B4-603%2C_Lufthansa_AN0520385.jpg',
     desc: 'desc_a300b4', airlineIds: ['af', 'ba'],
     tags: ['twin_engine', 'wide_body', 'regional'],
-    specs: { 'cruise_speed': '0.78 马赫', 'range': '5,300 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
+    specs: { 'engine': '2× GE CF6-50C / Pratt & Whitney JT9D', 'seats': '270 人', 'mtow': '165 吨', 'length': '53.62 m', 'height': '16.53 m', 'cruise_speed': '0.78 马赫', 'range': '5,300 km', 'capacity': '270-336 人', 'wingspan': '44.8 m' }
   }
 
 ];
@@ -5122,28 +5200,37 @@ function showCompare() {
   if (!a1 || !a2) return;
   window._track('compare', { id1: a1.id, id2: a2.id, name1: t(a1.name), name2: t(a2.name) });
 
-  // Determine which specs to compare (find common keys)
-  const specKeys1 = Object.keys(a1.specs);
-  const specKeys2 = Object.keys(a2.specs);
-  // Use keys from a1 as primary
-  const specRows = specKeys1.map((key, idx) => {
-    const v1 = a1.specs[key];
-    const v2_key = specKeys2[idx] || specKeys2.find(k => k.includes(key.slice(0,2))) || '';
-    const v2 = v2_key ? a2.specs[v2_key] : '--';
-    const n1 = extractNumeric(v1);
-    const n2 = extractNumeric(v2);
-    const better1 = n1 > n2 ? 'better' : '';
-    const better2 = n2 > n1 ? 'better' : '';
-    return { key, v1, v2, better1, better2 };
-  });
+  // 固定参数顺序：硬指标优先，原有规格在后
+  const COMPARE_KEYS = ['engine','mtow','seats','length','height',
+    'cruise_speed','max_speed','max_range','range','combat_radius',
+    'capacity','payload','wingspan','ceiling','rotor_diameter'];
+  const keys = COMPARE_KEYS.filter(k => a1.specs[k] !== undefined || a2.specs[k] !== undefined);
+  const extraKeys = [];
+  Object.keys(a1.specs).forEach(k => { if (keys.indexOf(k) === -1 && extraKeys.indexOf(k) === -1) extraKeys.push(k); });
+  Object.keys(a2.specs).forEach(k => { if (keys.indexOf(k) === -1 && extraKeys.indexOf(k) === -1) extraKeys.push(k); });
+  const allKeys = keys.concat(extraKeys);
 
-  const specRowsHTML = specRows.map(r => `
-    <div class="compare-spec-row">
-      <span class="spec-value ${r.better1}">${r.v1}</span>
-      <span class="spec-label">${specLabel(r.key)}</span>
-      <span class="spec-value ${r.better2}">${r.v2}</span>
-    </div>
-  `).join('');
+  // 数值型参数参与高亮，文本参数（如发动机型号）不比较
+  const NUMERIC_KEYS = ['mtow','seats','length','height','cruise_speed','max_speed',
+    'max_range','range','combat_radius','capacity','payload','wingspan','ceiling','rotor_diameter'];
+
+  const rowsHTML = allKeys.map(key => {
+    const v1 = a1.specs[key] !== undefined ? a1.specs[key] : '--';
+    const v2 = a2.specs[key] !== undefined ? a2.specs[key] : '--';
+    let better1 = '', better2 = '';
+    if (NUMERIC_KEYS.indexOf(key) !== -1) {
+      const n1 = extractNumeric(v1);
+      const n2 = extractNumeric(v2);
+      if (n1 > n2) better1 = 'better';
+      else if (n2 > n1) better2 = 'better';
+    }
+    return `
+    <div class="compare-table-row">
+      <div class="compare-table-param">${specLabel(key)}</div>
+      <div class="compare-table-val ${better1}">${v1}</div>
+      <div class="compare-table-val ${better2}">${v2}</div>
+    </div>`;
+  }).join('');
 
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
@@ -5169,8 +5256,13 @@ function showCompare() {
           <div class="compare-desc">${t(a2.desc)}</div>
         </div>
       </div>
-      <div style="padding:0 28px 28px">
-        ${specRowsHTML}
+      <div class="compare-table">
+        <div class="compare-table-head">
+          <div class="compare-table-param">${t('specParam')}</div>
+          <div class="compare-table-name">${t(a1.name)}</div>
+          <div class="compare-table-name">${t(a2.name)}</div>
+        </div>
+        ${rowsHTML}
       </div>
     </div>
   `;
@@ -5882,10 +5974,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260810-v33', '1');
+  localStorage.setItem('aviation-update-20260814-v35', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260810-v34')) return;
+  if (localStorage.getItem('aviation-update-20260814-v35')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -5907,24 +5999,24 @@ const NEWS_FEEDS = [
 
 // 内置中文航空新闻兜底（≥15条），确保离线/file://协议下100%可显示
 const NEWS_STATIC = [
-  { title: '新加坡航空A380航班增加25%运力 全球航线一览', snippet: '新加坡航空作为空客A380的启动客户和全球最大运营商之一，近日宣布将大幅提升A380执飞航班的运力，增幅高达25%。此次调整覆盖了新加坡至伦敦、悉尼、东京成田、上海浦东及孟买等核心航线，以满足年末旅行旺季的强劲客流需求。尽管超大型客机在全球部分市场逐渐被新一代双发宽体机替代，新航仍坚持发挥A380在枢纽机场高密度航线上的独特优势，尤其在樟宜机场的航班波衔接方面表现突出。新航目前运营着12架A380客机，均配置了全新一代套房、商务舱及优选经济舱产品，持续为高端旅客提供差异化服务。', pubDate: '2026-08-09', link: '#' },
-  { title: '空客A350商务舱与头等舱对比：差价是否真的值得？', snippet: '随着航空业为旅客提供比以往更多的舱位选择，空客A350作为全球旗舰远程宽体客机，已成为各大航空公司展示最先进客舱产品的舞台。商务舱与头等舱之间的差距近年来显著扩大——头等舱通常提供封闭式套间、私人迷你吧、专属管家服务和米其林级别机上餐食，而商务舱则普遍配置全平躺座椅和直通过道。本文从座椅宽度、娱乐系统、餐饮品质、地面服务及价格差异五个维度，对比了新加坡航空、卡塔尔航空和汉莎航空等运营商的A350两舱产品，指出对于大多数远程航线，商务舱的性价比远高于头等舱，但对于追求极致空间和隐私的旅客来说，头等舱依然有其不可替代的价值。', pubDate: '2026-08-09', link: '#' },
-  { title: '美国航空向1205名空乘提供9月无薪休假 应对航班削减', snippet: '美国航空公司近日宣布，将向旗下十座机组基地共计1205名空乘人员提供9月份的无薪休假选项，约占其空乘总人数的4%。此举与公司提前进入秋季淡季航班计划直接相关——今年美国航空将秋季航班表启动时间较往年提前了约三周，主要受返校客流分散、商务出行季节性回落以及航空燃油价格持续攀升等多重因素影响。受影响最大的基地包括达拉斯-沃斯堡、迈阿密和芝加哥奥黑尔等核心枢纽。公司强调此次为自愿性质，不涉及强制裁员，并预计随着感恩节和圣诞假期的临近，运力将在11月全面恢复至正常水平。', pubDate: '2026-08-09', link: '#' },
-  { title: '远程机长与短途机长对燃油储备的考量为何截然不同', snippet: '一架执行45分钟短途支线任务的涡桨飞机，其法定最终储备燃油加上应急燃油可能占装载总油量的近三分之一，而飞越太平洋的14小时远程航班则是完全不同的计算逻辑。本文从国际民航组织标准出发，深入解析了最终储备燃油、应急燃油、备降燃油和额外燃油的层级结构，指出远程机长必须将航路高空风、目的地天气趋势、备降场可用性以及二次放行策略纳入综合决策模型，而短途机长更关注备降场的物理距离和终端区空中交通流量。两位资深机长分享了实际运行中的燃油管理案例，揭示同一套法规在不同飞行场景下如何产生截然不同的操作策略。', pubDate: '2026-08-09', link: '#' },
-  { title: '波音787梦想客机交付量创新高 全年预计突破150架', snippet: '波音公司位于南卡罗来纳州北查尔斯顿和华盛顿州埃弗雷特的两条787总装线在8月进入满负荷生产状态，月交付速率已稳定在14架以上，全年交付量有望突破150架大关。这一强劲表现得益于供应链瓶颈的逐步缓解——尤其是普惠和罗尔斯·罗伊斯发动机的按时交付率显著改善。卡塔尔航空、阿联酋航空和美联航是本季度最大的接机客户，其中美联航一次性接收了5架787-10。分析师指出，宽体机市场的复苏速度远超预期，波音目前在远程宽体机领域对空客形成了明显的交付量领先优势。', pubDate: '2026-08-08', link: '#' },
-  { title: '中国商飞C919首次执飞国际航线 上海至新加坡成功首航', snippet: '8月8日上午，中国东方航空使用国产C919大型客机执飞的MU545航班从上海浦东国际机场起飞，经过约五个半小时的飞行后平稳降落在新加坡樟宜国际机场，标志着C919机型首次正式投入国际商业航线运营。此次国际首航航班搭载了158名旅客，客座率达到96%，航程约3800公里。新加坡民航局于今年7月正式向C919颁发了型号认可证。中国商飞表示，目前已累计交付东航、国航和南航共计12架C919，国内航线网络覆盖上海、北京、成都、广州等十多个城市，累计安全运营超过一万小时。', pubDate: '2026-08-08', link: '#' },
-  { title: '欧洲航空安全局正式批准空客A321XLR投入商业运营', snippet: '欧洲航空安全局于8月7日向空客颁发了A321XLR的最终型号合格证，为这款航程达4700海里的革命性窄体客机全面投入商业运营扫清了最后一道监管障碍。A321XLR配备了创新型一体式后部中央油箱，可在执飞跨大西洋航线时提供与宽体机相当的经济性。启动客户爱尔兰航空和靛蓝航空已准备在9月份分别开通都柏林至纽约以及德里至伦敦盖特威克航线。行业分析认为，A321XLR将深刻改变全球中等密度远程市场的竞争格局，使窄体机首次具备了在大西洋航线上对宽体机形成有效替代的能力。', pubDate: '2026-08-07', link: '#' },
-  { title: '日本航空2026财年第一季度净利润同比增长22%', snippet: '日本航空集团公布了2026财年第一季度（4-6月）财报，合并营业收入达到4580亿日元，同比增长18.3%，净利润为420亿日元，同比增长22%。国际客运收入增幅尤为显著，北美和东南亚航线贡献了最大增量，其中东京至纽约、洛杉矶及曼谷航线的客座率均超过90%。入境旅游需求的持续旺盛是核心驱动力——6月份访日外国游客人数达314万人次，再次刷新单月历史纪录。日航同时上调了全年盈利指引，并宣布将在年内新增东京成田至西雅图、大阪关西至墨尔本两条远程航线。', pubDate: '2026-08-07', link: '#' },
-  { title: '阿联酋航空宣布订购50架波音777X 总价值超200亿美元', snippet: '阿联酋航空在迪拜总部宣布，已与波音公司签署确认订单，增购50架波音777X系列客机，按目录价格计算总价值超过200亿美元。其中包括35架777-9和15架777-8货机，交付时间从2029年开始持续至2035年。此次订单意味着阿联酋航空的777X确认订单总数已增至205架，巩固了其作为该机型全球最大客户的地位。阿联酋航空总裁表示，777X将逐步替换机队中老旧的777-300ER和A380机型，是公司2035年机队战略的核心支柱。该订单对波音而言也是一剂强心针，777X项目此前因认证进度多次推迟而面临压力。', pubDate: '2026-08-07', link: '#' },
-  { title: '国际航协预测2026年全球航空客运量将首次突破50亿人次', snippet: '国际航空运输协会发布最新预测报告，预计2026年全球航空客运总量将达到50.4亿人次，首次突破50亿大关，较2025年增长约6.7%。亚太地区将成为增长最快的区域市场，中国国内市场和印度市场合计贡献全球增量的近四成。报告同时指出，行业面临的主要挑战包括可持续航空燃料供应严重不足、全球空中交通管理系统现代化滞后以及部分地区机场基础设施瓶颈日益突出。IATA总干事呼吁各国政府加大对SAF生产设施和空管系统升级的投资力度，以避免基础设施短板成为制约行业复苏的瓶颈。', pubDate: '2026-08-06', link: '#' },
-  { title: 'NASA X-59静音超音速验证机完成首次地面滑行测试', snippet: '美国国家航空航天局与洛克希德-马丁臭鼬工厂联合研制的X-59 QueSST静音超音速验证机，于8月5日在加州帕姆代尔基地成功完成首次地面滑行测试。X-59的设计目标是将音爆噪音降低至约75分贝——相当于关车门的声音水平，远低于协和号客机曾引发的105分贝震耳欲聋的音爆。本次测试验证了起落架、制动系统和航电设备在地面操作条件下的性能表现。NASA计划于今年四季度启动首次试飞，随后将飞越美国多个居民社区收集公众对低音爆的主观感受数据，为监管机构解除跨大陆超音速民用飞行禁令提供科学依据。', pubDate: '2026-08-06', link: '#' },
-  { title: '韩国仁川国际机场第四跑道正式启用 年吞吐能力提升至1.3亿人次', snippet: '韩国仁川国际机场8月5日举行了第四跑道启用仪式，韩国国土交通部长官及仁川机场公社社长共同出席。这条全长4000米的新跑道总投资约3.8万亿韩元，历经五年建设，配备了CAT IIIB精密进近系统和高级场面滑行引导系统。投运后，仁川机场的年航班起降容量从73万架次提升至100万架次，年旅客吞吐能力跃升至1.3亿人次，进一步巩固其作为东北亚核心航空枢纽的地位。大韩航空和韩亚航空均宣布将借助新增跑道容量，将欧洲和北美航线频次提高约15%至20%。', pubDate: '2026-08-05', link: '#' },
-  { title: '电动航空里程碑：Beta Technologies获FAA型号认证', snippet: '美国联邦航空管理局于8月5日向Beta Technologies颁发了其Alia eCTOL电动常规起降飞机的型号合格证，标志着全球首款获得FAA认证的全电动实用类飞机正式诞生。Alia eCTOL采用纯电推进系统，航程约250海里，充电时间约50分钟，主要瞄准城市间短途货运、医疗物资运输和空中出租车场景。Beta Technologies已从UPS、亚马逊Prime Air、美国空军及United Therapeutics等客户处获得超过600架确认订单及意向订单。公司创始人表示，FAA的认证是电动航空商业化的重大转折点，预计首架交付客户的飞机将在2027年初投入运营。', pubDate: '2026-08-05', link: '#' },
-  { title: '法航-荷航集团启动史上最大规模机队更新计划', snippet: '法航-荷航集团首席执行官在巴黎举行的战略发布会上宣布，集团将启动一项总额达120亿欧元的机队更新计划，在未来十年内引进超过160架新一代客机，以取代老旧的波音777-200ER、空客A330和A320ceo系列。新引进机型涵盖空客A350-900/1000、A321XLR以及波音787-10，A320neo系列也将作为中短程主力机队大规模引入。集团同时承诺，新机队将全部具备使用50%可持续航空燃料的能力，预计到2035年单位碳排放将较2019年下降30%。该计划不仅将显著降低燃油成本和维护支出，还将为乘客提供更安静、更舒适的客舱体验。', pubDate: '2026-08-04', link: '#' },
-  { title: '巴西航空工业公司E2系列全球确认订单突破400架', snippet: '巴西航空工业公司在圣若泽杜斯坎普斯总部宣布，E195-E2和E190-E2组成的E2系列客机全球确认订单已累计突破400架大关。最新一笔订单来自尼日利亚的和平航空，确认采购5架E195-E2。巴航工业目前月均交付5至6架E2系列飞机，积压订单可覆盖约三年的生产周期。E2系列凭借其行业领先的燃油效率——较上一代E-jet降低约25%的单座油耗——和出色的短跑道性能，在北美、欧洲和非洲的区域航空市场中持续获得航空公司青睐。波特航空是目前最大的E2运营商，已接收了38架E195-E2。', pubDate: '2026-08-04', link: '#' },
-  { title: '香港国际机场三跑道系统全面投入运营 旅客容量翻倍', snippet: '香港国际机场8月3日正式宣布，第三条跑道及配套的T2客运廊、新旅客捷运系统和行李处理系统已全部投入全面运营，历时近八年的三跑道系统建设项目至此圆满完成。新系统投运后，香港机场的年旅客吞吐量将从约7500万人次提升至1.2亿人次，货运能力从约500万吨提升至1000万吨，有望重新夺回全球最繁忙货运机场的头衔。国泰航空已同步宣布将在2027年之前新增包括达拉斯、西雅图、阿姆斯特丹在内的多条远程航线。香港机场管理局表示，第三条跑道是在填海造地基础上建造的，全长3800米，耗资约1415亿港元。', pubDate: '2026-08-03', link: '#' },
-  { title: '达美航空率先在跨大西洋航线实现免费高速WiFi全覆盖', snippet: '达美航空宣布，已在全部执飞跨大西洋航线的宽体机队上完成Viasat高通量卫星WiFi系统的安装和调试工作，成为全球首家在跨大西洋航线上对所有乘客实行免费高速WiFi全覆盖的主流航空公司。该系统提供每位乘客约15Mbps的下行带宽，足以支持高清视频串流和视频会议。达美航空此前已在国内干线上推行免费WiFi一年，获得了旅客高度认可。公司CEO表示，免费上网将不再是头等舱和商务舱的特权，未来两年内达美的全球所有航班都将部署免费WiFi，预计总投入超过10亿美元。', pubDate: '2026-08-03', link: '#' },
-  { title: '俄罗斯MC21客机搭载国产PD14发动机完成高寒测试', snippet: '俄罗斯联合航空制造集团宣布，搭载俄制PD-14涡扇发动机的MC-21-310客机已在雅库茨克地区成功完成零下45摄氏度极端高寒环境验证测试。测试内容包括发动机冷启动、辅助动力系统在极寒条件下的连续运行以及飞控系统防冰性能验证。MC-21是目前俄罗斯最先进的中程窄体客机，最大载客量211人，航程约6000公里，主翼采用复合材料整体成型技术，在全球同类机型中处于领先水平。PD-14发动机由联合发动机公司研制，是苏联解体后俄罗斯首款从零开始自主研制的民用大推力涡扇发动机，旨在完全替代普惠PW1400G进口型号。', pubDate: '2026-08-03', link: '#' }
+  { title: '国产大飞机C919首次执飞国际商业航线 北京至乌兰巴托成功首航', snippet: '8月12日15时17分，由国航CA723航班执飞的国产大飞机C919从北京首都国际机场腾空而起，经过约1小时41分钟的飞行，平稳降落在蒙古国乌兰巴托新成吉思汗国际机场，标志着C919投入商业运营以来首次执飞常态化国际定期客运航线。该航线航班号为CA723/CA724，计划每日一班往返，单程经济舱票价1770元起。首航航班搭载111名旅客，乌兰巴托机场以民航最高礼遇"水门仪式"迎接。中国商飞数据显示，截至8月12日，由国航、东航、南航运营的C919累计开通58条航线、通航26座城市，安全运送旅客超750万人次。', pubDate: '2026-08-12', link: '#' },
+  { title: 'C919出海路线图：EASA认证最快2028年 商飞瞄准2029年产能200架', snippet: 'C919首条国际航线开通引发国际媒体广泛关注。分析指出，中蒙双边适航互认打通了国产客机出海的首条通道，欧美适航认证并非国产客机国际化的唯一硬性门槛。根据EASA此前披露的消息，C919的全套认证流程预计耗时3至6年，最快2028年、最晚可能延至2031年拿到欧洲适航证，一旦顺利拿证将有望进驻欧盟及全球90多个国家。中国商飞已明确提出到2029年实现年产能200架的目标，高原型、加长型与增程版等衍生机型也在不断丰富应用场景。', pubDate: '2026-08-13', link: '#' },
+  { title: '国航及深圳航空订购55架空客飞机 目录价超124亿美元', snippet: '中国国航公告，将与附属公司深圳航空向空中客车购买55架飞机，目录价格合计约124.4亿美元。其中国航购置15架A350-900宽体客机，目录价约60.9亿美元，预计2030年至2032年分批交付；深圳航空购置40架A320neo系列窄体机，目录价约63.5亿美元，预计2029年至2032年分批交付。空中客车就飞机给予较大价格优惠，实际代价低于目录价格。', pubDate: '2026-08-13', link: '#' },
+  { title: '波音7月交付53架继续落后空客 前7个月差距拉大至51架', snippet: '波音8月11日公布，7月共向客户交付53架商用飞机，同期空客交付67架。今年前七个月，波音累计交付367架，空客交付418架，两家制造商差距拉大至51架。波音7月交付了10架787梦想客机，美联航接收3架787-9，印度航空、汉莎航空、利雅得航空等客户也各获新机。订单方面，波音7月录得38架新订单，包括法恩伯勒航展上来自AerCap、Luxair和乌干达国家航空的采购。', pubDate: '2026-08-11', link: '#' },
+  { title: '空客年内净订单突破1000架 中国市场需求成重要引擎', snippet: '空客宣布今年净订单量已突破1000架大关，中国航空公司的强劲需求贡献了重要增量。7月空客共向39家客户交付67架飞机，其中靛蓝航空接收7架A320neo系列，南航接收4架，阿联酋航空接收3架A350-900，美国航空接收3架A321neo。订单方面，利雅得航空确认增购6架A350-1000，SMBC航空租赁订购100架新飞机，东航订购25架A330-900。空客重申2026年全年交付约870架商用飞机的目标。', pubDate: '2026-08-09', link: '#' },
+  { title: '大韩航空与韩亚航空合并获正式批准 年底前完成整合', snippet: '大韩航空董事会与韩亚航空股东已正式批准合并协议，为年底前启动合并后航空公司的运营扫清关键障碍。两家航司合并后将成为全球十大航空公司之一，机队规模超过230架。此前双方已陆续获得韩国公平贸易委员会等多个监管机构的批准，合并工作进入最后冲刺阶段。', pubDate: '2026-08-12', link: '#' },
+  { title: '北京强降雨致57架次航班取消 两大机场启动防汛保障', snippet: '8月12日北京迎来强降雨并启动防汛二级应急响应。受天气影响，民航计划取消进出港航班57架次，首都、大兴两大机场备足应急物资并延长餐饮营业时间。当日北京"八站两场"进出京旅客预计138.42万人次，其中民航进出港39.14万人次，铁路方面停运123趟列车。', pubDate: '2026-08-12', link: '#' },
+  { title: '东航国内机票免费退改政策放宽 提前14天不再区分舱位', snippet: '自8月起，东方航空调整国内客票自愿退改规则，免费退改时间由起飞前30天扩大至提前14天，14天前退改不再区分舱位权益。此举旨在破解机票退改规则复杂、客诉高发的行业痛点，为旅客提供更灵活便捷的退改体验，也反映出航空公司服务竞争正从票价向售后体验延伸。', pubDate: '2026-08-12', link: '#' },
+  { title: '印度航空客机空中骤降17人受伤 机长大麻检测呈阳性', snippet: '印度民航部披露，印航一架普吉岛至德里的A320neo航班在飞行途中骤降约91米，导致13名乘客和4名机组人员受伤。事件调查中发现执飞机长大麻毒检呈阳性。印度民航部已于8月11日紧急召见印航CEO，要求彻查并强化机组人员健康管理，全球民航安全"人因"防线再度引发关注。', pubDate: '2026-08-11', link: '#' },
+  { title: '山河星航"阿若拉"轻型运动飞机实现全面国产化', snippet: '湖南山河星航宣布，旗下"阿若拉"轻型运动飞机已完成发动机、航电系统、碳纤维材料等全部核心部件国产化攻坚，今年1月首架搭载国产发动机与国产航电系统的阿若拉交付。该机型是我国首款取得民航局适航认证的轻型运动飞机，同时取得美国FAA、澳大利亚CASA认证，国内外累计交付近500架，国内市场占有率超80%，可使用95号车用汽油，百公里油耗仅8升，最大航程达1300公里。', pubDate: '2026-08-13', link: '#' },
+  { title: '中飞租赁与土耳其航空签署7架A321neo租赁协议', snippet: '中飞租赁宣布与土耳其航空签署七架全新空客A321neo飞机租赁协议，标志着双方正式建立战略合作关系。该批飞机均配备普惠PW1133GA-JM发动机，由中飞租赁订单簿提供，预计2027年起陆续交付，将支持土耳其航空推进其"Vision 2033"机队扩张战略。土耳其航空是全球航点覆盖最广的航空公司之一。', pubDate: '2026-08-13', link: '#' },
+  { title: '中飞租赁向美联航交付第200架新飞机', snippet: '中飞租赁宣布已向美国联合航空交付一架全新空客A321neo飞机，这是双方签订的12架空客A321neo租赁项目中的首架，同时也是中飞租赁第200架订单新飞机交付。此次交付也是集团首次从空客位于美国莫比尔的制造工厂接收飞机，将用于支持美联航机队转型更新计划。', pubDate: '2026-08-14', link: '#' },
+  { title: '瑞安航空与谷歌云签署五年合作协议 推进数字化运营', snippet: '瑞安航空宣布与谷歌云签署为期五年的合作伙伴关系，将向旗下35000名员工推广Google Workspace和谷歌云服务，推动航空公司数字化运营升级。瑞安航空是欧洲最大的低成本航空公司，此次合作涵盖办公协作、数据分析与云基础设施等全方位数字化改造，也是欧洲航司加速上云的最新例证。', pubDate: '2026-08-12', link: '#' },
+  { title: 'AirBaltic削减A220机队三分之一 聚焦里加枢纽', snippet: '拉脱维亚国家航空AirBaltic宣布，计划在年底前将空客A220-300机队削减约三分之一，并将航线网络更集中地围绕枢纽里加布局。公司表示此举旨在优化运力结构、提升运营效率，以应对燃油价格高企与市场竞争加剧带来的成本压力。', pubDate: '2026-08-11', link: '#' },
+  { title: '波音完成787短进气道降噪测试 油耗有望再降0.5%', snippet: '波音宣布完成787梦想客机短进气道降噪测试飞行。测试旨在验证采用新型声学处理的进气道导管能否在保持现有噪声水平的同时，将燃油效率再提升最多0.5%。若测试通过，该技术将应用于787后续交付机型，进一步提升这款宽体机的运营经济性。', pubDate: '2026-08-12', link: '#' },
+  { title: 'FAA正式认证波音737 MAX 7 取证进程重大突破', snippet: '美国联邦航空管理局于8月3日正式认证波音737 MAX 7机型，为该机型投入商业运营扫清关键监管障碍。737 MAX 7是MAX家族中座位数最少、航程最远的成员，主要面向低成本航空公司的高密度航线需求。认证通过后有望加速波音窄体机交付进度，缓解其在窄体机市场的竞争压力。', pubDate: '2026-08-03', link: '#' },
+  { title: '达美航空将开通亚特兰大至利雅得直飞航线', snippet: '达美航空宣布将于10月23日开通亚特兰大至沙特利雅得的新直飞航线，使用空客A350-900执飞。这是达美航空连接美国与沙特的重要航线，将加强美沙两国商务与旅游往来，也反映中东市场在美航司国际网络中的权重持续上升。', pubDate: '2026-08-09', link: '#' },
+  { title: '空客7月向39家客户交付67架飞机 全年目标保持870架', snippet: '空客公布7月交付数据，共向39家客户交付67架商用飞机，与去年同期持平。今年累计交付418架，较去年同期373架增长12%。空客重申2026年全年交付约870架的目标。7月新接订单204架，扣除66架取消后净订单138架，年内净订单累计突破1000架。', pubDate: '2026-08-07', link: '#' }
 ];
 
 const AI_SYSTEM_PROMPTS = {
@@ -7231,7 +7323,7 @@ function exportCollectionImage() {
 
   // --- Card grid ---
   var catLabels = { civil: '民航客机', fighter: '战斗机', bomber: '轰炸机', transport: '运输机', helicopter: '直升机' };
-  var specLabelMap = { cruise_speed: '巡航速度', max_speed: '最大速度', max_range: '最大航程', range: '航程', combat_radius: '作战半径', capacity: '载客量', load: '载重', wingspan: '翼展', ceiling: '升限', rotor_diameter: '旋翼直径' };
+  var specLabelMap = { cruise_speed: '巡航速度', max_speed: '最大速度', max_range: '最大航程', range: '航程', combat_radius: '作战半径', capacity: '载客量', load: '载重', wingspan: '翼展', ceiling: '升限', rotor_diameter: '旋翼直径', engine: '发动机', seats: '座位数', mtow: '最大起飞重量', length: '机身长度', height: '机身高度' };
 
   var loadedCount = 0;
   var totalImages = data.length;
