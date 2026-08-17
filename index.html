@@ -3271,9 +3271,11 @@ body.light-mode .map-container .leaflet-tile-pane {
   padding: 18px 10px 14px;
   display: flex; flex-direction: column; align-items: center; gap: 10px;
   position: relative;
+  cursor: pointer;
   transition: transform .25s ease, box-shadow .25s ease, opacity .25s ease;
 }
 .badge-card.unlocked:hover { transform: translateY(-4px); box-shadow: var(--glass-shadow-lg); }
+.badge-card.locked:hover { transform: translateY(-4px); opacity: .8; }
 .badge-card.locked { opacity: .55; filter: grayscale(1); }
 .badge-medal {
   width: 72px; height: 72px; border-radius: 50%;
@@ -3308,9 +3310,10 @@ body.light-mode .map-container .leaflet-tile-pane {
   z-index: 2;
 }
 .badge-toast-wrap {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
   z-index: 10030; display: flex; flex-direction: column; gap: 8px; align-items: center;
   pointer-events: none;
+  width: 100%;
 }
 .badge-toast {
   background: linear-gradient(135deg, rgba(30,41,59,.94), rgba(15,23,42,.94));
@@ -3323,12 +3326,61 @@ body.light-mode .map-container .leaflet-tile-pane {
 }
 .badge-toast.hide { animation: badgeToastOut .4s ease forwards; }
 @keyframes badgeToastIn {
-  from { opacity: 0; transform: translateY(16px) scale(.9); }
+  from { opacity: 0; transform: translateY(-24px) scale(.9); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes badgeToastOut {
-  to { opacity: 0; transform: translateY(10px) scale(.95); }
+  to { opacity: 0; transform: translateY(-14px) scale(.95); }
 }
+#badgeDetailOverlay {
+  position: fixed; inset: 0; z-index: 10035;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+  padding: 20px;
+}
+#badgeDetailOverlay.visible { display: flex; }
+.badge-detail-card {
+  width: 340px; max-width: 100%; box-sizing: border-box;
+  background: linear-gradient(160deg, rgba(30,41,59,.97), rgba(15,23,42,.97));
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 22px; padding: 30px 24px 24px;
+  text-align: center; position: relative;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  animation: badgeToastIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+.badge-detail-close {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,.08);
+  color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.badge-detail-close:hover { background: rgba(255,255,255,.18); }
+.badge-detail-close svg { width: 16px; height: 16px; }
+.badge-detail-medal {
+  width: 92px; height: 92px; border-radius: 50%;
+  margin: 0 auto 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem;
+  border: 3px solid rgba(255,255,255,.35);
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+.badge-detail-name { font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: .5px; }
+.badge-detail-status {
+  display: inline-block; margin-top: 8px; padding: 3px 14px;
+  border-radius: 50px; font-size: .75rem; font-weight: 600;
+}
+.badge-detail-status.ok { background: rgba(16,185,129,.2); color: #34d399; border: 1px solid rgba(16,185,129,.45); }
+.badge-detail-status.lock { background: rgba(148,163,184,.15); color: #94a3b8; border: 1px solid rgba(148,163,184,.35); }
+.badge-detail-intro {
+  margin-top: 16px; padding: 12px 14px;
+  background: rgba(255,255,255,.06);
+  border-radius: 12px; border-left: 3px solid rgba(139,92,246,.8);
+  color: #e2e8f0; font-size: .88rem; line-height: 1.75; text-align: left;
+}
+.badge-detail-date { margin-top: 14px; color: #a78bfa; font-size: .82rem; font-weight: 600; }
+.badge-detail-desc { margin-top: 6px; color: #64748b; font-size: .78rem; }
 @media (max-width: 768px) {
   .badge-card { width: 108px; padding: 14px 8px 12px; }
   .badge-medal { width: 60px; height: 60px; font-size: 1.6rem; }
@@ -3399,7 +3451,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260817-v37">
+<body data-version="20260817-v38">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -3683,6 +3735,7 @@ body.light-mode .map-container .leaflet-tile-pane {
     <div class="badge-grid" id="badgeGrid"></div>
   </div>
 </div>
+<div id="badgeDetailOverlay" onclick="badgeDetailBackdrop(event)"></div>
 <div class="badge-toast-wrap" id="badgeToastWrap"></div>
 
 <div class="compare-bar" id="compareBar">
@@ -3768,7 +3821,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">打卡成就系统上线</span> — 新增5枚主题徽章（首航纪念/收藏新秀/晨航打卡/满分飞行员/云端常客），每日自动打卡解锁专属徽章',
+    updateBanner: '<span class="banner-highlight">成就通知与徽章详情</span> — 解锁徽章顶部弹出通知，点击徽章可查看获取日期与专属介绍',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -4027,7 +4080,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Badge Achievement System</span> — Collect 5 themed badges (First Flight / Collector / Check-in / Quiz Master / Cloud Frequent Flyer) with daily auto check-in',
+    updateBanner: '<span class="banner-highlight">Badge Notification & Details</span> — Unlock badges with top popup notification; tap a badge to view unlock date and intro',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -6366,10 +6419,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260817-v37', '1');
+  localStorage.setItem('aviation-update-20260817-v38', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260817-v37')) return;
+  if (localStorage.getItem('aviation-update-20260817-v38')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -8350,11 +8403,11 @@ function showQuizResult() {
 
 // ===== 打卡成就徽章系统 =====
 var BADGES = [
-  { id: 'first-flight', name: '首航纪念', icon: '✈️', color: 'linear-gradient(135deg,#f59e0b,#fbbf24)', desc: '首次打开收藏馆' },
-  { id: 'collector',    name: '收藏新秀', icon: '⭐', color: 'linear-gradient(135deg,#10b981,#34d399)', desc: '收藏 5 款机型' },
-  { id: 'checkin-3',    name: '晨航打卡', icon: '📅', color: 'linear-gradient(135deg,#fb923c,#f97316)', desc: '连续 3 天打开打卡' },
-  { id: 'quiz-master',  name: '满分飞行员', icon: '🏆', color: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', desc: 'Quiz 10 题全对' },
-  { id: 'checkin-7',    name: '云端常客', icon: '👑', color: 'linear-gradient(135deg,#ef4444,#f59e0b)', desc: '累计打卡满 7 天' }
+  { id: 'first-flight', name: '首航纪念', icon: '✈️', color: 'linear-gradient(135deg,#f59e0b,#fbbf24)', desc: '首次打开收藏馆', intro: '第一次踏上收藏馆的跑道，属于你的航空之旅就此启航。' },
+  { id: 'collector',    name: '收藏新秀', icon: '⭐', color: 'linear-gradient(135deg,#10b981,#34d399)', desc: '收藏 5 款机型', intro: '机库渐丰，眼光独到。收藏 5 款心仪机型，你就是收藏新秀。' },
+  { id: 'checkin-3',    name: '晨航打卡', icon: '📅', color: 'linear-gradient(135deg,#fb923c,#f97316)', desc: '连续 3 天打开打卡', intro: '连续 3 天如约而至，像准时起飞的晨间航班一样可靠。' },
+  { id: 'quiz-master',  name: '满分飞行员', icon: '🏆', color: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', desc: 'Quiz 10 题全对', intro: '机型、年代、细节全掌握。满分飞行员，专业级航空通！' },
+  { id: 'checkin-7',    name: '云端常客', icon: '👑', color: 'linear-gradient(135deg,#ef4444,#f59e0b)', desc: '累计打卡满 7 天', intro: '累计 7 天登机打卡，云层之上早已认得你的身影。' }
 ];
 var badgeNewThisSession = [];
 function badgeDateStr(offset) {
@@ -8374,11 +8427,22 @@ function badgeGetUnlocked() {
 function badgeSaveUnlocked(arr) {
   try { localStorage.setItem('aviation_badges', JSON.stringify(arr)); } catch (e) {}
 }
+function badgeGetTimes() {
+  try { return JSON.parse(localStorage.getItem('aviation_badges_time') || '{}'); } catch (e) { return {}; }
+}
+function badgeSaveTime(id) {
+  try {
+    var times = badgeGetTimes();
+    times[id] = badgeDateStr(0) + ' ' + String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0');
+    localStorage.setItem('aviation_badges_time', JSON.stringify(times));
+  } catch (e) {}
+}
 function unlockBadge(id) {
   var arr = badgeGetUnlocked();
   if (arr.indexOf(id) !== -1) return false;
   arr.push(id);
   badgeSaveUnlocked(arr);
+  badgeSaveTime(id);
   badgeNewThisSession.push(id);
   showBadgeToast(id);
   return true;
@@ -8435,7 +8499,7 @@ function renderBadges() {
   grid.innerHTML = BADGES.map(function(b) {
     var has = unlocked.indexOf(b.id) !== -1;
     var isNew = badgeNewThisSession.indexOf(b.id) !== -1;
-    return '<div class="badge-card ' + (has ? 'unlocked' : 'locked') + '">' +
+    return '<div class="badge-card ' + (has ? 'unlocked' : 'locked') + '" onclick="showBadgeDetail(\'' + b.id + '\')">' +
       (has ? (isNew ? '<div class="badge-new">NEW</div>' : '') : '<div class="badge-lock">🔒</div>') +
       '<div class="badge-medal" style="background:' + b.color + '">' + b.icon + '</div>' +
       '<div class="badge-name">' + b.name + '</div>' +
@@ -8443,6 +8507,41 @@ function renderBadges() {
     '</div>';
   }).join('');
 }
+function showBadgeDetail(id) {
+  var b = BADGES.filter(function(x) { return x.id === id; })[0];
+  if (!b) return;
+  var unlocked = badgeGetUnlocked();
+  var has = unlocked.indexOf(b.id) !== -1;
+  var times = badgeGetTimes();
+  var el = document.getElementById('badgeDetailOverlay');
+  if (!el) return;
+  var dateLine = has
+    ? (times[b.id] ? '获取日期：' + times[b.id] : '获取日期：已解锁（较早版本记录）')
+    : '未解锁';
+  el.innerHTML =
+    '<div class="badge-detail-card">' +
+      '<button class="badge-detail-close" onclick="closeBadgeDetail()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+      '<div class="badge-detail-medal" style="background:' + b.color + (has ? '' : ';filter:grayscale(1)') + '">' + b.icon + '</div>' +
+      '<div class="badge-detail-name">' + b.name + '</div>' +
+      '<div class="badge-detail-status ' + (has ? 'ok' : 'lock') + '">' + (has ? '已解锁' : '未解锁') + '</div>' +
+      '<div class="badge-detail-intro">' + b.intro + '</div>' +
+      '<div class="badge-detail-date">' + dateLine + '</div>' +
+      '<div class="badge-detail-desc">解锁条件：' + b.desc + '</div>' +
+    '</div>';
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function closeBadgeDetail() {
+  var el = document.getElementById('badgeDetailOverlay');
+  if (el) el.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+function badgeDetailBackdrop(e) {
+  if (e.target === e.currentTarget) closeBadgeDetail();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeBadgeDetail();
+});
 
 // 页面加载完成后打卡（函数定义块末尾调用，确保 BADGES 等已就绪）
 checkinOnLoad();
