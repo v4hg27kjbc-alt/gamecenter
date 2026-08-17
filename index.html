@@ -3239,6 +3239,108 @@ body.light-mode .map-container .leaflet-tile-pane {
   #quizOverlay .quiz-options { grid-template-columns: 1fr; gap: 8px; }
   #quizOverlay .quiz-result-score { font-size: 2.6rem; }
 }
+
+/* ===== 打卡成就徽章系统 ===== */
+#badgeOverlay {
+  position: fixed; inset: 0; z-index: 10002;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#badgeOverlay.visible { display: flex; }
+.badge-content {
+  flex: 1; overflow-y: auto;
+  padding: 24px; max-width: 780px; margin: 0 auto; width: 100%;
+}
+.badge-stats {
+  text-align: center; margin-bottom: 20px;
+  font-size: 0.92rem; color: var(--text-dim);
+  letter-spacing: 1px;
+}
+.badge-stats strong { color: var(--accent); font-size: 1.5rem; font-weight: 700; }
+.badge-grid {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  justify-content: center;
+}
+.badge-card {
+  width: 132px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 18px 10px 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  position: relative;
+  transition: transform .25s ease, box-shadow .25s ease, opacity .25s ease;
+}
+.badge-card.unlocked:hover { transform: translateY(-4px); box-shadow: var(--glass-shadow-lg); }
+.badge-card.locked { opacity: .55; filter: grayscale(1); }
+.badge-medal {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  border: 3px solid rgba(255,255,255,.35);
+  box-shadow: 0 6px 18px rgba(0,0,0,.25), inset 0 0 12px rgba(255,255,255,.25);
+  position: relative;
+}
+.badge-card.unlocked .badge-medal { animation: badgeShine 2.6s ease-in-out infinite; }
+@keyframes badgeShine {
+  0%, 100% { box-shadow: 0 6px 18px rgba(0,0,0,.25), 0 0 0 rgba(255,255,255,0); }
+  50% { box-shadow: 0 6px 22px rgba(0,0,0,.28), 0 0 24px rgba(255,255,255,.5); }
+}
+.badge-lock {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(30,41,59,.85);
+  color: #fff; font-size: .8rem;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,.4);
+}
+.badge-name { font-size: .92rem; font-weight: 600; color: var(--text); text-align: center; }
+.badge-desc { font-size: .72rem; color: var(--text-dim); text-align: center; line-height: 1.5; }
+.badge-new {
+  position: absolute; top: 8px; right: 8px;
+  background: linear-gradient(135deg,#f59e0b,#ef4444);
+  color: #fff; font-size: .62rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 50px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(239,68,68,.4);
+  z-index: 2;
+}
+.badge-toast-wrap {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 10030; display: flex; flex-direction: column; gap: 8px; align-items: center;
+  pointer-events: none;
+}
+.badge-toast {
+  background: linear-gradient(135deg, rgba(30,41,59,.94), rgba(15,23,42,.94));
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff; border-radius: 50px;
+  padding: 10px 20px; font-size: .88rem;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  animation: badgeToastIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+.badge-toast.hide { animation: badgeToastOut .4s ease forwards; }
+@keyframes badgeToastIn {
+  from { opacity: 0; transform: translateY(16px) scale(.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes badgeToastOut {
+  to { opacity: 0; transform: translateY(10px) scale(.95); }
+}
+@media (max-width: 768px) {
+  .badge-card { width: 108px; padding: 14px 8px 12px; }
+  .badge-medal { width: 60px; height: 60px; font-size: 1.6rem; }
+  .badge-name { font-size: .8rem; }
+  .badge-desc { font-size: .66rem; }
+  .badge-content { padding: 16px; }
+}
+@media (max-width: 480px) {
+  .badge-card { width: 96px; }
+  .badge-medal { width: 54px; height: 54px; font-size: 1.4rem; }
+  .badge-stats { font-size: .8rem; }
+}
 .ai-review-gen-btn:disabled {
   opacity: 0.5; cursor: not-allowed; transform: none;
   box-shadow: none;
@@ -3297,7 +3399,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260817-v36">
+<body data-version="20260817-v37">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -3420,6 +3522,7 @@ body.light-mode .map-container .leaflet-tile-pane {
     <button class="filter-chip news-btn" id="newsBtn" onclick="openNewsPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg><span id="newsBtnText">航空快讯</span></button>
     <button class="filter-chip kg-btn" id="kgBtn" onclick="openKgPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="19" r="2"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/></svg><span id="kgBtnText">AI 知识图谱</span></button>
     <button class="filter-chip quiz-btn" id="quizBtn" onclick="openQuiz()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114.5 1.6c-.8.8-2 1.4-2 2.9"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="quizBtnText">机型 Quiz</span></button>
+    <button class="filter-chip quiz-btn" id="badgeBtn" onclick="openBadges()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.9 4.9l1.4 1.4"/><path d="M17.7 17.7l1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.9 19.1l1.4-1.4"/><path d="M17.7 6.3l1.4-1.4"/></svg><span id="badgeBtnText">成就</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -3565,6 +3668,23 @@ body.light-mode .map-container .leaflet-tile-pane {
   <div class="quiz-content" id="quizContent"></div>
 </div>
 
+<div id="badgeOverlay">
+  <div class="quiz-header">
+    <div class="quiz-title">
+      <div class="quiz-title-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.9 4.9l1.4 1.4"/><path d="M17.7 17.7l1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.9 19.1l1.4-1.4"/><path d="M17.7 6.3l1.4-1.4"/></svg></div>
+      <span>打卡成就 · 徽章收藏册</span>
+    </div>
+    <button class="quiz-close" onclick="closeBadges()" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="badge-content">
+    <div class="badge-stats">已解锁 <strong id="badgeUnlockedCount">0</strong> / 5 枚徽章</div>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+</div>
+<div class="badge-toast-wrap" id="badgeToastWrap"></div>
+
 <div class="compare-bar" id="compareBar">
   <span class="compare-slot" id="compareSlot1" data-default="selectAircraft1">选择机型 1</span>
   <span class="compare-vs">VS</span>
@@ -3648,7 +3768,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">机型 Quiz & 体验优化</span> — 新增10题看图猜机型/年份小游戏（带音效开关），修复弹窗关闭跳转、快讯翻译、航线坐标等多项问题',
+    updateBanner: '<span class="banner-highlight">打卡成就系统上线</span> — 新增5枚主题徽章（首航纪念/收藏新秀/晨航打卡/满分飞行员/云端常客），每日自动打卡解锁专属徽章',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -3907,7 +4027,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Aircraft Quiz & UX Improvements</span> — New 10-question guess-the-aircraft quiz with sound toggle; fixed popup scroll jump, news translation, route coordinates and more',
+    updateBanner: '<span class="banner-highlight">Badge Achievement System</span> — Collect 5 themed badges (First Flight / Collector / Check-in / Quiz Master / Cloud Frequent Flyer) with daily auto check-in',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -5375,6 +5495,7 @@ function toggleCollect(id) {
   if (collection.has(id)) { collection.delete(id); window._track('uncollect', { aircraftId: id }); }
   else { collection.add(id); window._track('collect', { aircraftId: id }); }
   localStorage.setItem('aviation_collection', JSON.stringify([...collection]));
+  if (collection.size >= 5) unlockBadge('collector');
   renderCards();
 }
 
@@ -6187,6 +6308,7 @@ function closeDetail() {
 
 document.querySelector('.filter-bar').addEventListener('click', (e) => {
   if (!e.target.classList.contains('filter-chip')) return;
+  if (!e.target.dataset.filter) return; // 排除问AI/快讯/图谱/Quiz/成就等功能按钮
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   e.target.classList.add('active');
   currentFilter = e.target.dataset.filter;
@@ -6206,6 +6328,7 @@ document.addEventListener('keydown', (e) => {
   // 优先关闭最顶层弹窗
   if (document.querySelector('.image-lightbox')) { closeImageLightbox(); return; }
   if (document.getElementById('quizOverlay') && document.getElementById('quizOverlay').classList.contains('visible')) { closeQuiz(); return; }
+  if (document.getElementById('badgeOverlay') && document.getElementById('badgeOverlay').classList.contains('visible')) { closeBadges(); return; }
   if (document.getElementById('aiReviewOverlay').classList.contains('visible')) { closeAiReview(); return; }
   if (document.getElementById('newsPanelOverlay') && document.getElementById('newsPanelOverlay').classList.contains('visible')) { closeNewsPanel(); return; }
   closeDetail();
@@ -6243,10 +6366,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260817-v36', '1');
+  localStorage.setItem('aviation-update-20260817-v37', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260817-v36')) return;
+  if (localStorage.getItem('aviation-update-20260817-v37')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -8208,7 +8331,7 @@ function showQuizResult() {
   document.getElementById('quizProgressFill').style.width = '100%';
   playQuizSound('finish');
   var title, desc;
-  if (quizScore >= 9) { title = '航空专家！'; desc = '对机型和首飞年份如数家珍，太强了！'; }
+  if (quizScore >= 10) { unlockBadge('quiz-master'); title = '航空专家！'; desc = '对机型和首飞年份如数家珍，太强了！'; }
   else if (quizScore >= 7) { title = '资深航空迷'; desc = '眼光相当准，离专家就差一点点啦！'; }
   else if (quizScore >= 5) { title = '入门航迷'; desc = '有潜力！多逛逛收藏馆，下次就是满分！'; }
   else { title = '新手上路'; desc = '别灰心，多看几次机型卡片，很快就能认出它们！'; }
@@ -8224,6 +8347,105 @@ function showQuizResult() {
       '</div>' +
     '</div>';
 }
+
+// ===== 打卡成就徽章系统 =====
+var BADGES = [
+  { id: 'first-flight', name: '首航纪念', icon: '✈️', color: 'linear-gradient(135deg,#f59e0b,#fbbf24)', desc: '首次打开收藏馆' },
+  { id: 'collector',    name: '收藏新秀', icon: '⭐', color: 'linear-gradient(135deg,#10b981,#34d399)', desc: '收藏 5 款机型' },
+  { id: 'checkin-3',    name: '晨航打卡', icon: '📅', color: 'linear-gradient(135deg,#fb923c,#f97316)', desc: '连续 3 天打开打卡' },
+  { id: 'quiz-master',  name: '满分飞行员', icon: '🏆', color: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', desc: 'Quiz 10 题全对' },
+  { id: 'checkin-7',    name: '云端常客', icon: '👑', color: 'linear-gradient(135deg,#ef4444,#f59e0b)', desc: '累计打卡满 7 天' }
+];
+var badgeNewThisSession = [];
+function badgeDateStr(offset) {
+  var d = new Date(); if (offset) d.setDate(d.getDate() + offset);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function badgeGetCheckin() {
+  try { return JSON.parse(localStorage.getItem('aviation_checkin') || '{"days":[],"streak":0,"total":0}'); }
+  catch (e) { return { days: [], streak: 0, total: 0 }; }
+}
+function badgeSaveCheckin(c) {
+  try { localStorage.setItem('aviation_checkin', JSON.stringify(c)); } catch (e) {}
+}
+function badgeGetUnlocked() {
+  try { return JSON.parse(localStorage.getItem('aviation_badges') || '[]'); } catch (e) { return []; }
+}
+function badgeSaveUnlocked(arr) {
+  try { localStorage.setItem('aviation_badges', JSON.stringify(arr)); } catch (e) {}
+}
+function unlockBadge(id) {
+  var arr = badgeGetUnlocked();
+  if (arr.indexOf(id) !== -1) return false;
+  arr.push(id);
+  badgeSaveUnlocked(arr);
+  badgeNewThisSession.push(id);
+  showBadgeToast(id);
+  return true;
+}
+function showBadgeToast(id) {
+  var b = BADGES.filter(function(x) { return x.id === id; })[0];
+  if (!b) return;
+  var wrap = document.getElementById('badgeToastWrap');
+  if (!wrap) return;
+  var div = document.createElement('div');
+  div.className = 'badge-toast';
+  div.innerHTML = '<span>' + b.icon + '</span><span>解锁徽章：<strong>' + b.name + '</strong></span>';
+  wrap.appendChild(div);
+  setTimeout(function() {
+    div.classList.add('hide');
+    setTimeout(function() { div.remove(); }, 450);
+  }, 3200);
+}
+function checkinOnLoad() {
+  var c = badgeGetCheckin();
+  var today = badgeDateStr(0);
+  var last = c.days.length ? c.days[c.days.length - 1] : '';
+  var isFirst = c.days.length === 0;
+  if (last !== today) {
+    var consecutive = last === badgeDateStr(-1);
+    c.streak = consecutive ? c.streak + 1 : 1;
+    c.days.push(today);
+    c.total = c.days.length;
+    badgeSaveCheckin(c);
+  }
+  var unlocked = badgeGetUnlocked();
+  if (isFirst && unlocked.indexOf('first-flight') === -1) unlockBadge('first-flight');
+  if (c.streak >= 3 && unlocked.indexOf('checkin-3') === -1) unlockBadge('checkin-3');
+  if (c.total >= 7 && unlocked.indexOf('checkin-7') === -1) unlockBadge('checkin-7');
+  if (collection.size >= 5 && unlocked.indexOf('collector') === -1) unlockBadge('collector');
+}
+function openBadges() {
+  saveScrollState();
+  document.getElementById('badgeOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+  renderBadges();
+}
+function closeBadges() {
+  document.getElementById('badgeOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  if (typeof renderCards === 'function') renderCards();
+  restoreScrollState();
+}
+function renderBadges() {
+  var unlocked = badgeGetUnlocked();
+  var grid = document.getElementById('badgeGrid');
+  if (!grid) return;
+  document.getElementById('badgeUnlockedCount').textContent = unlocked.length;
+  grid.innerHTML = BADGES.map(function(b) {
+    var has = unlocked.indexOf(b.id) !== -1;
+    var isNew = badgeNewThisSession.indexOf(b.id) !== -1;
+    return '<div class="badge-card ' + (has ? 'unlocked' : 'locked') + '">' +
+      (has ? (isNew ? '<div class="badge-new">NEW</div>' : '') : '<div class="badge-lock">🔒</div>') +
+      '<div class="badge-medal" style="background:' + b.color + '">' + b.icon + '</div>' +
+      '<div class="badge-name">' + b.name + '</div>' +
+      '<div class="badge-desc">' + (has ? b.desc : '未解锁 · ' + b.desc) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// 页面加载完成后打卡（函数定义块末尾调用，确保 BADGES 等已就绪）
+checkinOnLoad();
 
 function renderNewsContent(content, items) {
   if (items.length === 0) {
