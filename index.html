@@ -3445,13 +3445,113 @@ body.light-mode .map-container .leaflet-tile-pane {
   50% { opacity: 0.8; transform: translate(3%, 3%); }
 }
 
+/* ===== 页脚与隐私政策弹窗 ===== */
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 12px 22px;
+  font-size: 13px;
+  color: #8b93a7;
+  border-top: 1px solid rgba(99,102,241,.12);
+  background: linear-gradient(180deg, transparent, rgba(99,102,241,.05));
+}
+.footer-watermark {
+  font-weight: 600;
+  letter-spacing: .4px;
+  background: linear-gradient(90deg,#6366f1,#a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.footer-policy-btn {
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 2px 10px rgba(99,102,241,.35);
+}
+.footer-policy-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(99,102,241,.5);
+}
+.footer-update { color: #9aa2b5; font-size: 12px; }
+#privacyOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10,12,25,.66);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#privacyOverlay.show { display: flex; }
+.privacy-card {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  max-height: 82vh;
+  background: linear-gradient(160deg, #1a1e33, #14172b);
+  border: 1px solid rgba(99,102,241,.25);
+  border-radius: 16px;
+  padding: 28px 26px 18px;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  animation: privacyPop .22s ease;
+}
+@keyframes privacyPop {
+  from { opacity: 0; transform: translateY(14px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.privacy-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(99,102,241,.15);
+  color: #a5b0ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s ease;
+}
+.privacy-close:hover { background: rgba(99,102,241,.3); }
+.privacy-close svg { width: 15px; height: 15px; }
+.privacy-title {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(90deg,#6366f1,#a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+.privacy-date { font-size: 12px; color: #8b93a7; margin-bottom: 14px; }
+.privacy-body { font-size: 13.5px; line-height: 1.75; color: #c7cdde; }
+.privacy-body p { margin: 6px 0; }
+.privacy-body strong { color: #e8ebf7; }
+
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260817-v38">
+<body data-version="20260817-v39">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -3821,7 +3921,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">成就通知与徽章详情</span> — 解锁徽章顶部弹出通知，点击徽章可查看获取日期与专属介绍',
+    updateBanner: '<span class="banner-highlight">添加了协议政策</span>',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -4080,7 +4180,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Badge Notification & Details</span> — Unlock badges with top popup notification; tap a badge to view unlock date and intro',
+    updateBanner: '<span class="banner-highlight">Privacy Policy Added</span>',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -6419,10 +6519,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260817-v38', '1');
+  localStorage.setItem('aviation-update-20260817-v39', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260817-v38')) return;
+  if (localStorage.getItem('aviation-update-20260817-v39')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -9075,7 +9175,81 @@ function restoreColdFact() {
 
   checkVersion();
 })();
+
+// 隐私政策弹窗
+function openPrivacyPolicy() {
+  var o = document.getElementById('privacyOverlay');
+  if (o) o.classList.add('show');
+}
+function closePrivacyPolicy() {
+  var o = document.getElementById('privacyOverlay');
+  if (o) o.classList.remove('show');
+}
+function privacyBackdrop(e) {
+  if (e && e.target && e.target.id === 'privacyOverlay') closePrivacyPolicy();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePrivacyPolicy();
+});
 </script>
+
+<footer class="site-footer">
+  <div class="footer-watermark">Aviation Collection © 2026</div>
+  <button class="footer-policy-btn" onclick="openPrivacyPolicy()">协议政策</button>
+  <div class="footer-update">隐私政策更新：2026-08-17</div>
+</footer>
+
+<div id="privacyOverlay" onclick="privacyBackdrop(event)">
+  <div class="privacy-card">
+    <button class="privacy-close" onclick="closePrivacyPolicy()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="privacy-title">隐私保护与网站安全说明</div>
+    <div class="privacy-date">更新日期：2026-08-17</div>
+    <div class="privacy-body">
+      <p><strong>一、网站性质</strong></p>
+      <p>本网站是由个人维护的民航机型收藏展示项目，采用单文件静态网页技术构建，部署于 Cloudflare Pages 全球加速网络（CDN）。网站本身不包含服务器后台程序、不维护用户数据库、不设立用户账号体系，因此不存在传统意义上的"用户注册信息"。</p>
+      <p><strong>二、数据存储与本地化原则</strong></p>
+      <p>1. 您在本网站产生的所有个性化数据，包括但不限于：收藏的机型、打卡记录、连续签到天数、成就徽章、主题偏好、AI 对话记录、页面浏览状态等，均仅保存在您当前设备的浏览器本地存储（localStorage）中。</p>
+      <p>2. 上述数据不会上传至本网站的任何服务器，也不会被本网站所有者、托管平台或任何第三方读取、备份或分析。</p>
+      <p>3. 清除方式：您可在浏览器设置中清除该网站的站点数据，或使用浏览器的"无痕模式"访问，关闭后本地数据即随之消失。</p>
+      <p><strong>三、第三方服务说明</strong></p>
+      <p>1. <strong>AI 智能问答（智谱 AI / BigModel）</strong>：当您使用「问 AI」功能并发送问题时，您输入的问题文本会经由本页面直接发送至第三方大模型服务商智谱 AI（BigModel）的接口，用于生成回答。传输内容仅包含您主动输入的问题文本及必要的对话上下文，不包含您的设备信息、位置信息或本网站其他本地数据。第三方服务商将按其自身隐私政策处理该内容，建议您在提问时勿输入身份证号、银行卡号、家庭住址、密码等敏感个人信息。回答内容仅用于本次对话的即时展示，本网站不存储任何问答记录。</p>
+      <p>2. <strong>地图服务（Leaflet 开源库与瓦片资源）</strong>：页面中的航线地图功能使用开源地图库 Leaflet 渲染，地图瓦片可能来自公开地图服务商。加载地图时可能产生对第三方服务器的请求，用于获取地图底图数据。</p>
+      <p>3. <strong>图片与媒体资源（维基百科等公开图源）</strong>：部分机型照片、历史图片来自维基百科等公开网络图源，并经过第三方图片代理服务（wsrv.nl）优化加载。上述资源加载时会产生第三方请求，但本网站不通过该渠道采集任何访客信息。</p>
+      <p>4. <strong>开源库与 CDN</strong>：页面引用的开源代码库（如 Leaflet、字体、图标等）可能从公共 CDN（如 unpkg、jsDelivr 等）加载，加载过程可能产生第三方网络请求。</p>
+      <p>5. <strong>托管平台（Cloudflare Pages）</strong>：本网站由 Cloudflare Pages 提供静态托管与 CDN 加速。Cloudflare 作为基础设施服务商，其网络边缘节点在传输过程中可能产生标准的访问日志（如 IP 地址、访问时间、请求路径），该日志属于托管平台的常规运维数据，本网站所有者不主动采集、不用于用户画像，也不向任何商业机构出售。</p>
+      <p>6. <strong>访问统计（Umami）</strong>：本网站接入 Umami 开源网站统计后台，用于了解页面访问量、来源渠道与访问趋势等宏观运行数据。Umami 为隐私友好型统计方案：不采集个人身份信息、不使用 Cookie、不进行跨站追踪、不生成用户画像，所有统计数据均为匿名聚合，仅用于网站维护者优化内容与体验，不会向任何第三方出售或共享。</p>
+      <p><strong>四、信息收集声明</strong></p>
+      <p>1. 本网站不主动收集您的任何个人信息，包括姓名、电话、邮箱、地址、位置、设备标识等。</p>
+      <p>2. 本网站不包含任何广告联盟代码、第三方统计埋点（如百度统计、Google Analytics）、Cookie 追踪、指纹识别或行为画像分析组件。</p>
+      <p>3. 您主动输入的内容（如 AI 问答问题）仅在您使用对应功能时按上文说明发生传输，本网站不保存。</p>
+      <p>4. 本网站不提供注册、登录、评论、留言等会采集信息的交互功能。</p>
+      <p><strong>五、网站安全信息</strong></p>
+      <p>1. <strong>传输安全</strong>：本网站全站启用 HTTPS 加密传输（由 Cloudflare 提供证书），您与网站之间的所有数据传输均经过加密保护，可有效防止内容在传输途中被窃听、拦截或篡改。</p>
+      <p>2. <strong>托管防护</strong>：网站部署于 Cloudflare 全球网络，依托其 DDoS 防护、WAF 边缘防护与智能安全能力，持续抵御恶意攻击、爬虫与异常流量，保障网站稳定可用。</p>
+      <p>3. <strong>后台管理与访问统计（Umami）</strong>：为确保后台管理透明可控，本网站已接入 Umami 开源网站统计后台，用于了解页面访问量、来源渠道与访问趋势等宏观运行数据。Umami 是业内公认的隐私友好型统计方案：不采集个人身份信息、不使用 Cookie、不进行跨站追踪、不生成用户画像，所有统计数据均为匿名聚合，仅用于网站维护者优化内容与体验，不会向任何第三方出售或共享。</p>
+      <p>4. <strong>代码保护</strong>：本网站已实施前端代码保护措施，包括禁用右键菜单、禁用开发者工具快捷键、限制文本复制选择等，防止源码被轻易查看、复制与二次分发。需要说明的是，静态网页源码在技术层面最终可被获取，前端保护主要面向普通访客，无法绝对阻止具备专业技术的用户。</p>
+      <p>5. <strong>篡改与内容保护</strong>：本网站对线上页面实行版本化与指纹化管理，可识别页面内容是否被非授权修改。如发现冒用、篡改或仿冒本站内容的行为，网站维护者将保留通过托管平台日志、统计后台数据及法律途径追溯与追责的权利，切实维护页面内容与访客权益。</p>
+      <p>6. <strong>无后台风险面</strong>：网站无传统服务器后台、无数据库、无用户账号体系，攻击面极小；接入的 Umami 统计仅收集匿名聚合数据，不含可识别个人身份的信息，从根本上降低了数据泄露风险。</p>
+      <p>7. <strong>未来安全升级承诺</strong>：随着网络安全形势变化与技术发展，我们将持续升级网站的安全防护等级，包括但不限于：更新安全策略、强化传输加密、优化代码保护机制、升级统计与监控方案等，确保防护能力始终与风险水平相匹配。</p>
+      <p>8. <strong>个人访问安全承诺</strong>：我们郑重承诺，全力保护每一位访客的个人访问安全——您的浏览行为、本地数据与主动输入内容均受到加密传输、匿名统计与本地化存储的多重保护，本网站不以任何形式采集、留存或滥用您的个人信息，让您安心浏览、放心使用。</p>
+      <p>9. <strong>更新机制</strong>：网站功能与安全维护会持续进行，版本更新以页面顶部横幅形式告知，更新内容均为功能迭代、体验优化与安全加固。</p>
+      <p>10. <strong>浏览器安全提示</strong>：请确保您的浏览器为最新版本，以获得最佳的安全防护与浏览体验。</p>
+      <p><strong>六、未成年人保护</strong></p>
+      <p>本网站为航空文化展示类内容，内容健康向上，适合全年龄段浏览。网站不收集任何用户的年龄、身份等个人信息。</p>
+      <p><strong>七、协议确认与授权条款</strong></p>
+      <p>1. <strong>水印与版权标识</strong>：本网站页面下方展示网站英文水印及年份标识（© Aviation Collection 2026），作为网站版权与来源的识别标记。任何转载、引用本站内容时，须保留该水印标识并注明出处。</p>
+      <p>2. <strong>协议政策入口</strong>：本网站页面下方设有"协议政策"按钮，点击可随时查看本《隐私保护与网站安全说明》全文及其更新时间，便于您了解网站的数据处理与安全策略。</p>
+      <p>3. <strong>访问即同意</strong>：用户打开并访问本网站，即视为已阅读并同意上述全部条款，同时同意本网站在合理范围内进行访问统计、匿名数据分析及其他为保障网站运行与安全所必需的权限操作。如您不同意本说明中的任何条款，请停止使用本网站。</p>
+      <p>4. <strong>持续合规</strong>：本网站承诺，所有统计与分析行为均保持在"合理且必要"的范围内，绝不越界采集个人信息，并接受广大访客的监督。</p>
+      <p><strong>八、说明变更</strong></p>
+      <p>本说明可能随网站功能调整而更新，更新后将在页面中展示最新版本，更新日期以页面标注为准。若您对隐私保护有任何疑问，可通过下方联系方式与网站维护者沟通。</p>
+      <p><strong>九、意见反馈与联系方式</strong></p>
+      <p>欢迎各界朋友对本网站提出功能、内容或安全等方面的宝贵意见与建议，您的每一条反馈都是我们进步的动力。网站维护者微信号：<strong>15652760512</strong>。添加好友时请备注来意，以便我们及时、高效地为您服务。</p>
+      <p><strong>十、免责声明</strong></p>
+      <p>本网站展示的机型信息、历史资料及图片均来源于公开资料，仅供航空爱好者交流学习使用，不用于任何商业用途。如涉及版权问题，请联系维护者处理。</p>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
