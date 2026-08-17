@@ -222,6 +222,7 @@ body.light-mode .stars-layer { opacity: 0; }
   box-shadow: var(--glass-shadow);
   text-align: center;
   position: relative;
+  z-index: 5;
   animation: fadeInDown 0.6s ease;
   transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
@@ -285,7 +286,7 @@ body.light-mode .header h1 {
 .theme-toggle-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
 
 .theme-dropdown {
-  position: absolute; top: 62px; right: 24px; z-index: 110;
+  position: absolute; top: 62px; right: 24px; z-index: 1500;
   min-width: 180px;
   backdrop-filter: blur(22px) saturate(180%);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
@@ -390,6 +391,27 @@ body.light-mode .header h1 {
   pointer-events: none;
 }
 .kg-btn:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35)) !important;
+  border-color: rgba(99,102,241,0.55) !important;
+  transform: translateY(-2px);
+}
+
+/* ===== 机型Quiz按钮（与问AI/快讯/知识图谱同色同动画） ===== */
+.quiz-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2)) !important;
+  border-color: rgba(99,102,241,0.35) !important;
+}
+.quiz-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
+  pointer-events: none;
+}
+.quiz-btn:hover {
   background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35)) !important;
   border-color: rgba(99,102,241,0.55) !important;
   transform: translateY(-2px);
@@ -525,6 +547,14 @@ body.light-mode .ai-loading { background: #f1f5f9; }
 }
 .ai-loading span:nth-child(2) { animation-delay: 0.2s; }
 .ai-loading span:nth-child(3) { animation-delay: 0.4s; }
+.news-summary-result {
+  white-space: pre-wrap; line-height: 2; padding: 10px 0; font-size: 1rem;
+  animation: newsSummaryFade 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes newsSummaryFade {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @keyframes aiDot { 0%,80%,100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
 
 /* 底部输入区 */
@@ -1288,7 +1318,28 @@ body.light-mode .card:hover {
   width: 100%; height: 100%; object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.card:hover .card-image-wrap img { transform: scale(1.05); transition: transform 0.3s ease; }
+.card:hover .card-image-wrap img {
+  transform: scale(1.08) rotate(0.4deg);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-image-wrap::before {
+  content: '';
+  position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.22), transparent);
+  transform: skewX(-18deg);
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.card:hover .card-image-wrap::before {
+  opacity: 1;
+  animation: cardShine 0.9s ease forwards;
+}
+@keyframes cardShine {
+  0% { left: -120%; }
+  100% { left: 160%; }
+}
 .card-image-wrap::after {
   content: '';
   position: absolute; bottom: 0; left: 0; right: 0; height: 55px;
@@ -1507,6 +1558,9 @@ body.light-mode .airline-name { color: #1a1a2e; }
   .header { padding: 24px 16px; margin-bottom: 20px; border-radius: 18px; }
   .header h1 { font-size: 1.7rem; }
   .header .subtitle { font-size: 0.8rem; }
+  .theme-toggle-btn { padding: 6px 12px; font-size: 0.78rem; }
+  .theme-dropdown { top: 56px; right: 12px; min-width: 168px; max-height: calc(100vh - 90px); overflow-y: auto; }
+  .theme-dropdown-item { padding: 8px 14px; font-size: 0.82rem; }
   .hero-banner { height: 260px; border-radius: 18px; margin-bottom: 20px; }
   .hero-content { flex-direction: column; }
   .hero-text { width: 100%; min-width: 0; padding: 12px 14px 6px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
@@ -1598,6 +1652,8 @@ body.light-mode .airline-name { color: #1a1a2e; }
   .news-btn svg { width: 12px; height: 12px; }
   .kg-btn { font-size: 0.7rem; padding: 4px 8px; }
   .kg-btn svg { width: 12px; height: 12px; }
+  .quiz-btn { font-size: 0.7rem; padding: 4px 8px; }
+  .quiz-btn svg { width: 12px; height: 12px; }
   .kg-overlay .kg-header { padding: 12px 16px; }
   .kg-overlay .kg-title { font-size: 0.9rem; }
   .kg-overlay .kg-legend { padding: 6px 16px; font-size: 0.7rem; }
@@ -3013,6 +3069,176 @@ body.light-mode .map-container .leaflet-tile-pane {
   transform: translateY(-1px);
 }
 .ai-review-gen-btn:active { transform: scale(0.98); }
+
+/* ===== 机型Quiz弹窗 ===== */
+#quizOverlay {
+  position: fixed; inset: 0; z-index: 10002;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#quizOverlay.visible { display: flex; }
+.quiz-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+.quiz-title {
+  font-size: 1.05rem; font-weight: 600; color: var(--text);
+  letter-spacing: 1px;
+  display: flex; align-items: center; gap: 10px;
+}
+.quiz-title-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.25));
+  border: 1px solid rgba(99,102,241,0.4);
+  display: flex; align-items: center; justify-content: center;
+  color: #a5b4fc;
+}
+.quiz-header-actions { display: flex; align-items: center; gap: 6px; }
+.quiz-sound-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: rgba(99,102,241,0.15);
+  color: #a5b4fc; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+}
+.quiz-sound-btn:hover { background: rgba(99,102,241,0.3); color: #c7d2fe; }
+.quiz-sound-btn.off { opacity: 0.5; background: rgba(100,116,139,0.15); color: var(--text-dim); }
+.quiz-sound-btn svg { width: 18px; height: 18px; }
+.quiz-close {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+}
+.quiz-close:hover { background: var(--card-bg-hover); color: var(--text); }
+.quiz-close svg { width: 20px; height: 20px; }
+.quiz-progress-wrap {
+  padding: 12px 24px 4px; max-width: 640px; margin: 0 auto; width: 100%;
+  flex-shrink: 0;
+}
+.quiz-progress-text {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.82rem; color: var(--text-dim); margin-bottom: 8px;
+}
+.quiz-progress-score { color: #a5b4fc; font-weight: 600; }
+.quiz-progress-bar {
+  height: 6px; border-radius: 50px;
+  background: var(--card-bg-hover);
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  border-radius: 50px;
+  transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quiz-content {
+  flex: 1; overflow-y: auto; padding: 18px 24px 28px;
+  max-width: 640px; margin: 0 auto; width: 100%;
+}
+.quiz-question-type {
+  display: inline-block;
+  padding: 4px 14px; border-radius: 50px;
+  background: rgba(99,102,241,0.18);
+  border: 1px solid rgba(99,102,241,0.35);
+  color: #a5b4fc; font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 1px; margin-bottom: 14px;
+}
+.quiz-question-type.type-year { background: rgba(139,92,246,0.18); border-color: rgba(139,92,246,0.4); color: #c4b5fd; }
+.quiz-img {
+  width: 100%; max-height: 280px; object-fit: contain;
+  border-radius: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  margin-bottom: 16px;
+}
+.quiz-question-text {
+  font-size: 1.02rem; font-weight: 600; color: var(--text);
+  margin-bottom: 16px; text-align: center;
+}
+.quiz-options {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.quiz-option {
+  padding: 13px 14px; border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text); font-size: 0.92rem; font-weight: 500;
+  cursor: pointer; text-align: center;
+  transition: all 0.22s ease;
+  user-select: none;
+}
+.quiz-option:hover:not(:disabled) {
+  border-color: rgba(99,102,241,0.55);
+  background: rgba(99,102,241,0.12);
+  transform: translateY(-2px);
+}
+.quiz-option.correct {
+  background: rgba(34,197,94,0.25) !important;
+  border-color: rgba(34,197,94,0.6) !important;
+  color: #4ade80 !important;
+  box-shadow: 0 0 16px rgba(34,197,94,0.25);
+}
+.quiz-option.wrong {
+  background: rgba(239,68,68,0.2) !important;
+  border-color: rgba(239,68,68,0.55) !important;
+  color: #f87171 !important;
+}
+.quiz-option:disabled { cursor: default; opacity: 0.85; }
+.quiz-feedback {
+  text-align: center; margin-top: 16px; min-height: 26px;
+  font-size: 0.9rem; color: var(--text-dim);
+  font-weight: 600;
+}
+.quiz-result {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 30px 10px; text-align: center;
+}
+.quiz-result-score {
+  font-size: 3.2rem; font-weight: 800;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 10px 0 4px;
+}
+.quiz-result-label { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 8px; }
+.quiz-result-title { font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.quiz-result-desc { font-size: 0.92rem; color: var(--text-dim); max-width: 400px; line-height: 1.7; margin-bottom: 24px; }
+.quiz-result-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.quiz-primary-btn {
+  padding: 11px 26px; border-radius: 50px; border: none;
+  background: linear-gradient(135deg, #5b7fb8, #4a6799);
+  color: #fff; font-size: 0.92rem; font-weight: 600; cursor: pointer;
+  box-shadow: 0 0 14px rgba(90,120,180,0.25), 0 3px 10px rgba(70,100,160,0.15);
+  transition: all 0.3s ease;
+}
+.quiz-primary-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(90,120,180,0.35); }
+.quiz-ghost-btn {
+  padding: 11px 26px; border-radius: 50px;
+  border: 1px solid var(--glass-border);
+  background: transparent; color: var(--text-dim);
+  font-size: 0.92rem; font-weight: 500; cursor: pointer;
+  transition: all 0.3s ease;
+}
+.quiz-ghost-btn:hover { border-color: var(--accent); color: var(--text); }
+/* Quiz 弹窗 768px 响应式 */
+@media (max-width: 768px) {
+  #quizOverlay .quiz-header { padding: 12px 14px; }
+  #quizOverlay .quiz-title { font-size: 0.92rem; }
+  #quizOverlay .quiz-progress-wrap { padding: 10px 14px 2px; }
+  #quizOverlay .quiz-content { padding: 14px 14px 22px; }
+  #quizOverlay .quiz-img { max-height: 200px; }
+  #quizOverlay .quiz-options { grid-template-columns: 1fr; gap: 8px; }
+  #quizOverlay .quiz-result-score { font-size: 2.6rem; }
+}
 .ai-review-gen-btn:disabled {
   opacity: 0.5; cursor: not-allowed; transform: none;
   box-shadow: none;
@@ -3071,7 +3297,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260814-v35">
+<body data-version="20260817-v36">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -3193,6 +3419,7 @@ body.light-mode .map-container .leaflet-tile-pane {
     <button class="filter-chip ai-chat-btn" id="aiChatBtn" onclick="openAiChat()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span id="aiChatBtnText">问 AI</span></button>
     <button class="filter-chip news-btn" id="newsBtn" onclick="openNewsPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg><span id="newsBtnText">航空快讯</span></button>
     <button class="filter-chip kg-btn" id="kgBtn" onclick="openKgPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="19" r="2"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/></svg><span id="kgBtnText">AI 知识图谱</span></button>
+    <button class="filter-chip quiz-btn" id="quizBtn" onclick="openQuiz()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114.5 1.6c-.8.8-2 1.4-2 2.9"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="quizBtnText">机型 Quiz</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -3312,6 +3539,32 @@ body.light-mode .map-container .leaflet-tile-pane {
   </div>
 </div>
 
+<div id="quizOverlay">
+  <div class="quiz-header">
+    <div class="quiz-title">
+      <div class="quiz-title-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114.5 1.6c-.8.8-2 1.4-2 2.9"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <span>机型 Quiz · 看图猜机型/年份</span>
+    </div>
+    <div class="quiz-header-actions">
+      <button class="quiz-sound-btn" id="quizSoundBtn" onclick="toggleQuizSound()" title="音效开关">
+        <svg id="quizSoundOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M19 5a9 9 0 010 14"/></svg>
+        <svg id="quizSoundOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      </button>
+      <button class="quiz-close" onclick="closeQuiz()" title="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="quiz-progress-wrap">
+    <div class="quiz-progress-text">
+      <span id="quizProgressText">第 1 / 10 题</span>
+      <span class="quiz-progress-score" id="quizScoreText">答对 0 题</span>
+    </div>
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+  </div>
+  <div class="quiz-content" id="quizContent"></div>
+</div>
+
 <div class="compare-bar" id="compareBar">
   <span class="compare-slot" id="compareSlot1" data-default="selectAircraft1">选择机型 1</span>
   <span class="compare-vs">VS</span>
@@ -3395,7 +3648,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">机型对比表 & 完整机身 & 快讯刷新</span> — 新增发动机/座位数/MTOW等硬指标并排对比表，全部机型图片改为完整机身显示，航空快讯同步更新为最新新闻',
+    updateBanner: '<span class="banner-highlight">机型 Quiz & 体验优化</span> — 新增10题看图猜机型/年份小游戏（带音效开关），修复弹窗关闭跳转、快讯翻译、航线坐标等多项问题',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -3654,7 +3907,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Compare Table & Full Aircraft View</span> — New side-by-side spec table with engine/seats/MTOW, all photos now show the complete aircraft body',
+    updateBanner: '<span class="banner-highlight">Aircraft Quiz & UX Improvements</span> — New 10-question guess-the-aircraft quiz with sound toggle; fixed popup scroll jump, news translation, route coordinates and more',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -4346,6 +4599,17 @@ let sortDir = 'asc';
 let userSetSort = false;
 let compareSet = new Set();
 let _skipHashHandler = false; // P2: guard against hashchange loops
+var _pageScrollY = 0;
+var _renderCardsToken = 0;
+function saveScrollState() {
+  _pageScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+}
+function restoreScrollState() {
+  var y = _pageScrollY;
+  requestAnimationFrame(function() {
+    window.scrollTo(0, y);
+  });
+}
 
 function getAirlineCountries() {
   const countries = new Set();
@@ -4894,6 +5158,7 @@ function renderCards() {
   const countryBar = document.getElementById('countryBar');
   const searchHint = document.getElementById('searchHint');
   const searchClear = document.getElementById('searchClear');
+  var token = ++_renderCardsToken;
 
   if (currentFilter === 'civil') {
     countryBar.classList.add('visible');
@@ -5079,6 +5344,7 @@ function renderCards() {
   // Direct batch render without skeleton to avoid flash
   let batchIndex = 0;
   function renderBatch() {
+    if (token !== _renderCardsToken) return; // 旧批次作废，避免竞态清空/重复
     try {
       if (batchIndex === 0) {
         grid.innerHTML = items.slice(0, BATCH_SIZE).join('');
@@ -5832,6 +6098,7 @@ function randomLucky() {
 function openDetail(id) {
   const a = aircrafts.find(x => x.id === id);
   if (!a) return;
+  saveScrollState();
 
   var sq = searchQuery.trim();
 
@@ -5915,6 +6182,7 @@ function closeDetail() {
   document.body.style.overflow = '';
   // 清除 hash，避免刷新时自动打开
   history.replaceState(null, '', window.location.pathname + window.location.search);
+  restoreScrollState();
 }
 
 document.querySelector('.filter-bar').addEventListener('click', (e) => {
@@ -5937,6 +6205,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   // 优先关闭最顶层弹窗
   if (document.querySelector('.image-lightbox')) { closeImageLightbox(); return; }
+  if (document.getElementById('quizOverlay') && document.getElementById('quizOverlay').classList.contains('visible')) { closeQuiz(); return; }
   if (document.getElementById('aiReviewOverlay').classList.contains('visible')) { closeAiReview(); return; }
   if (document.getElementById('newsPanelOverlay') && document.getElementById('newsPanelOverlay').classList.contains('visible')) { closeNewsPanel(); return; }
   closeDetail();
@@ -5974,10 +6243,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260814-v35', '1');
+  localStorage.setItem('aviation-update-20260817-v36', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260814-v35')) return;
+  if (localStorage.getItem('aviation-update-20260817-v36')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -6026,6 +6295,7 @@ const AI_SYSTEM_PROMPTS = {
 let aiConversationHistory = [];
 
 function openAiChat() {
+  saveScrollState();
   document.getElementById('aiChatOverlay').classList.add('visible');
   document.body.style.overflow = 'hidden';
   document.getElementById('aiChatInput').focus();
@@ -6037,6 +6307,7 @@ function closeAiChat() {
   document.getElementById('aiChatOverlay').classList.remove('visible');
   document.body.style.overflow = '';
   if (typeof renderCards === 'function') renderCards();
+  restoreScrollState();
 }
 
 function updateAiCharCount() {
@@ -6939,7 +7210,8 @@ function initRouteMap(airlineId, el) {
   var map = L.map(mapEl, {
     center: [(minLat + maxLat) / 2, (minLng + maxLng) / 2],
     zoomControl: false, attributionControl: false,
-    scrollWheelZoom: true
+    scrollWheelZoom: true,
+    crs: L.CRS.EPSG4326
   });
 
   // 世界地图剪影底图
@@ -7620,6 +7892,7 @@ function exportSingleAircraft(id) {
 // ===== AI 知识图谱 =====
 
 function openKgPanel() {
+  saveScrollState();
   var overlay = document.getElementById('kgOverlay');
   overlay.classList.add('active');
   buildKgCardGrid();
@@ -7628,6 +7901,7 @@ function openKgPanel() {
 function closeKgPanel() {
   document.getElementById('kgOverlay').classList.remove('active');
   if (typeof renderCards === 'function') renderCards();
+  restoreScrollState();
 }
 
 function buildKgCardGrid() {
@@ -7721,6 +7995,7 @@ function buildKgCardGrid() {
 let newsPanelItems = [];
 
 async function openNewsPanel() {
+  saveScrollState();
   document.getElementById('newsPanelOverlay').classList.add('visible');
   document.body.style.overflow = 'hidden';
   if (newsPanelItems.length === 0) { await loadNewsPanel(); }
@@ -7754,6 +8029,200 @@ function closeNewsPanel() {
   document.body.style.overflow = '';
   if (window._newsRefreshInterval) { clearInterval(window._newsRefreshInterval); window._newsRefreshInterval = null; }
   if (typeof renderCards === 'function') renderCards();
+  restoreScrollState();
+}
+
+/* ===== 机型Quiz ===== */
+var QUIZ_YEARS = {
+  'Airbus A380': 2005, 'Boeing 787-9': 2013, 'Airbus A350-900': 2013, 'Boeing 777-300ER': 2003,
+  'COMAC C919': 2017, 'Airbus A320neo': 2014, 'Boeing 737 MAX 8': 2016, 'Airbus A330-300': 1992,
+  'Embraer E195-E2': 2017, 'Airbus A220-300': 2015, 'F-22 Raptor': 1997, 'J-20': 2011,
+  'B-2 Spirit': 1989, 'C-17': 1991, 'Y-20': 2013, 'AH-64 Apache': 1975,
+  'Boeing 747-8': 2010, 'Boeing 707-120': 1957, 'Boeing 707-320': 1959, 'Boeing 727-100': 1963,
+  'Boeing 727-200': 1967, 'Boeing 737-100': 1967, 'Boeing 737-200': 1967, 'Boeing 747-100': 1969,
+  'Boeing 747-200': 1970, 'Boeing 747-SP': 1975, 'Boeing 747-300': 1982, 'Airbus A300B2': 1972,
+  'Airbus A300B4': 1974
+};
+var quizQuestions = [];
+var quizIndex = 0;
+var quizScore = 0;
+var quizAnswered = false;
+var quizSoundEnabled = (function() { try { return localStorage.getItem('quizSound') !== 'off'; } catch(e) { return true; } })();
+var quizAudioCtx = null;
+
+function quizGetCtx() {
+  if (!quizAudioCtx) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) quizAudioCtx = new AC();
+  }
+  if (quizAudioCtx && quizAudioCtx.state === 'suspended') quizAudioCtx.resume();
+  return quizAudioCtx;
+}
+function quizTone(freq, start, dur, type, vol) {
+  var ctx = quizGetCtx();
+  if (!ctx) return;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  var t0 = ctx.currentTime + (start || 0);
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(vol || 0.18, t0 + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + (dur || 0.3));
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0 + (dur || 0.3) + 0.05);
+}
+function playQuizSound(type) {
+  if (!quizSoundEnabled) return;
+  try {
+    if (type === 'correct') { quizTone(523, 0, 0.18, 'triangle', 0.2); quizTone(659, 0.1, 0.18, 'triangle', 0.2); quizTone(784, 0.2, 0.3, 'triangle', 0.22); }
+    else if (type === 'wrong') { quizTone(220, 0, 0.25, 'sawtooth', 0.12); quizTone(150, 0.16, 0.35, 'sawtooth', 0.1); }
+    else if (type === 'click') { quizTone(880, 0, 0.08, 'sine', 0.1); }
+    else if (type === 'finish') { quizTone(523, 0, 0.16, 'triangle', 0.2); quizTone(659, 0.13, 0.16, 'triangle', 0.2); quizTone(784, 0.26, 0.16, 'triangle', 0.2); quizTone(1046, 0.39, 0.45, 'triangle', 0.24); }
+  } catch(e) {}
+}
+function toggleQuizSound() {
+  quizSoundEnabled = !quizSoundEnabled;
+  try { localStorage.setItem('quizSound', quizSoundEnabled ? 'on' : 'off'); } catch(e) {}
+  var btn = document.getElementById('quizSoundBtn');
+  var onIcon = document.getElementById('quizSoundOnIcon');
+  var offIcon = document.getElementById('quizSoundOffIcon');
+  if (btn) btn.classList.toggle('off', !quizSoundEnabled);
+  if (onIcon) onIcon.style.display = quizSoundEnabled ? '' : 'none';
+  if (offIcon) offIcon.style.display = quizSoundEnabled ? 'none' : '';
+  if (quizSoundEnabled) playQuizSound('click');
+}
+function quizShuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function quizRandomPick(arr, n, exclude) {
+  var pool = arr.filter(function(x) { return x !== exclude; });
+  return quizShuffle(pool).slice(0, n);
+}
+function generateQuizQuestions() {
+  var pool = aircrafts.filter(function(a) { return QUIZ_YEARS[a.code] !== undefined; });
+  var picked = quizShuffle(pool).slice(0, 10);
+  var qs = picked.map(function(a, i) {
+    var isName = (i % 2 === 0) ? true : false;
+    if (isName) {
+      var wrong = quizRandomPick(pool.map(function(x) { return x.code; }), 3, a.code);
+      return { aircraft: a, type: 'name', answer: a.code, options: quizShuffle([a.code].concat(wrong)) };
+    } else {
+      var years = Object.keys(QUIZ_YEARS).map(function(k) { return QUIZ_YEARS[k]; });
+      var wrongY = [];
+      var attempts = 0;
+      while (wrongY.length < 3 && attempts < 60) {
+        attempts++;
+        var y = years[Math.floor(Math.random() * years.length)];
+        if (y !== QUIZ_YEARS[a.code] && wrongY.indexOf(y) === -1) wrongY.push(y);
+      }
+      var seed = QUIZ_YEARS[a.code];
+      [seed - 3, seed + 4, seed - 7, seed + 8].forEach(function(y) {
+        if (wrongY.length < 3 && y !== seed && wrongY.indexOf(y) === -1 && y >= 1950) wrongY.push(y);
+      });
+      return { aircraft: a, type: 'year', answer: seed, options: quizShuffle([seed].concat(wrongY)) };
+    }
+  });
+  return qs;
+}
+function openQuiz() {
+  playQuizSound('click');
+  saveScrollState();
+  document.getElementById('quizOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+  var btn = document.getElementById('quizSoundBtn');
+  var onIcon = document.getElementById('quizSoundOnIcon');
+  var offIcon = document.getElementById('quizSoundOffIcon');
+  if (btn) btn.classList.toggle('off', !quizSoundEnabled);
+  if (onIcon) onIcon.style.display = quizSoundEnabled ? '' : 'none';
+  if (offIcon) offIcon.style.display = quizSoundEnabled ? 'none' : '';
+  quizQuestions = generateQuizQuestions();
+  quizIndex = 0;
+  quizScore = 0;
+  quizAnswered = false;
+  document.getElementById('quizProgressFill').style.width = '0%';
+  renderQuizQuestion();
+}
+function closeQuiz() {
+  document.getElementById('quizOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  if (typeof renderCards === 'function') renderCards();
+  restoreScrollState();
+}
+function renderQuizQuestion() {
+  var content = document.getElementById('quizContent');
+  var q = quizQuestions[quizIndex];
+  document.getElementById('quizProgressText').textContent = '第 ' + (quizIndex + 1) + ' / 10 题';
+  document.getElementById('quizScoreText').textContent = '答对 ' + quizScore + ' 题';
+  document.getElementById('quizProgressFill').style.width = ((quizIndex) / 10 * 100) + '%';
+  var typeLabel = q.type === 'name'
+    ? '<div class="quiz-question-type">猜机型</div>'
+    : '<div class="quiz-question-type type-year">猜年份</div>';
+  var questionText = q.type === 'name'
+    ? '这张图是哪款机型？'
+    : '猜猜它的首飞年份？';
+  var optionHtml = q.options.map(function(opt, i) {
+    var label = q.type === 'name' ? opt : opt + ' 年';
+    return '<button class="quiz-option" id="quizOpt' + i + '" onclick="selectQuizAnswer(' + i + ')">' + label + '</button>';
+  }).join('');
+  content.innerHTML =
+    typeLabel +
+    '<img class="quiz-img" src="' + q.aircraft.image + '" alt="机型图片" loading="lazy">' +
+    '<div class="quiz-question-text">' + questionText + '</div>' +
+    '<div class="quiz-options">' + optionHtml + '</div>' +
+    '<div class="quiz-feedback" id="quizFeedback"></div>';
+  quizAnswered = false;
+}
+function selectQuizAnswer(idx) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  var q = quizQuestions[quizIndex];
+  var correct = idx === q.options.indexOf(q.answer);
+  if (correct) { quizScore++; playQuizSound('correct'); }
+  else { playQuizSound('wrong'); }
+  document.querySelectorAll('#quizContent .quiz-option').forEach(function(btn, i) {
+    btn.disabled = true;
+    if (i === q.options.indexOf(q.answer)) btn.classList.add('correct');
+    else if (i === idx) btn.classList.add('wrong');
+  });
+  var fb = document.getElementById('quizFeedback');
+  var correctLabel = q.type === 'name' ? q.answer : q.answer + ' 年';
+  fb.innerHTML = correct
+    ? '回答正确！这是 ' + q.aircraft.code + '，太棒了！'
+    : '回答错误。正确答案是：' + correctLabel;
+  document.getElementById('quizScoreText').textContent = '答对 ' + quizScore + ' 题';
+  document.getElementById('quizProgressFill').style.width = ((quizIndex + 1) / 10 * 100) + '%';
+  setTimeout(function() {
+    if (quizIndex + 1 >= 10) { showQuizResult(); }
+    else { quizIndex++; renderQuizQuestion(); }
+  }, correct ? 1100 : 1700);
+}
+function showQuizResult() {
+  var content = document.getElementById('quizContent');
+  document.getElementById('quizProgressText').textContent = '完成';
+  document.getElementById('quizProgressFill').style.width = '100%';
+  playQuizSound('finish');
+  var title, desc;
+  if (quizScore >= 9) { title = '航空专家！'; desc = '对机型和首飞年份如数家珍，太强了！'; }
+  else if (quizScore >= 7) { title = '资深航空迷'; desc = '眼光相当准，离专家就差一点点啦！'; }
+  else if (quizScore >= 5) { title = '入门航迷'; desc = '有潜力！多逛逛收藏馆，下次就是满分！'; }
+  else { title = '新手上路'; desc = '别灰心，多看几次机型卡片，很快就能认出它们！'; }
+  content.innerHTML =
+    '<div class="quiz-result">' +
+      '<div class="quiz-result-label">本次得分</div>' +
+      '<div class="quiz-result-score">' + quizScore + ' / 10</div>' +
+      '<div class="quiz-result-title">' + title + '</div>' +
+      '<div class="quiz-result-desc">' + desc + '</div>' +
+      '<div class="quiz-result-btns">' +
+        '<button class="quiz-primary-btn" onclick="openQuiz()">再来一局</button>' +
+        '<button class="quiz-ghost-btn" onclick="closeQuiz()">返回首页</button>' +
+      '</div>' +
+    '</div>';
 }
 
 function renderNewsContent(content, items) {
@@ -7808,31 +8277,42 @@ async function tryFetchRSSAndUpdate(content, today, shownTitles, shownUrls) {
     if (rssSelected.length === 0) return;
 
     // AI翻译
-    try {
-      var translatePrompt = '将以下5条英文航空新闻标题和摘要翻译成中文，返回严格JSON格式：[{"title":"中文标题","snippet":"中文摘要"},...]，只输出JSON不要任何解释，snippet字段不要包含换行符。\n' + JSON.stringify(rssSelected.map(function(item) { return { title: item.title, snippet: item.snippet }; }));
-      var tCtrl = new AbortController();
-      var tTimeout = setTimeout(function() { tCtrl.abort(); }, 20000);
-      var tResp = await fetch(AI_CONFIG.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
-        body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'user', content: translatePrompt }], max_tokens: 2000, temperature: 0.3 }),
-        signal: tCtrl.signal
-      });
-      clearTimeout(tTimeout);
-      if (tResp.ok) {
-        var tData = await tResp.json();
-        var tReply = tData.choices && tData.choices[0] && tData.choices[0].message && tData.choices[0].message.content;
-        if (tReply) {
-          var translated = JSON.parse(tReply.trim().replace(/\n/g, ' '));
-          if (Array.isArray(translated)) {
-            for (var ti = 0; ti < Math.min(translated.length, rssSelected.length); ti++) {
-              if (translated[ti].title) rssSelected[ti].title = translated[ti].title;
-              if (translated[ti].snippet) rssSelected[ti].snippet = translated[ti].snippet;
-            }
+    var translated = null;
+    for (var tAttempt = 0; tAttempt < 3 && !translated; tAttempt++) {
+      try {
+        var translatePrompt = '你是专业航空新闻翻译。将以下5条英文航空新闻的标题和摘要翻译成简体中文，返回严格JSON数组：[{"title":"中文标题","snippet":"中文摘要"}]。要求：1.只输出JSON数组，不要markdown代码块、不要任何解释；2.title保持简洁准确；3.snippet完整通顺；4.专有名词保留英文缩写（如C919、A380、EASA）；5.严禁输出英文原文。\n' + JSON.stringify(rssSelected.map(function(item) { return { title: item.title, snippet: item.snippet }; }));
+        var tCtrl = new AbortController();
+        var tTimeout = setTimeout(function() { tCtrl.abort(); }, 20000);
+        var tResp = await fetch(AI_CONFIG.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
+          body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'user', content: translatePrompt }], max_tokens: 2000, temperature: 0.3 }),
+          signal: tCtrl.signal
+        });
+        clearTimeout(tTimeout);
+        if (tResp.ok) {
+          var tData = await tResp.json();
+          var tReply = tData.choices && tData.choices[0] && tData.choices[0].message && tData.choices[0].message.content;
+          if (tReply) {
+            var parsed = extractTranslatedJson(tReply);
+            if (parsed) translated = parsed;
           }
         }
-      }
-    } catch(e) { /* 翻译失败，保留原文标题/摘要 */ }
+      } catch(e) { /* 单次翻译失败，稍后重试 */ }
+      if (!translated && tAttempt < 2) await new Promise(function(r) { setTimeout(r, 500); });
+    }
+    // 翻译失败或结果仍为英文时，保留静态中文新闻，不替换展示
+    if (!translated) return;
+    var latinTitleCount = translated.filter(function(t) {
+      var title = (t && t.title) || '';
+      var latin = (title.match(/[A-Za-z]/g) || []).length;
+      return title.length > 0 && latin / title.length > 0.4;
+    }).length;
+    if (latinTitleCount > 0) return;
+    for (var ti = 0; ti < Math.min(translated.length, rssSelected.length); ti++) {
+      if (translated[ti].title) rssSelected[ti].title = translated[ti].title;
+      if (translated[ti].snippet) rssSelected[ti].snippet = translated[ti].snippet;
+    }
 
     // 更新 RSS 去重记录
     rssSelected.forEach(function(item) { shownUrls.push(item.link); });
@@ -7852,6 +8332,31 @@ async function tryFetchRSSAndUpdate(content, today, shownTitles, shownUrls) {
     newsPanelItems = rssSelected;
     renderNewsContent(content, rssSelected);
   } catch(e) { /* RSS全失败，保留静态内容不变 */ }
+}
+
+function extractTranslatedJson(raw) {
+  if (!raw) return null;
+  var text = raw.trim();
+  // 去掉可能的 markdown 代码块围栏
+  text = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '');
+  // 若整体不是数组，尝试截取第一个 [ ... ] 片段
+  if (text.charAt(0) !== '[') {
+    var si = text.indexOf('[');
+    var ei = text.lastIndexOf(']');
+    if (si === -1 || ei === -1 || ei <= si) return null;
+    text = text.substring(si, ei + 1);
+  }
+  try {
+    var arr = JSON.parse(text);
+    return Array.isArray(arr) ? arr : null;
+  } catch(e) {
+    // 尝试逐行清洗非法字符后重试
+    try {
+      var cleaned = text.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+      var arr2 = JSON.parse(cleaned);
+      return Array.isArray(arr2) ? arr2 : null;
+    } catch(e2) { return null; }
+  }
 }
 
 async function loadNewsPanel() {
@@ -7937,7 +8442,7 @@ async function generateNewsSummaryInPanel() {
     if (!response.ok) throw new Error('API error ' + response.status);
     var data = await response.json();
     var reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-    content.innerHTML = reply ? '<div style="white-space:pre-wrap;line-height:2;padding:10px 0;font-size:1rem;">' + escapeHtml(reply) + '</div>' : '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">生成失败，请重试</div>';
+    content.innerHTML = reply ? '<div class="news-summary-result">' + escapeHtml(reply) + '</div>' : '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">生成失败，请重试</div>';
   } catch (err) {
     clearTimeout(timeoutId);
     content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">' + (err.name === 'AbortError' ? '请求超时' : '生成失败') + '，请重试</div>';
