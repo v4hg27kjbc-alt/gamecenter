@@ -3467,6 +3467,89 @@ body.light-mode .map-container .leaflet-tile-pane {
 .livery-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 body.light-mode .livery-toast { background: rgba(255,255,255,0.95); color: #1a1a2e; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
 
+/* ===== 收藏记录弹窗 ===== */
+.collect-record-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(5,10,22,0.72); backdrop-filter: blur(10px);
+}
+.collect-record-overlay.visible { display: flex; }
+.collect-record-panel {
+  width: min(900px, 94vw); max-height: 88vh;
+  background: linear-gradient(160deg, #101a33 0%, #0b1220 55%, #150f2e 100%);
+  border: 1px solid rgba(99,102,241,0.28); border-radius: 20px;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  animation: liveryCardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+body.light-mode .collect-record-panel {
+  background: linear-gradient(160deg, #ffffff 0%, #f1f5ff 55%, #eef0ff 100%);
+  border-color: rgba(99,102,241,0.35);
+}
+.collect-record-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid rgba(99,102,241,0.18);
+}
+.collect-record-header-title { display: flex; align-items: baseline; gap: 10px; }
+.collect-record-header-title > span:first-child { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.collect-record-sub { font-size: 0.78rem; color: var(--text-dim); }
+.collect-record-tabs {
+  display: flex; gap: 8px; padding: 12px 20px 0;
+}
+.collect-record-tab {
+  padding: 7px 16px; border-radius: 999px; font-size: 0.82rem; cursor: pointer;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(99,102,241,0.25);
+  color: var(--text-dim); transition: all 0.25s ease;
+}
+.collect-record-tab:hover { color: #e0e7ff; border-color: rgba(99,102,241,0.5); }
+.collect-record-tab.active {
+  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35));
+  border-color: rgba(129,140,248,0.6); color: #fff;
+}
+.collect-record-content {
+  padding: 16px 20px 20px; overflow-y: auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;
+}
+.collect-record-empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-dim); }
+.collect-record-card {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 16px; overflow: hidden;
+  display: flex; flex-direction: column;
+  animation: liveryCardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.collect-record-card:hover { transform: translateY(-3px); border-color: rgba(129,140,248,0.55); }
+.collect-record-card .cr-thumb {
+  width: 100%; aspect-ratio: 16/9; overflow: hidden; position: relative;
+  background: linear-gradient(150deg, #101a33, #1d1140);
+}
+.collect-record-card .cr-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.collect-record-card .cr-type-badge {
+  position: absolute; top: 8px; left: 8px; z-index: 2;
+  padding: 3px 10px; border-radius: 999px; font-size: 0.68rem; font-weight: 600;
+  background: linear-gradient(135deg, rgba(59,130,246,0.85), rgba(139,92,246,0.85));
+  color: #fff; backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+.collect-record-card .cr-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.collect-record-card .cr-name { font-size: 0.92rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+.collect-record-card .cr-sub { font-size: 0.76rem; color: var(--text-dim); }
+.collect-record-card .cr-actions { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }
+.collect-record-card .cr-actions .livery-act-btn { flex: 1; justify-content: center; }
+.collect-record-dot {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px; margin-left: 3px;
+  border-radius: 999px; font-size: 0.68rem; font-weight: 700;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff;
+  vertical-align: middle;
+}
+.collect-record-btn { position: relative; }
+@media (max-width: 768px) {
+  .collect-record-content { grid-template-columns: 1fr; padding: 14px; }
+  .collect-record-panel { max-height: 92vh; border-radius: 18px; }
+}
+
 .quiz-progress-wrap {
   padding: 12px 24px 4px; max-width: 640px; margin: 0 auto; width: 100%;
   flex-shrink: 0;
@@ -3900,7 +3983,7 @@ body.light-mode .livery-toast { background: rgba(255,255,255,0.95); color: #1a1a
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260820-v41">
+<body data-version="20260820-v42">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4025,6 +4108,7 @@ body.light-mode .livery-toast { background: rgba(255,255,255,0.95); color: #1a1a
     <button class="filter-chip quiz-btn" id="quizBtn" onclick="openQuiz()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114.5 1.6c-.8.8-2 1.4-2 2.9"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="quizBtnText">机型 Quiz</span></button>
     <button class="filter-chip quiz-btn" id="badgeBtn" onclick="openBadges()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.9 4.9l1.4 1.4"/><path d="M17.7 17.7l1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.9 19.1l1.4-1.4"/><path d="M17.7 6.3l1.4-1.4"/></svg><span id="badgeBtnText">成就</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
+    <button class="filter-chip collect-record-btn" id="collectRecordBtn" onclick="openCollectRecord()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21z"/></svg><span id="collectRecordBtnText">收藏记录</span><span class="collect-record-dot" id="collectRecordDot">0</span></button>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
@@ -4222,6 +4306,27 @@ body.light-mode .livery-toast { background: rgba(255,255,255,0.95); color: #1a1a
 
 <div id="overlayContainer"></div>
 
+<!-- ===== 收藏记录弹窗（机型+涂装统一） ===== -->
+<div id="collectRecordOverlay" class="collect-record-overlay" onclick="closeCollectRecord(event)">
+  <div class="collect-record-panel">
+    <div class="collect-record-header">
+      <div class="collect-record-header-title">
+        <span id="collectRecordTitle">收藏记录</span>
+        <span class="collect-record-sub" id="collectRecordSub"></span>
+      </div>
+      <button class="quiz-close" onclick="closeCollectRecord(event)" title="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="collect-record-tabs" id="collectRecordTabs">
+      <button class="collect-record-tab active" data-tab="all" onclick="switchCollectRecordTab('all')"><span id="collectRecordTabAll">全部</span></button>
+      <button class="collect-record-tab" data-tab="aircraft" onclick="switchCollectRecordTab('aircraft')"><span id="collectRecordTabAircraft">机型收藏</span></button>
+      <button class="collect-record-tab" data-tab="livery" onclick="switchCollectRecordTab('livery')"><span id="collectRecordTabLivery">涂装收藏</span></button>
+    </div>
+    <div class="collect-record-content" id="collectRecordContent"></div>
+  </div>
+</div>
+
 <script>
 // ===== 国际化 (i18n) =====
 const i18n = {
@@ -4295,7 +4400,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">涂装画廊介绍全面升级</span>·84款经典涂装均有50字详介',
+    updateBanner: '<span class="banner-highlight">收藏记录全新上线</span>·机型与涂装收藏统一管理，无照片涂装已优化',
 
     // --- 涂装画廊 ---
     liveryGallery: '涂装画廊',
@@ -4318,6 +4423,19 @@ const i18n = {
     liveryCollectSuccess: '已收藏涂装',
     liveryUncollectSuccess: '已取消收藏',
     liveryNoImage: '经典涂装',
+
+    // --- 收藏记录 ---
+    collectRecord: '收藏记录',
+    collectRecordSub: '机型与涂装收藏汇总',
+    collectRecordTabAll: '全部',
+    collectRecordTabAircraft: '机型收藏',
+    collectRecordTabLivery: '涂装收藏',
+    collectRecordEmpty: '还没有任何收藏，快去逛逛吧！',
+    collectRecordEmptyAircraft: '还没有收藏任何机型',
+    collectRecordEmptyLivery: '还没有收藏任何涂装',
+    collectRecordType: '机型',
+    collectRecordLiveryType: '涂装',
+    collectRecordRemove: '取消收藏',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -4576,7 +4694,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Livery Gallery Details Upgraded</span>',
+    updateBanner: '<span class="banner-highlight">Collection Record & Livery Gallery Upgraded</span>',
 
     // --- Livery Gallery ---
     liveryGallery: 'Livery Gallery',
@@ -4595,6 +4713,19 @@ const i18n = {
     liveryCollectSuccess: 'Livery collected',
     liveryUncollectSuccess: 'Livery removed',
     liveryNoImage: 'Classic Livery',
+
+    // --- Collection Record ---
+    collectRecord: 'Collection Record',
+    collectRecordSub: 'Aircraft & livery collections',
+    collectRecordTabAll: 'All',
+    collectRecordTabAircraft: 'Aircraft',
+    collectRecordTabLivery: 'Liveries',
+    collectRecordEmpty: 'No collections yet. Explore!',
+    collectRecordEmptyAircraft: 'No aircraft collected yet',
+    collectRecordEmptyLivery: 'No liveries collected yet',
+    collectRecordType: 'Aircraft',
+    collectRecordLiveryType: 'Livery',
+    collectRecordRemove: 'Remove',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -6187,6 +6318,7 @@ function renderCards() {
   if (items.length === 0) {
     grid.innerHTML = '';
     updateCollectionCount();
+    updateCollectRecordDot();
     updateCompareBar();
     return;
   }
@@ -6227,6 +6359,8 @@ function toggleCollect(id) {
   localStorage.setItem('aviation_collection', JSON.stringify([...collection]));
   if (collection.size >= 5) unlockBadge('collector');
   renderCards();
+  updateCollectRecordDot();
+  if (document.getElementById('collectRecordOverlay') && document.getElementById('collectRecordOverlay').classList.contains('visible')) renderCollectRecord();
 }
 
 function updateCollectionCount() {
@@ -7014,8 +7148,7 @@ function openDetail(id) {
                   onclick="event.stopPropagation();exportSingleAircraft(${a.id})">导出为图片</button>
           <button class="modal-action-btn ai-review-entry-btn"
                   onclick="event.stopPropagation();openAiReview(${a.id})">AI 评</button>
-          <button class="modal-action-btn livery-entry-btn"
-                  onclick="event.stopPropagation();openLivery(${a.id})">涂装画廊</button>
+          ${(LIVERIES[a.id] || []).some(function(lv) { return !!lv.img; }) ? '<button class="modal-action-btn livery-entry-btn" onclick="event.stopPropagation();openLivery(' + a.id + ')">涂装画廊</button>' : ''}
         </div>
         ${airlineCards ? `<div class="airlines-section"><h3>${t('operatingAirlines')}</h3>${airlineCards}</div>` : ''}
         ${renderRelatedSection(a.id)}
@@ -9223,6 +9356,14 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeBadgeDetail();
 });
 
+// Esc 关闭收藏记录
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var cr = document.getElementById('collectRecordOverlay');
+    if (cr && cr.classList.contains('visible')) closeCollectRecord();
+  }
+});
+
 // ===== 机型涂装画廊 =====
 var LIVERY_KEY = 'aviation_liveries';
 function liveryGetCollected() {
@@ -9243,6 +9384,93 @@ function liveryLogoOf(al) {
 function liveryUpdateBadge() {
   var dot = document.getElementById('liveryBadgeDot');
   if (dot) dot.textContent = liveryGetCollected().length;
+  updateCollectRecordDot();
+}
+function updateCollectRecordDot() {
+  var dot = document.getElementById('collectRecordDot');
+  if (dot) dot.textContent = collection.size + liveryGetCollected().length;
+}
+var collectRecordTab = 'all';
+function openCollectRecord() {
+  var el = document.getElementById('collectRecordOverlay');
+  if (!el) return;
+  document.getElementById('collectRecordTitle').textContent = t('collectRecord');
+  document.getElementById('collectRecordSub').textContent = t('collectRecordSub');
+  document.getElementById('collectRecordTabAll').textContent = t('collectRecordTabAll');
+  document.getElementById('collectRecordTabAircraft').textContent = t('collectRecordTabAircraft');
+  document.getElementById('collectRecordTabLivery').textContent = t('collectRecordTabLivery');
+  switchCollectRecordTab('all');
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function closeCollectRecord(e) {
+  if (e && e.target !== e.currentTarget && !(e.target.classList && e.target.classList.contains('quiz-close'))) return;
+  var el = document.getElementById('collectRecordOverlay');
+  if (el) el.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+function switchCollectRecordTab(tab) {
+  collectRecordTab = tab;
+  var tabs = document.querySelectorAll('.collect-record-tab');
+  tabs.forEach(function(btn) { btn.classList.toggle('active', btn.dataset.tab === tab); });
+  renderCollectRecord();
+}
+function collectRecordThumbForAircraft(a) {
+  return '<div class="cr-thumb"><img src="' + proxyUrl(a.image) + '" alt="' + t(a.name) + '" loading="lazy" onerror="this.parentNode.style.background=\'linear-gradient(135deg,#1e3a8a,#7c3aed)\';this.remove()"><span class="cr-type-badge">' + t('collectRecordType') + '</span></div>';
+}
+function collectRecordThumbForLivery(id, idx, lv) {
+  var a = liveryFindAircraft(id);
+  var code = a ? a.code : '';
+  return '<div class="cr-thumb"><img src="' + lv.img + '" alt="' + lv.cn + '" loading="lazy" onerror="this.parentNode.innerHTML=' + "'" + liveryPosterHtml(lv, code).replace(/'/g, "\\'") + "'" + '"><span class="cr-type-badge" style="background:linear-gradient(135deg,' + lv.color + ',#1e3a8a)">' + t('collectRecordLiveryType') + '</span></div>';
+}
+function renderCollectRecord() {
+  var content = document.getElementById('collectRecordContent');
+  if (!content) return;
+  var aircraftItems = [];
+  collection.forEach(function(id) {
+    var a = aircrafts.filter(function(x) { return x.id === id; })[0];
+    if (!a) return;
+    aircraftItems.push(
+      '<div class="collect-record-card">' + collectRecordThumbForAircraft(a) +
+      '<div class="cr-body">' +
+        '<div class="cr-name">' + t(a.name) + ' · ' + (a.code || '') + '</div>' +
+        '<div class="cr-sub">' + a.country + '</div>' +
+        '<div class="cr-actions">' +
+          '<button class="livery-act-btn" onclick="openDetail(' + a.id + ');closeCollectRecord()">' + t('collectRecordTabAircraft') + '</button>' +
+          '<button class="livery-act-btn" onclick="toggleCollect(' + a.id + ')">' + t('collectRecordRemove') + '</button>' +
+        '</div>' +
+      '</div></div>'
+    );
+  });
+  var liveryItems = [];
+  liveryGetCollected().forEach(function(key) {
+    var sp = key.split('-');
+    var id = parseInt(sp[0], 10), idx = parseInt(sp[1], 10);
+    var a = liveryFindAircraft(id);
+    var lv = (LIVERIES[id] || [])[idx];
+    if (!a || !lv || !lv.img) return;
+    liveryItems.push(
+      '<div class="collect-record-card">' + collectRecordThumbForLivery(id, idx, lv) +
+      '<div class="cr-body">' +
+        '<div class="cr-name">' + t(a.name) + ' · ' + lv.cn + '</div>' +
+        '<div class="cr-sub">' + lv.en + ' · ' + lv.cc + '</div>' +
+        '<div class="cr-actions">' +
+          '<button class="livery-act-btn" onclick="openLivery(' + id + ');closeCollectRecord()">' + t('liveryGallery') + '</button>' +
+          '<button class="livery-act-btn" onclick="toggleCollectLivery(' + id + ',' + idx + ')">' + t('collectRecordRemove') + '</button>' +
+        '</div>' +
+      '</div></div>'
+    );
+  });
+  var html;
+  if (collectRecordTab === 'aircraft') {
+    html = aircraftItems.length ? aircraftItems.join('') : '<div class="collect-record-empty">' + t('collectRecordEmptyAircraft') + '</div>';
+  } else if (collectRecordTab === 'livery') {
+    html = liveryItems.length ? liveryItems.join('') : '<div class="collect-record-empty">' + t('collectRecordEmptyLivery') + '</div>';
+  } else {
+    var merged = aircraftItems.concat(liveryItems);
+    html = merged.length ? merged.join('') : '<div class="collect-record-empty">' + t('collectRecordEmpty') + '</div>';
+  }
+  content.innerHTML = html;
 }
 function liveryPosterHtml(lv, code) {
   var logo = liveryLogoOf(lv.al);
@@ -9259,6 +9487,7 @@ function liveryPosterHtml(lv, code) {
 function liveryCardHtml(id, idx, lv) {
   var a = liveryFindAircraft(id);
   var code = a ? a.code : '';
+  var collected = liveryGetCollected().indexOf(liveryKeyOf(id, idx)) !== -1;
   var imgHtml = lv.img
     ? '<img class="livery-card-img" src="' + lv.img + '" alt="' + lv.cn + '" loading="lazy" onerror="this.parentNode.classList.add(\'img-fallback\');this.parentNode.innerHTML=' + "'" + liveryPosterHtml(lv, code).replace(/'/g, "\\'") + "'" + '">'
     : liveryPosterHtml(lv, code);
@@ -9269,6 +9498,10 @@ function liveryCardHtml(id, idx, lv) {
     '<div class="livery-card-info">' +
       '<div class="livery-card-name">' + lv.cn + '</div>' +
       '<div class="livery-card-en">' + lv.en + ' · ' + lv.cc + '</div>' +
+      '<button class="livery-act-btn livery-coll-btn' + (collected ? ' collected' : '') + '" id="livery-btn-' + liveryKeyOf(id, idx) + '" onclick="toggleCollectLivery(' + id + ',' + idx + ')">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' +
+        (collected ? t('liveryCollected') : t('liveryCollect')) +
+      '</button>' +
       '<button class="livery-fold-toggle" onclick="toggleLiveryFold(this)">' + t('liveryFold') + ' ▾</button>' +
       '<div class="livery-fold-body"><div class="livery-note">' + lv.note + '</div></div>' +
     '</div>' +
@@ -9276,7 +9509,9 @@ function liveryCardHtml(id, idx, lv) {
 }
 function openLivery(id) {
   var a = liveryFindAircraft(id);
-  var list = LIVERIES[id] || [];
+  var all = LIVERIES[id] || [];
+  var list = [];
+  all.forEach(function(lv, i) { if (lv.img) list.push({ lv: lv, i: i }); });
   var el = document.getElementById('liveryOverlay');
   if (!el) return;
   document.getElementById('liveryTitle').textContent = a ? t(a.name) : ('#' + id);
@@ -9285,7 +9520,7 @@ function openLivery(id) {
   if (!list.length) {
     content.innerHTML = '<div class="livery-empty">' + t('liveryNoImage') + '</div>';
   } else {
-    content.innerHTML = list.map(function(lv, i) { return liveryCardHtml(id, i, lv); }).join('');
+    content.innerHTML = list.map(function(x) { return liveryCardHtml(id, x.i, x.lv); }).join('');
   }
   var bar = document.getElementById('liveryExportBar');
   if (bar) bar.style.display = 'none';
@@ -9316,10 +9551,11 @@ function toggleCollectLivery(id, idx) {
   liverySaveCollected(list);
   var btn = document.getElementById('livery-btn-' + key);
   if (btn) {
-    btn.textContent = (i !== -1) ? t('liveryCollect') : t('liveryCollected');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' + ((i !== -1) ? t('liveryCollect') : t('liveryCollected'));
     btn.classList.toggle('collected', i === -1);
   }
   liveryUpdateBadge();
+  if (document.getElementById('collectRecordOverlay') && document.getElementById('collectRecordOverlay').classList.contains('visible')) renderCollectRecord();
 }
 function drawLiveryPlane(ctx, cx, cy, w, h, color) {
   ctx.save();
@@ -9414,10 +9650,12 @@ function openLiveryCollection() {
       var id = parseInt(sp[0], 10), idx = parseInt(sp[1], 10);
       var a = liveryFindAircraft(id);
       var lv = (LIVERIES[id] || [])[idx];
-      if (!a || !lv) return '';
+      if (!a || !lv || !lv.img) return '';
+      var collected = liveryGetCollected().indexOf(liveryKeyOf(id, idx)) !== -1;
       return '<div class="livery-coll-card">' +
         '<span class="livery-coll-badge" style="background:' + lv.color + '">' + (a.code || '?') + '</span>' +
         '<div class="livery-coll-info"><div class="livery-coll-name">' + a.name + ' · ' + lv.cn + '</div><div class="livery-coll-sub">' + lv.en + ' · ' + lv.cc + '</div></div>' +
+        '<button class="livery-act-btn livery-coll-btn' + (collected ? ' collected' : '') + '" id="livery-btn-' + liveryKeyOf(id, idx) + '" onclick="toggleCollectLivery(' + id + ',' + idx + ')">' + (collected ? t('liveryCollected') : t('liveryCollect')) + '</button>' +
         '<button class="livery-act-btn" onclick="openLivery(' + id + ')">' + t('liveryGallery') + '</button>' +
       '</div>';
     }).join('');
