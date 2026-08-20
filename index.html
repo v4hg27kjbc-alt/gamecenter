@@ -3118,6 +3118,355 @@ body.light-mode .map-container .leaflet-tile-pane {
 }
 .quiz-close:hover { background: var(--card-bg-hover); color: var(--text); }
 .quiz-close svg { width: 20px; height: 20px; }
+
+/* ===== 涂装画廊 ===== */
+.livery-entry-btn {
+  background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.25)) !important;
+  border-color: rgba(99,102,241,0.4) !important;
+  position: relative;
+  overflow: hidden;
+}
+.livery-entry-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
+  pointer-events: none;
+}
+.livery-entry-btn:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.4)) !important;
+  border-color: rgba(99,102,241,0.6) !important;
+  transform: translateY(-2px);
+}
+.livery-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(4,8,18,0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  animation: liveryFadeIn 0.3s ease;
+}
+.livery-overlay.show, .livery-overlay.visible { display: flex; }
+@keyframes liveryFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.livery-panel {
+  width: min(960px, 100%);
+  max-height: 88vh;
+  background: linear-gradient(160deg, rgba(17,24,39,0.98), rgba(30,27,75,0.96));
+  border: 1px solid rgba(99,102,241,0.3);
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.12);
+  animation: liveryPanelIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes liveryPanelIn {
+  from { opacity: 0; transform: translateY(28px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.livery-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(99,102,241,0.15);
+  flex-shrink: 0;
+}
+.livery-header-title {
+  font-size: 1.15rem; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+}
+.livery-header-title .livery-title-sub { font-size: 0.8rem; color: var(--text-dim); font-weight: 400; }
+.livery-header-actions { display: flex; align-items: center; gap: 8px; }
+.livery-mybtn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+  position: relative;
+}
+.livery-mybtn svg { width: 19px; height: 19px; }
+.livery-mybtn:hover { background: rgba(99,102,241,0.3); color: #c7d2fe; transform: translateY(-1px); }
+.livery-mybtn .livery-badge-dot {
+  position: absolute; top: 4px; right: 4px;
+  min-width: 14px; height: 14px; padding: 0 3px;
+  border-radius: 20px; background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  color: #fff; font-size: 0.62rem; font-weight: 700;
+  display: none; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.livery-mybtn.has-livery .livery-badge-dot { display: flex; }
+.livery-content {
+  padding: 20px 24px 26px;
+  overflow-y: auto;
+  flex: 1;
+}
+.livery-aircraft-title {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 16px;
+}
+.livery-aircraft-title .lv-code { color: #a5b4fc; font-weight: 700; }
+.livery-aircraft-title .lv-desc { font-size: 0.85rem; color: var(--text-dim); }
+.livery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.livery-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(99,102,241,0.18);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  animation: liveryCardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes liveryCardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.livery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(79,70,229,0.25);
+  border-color: rgba(99,102,241,0.45);
+}
+.livery-card-img-wrap {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(150deg, #101a33, #1d1140);
+}
+.livery-card-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.livery-card:hover .livery-card-img { transform: scale(1.06); }
+.livery-card-logo {
+  position: absolute; top: 10px; left: 10px;
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: rgba(8,12,24,0.72);
+  padding: 4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+.livery-card-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+.livery-card-logo-txt {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  font-size: 0.52rem; font-weight: 700; color: #fff;
+  text-align: center; line-height: 1.2; letter-spacing: 0.2px;
+  padding: 1px;
+}
+.livery-poster {
+  width: 100%; height: 100%;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.livery-plane {
+  font-size: 3.2rem; opacity: 0.25;
+  user-select: none;
+  transform: rotate(-5deg);
+}
+.livery-poster-code {
+  position: absolute; bottom: 22px; right: 18px;
+  font-size: 1.6rem; font-weight: 800;
+  color: rgba(255,255,255,0.12);
+  letter-spacing: 3px;
+}
+.livery-poster-cc {
+  position: absolute; bottom: 10px; left: 10px;
+  font-size: 0.68rem; color: #e2e8f0;
+  background: rgba(8,12,24,0.66);
+  padding: 3px 8px; border-radius: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.livery-poster-logo {
+  position: absolute; top: 10px; left: 10px;
+  width: 46px; height: 46px;
+  border-radius: 10px;
+  background: rgba(8,12,24,0.7);
+  padding: 3px;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+.livery-poster-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 7px; }
+.livery-poster-logo-txt {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.56rem; font-weight: 700; color: #fff;
+  text-align: center; line-height: 1.2; letter-spacing: 0.2px;
+}
+.livery-card-country {
+  position: absolute; bottom: 10px; left: 10px;
+  font-size: 0.68rem; color: #e2e8f0;
+  background: rgba(8,12,24,0.66);
+  padding: 3px 8px; border-radius: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.livery-card-body { padding: 12px 14px 14px; }
+.livery-card-info { padding: 12px 14px 14px; }
+.livery-card-name {
+  font-size: 0.98rem; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.livery-card-en {
+  font-size: 0.76rem; color: var(--text-dim);
+  margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.livery-card-name .lv-airline { flex: 1; }
+.livery-card-note {
+  font-size: 0.78rem; color: var(--text-dim);
+  margin-top: 4px; line-height: 1.5;
+}
+.livery-fold-toggle {
+  margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(99,102,241,0.35);
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+  color: #c7d2fe;
+  font-size: 0.76rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.25s ease;
+}
+.livery-fold-toggle::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
+  pointer-events: none;
+}
+.livery-fold-toggle:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35));
+  border-color: rgba(99,102,241,0.55);
+  color: #e0e7ff;
+}
+.livery-fold-toggle svg { position: relative; z-index: 1; width: 14px; height: 14px; transition: transform 0.3s ease; }
+.livery-fold-toggle.open svg { transform: rotate(180deg); }
+.livery-fold-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.livery-fold-body.open { max-height: 200px; }
+.livery-fold-content {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px dashed rgba(99,102,241,0.25);
+  font-size: 0.8rem; color: var(--text-dim);
+  line-height: 1.7;
+}
+.livery-card-actions {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.livery-act-btn {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 7px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(99,102,241,0.35);
+  background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+  color: #c7d2fe;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.livery-act-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
+  pointer-events: none;
+}
+.livery-act-btn svg { position: relative; z-index: 1; }
+.livery-act-btn svg { width: 14px; height: 14px; }
+.livery-act-btn:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.35));
+  border-color: rgba(99,102,241,0.55);
+  color: #e0e7ff;
+  transform: translateY(-1px);
+}
+.livery-act-btn:active { transform: translateY(0); }
+.livery-act-btn.collected {
+  background: linear-gradient(135deg, rgba(21,101,192,0.7), rgba(99,102,241,0.7));
+  border-color: rgba(129,140,248,0.6);
+  color: #fff;
+}
+.livery-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-dim);
+}
+.livery-empty svg { width: 56px; height: 56px; opacity: 0.4; margin-bottom: 14px; }
+/* 收藏汇总弹窗 */
+.livery-collection-list {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px;
+}
+.livery-coll-card {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex; gap: 12px; align-items: center;
+  animation: liveryCardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.livery-coll-thumb {
+  width: 64px; height: 48px; border-radius: 10px; overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(150deg, #101a33, #1d1140);
+}
+.livery-coll-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.livery-coll-info { flex: 1; min-width: 0; }
+.livery-coll-info .lc-name { font-size: 0.85rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.livery-coll-info .lc-airline { font-size: 0.74rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.livery-export-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.livery-export-bar .lv-stat { font-size: 0.82rem; color: var(--text-dim); }
+.livery-export-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(139,92,246,0.3));
+  border: 1px solid rgba(99,102,241,0.45);
+  color: #e0e7ff; font-size: 0.82rem; cursor: pointer;
+  transition: all 0.25s ease;
+}
+.livery-export-btn svg { width: 15px; height: 15px; }
+.livery-export-btn:hover { background: linear-gradient(135deg, rgba(59,130,246,0.5), rgba(139,92,246,0.5)); transform: translateY(-1px); }
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .livery-panel { border-radius: 18px; max-height: 92vh; }
+  .livery-grid { grid-template-columns: 1fr; gap: 12px; }
+  .livery-content { padding: 14px 14px 18px; }
+  .livery-header { padding: 14px 16px; }
+  .livery-collection-list { grid-template-columns: 1fr; }
+}
+.livery-toast {
+  position: fixed; bottom: 60px; left: 50%;
+  background: rgba(30,40,60,0.95); color: #fff; padding: 12px 28px; border-radius: 12px;
+  font-size: 14px; z-index: 99999; backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  opacity: 0; transform: translateX(-50%) translateY(20px); pointer-events: none;
+}
+.livery-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+body.light-mode .livery-toast { background: rgba(255,255,255,0.95); color: #1a1a2e; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+
 .quiz-progress-wrap {
   padding: 12px 24px 4px; max-width: 640px; margin: 0 auto; width: 100%;
   flex-shrink: 0;
@@ -3551,7 +3900,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260818-v40">
+<body data-version="20260820-v41">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -3846,6 +4195,31 @@ body.light-mode .map-container .leaflet-tile-pane {
   <button class="compare-clear" id="clearCompareBtn" onclick="clearCompare()">清除</button>
 </div>
 
+<!-- ===== 涂装画廊弹窗 ===== -->
+<div id="liveryOverlay" class="livery-overlay" onclick="liveryBackdrop(event)">
+  <div class="livery-panel">
+    <div class="livery-header">
+      <div class="livery-header-title">
+        <span id="liveryTitle">涂装画廊</span>
+        <span class="livery-title-sub" id="liveryTitleSub"></span>
+      </div>
+      <div class="livery-header-actions">
+        <button class="livery-mybtn" id="liveryMyBtn" onclick="openLiveryCollection()" title="我的涂装收藏">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span class="livery-badge-dot" id="liveryBadgeDot">0</span>
+        </button>
+        <button class="quiz-close" onclick="closeLivery()" title="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="livery-content" id="liveryContent"></div>
+    <div class="livery-export-bar" id="liveryExportBar" style="display:none">
+      <button class="livery-export-btn" onclick="exportLiveryCollection()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span id="liveryExportBtnText">导出全部收藏</span></button>
+    </div>
+  </div>
+</div>
+
 <div id="overlayContainer"></div>
 
 <script>
@@ -3921,7 +4295,29 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">添加了协议政策</span>',
+    updateBanner: '<span class="banner-highlight">涂装画廊介绍全面升级</span>·84款经典涂装均有50字详介',
+
+    // --- 涂装画廊 ---
+    liveryGallery: '涂装画廊',
+    liveryGallerySub: '同款机型 · 经典航司涂装',
+    liveryMy: '我的涂装收藏',
+    liveryDownload: '下载涂装',
+    liveryCollect: '收藏',
+    liveryCollected: '已收藏',
+    liveryFold: '涂装详情',
+    liveryFoldHide: '收起详情',
+    liveryEmpty: '还没有收藏任何涂装，快去机型详情里逛逛吧！',
+    liveryExport: '导出收藏图',
+    liveryExportAll: '导出全部涂装',
+    liveryExportSuccess: '涂装收藏图已导出',
+    liveryNoImage: '该机型暂未收录涂装数据',
+    liveryCollectSuccess: '已收藏该涂装',
+    liveryUncollectSuccess: '已取消收藏该涂装',
+    liveryDownloadSuccess: '涂装图片已下载',
+    liveryDownloadSuccess: '涂装图片已下载',
+    liveryCollectSuccess: '已收藏涂装',
+    liveryUncollectSuccess: '已取消收藏',
+    liveryNoImage: '经典涂装',
 
     // --- AI 问答 ---
     aiChat: '问 AI',
@@ -4180,7 +4576,25 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Privacy Policy Added</span>',
+    updateBanner: '<span class="banner-highlight">Livery Gallery Details Upgraded</span>',
+
+    // --- Livery Gallery ---
+    liveryGallery: 'Livery Gallery',
+    liveryGallerySub: 'Classic liveries of this aircraft',
+    liveryMy: 'My Liveries',
+    liveryDownload: 'Download',
+    liveryCollect: 'Collect',
+    liveryCollected: 'Collected',
+    liveryFold: 'Details',
+    liveryFoldHide: 'Hide',
+    liveryEmpty: 'No liveries collected yet. Explore aircraft details!',
+    liveryExport: 'Export',
+    liveryExportAll: 'Export All',
+    liveryExportSuccess: 'Livery image exported',
+    liveryDownloadSuccess: 'Livery image downloaded',
+    liveryCollectSuccess: 'Livery collected',
+    liveryUncollectSuccess: 'Livery removed',
+    liveryNoImage: 'Classic Livery',
 
     // --- AI Chat ---
     aiChat: 'Ask AI',
@@ -4485,6 +4899,169 @@ const airlineRoutes = {
   'dl': { hub: 'ATL', routes: [['ATL','AMS'],['ATL','CDG'],['ATL','HND'],['JFK','LHR'],['LAX','SYD']] }
 };
 
+const LIVERIES = {
+  1: [
+    { al: 'ek', cn: '阿联酋航空', en: 'Emirates', cc: '阿联酋', color: '#dc1f2f', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/A6-ADT_A380_Emirates_%288557113059%29.jpg/1280px-A6-ADT_A380_Emirates_%288557113059%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '阿联酋航空拥有全球最大 A380 机队，金色沙丘与阿拉伯书法标志醒目，机尾红白配色取自阿联酋国旗，头等舱还配有机上淋浴间，涂装辨识度极高。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Singapore_Airlines_Airbus_A380_9V-SKL%40ZRH_26_07_2013_6.JPG/1280px-Singapore_Airlines_Airbus_A380_9V-SKL%40ZRH_26_07_2013_6.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '新加坡航空首创头等舱套房概念，深蓝机身配金色飞鸟徽标，象征新加坡城市精神，多次获评全球最佳航司，蓝金涂装经典耐看。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/British_Airways_Airbus_A380-841_F-WWSK_PAS_2013_03_Trent_970_engine.jpg/1280px-British_Airways_Airbus_A380-841_F-WWSK_PAS_2013_03_Trent_970_engine.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '英国航空 A380 采用标志性 Union Flag 尾翼涂装，将英国国旗艺术化融入机尾，机身经典蓝白配色，伦敦希思罗是主要运营基地。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Air_France_A380_F-HPJA.jpg/1280px-Air_France_A380_F-HPJA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 A380 以优雅海魂衫条纹装饰机尾，蓝白红三色点缀机身，延续法式设计美学，被誉为欧洲最优雅的 A380 涂装之一。' },
+    { al: 'lh', cn: '德国汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Lufthansa_A380_D-AIMC.jpg/1280px-Lufthansa_A380_D-AIMC.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空是全球首批 A380 用户之一，机尾深蓝圆环内是金色鸟形标志，机身洁白，德式严谨风格尽显，法兰克福枢纽主力机型。' },
+  ],
+  2: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/United_Airlines%2C_Boeing_787-9_Dreamliner%2C_N35953_-_Haneda.jpg/1280px-United_Airlines%2C_Boeing_787-9_Dreamliner%2C_N35953_-_Haneda.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '美联航是波音 787 启动用户之一，经典蓝色地球涂装享誉全球，机尾地球标志象征全球航线网络，机身白色搭配蓝色字体简洁大方。' },
+    { al: 'nh', cn: '全日空', en: 'ANA', cc: '日本', color: '#0f204b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/All_Nippon_Airways%2C_Boeing_787-9_Dreamliner%2C_JA873A_%2822246790425%29.jpg/1280px-All_Nippon_Airways%2C_Boeing_787-9_Dreamliner%2C_JA873A_%2822246790425%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '全日空 787 曾推出 Inspiration of JAPAN 特别涂装，以日本传统和纸纹样为主题，机身为纯白底色，展现东瀛美学与创新精神。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/British_Airways_Boeing_787-9_G-ZBKF_departing_Boston_March_2025_2.jpg/1280px-British_Airways_Boeing_787-9_G-ZBKF_departing_Boston_March_2025_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '英国航空 787 执飞首条伦敦-奥斯汀航线，延续 Union Flag 尾翼设计，787 是其远程机队现代化的重要成员。' },
+    { al: 'cz', cn: '中国南方航空', en: 'China Southern', cc: '中国', color: '#008bd0', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/B-1128_-_China_Southern_Airlines_-_Boeing_787-9_Dreamliner_-_63982_-_VGHS.jpg/1280px-B-1128_-_China_Southern_Airlines_-_Boeing_787-9_Dreamliner_-_63982_-_VGHS.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国南方航空是中国首家 787 运营商，机尾木棉花标志色彩鲜明，木棉是广州市花，象征南航扎根岭南的独特地域文化。' },
+    { al: 'qr', cn: '卡塔尔航空', en: 'Qatar Airways', cc: '卡塔尔', color: '#5c0679', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A7-BHF_-_Qatar_Airways_-_Boeing_787-9_Dreamliner_-_64209_-_VGHS.jpg/1280px-A7-BHF_-_Qatar_Airways_-_Boeing_787-9_Dreamliner_-_64209_-_VGHS.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '卡塔尔航空 787 涂装以紫红色机尾配金色羚羊标志，奢华大气，Qsuite 商务舱首创者身份让其远程航线备受推崇。' },
+  ],
+  3: [
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Airbus_A350-900_%289V-SHF%29_Singapore_airlines_in_Brisbane_%28BNE%29.jpg/1280px-Airbus_A350-900_%289V-SHF%29_Singapore_airlines_in_Brisbane_%28BNE%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '新加坡航空是全球首发 A350-900 用户，蓝金飞鸟涂装经典，A350 执飞超长航线如新加坡-纽约，是新一代远程旗舰。' },
+    { al: 'qr', cn: '卡塔尔航空', en: 'Qatar Airways', cc: '卡塔尔', color: '#5c0679', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/A7-ALG_Qatar_Airways_Airbus_A350-941_MSN-13.jpg/1280px-A7-ALG_Qatar_Airways_Airbus_A350-941_MSN-13.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '卡塔尔航空是 A350-1000 启动用户，紫红机尾配金色羚羊，标志性涂装辨识度极高，多哈枢纽连接全球六大洲。' },
+    { al: 'cx', cn: '国泰航空', en: 'Cathay Pacific', cc: '中国香港', color: '#006f51', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/B-LRJ_Cathay_Pacific_Airbus_A350-900_%2855077965786%29.jpg/1280px-B-LRJ_Cathay_Pacific_Airbus_A350-900_%2855077965786%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '国泰航空 A350 采用流畅曲线波纹机尾，寓意祥云与飞龙，白底绿字配色清爽，香港基地执飞众多洲际航线。' },
+    { al: 'ay', cn: '芬兰航空', en: 'Finnair', cc: '芬兰', color: '#006a9e', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Finnair%2C_Airbus_A350-900_OH-LWC_NRT_%2830222794141%29.jpg/1280px-Finnair%2C_Airbus_A350-900_OH-LWC_NRT_%2830222794141%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '芬兰航空 A350 涂装以纯白机身配冰蓝机尾，象征芬兰纯净自然，赫尔辛基机场是欧亚最短航线的重要枢纽。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Lufthansa_-_Airbus_A350-941_-_D-AIXE_-_D%C3%BCsseldorf_Airport-1333.jpg/1280px-Lufthansa_-_Airbus_A350-941_-_D-AIXE_-_D%C3%BCsseldorf_Airport-1333.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空拥有欧洲最大 A350 机队，深蓝圆环金色飞鸟涂装经典，A350 是其远程航线低碳化转型的主力机型。' },
+  ],
+  4: [
+    { al: 'ek', cn: '阿联酋航空', en: 'Emirates', cc: '阿联酋', color: '#dc1f2f', img: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Boeing_777-31H%2C_Emirates_AN1633283.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '阿联酋航空 777-300ER 机队规模全球第一，金色沙丘涂装配红白机尾，是迪拜枢纽连接世界的主要运力，商务舱平躺座椅广受好评。' },
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航是波音 777 启动用户之一，蓝色地球涂装经典，777 曾是其跨太平洋航线主力，美式简洁风格。' },
+    { al: 'cx', cn: '国泰航空', en: 'Cathay Pacific', cc: '中国香港', color: '#006f51', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Cathay_Pacific_Boeing_777-200%3B_B-HNL%40HKG.jpg/1280px-Cathay_Pacific_Boeing_777-200%3B_B-HNL%40HKG.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '国泰航空是波音 777 首批用户，流线波纹机尾配绿色标志，777-300ER 是香港出发洲际航线的绝对主力。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Air_France_Boeing_777-300ER_F-GSQM_IAD_VA2.jpg/1280px-Air_France_Boeing_777-300ER_F-GSQM_IAD_VA2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 777-300ER 涂装延续海魂衫条纹机尾，蓝白红三色经典，法航远程旗舰机型，执飞巴黎至全球主要城市。' },
+    { al: 'tk', cn: '土耳其航空', en: 'Turkish Airlines', cc: '土耳其', color: '#6e1f2d', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Turkish_airlines_Boeing_777-300ER.jpg/1280px-Turkish_airlines_Boeing_777-300ER.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '土耳其航空 777-300ER 机尾红白配色鲜明，伊斯坦布尔新机场连接欧亚非三大洲，涂装展现其全球通航国家最多的地位。' },
+  ],
+  5: [
+    { al: 'mu', cn: '中国东方航空', en: 'China Eastern', cc: '中国', color: '#ce1126', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/China_Eastern_Airlines_COMAC_C919_Airplane_B-919A.jpg/1280px-China_Eastern_Airlines_COMAC_C919_Airplane_B-919A.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国东方航空是全球 C919 首发用户，机身以传统祥云纹样点缀，红蓝双色腰线，象征中国大飞机梦，2023 年首航上海-成都。' },
+    { al: 'ca', cn: '中国国际航空', en: 'Air China', cc: '中国', color: '#a6192e', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/20260614_COMAC_C919-100ER_of_Air_China_%28B-919Z%29_taxiing_at_HKG.jpg/1280px-20260614_COMAC_C919-100ER_of_Air_China_%28B-919Z%29_taxiing_at_HKG.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国国际航空 C919 采用凤凰涂装，机尾凤凰展翅寓意吉祥，红金配色醒目，B-919Z 首架交付后执飞北京航线。' },
+    { al: 'cz', cn: '中国南方航空', en: 'China Southern', cc: '中国', color: '#008bd0', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/20250731_COMAC_C919-100STD_of_China_Southern_Airlines_%28B-919J%29_taking-off_from_CGO_01.jpg/1280px-20250731_COMAC_C919-100STD_of_China_Southern_Airlines_%28B-919J%29_taking-off_from_CGO_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国南方航空 C919 以木棉花为涂装主题，木棉是广州市花，红白配色热烈奔放，2025 年交付后投入广州枢纽运营。' },
+    { al: 'hu', cn: '海南航空', en: 'Hainan Airlines', cc: '中国', color: '#dc191b', img: '', note: '海南航空 C919 金鹿涂装标志醒目，机身红黄双色腰线，鹿角标志象征海南热带风情，是国产大飞机海南首秀的担当。' },
+    { al: '3u', cn: '四川航空', en: 'Sichuan Airlines', cc: '中国', color: '#0072bc', img: '', note: '四川航空 C919 熊猫主题涂装萌趣可爱，机身绘有熊猫图案，成都大熊猫之都特色鲜明，川航特色服务闻名全国。' },
+  ],
+  6: [
+    { al: 'ca', cn: '中国国际航空', en: 'Air China', cc: '中国', color: '#a6192e', img: '', note: '中国国际航空 A320neo 涂装以红色凤凰机尾为标志，机身洁白，A320neo 是其国内干支线网络的重要运力补充。' },
+    { al: 'cz', cn: '中国南方航空', en: 'China Southern', cc: '中国', color: '#008bd0', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/%28SGP-Singapore%29_China_Southern_Airlines_Airbus_A320-251N_B-30EZ_%40_WSSS_2026-03-11.jpg/1280px-%28SGP-Singapore%29_China_Southern_Airlines_Airbus_A320-251N_B-30EZ_%40_WSSS_2026-03-11.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国南方航空拥有国内最大 A320neo 机队，木棉花标志色彩鲜明，新机型燃油效率大幅提升，绿色运营典范。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Airbus_A320NEO_Lufthansa_100_Years_-_D-AIND_%28Unna%29.jpg/1280px-Airbus_A320NEO_Lufthansa_100_Years_-_D-AIND_%28Unna%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空是 A320neo 全球首发用户，德式简洁涂装配金色飞鸟机尾，2016 年首架交付，欧洲短途航线主力。' },
+    { al: 'tk', cn: '土耳其航空', en: 'Turkish Airlines', cc: '土耳其', color: '#6e1f2d', img: '', note: '土耳其航空 A320neo 红白机尾涂装鲜明，伊斯坦布尔双机场运营，A320neo 是其中短途航线的主力机型。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Airbus_A320-251N_%28A320neo%29_from_British_Airways_taxiing_to_runway.jpg/1280px-Airbus_A320-251N_%28A320neo%29_from_British_Airways_taxiing_to_runway.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '英国航空 A320neo 延续 Union Flag 尾翼经典涂装，窄体机队主力，执飞欧洲各主要城市航线。' },
+  ],
+  7: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航是 737 MAX 8 美国最大用户，蓝色地球涂装，MAX 系列是其国内航线主力，机队规模达数百架。' },
+    { al: 'cz', cn: '中国南方航空', en: 'China Southern', cc: '中国', color: '#008bd0', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/%28SGP-Singapore%29_China_Southern_Airlines_Boeing_737_MAX_8_B-1126_%40_WSSS_2025-01-27.jpg/1280px-%28SGP-Singapore%29_China_Southern_Airlines_Boeing_737_MAX_8_B-1126_%40_WSSS_2025-01-27.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国南方航空是中国首批 737 MAX 运营商，木棉花标志，MAX 8 投入国内干线运营，节油环保。' },
+    { al: 'tk', cn: '土耳其航空', en: 'Turkish Airlines', cc: '土耳其', color: '#6e1f2d', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Boeing_737-8MAX_of_THY_Turkish_Airlines_at_Birmingham.jpg/1280px-Boeing_737-8MAX_of_THY_Turkish_Airlines_at_Birmingham.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '土耳其航空 737 MAX 欧洲大户，红白涂装，伊斯坦布尔枢纽辐射欧洲数百条航线。' },
+    { al: 'nh', cn: '全日空', en: 'ANA', cc: '日本', color: '#0f204b', img: '', note: '全日空 737 MAX 亚太大户，蓝白涂装简洁，以东京羽田、成田双枢纽运营日本国内及亚洲航线。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: '', note: '英国航空 737 MAX 欧洲用户，Union Flag 尾翼，执飞伦敦至欧洲各城市航线，短途机队主力。' },
+  ],
+  8: [
+    { al: 'ca', cn: '中国国际航空', en: 'Air China', cc: '中国', color: '#a6192e', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Air_China_Airbus_A330-243_B-5933_MUC_2015_01.jpg/1280px-Air_China_Airbus_A330-243_B-5933_MUC_2015_01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国国际航空 A330 中国主力，凤凰机尾红金配色，宽体机执飞国内干线及亚洲区域航线，客舱舒适度高。' },
+    { al: 'mu', cn: '中国东方航空', en: 'China Eastern', cc: '中国', color: '#ce1126', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/China_Eastern_Airbus_A330-200_B-5952_landing_at_Shanghai_Hongqiao_May_2026.jpg/1280px-China_Eastern_Airbus_A330-200_B-5952_landing_at_Shanghai_Hongqiao_May_2026.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国东方航空 A330 宽体主力，红蓝祥云腰线，执飞上海至欧洲澳洲远程航线，机队规模庞大。' },
+    { al: 'cz', cn: '中国南方航空', en: 'China Southern', cc: '中国', color: '#008bd0', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/B-5939_-_China_Southern_Airlines_-_Airbus_A330-323_-_MSN_1494_-_VGHS.jpg/1280px-B-5939_-_China_Southern_Airlines_-_Airbus_A330-323_-_MSN_1494_-_VGHS.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国南方航空 A330 机队规模全球前列，木棉花标志，广州枢纽连接全球，远程航线重要运力。' },
+    { al: 'tk', cn: '土耳其航空', en: 'Turkish Airlines', cc: '土耳其', color: '#6e1f2d', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/TC-JNK_-_Turkish_Airlines_-_Airbus_A330-343_-_MSN_1172_-_HSIA.jpg/1280px-TC-JNK_-_Turkish_Airlines_-_Airbus_A330-343_-_MSN_1172_-_HSIA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '土耳其航空 A330 洲际主力，红白涂装，伊斯坦布尔枢纽连接欧亚非，A330 执飞众多中远程航线。' },
+    { al: 'cx', cn: '国泰航空', en: 'Cathay Pacific', cc: '中国香港', color: '#006f51', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/B-LAE_-_Cathay_Pacific_-_Airbus_A330-342_-_MSN_850_-_VGHS.jpg/1280px-B-LAE_-_Cathay_Pacific_-_Airbus_A330-342_-_MSN_850_-_VGHS.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '国泰航空 A330 区域旗舰，流线波纹涂装，执飞香港至亚洲各主要城市，区域航线主力机型。' },
+  ],
+  9: [
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Embraer_E195_D-AEBF_Bad_F%C3%BCssing_%288239506822%29.jpg/1280px-Embraer_E195_D-AEBF_Bad_F%C3%BCssing_%288239506822%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空 E195 欧洲区域大户，德式简洁涂装，支线网络主力，连接欧洲二线城市与枢纽。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: '', note: '法国航空 E-Jet 欧洲经典，海魂衫条纹机尾，执飞巴黎至欧洲区域航线，支线网络现代化。' },
+    { al: 'ay', cn: '芬兰航空', en: 'Finnair', cc: '芬兰', color: '#006a9e', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Embraer_E190_OH-LKP_of_Finnair_at_Berlin-Tegel_April_2012_%287107753%29.jpg/1280px-Embraer_E190_OH-LKP_of_Finnair_at_Berlin-Tegel_April_2012_%287107753%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '芬兰航空 E-Jet 北极航线，冰蓝机尾，执飞赫尔辛基至北欧及欧洲区域航线，冬季运行经验丰富。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/BRITISH_AIRWAYS_CITYFLYER_EMBRAER_E190_G-LCAB_%2851689032771%29.jpg/1280px-BRITISH_AIRWAYS_CITYFLYER_EMBRAER_E190_G-LCAB_%2851689032771%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '英国航空 Cityflyer 支线，Union Flag 尾翼，伦敦城市机场短跑道运营专家，商务支线定位。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: '', note: '新加坡航空区域支线，蓝金飞鸟涂装，执飞新加坡至东南亚区域航线，短途网络补充。' },
+  ],
+  10: [
+    { al: 'ay', cn: '芬兰航空', en: 'Finnair', cc: '芬兰', color: '#006a9e', img: '', note: '芬兰航空是 A220 启动用户之一，冰蓝机尾纯净涂装，2016 年接收全球首架 A220，北欧区域航线主力。' },
+    { al: 'dl', cn: '达美航空', en: 'Delta Air Lines', cc: '美国', color: '#7b1e3b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Airbus_A220-100_-_Delta_Air_Lines_%28N131DU%29.jpg/1280px-Airbus_A220-100_-_Delta_Air_Lines_%28N131DU%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '达美航空是北美最大 A220 用户，经典红蓝白机尾涂装，A220 执飞美国国内及短程国际航线。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: '', note: '新加坡航空 A220 亚洲运营，蓝金飞鸟涂装，2021 年接收首架，执飞东南亚区域航线。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: '', note: '汉莎航空 A220 欧洲大户，金色飞鸟机尾，瑞士航空执飞，欧洲区域支线现代化。' },
+    { al: 'cx', cn: '国泰航空', en: 'Cathay Pacific', cc: '中国香港', color: '#006f51', img: '', note: '国泰航空 A220 亚洲新贵，流线波纹涂装，2024 年接收首架，执飞香港至亚洲区域航线。' },
+  ],
+  26: [
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Boeing_747-8_Lufthansa_%28D-ABYF_%22Sachsen-Anhalt%22%29.jpg/1280px-Boeing_747-8_Lufthansa_%28D-ABYF_%22Sachsen-Anhalt%22%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空是 747-8 全球最大用户，机队规模达 19 架，金色飞鸟深蓝圆环涂装经典，执飞法兰克福至北美远程航线，747 旗舰地位稳固。' },
+    { al: 'ca', cn: '中国国际航空', en: 'Air China', cc: '中国', color: '#a6192e', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Air_China_Boeing_747-8_%2819379086980%29.jpg/1280px-Air_China_Boeing_747-8_%2819379086980%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '中国国际航空 747-8 VIP 专机，凤凰红金涂装，机号 B-2482 曾执飞领导人专机任务，是国航宽体机队中的旗舰机型。' },
+    { al: 'ek', cn: '阿联酋航空', en: 'Emirates', cc: '阿联酋', color: '#dc1f2f', img: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Boeing_747-47UF-SCD%2C_Emirates_SkyCargo_%28Atlas_Air%29_AN1813839.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '阿联酋航空 747-8F 货机大户，金色沙丘涂装，货机机队运营全球货运航线，迪拜枢纽连接亚欧市场。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Boeing_747_of_British_Airways_at_Hong_Kong_International_Airport.jpg/1280px-Boeing_747_of_British_Airways_at_Hong_Kong_International_Airport.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '英国航空曾订购 747-8 客机但最终取消，保留 Union Flag 经典尾翼，747 曾是其跨大西洋航线老牌主力。' },
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/United_Airlines%2C_Boeing_747-422%2C_N118UA.jpg/1280px-United_Airlines%2C_Boeing_747-422%2C_N118UA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '美联航 747 传统用户，蓝色地球涂装，747 曾是跨太平洋航线主力，现已被 777X 逐步取代。' },
+  ],
+  27: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航是 707-120 全球首发用户，1958 年首航，开启喷气时代，蓝色地球涂装雏形，航空史里程碑。' },
+    { al: 'dl', cn: '达美航空', en: 'Delta Air Lines', cc: '美国', color: '#7b1e3b', img: '', note: '达美航空早期 707 用户，经典红蓝白机尾涂装，1960 年代引进，迈入喷气时代，助力美国国内航线扩张。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/BOAC_Boeing_707-336C_G-AXGX.jpg/1280px-BOAC_Boeing_707-336C_G-AXGX.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '英国航空 707 跨大西洋经典，Union Flag 尾翼，1959 年引进执飞伦敦-纽约航线，喷气时代先驱。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/N90287_Boeing_707-328_Intercontinental_Stansted_03.80_%2851845245775%29.jpg/1280px-N90287_Boeing_707-328_Intercontinental_Stansted_03.80_%2851845245775%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 707 欧洲经典，海魂衫条纹机尾，1960 年引进，执飞巴黎至纽约航线，法式优雅。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: '', note: '新加坡航空 707 亚洲早期用户，蓝金飞鸟涂装，1960 年代引进，奠定新加坡航空国际航线基础。' },
+  ],
+  28: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航 707 跨大西洋经典，蓝色地球涂装，707-320 航程更远，执飞美国至欧洲远程航线，喷气时代主力。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: '', note: '英国航空前身 BOAC 经典涂装，红蓝白三色机尾，707-320 执飞伦敦至全球殖民地航线，英帝国航空标志。' },
+    { al: 'dl', cn: '达美航空', en: 'Delta Air Lines', cc: '美国', color: '#7b1e3b', img: '', note: '达美航空 707 美国经典，红蓝白机尾，707-320 载客量更大，执飞美国国内及跨大西洋航线。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: '', note: '法国航空 707 欧洲经典，蓝白红三色机尾，707-320 执飞巴黎至全球远程航线，法式优雅。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: 'https://upload.wikimedia.org/wikipedia/commons/1/1d/Boeing_707-338C%2C_Singapore_Airlines_Cargo_AN1039810.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '新加坡航空 707 亚洲早期用户，蓝金飞鸟，707-320 执飞新加坡至香港、东京等亚洲航线。' },
+  ],
+  29: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Boeing_727-100_%28United_Airlines%29_%2816279316443%29.jpg/1280px-Boeing_727-100_%28United_Airlines%29_%2816279316443%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '美联航是 727-100 全球首发用户，1964 年接收首架，三发后置 T 尾经典设计，蓝色地球涂装，国内航线主力。' },
+    { al: 'dl', cn: '达美航空', en: 'Delta Air Lines', cc: '美国', color: '#7b1e3b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Delta_Air_Lines_Boeing_727-200_N523DA.jpg/1280px-Delta_Air_Lines_Boeing_727-200_N523DA.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '达美航空 727 经典运营商，红蓝白机尾，727-100 执飞美国国内航线，是 1960 年代美国民航主力机型。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: '', note: '法国航空 727 欧洲用户，海魂衫条纹机尾，执飞欧洲区域航线，三发设计适应短跑道机场。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Lufthansa_Boeing_727-30%3B_N90557%2C_October_1975_BQO_%285288885994%29.jpg/1280px-Lufthansa_Boeing_727-30%3B_N90557%2C_October_1975_BQO_%285288885994%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空 727 欧洲用户，金色飞鸟机尾，执飞欧洲区域航线，德式严谨运营。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: '', note: '英国航空 727 欧洲用户，Union Flag 尾翼，执飞伦敦至欧洲各城市区域航线。' },
+  ],
+  30: [
+    { al: 'dl', cn: '达美航空', en: 'Delta Air Lines', cc: '美国', color: '#7b1e3b', img: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Boeing_727-232-Adv%2C_Delta_Air_Lines_AN0200726.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '达美航空是 727-200 最大用户，机队规模庞大，红蓝白机尾，加长版载客量提升，美国国内干线主力。' },
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航 727-200 重要用户，蓝色地球涂装，加长版机队，执飞美国东西海岸航线。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/9/99/Air_France_Boeing_727-200_Volpati-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '法国航空 727-200 欧洲用户，海魂衫条纹机尾，727-200 执飞巴黎至欧洲区域及北非航线。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Boeing_727-200_Lufthansa_%28FRA%29.jpg/1280px-Boeing_727-200_Lufthansa_%28FRA%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空 727-200 欧洲用户，金色飞鸟，加长版执飞欧洲区域航线，德式运营。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/3/35/BA_%28Comair%29_B727-200_%286354343663%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '英国航空 727-200 欧洲用户，Union Flag 尾翼，执飞欧洲航线，区域网络主力。' },
+  ],
+  31: [
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Boeing_737-100.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '汉莎航空是 737-100 全球首发用户，1967 年接收首架，金色飞鸟机尾，开启全球最畅销窄体机传奇。' },
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/United_Boeing_737-700_N23708_BWI_MD1.jpg/1280px-United_Boeing_737-700_N23708_BWI_MD1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '美联航 737 全球首发伙伴，蓝色地球涂装，与波音合作开发 737，1968 年引进，窄体机队基石。' },
+    { al: 'dl', cn: '达美航空', en: 'Delta Air Lines', cc: '美国', color: '#7b1e3b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Delta_Boeing_737-900ER_N809DN_BWI_MD1.jpg/1280px-Delta_Boeing_737-900ER_N809DN_BWI_MD1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '达美航空 737-100 早期用户，红蓝白机尾，1968 年引进，737 系列助力美国航空网络扩张。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: '', note: '法国航空 737-100 欧洲用户，海魂衫条纹机尾，短途航线灵活运力，欧洲区域运营。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: '', note: '新加坡航空 737-100 亚洲用户，蓝金飞鸟，短途区域航线，东南亚航空网络扩张。' },
+  ],
+  32: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Boeing_737-222%2C_United_Airlines_AN1045540.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '美联航 737-200 早期用户，蓝色地球涂装，加长版载客量提升，1960 年代末美国国内航线主力。' },
+    { al: 'dl', cn: '达美航空', en: 'Delta Air Lines', cc: '美国', color: '#7b1e3b', img: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Boeing_737-2T4-Adv%2C_Delta_Air_Lines_AN0230160.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '达美航空 737-200 经典机队，红蓝白机尾，执飞美国国内航线，737 系列延续运营。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Air_France_Boeing_737-200%3B_F-GBYK%40CDG%3B04.08.1996_%284734048913%29.jpg/1280px-Air_France_Boeing_737-200%3B_F-GBYK%40CDG%3B04.08.1996_%284734048913%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 737-200 欧洲经典，海魂衫条纹机尾，执飞欧洲区域航线，737 系列欧洲推广。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Boeing_737-200_Lufthansa_%28CGN%2C_1980er_Jahre%29.jpg/1280px-Boeing_737-200_Lufthansa_%28CGN%2C_1980er_Jahre%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '汉莎航空 737-200 欧洲经典，金色飞鸟机尾，737-200 执飞欧洲区域航线，德式严谨运营。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: '', note: '新加坡航空 737-200 亚洲早期用户，蓝金飞鸟涂装，1970 年代引进执飞东南亚区域航线，助力新加坡航空网络早期扩张。' },
+  ],
+  33: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Boeing_747-...%2C_United_Airlines_AN0107266.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '美联航是 747-100 全球首发用户，1970 年接收首架，蓝色地球涂装雏形，开启波音 747 改变民航史的喷气时代。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/British_Airways_Boeing_747-100%2C_G-AWND.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '英国航空 747-100 Jumbo Jet 经典，Union Flag 尾翼涂装，1971 年引进执飞伦敦-纽约航线，跨大西洋旗舰。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Air_France_Boeing_747-100_Gilliand.jpg/1280px-Air_France_Boeing_747-100_Gilliand.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 747 欧洲经典，海魂衫条纹机尾，1971 年引进 747-100，执飞巴黎至北美远程航线，欧洲首批 747 用户之一。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: '', note: '汉莎航空 747 欧洲大户，金色飞鸟深蓝圆环涂装，1971 年引进，执飞法兰克福至北美航线，欧洲 747 运营先驱。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/9V-SFO_%2827748896656%29.jpg/1280px-9V-SFO_%2827748896656%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '新加坡航空 747 亚洲经典，蓝金飞鸟涂装，1973 年引进，执飞新加坡至伦敦、悉尼等远程航线，亚洲远程航线开拓者。' },
+  ],
+  34: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Boeing_747-238B%2C_United_Airlines_AN0634286.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '美联航 747-200 跨洋旗舰，蓝色地球涂装，1972 年引进，执飞美国至亚洲跨太平洋航线，航程更远载客更多。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/13aa_-_British_Airways_Boeing_747-200%3B_G-BDXM%40LHR%3B01.02.1998_%288196611385%29.jpg/1280px-13aa_-_British_Airways_Boeing_747-200%3B_G-BDXM%40LHR%3B01.02.1998_%288196611385%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '英国航空早期 747 涂装，Union Flag 尾翼，747-200 执飞伦敦至全球远程航线，1980 年代英航远程机队主力。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/144ep_-_Air_France_Boeing_747-200%2C_F-GCBJ%40CDG%2C10.08.2001_-_Flickr_-_Aero_Icarus.jpg/1280px-144ep_-_Air_France_Boeing_747-200%2C_F-GCBJ%40CDG%2C10.08.2001_-_Flickr_-_Aero_Icarus.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 747-200 欧洲经典，海魂衫条纹机尾，执飞巴黎至纽约、东京等远程航线，法航远程旗舰机型。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: '', note: '汉莎航空 747-200 欧洲大户，金色飞鸟机尾，执飞法兰克福至北美、亚洲远程航线，747 系列忠实用户。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: 'https://upload.wikimedia.org/wikipedia/commons/f/f3/Boeing_747-212B%2C_Singapore_Airlines_AN1040728.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '新加坡航空 747-200 亚洲经典，蓝金飞鸟涂装，执飞新加坡至伦敦、旧金山等超远程航线，亚洲远程运营典范。' },
+  ],
+  35: [
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航是 747SP 全球最大用户，蓝色地球涂装，机身缩短航程超长，执飞跨太平洋不经停航线，1976 年引进。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: '', note: '英国航空曾运营 747SP，Union Flag 尾翼，执飞伦敦至澳洲等超远程航线，短机身特殊构型辨识度高。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/9V-SKM_%288376923713%29_%282%29.jpg/1280px-9V-SKM_%288376923713%29_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '新加坡航空 747SP 环球航线，蓝金飞鸟涂装，1989 年创下新加坡-伦敦环球不停站飞行纪录，航空史经典。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: '', note: '法国航空 747SP 欧洲运营，海魂衫条纹机尾，执飞巴黎至南美等超远程航线，特殊短机身构型。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: '', note: '汉莎航空 747SP 欧洲运营，金色飞鸟机尾，执飞法兰克福至南美超远程航线，747SP 特殊构型。' },
+  ],
+  36: [
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Boeing_747-300_%28Singapore_Airlines%29_12.jpg/1280px-Boeing_747-300_%28Singapore_Airlines%29_12.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '新加坡航空是 747-300 启动用户，蓝金飞鸟涂装，上层客舱加长设计，1983 年接收首架，远程航线旗舰。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: '', note: '英国航空 747-300 运营商，Union Flag 尾翼，执飞伦敦至北美、非洲等远程航线，747 系列主力。' },
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航 747-300 美国用户，蓝色地球涂装，执飞跨太平洋航线，上层加长版载客量更大。' },
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/48ay_-_Air_France_Boeing_747-300%3B_F-GETB%40SXM%3B03.02.1999_%284704887466%29.jpg/1280px-48ay_-_Air_France_Boeing_747-300%3B_F-GETB%40SXM%3B03.02.1999_%284704887466%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 747-300 欧洲用户，海魂衫条纹机尾，执飞巴黎至全球远程航线，747 系列延续。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: '', note: '汉莎航空 747-300 欧洲用户，金色飞鸟机尾，执飞法兰克福远程航线，747 系列忠实用户。' },
+  ],
+  37: [
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Air_France_Airbus_A300B2_Volpati.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '法国航空是 A300 全球首发用户，1974 年接收首架，海魂衫条纹机尾，空客首款机型，开启欧洲双发宽体时代。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Airbus_A300B2-1C%2C_Lufthansa_AN1145377.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '汉莎航空 A300 早期用户，金色飞鸟机尾，1976 年引进，空客在欧洲推广的重要伙伴，德式严谨运营。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: '', note: '英国航空 A300 欧洲经典，Union Flag 尾翼，1980 年代引进，执飞欧洲及中东区域航线，宽体机灵活运用。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: '', note: '新加坡航空 A300 亚洲用户，蓝金飞鸟涂装，执飞新加坡至亚洲区域航线，空客在亚洲早期推广。' },
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航 A300 北美用户，蓝色地球涂装，1983 年引进，执飞美国国内干线，空客首次进入北美市场。' },
+  ],
+  38: [
+    { al: 'af', cn: '法国航空', en: 'Air France', cc: '法国', color: '#002157', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Air_France_Airbus_A300B4-203_F-BVGT_%2825815524052%29.jpg/1280px-Air_France_Airbus_A300B4-203_F-BVGT_%2825815524052%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', note: '法国航空 A300B4 经典运营商，海魂衫条纹机尾，B4 型航程更远载油更多，执飞巴黎至中东、非洲航线。' },
+    { al: 'ba', cn: '英国航空', en: 'British Airways', cc: '英国', color: '#0e2f6b', img: '', note: '英国航空 A300B4 欧洲航线，Union Flag 尾翼，B4 加长航程版本，执飞伦敦至中东区域航线。' },
+    { al: 'lh', cn: '汉莎航空', en: 'Lufthansa', cc: '德国', color: '#f4c900', img: 'https://upload.wikimedia.org/wikipedia/commons/4/49/Airbus_A300B4-2C%2C_Lufthansa_AN0529576.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', note: '汉莎航空 A300B4 欧洲用户，金色飞鸟机尾，B4 型执飞法兰克福至中东、北非航线，空客忠实伙伴。' },
+    { al: 'sq', cn: '新加坡航空', en: 'Singapore Airlines', cc: '新加坡', color: '#f4a700', img: '', note: '新加坡航空 A300B4 亚洲用户，蓝金飞鸟涂装，执飞新加坡至东南亚、东北亚区域航线。' },
+    { al: 'ua', cn: '美联航', en: 'United Airlines', cc: '美国', color: '#002244', img: '', note: '美联航 A300B4 北美用户，蓝色地球涂装，B4 型执飞美国国内及加勒比航线，空客北美早期用户。' },
+  ],
+};
 
 const airlines = {
   'ua': {
@@ -6437,6 +7014,8 @@ function openDetail(id) {
                   onclick="event.stopPropagation();exportSingleAircraft(${a.id})">导出为图片</button>
           <button class="modal-action-btn ai-review-entry-btn"
                   onclick="event.stopPropagation();openAiReview(${a.id})">AI 评</button>
+          <button class="modal-action-btn livery-entry-btn"
+                  onclick="event.stopPropagation();openLivery(${a.id})">涂装画廊</button>
         </div>
         ${airlineCards ? `<div class="airlines-section"><h3>${t('operatingAirlines')}</h3>${airlineCards}</div>` : ''}
         ${renderRelatedSection(a.id)}
@@ -6888,6 +7467,7 @@ window.setLang = function(lang) {
   var newsBtnEl = document.getElementById('newsBtnText');
   if (newsBtnEl) newsBtnEl.textContent = (lang === 'en' ? 'Aviation News' : '航空快讯');
   var kgBtnEl = document.getElementById('kgBtnText'); if (kgBtnEl) kgBtnEl.textContent = (lang === 'en' ? 'AI Knowledge Graph' : 'AI 知识图谱');
+  var liveryMyBtnEl = document.getElementById('liveryMyBtn'); if (liveryMyBtnEl) liveryMyBtnEl.title = (lang === 'en' ? 'My Liveries' : '我的涂装收藏');
   var npTitle = document.querySelector('#newsPanelOverlay .ai-review-title');
   if (npTitle) { var n = npTitle.firstChild; while (n && n.nodeType !== 3) n = n.nextSibling; if (n) n.textContent = (lang === 'en' ? 'Aviation News' : '航空快讯'); }
 };
@@ -8642,6 +9222,260 @@ function badgeDetailBackdrop(e) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeBadgeDetail();
 });
+
+// ===== 机型涂装画廊 =====
+var LIVERY_KEY = 'aviation_liveries';
+function liveryGetCollected() {
+  try { return JSON.parse(localStorage.getItem(LIVERY_KEY) || '[]'); } catch (e) { return []; }
+}
+function liverySaveCollected(list) {
+  try { localStorage.setItem(LIVERY_KEY, JSON.stringify(list)); } catch (e) {}
+}
+function liveryKeyOf(id, idx) { return id + '-' + idx; }
+function liveryFindAircraft(id) {
+  var arr = aircrafts.filter(function(x) { return x.id === id; });
+  return arr.length ? arr[0] : null;
+}
+function liveryLogoOf(al) {
+  var air = airlines[al];
+  return (air && air.logo) ? air.logo : '';
+}
+function liveryUpdateBadge() {
+  var dot = document.getElementById('liveryBadgeDot');
+  if (dot) dot.textContent = liveryGetCollected().length;
+}
+function liveryPosterHtml(lv, code) {
+  var logo = liveryLogoOf(lv.al);
+  var logoHtml = logo
+    ? '<img class="livery-poster-logo" src="' + logo + '" alt="' + lv.cn + '">'
+    : '<div class="livery-poster-logo livery-poster-logo-txt" style="background:' + lv.color + '">' + lv.cn + '</div>';
+  return '<div class="livery-poster" style="background:linear-gradient(135deg,' + lv.color + ' 0%,#0b1220 130%)">' +
+    logoHtml +
+    '<div class="livery-plane">✈</div>' +
+    '<div class="livery-poster-code">' + (code || '') + '</div>' +
+    '<div class="livery-poster-cc">' + lv.cc + '</div>' +
+  '</div>';
+}
+function liveryCardHtml(id, idx, lv) {
+  var a = liveryFindAircraft(id);
+  var code = a ? a.code : '';
+  var imgHtml = lv.img
+    ? '<img class="livery-card-img" src="' + lv.img + '" alt="' + lv.cn + '" loading="lazy" onerror="this.parentNode.classList.add(\'img-fallback\');this.parentNode.innerHTML=' + "'" + liveryPosterHtml(lv, code).replace(/'/g, "\\'") + "'" + '">'
+    : liveryPosterHtml(lv, code);
+  return '<div class="livery-card">' +
+    '<div class="livery-card-img-wrap">' + imgHtml +
+      '<div class="livery-card-logo">' + (liveryLogoOf(lv.al) ? '<img src="' + liveryLogoOf(lv.al) + '" alt="' + lv.cn + '">' : '<span class="livery-card-logo-txt">' + lv.cn + '</span>') + '</div>' +
+    '</div>' +
+    '<div class="livery-card-info">' +
+      '<div class="livery-card-name">' + lv.cn + '</div>' +
+      '<div class="livery-card-en">' + lv.en + ' · ' + lv.cc + '</div>' +
+      '<button class="livery-fold-toggle" onclick="toggleLiveryFold(this)">' + t('liveryFold') + ' ▾</button>' +
+      '<div class="livery-fold-body"><div class="livery-note">' + lv.note + '</div></div>' +
+    '</div>' +
+  '</div>';
+}
+function openLivery(id) {
+  var a = liveryFindAircraft(id);
+  var list = LIVERIES[id] || [];
+  var el = document.getElementById('liveryOverlay');
+  if (!el) return;
+  document.getElementById('liveryTitle').textContent = a ? t(a.name) : ('#' + id);
+  document.getElementById('liveryTitleSub').textContent = t('liveryGallerySub');
+  var content = document.getElementById('liveryContent');
+  if (!list.length) {
+    content.innerHTML = '<div class="livery-empty">' + t('liveryNoImage') + '</div>';
+  } else {
+    content.innerHTML = list.map(function(lv, i) { return liveryCardHtml(id, i, lv); }).join('');
+  }
+  var bar = document.getElementById('liveryExportBar');
+  if (bar) bar.style.display = 'none';
+  liveryUpdateBadge();
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function closeLivery() {
+  var el = document.getElementById('liveryOverlay');
+  if (el) el.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+function liveryBackdrop(e) {
+  if (e.target === e.currentTarget) closeLivery();
+}
+function toggleLiveryFold(btn) {
+  var body = btn.parentNode.querySelector('.livery-fold-body');
+  if (!body) return;
+  var open = body.classList.toggle('open');
+  btn.innerHTML = open ? t('liveryFoldHide') + ' ▴' : t('liveryFold') + ' ▾';
+}
+function toggleCollectLivery(id, idx) {
+  var list = liveryGetCollected();
+  var key = liveryKeyOf(id, idx);
+  var i = list.indexOf(key);
+  if (i !== -1) { list.splice(i, 1); liveryToast(t('liveryUncollectSuccess')); }
+  else { list.push(key); liveryToast(t('liveryCollectSuccess')); }
+  liverySaveCollected(list);
+  var btn = document.getElementById('livery-btn-' + key);
+  if (btn) {
+    btn.textContent = (i !== -1) ? t('liveryCollect') : t('liveryCollected');
+    btn.classList.toggle('collected', i === -1);
+  }
+  liveryUpdateBadge();
+}
+function drawLiveryPlane(ctx, cx, cy, w, h, color) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.fillStyle = color;
+  // 后掠翼（上）
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.15, -h * 0.1);
+  ctx.lineTo(-w * 0.75, -h * 1.35);
+  ctx.lineTo(-w * 0.5, -h * 0.35);
+  ctx.lineTo(-w * 0.2, -h * 0.05);
+  ctx.closePath(); ctx.fill();
+  // 后掠翼（下）
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.15, h * 0.1);
+  ctx.lineTo(-w * 0.75, h * 1.35);
+  ctx.lineTo(-w * 0.5, h * 0.35);
+  ctx.lineTo(-w * 0.2, h * 0.05);
+  ctx.closePath(); ctx.fill();
+  // 尾翼
+  ctx.beginPath();
+  ctx.moveTo(w * 0.5, -h * 0.18);
+  ctx.lineTo(w * 0.92, -h * 1.05);
+  ctx.lineTo(w * 0.98, -h * 0.15);
+  ctx.closePath(); ctx.fill();
+  // 机身
+  ctx.beginPath();
+  ctx.ellipse(0, 0, w, h, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // 机头舷窗点缀
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.55, 0, w * 0.22, h * 0.75, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+function drawLiveryPoster(ctx, x, y, w, h, lv, a) {
+  // 背景
+  var grad = ctx.createLinearGradient(x, y, x + w, y + h);
+  grad.addColorStop(0, lv.color);
+  grad.addColorStop(1, '#0b1220');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, 18);
+  ctx.fill();
+  // 飞机
+  drawLiveryPlane(ctx, x + w * 0.52, y + h * 0.5, w * 0.30, h * 0.16, 'rgba(255,255,255,0.92)');
+  // 航司logo
+  var logo = liveryLogoOf(lv.al);
+  if (logo) {
+    var img = new Image();
+    img.src = logo;
+    try { ctx.drawImage(img, x + 20, y + 18, 64, 64); } catch (e) {}
+  }
+  // 文字
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 30px sans-serif';
+  ctx.fillText(a ? a.name : '', x + 20, y + h - 46);
+  ctx.font = '20px sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fillText(lv.cn + ' · ' + lv.en, x + 20, y + h - 16);
+  ctx.font = 'bold 26px sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.fillText(a ? a.code : '', x + w - 110, y + 48);
+}
+function downloadLivery(id, idx) {
+  var lv = (LIVERIES[id] || [])[idx];
+  if (!lv) return;
+  var a = liveryFindAircraft(id);
+  var canvas = document.createElement('canvas');
+  canvas.width = 800; canvas.height = 560;
+  var ctx = canvas.getContext('2d');
+  drawLiveryPoster(ctx, 20, 20, 760, 520, lv, a);
+  var link = document.createElement('a');
+  link.download = 'livery_' + (a ? a.code : id) + '_' + lv.al + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  liveryToast(t('liveryDownloadSuccess'));
+}
+function openLiveryCollection() {
+  var el = document.getElementById('liveryOverlay');
+  if (!el) return;
+  var list = liveryGetCollected();
+  var content = document.getElementById('liveryContent');
+  document.getElementById('liveryTitle').textContent = t('liveryMy');
+  document.getElementById('liveryTitleSub').textContent = '';
+  if (!list.length) {
+    content.innerHTML = '<div class="livery-empty">' + t('liveryEmpty') + '</div>';
+  } else {
+    content.innerHTML = list.map(function(key) {
+      var sp = key.split('-');
+      var id = parseInt(sp[0], 10), idx = parseInt(sp[1], 10);
+      var a = liveryFindAircraft(id);
+      var lv = (LIVERIES[id] || [])[idx];
+      if (!a || !lv) return '';
+      return '<div class="livery-coll-card">' +
+        '<span class="livery-coll-badge" style="background:' + lv.color + '">' + (a.code || '?') + '</span>' +
+        '<div class="livery-coll-info"><div class="livery-coll-name">' + a.name + ' · ' + lv.cn + '</div><div class="livery-coll-sub">' + lv.en + ' · ' + lv.cc + '</div></div>' +
+        '<button class="livery-act-btn" onclick="openLivery(' + id + ')">' + t('liveryGallery') + '</button>' +
+      '</div>';
+    }).join('');
+  }
+  var bar = document.getElementById('liveryExportBar');
+  if (bar) bar.style.display = list.length ? '' : 'none';
+  liveryUpdateBadge();
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function exportLiveryCollection() {
+  var list = liveryGetCollected();
+  var items = [];
+  list.forEach(function(key) {
+    var sp = key.split('-');
+    var id = parseInt(sp[0], 10), idx = parseInt(sp[1], 10);
+    var a = liveryFindAircraft(id);
+    var lv = (LIVERIES[id] || [])[idx];
+    if (a && lv) items.push({ a: a, lv: lv });
+  });
+  if (!items.length) { liveryToast(t('liveryEmpty')); return; }
+  var canvas = document.createElement('canvas');
+  canvas.width = 800;
+  canvas.height = 100 + items.length * 280;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0b1220';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 34px sans-serif';
+  ctx.fillText(t('liveryMy') + ' · ' + items.length, 40, 62);
+  ctx.font = '18px sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillText('Aviation Collection', 40, 92);
+  items.forEach(function(it, i) {
+    drawLiveryPoster(ctx, 40, 120 + i * 280, 720, 250, it.lv, it.a);
+  });
+  var link = document.createElement('a');
+  link.download = 'my_liveries.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  liveryToast(t('liveryExportSuccess'));
+}
+
+function liveryToast(msg) {
+  var old = document.getElementById('liveryToast');
+  if (old) old.remove();
+  var div = document.createElement('div');
+  div.id = 'liveryToast';
+  div.className = 'livery-toast';
+  div.textContent = msg;
+  document.body.appendChild(div);
+  requestAnimationFrame(function() { div.classList.add('show'); });
+  setTimeout(function() {
+    div.classList.remove('show');
+    setTimeout(function() { if (div.parentNode) div.parentNode.removeChild(div); }, 400);
+  }, 2200);
+}
+
 
 // 页面加载完成后打卡（函数定义块末尾调用，确保 BADGES 等已就绪）
 checkinOnLoad();
