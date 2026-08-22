@@ -2905,6 +2905,182 @@ body.light-mode .map-container .leaflet-tile-pane {
 }
 #aiReviewOverlay.visible { display: flex; }
 
+/* ===== 照片识机全屏面板 ===== */
+#photoAiOverlay {
+  position: fixed; inset: 0; z-index: 9980;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#photoAiOverlay.visible { display: flex; }
+#photoAiOverlay.pa-under { z-index: 50 !important; }
+.pa-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+.pa-title { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 600; color: var(--text); }
+.pa-title-icon { color: var(--accent); display: flex; align-items: center; }
+.pa-close {
+  background: none; border: none; color: var(--text-dim); font-size: 1.8rem;
+  cursor: pointer; line-height: 1; padding: 0 4px; transition: color 0.2s;
+}
+.pa-close:hover { color: var(--text); }
+.pa-content { flex: 1; overflow-y: auto; padding: 24px; max-width: 720px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+.pa-question { margin-bottom: 20px; }
+.pa-q-title { font-size: .88rem; font-weight: 600; color: var(--text-dim); margin-bottom: 10px; letter-spacing: .3px; }
+.pa-opts { display: flex; flex-wrap: wrap; gap: 10px; }
+.pa-opt {
+  position: relative; overflow: hidden;
+  padding: 10px 18px; border-radius: 14px; border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,.04); color: var(--text);
+  cursor: pointer; font-size: .9rem; transition: all .2s; user-select: none;
+}
+.pa-opt:hover { border-color: rgba(99,102,241,.5); transform: translateY(-1px); }
+.pa-opt.selected {
+  background: linear-gradient(135deg, rgba(59,130,246,.28), rgba(139,92,246,.28));
+  border-color: rgba(99,102,241,.65); color: #fff;
+  box-shadow: 0 0 0 1px rgba(99,102,241,.35);
+}
+.pa-start-row { margin-top: 8px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.pa-start-btn {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; color: #fff;
+  padding: 12px 26px; border-radius: 14px; font-size: .95rem; font-weight: 600;
+  cursor: pointer; transition: all .25s; display: flex; align-items: center; gap: 8px;
+  opacity: .45; pointer-events: none; transform: scale(.97);
+}
+.pa-start-btn::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  animation: aiBtnGlow 1.8s ease .5s 1 forwards; pointer-events: none;
+}
+.pa-start-btn.enabled {
+  opacity: 1; pointer-events: auto; transform: scale(1);
+  box-shadow: 0 4px 18px rgba(99,102,241,.4);
+}
+.pa-start-btn.enabled:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.pa-start-hint { font-size: .78rem; color: var(--text-dim); }
+.pa-media { margin-top: 22px; display: none; }
+.pa-media.visible { display: block; }
+.pa-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+.pa-upload-btn, .pa-camera-btn {
+  position: relative; overflow: hidden;
+  padding: 11px 20px; border-radius: 13px; border: 1px solid rgba(99,102,241,.35);
+  background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(139,92,246,.15));
+  color: var(--text); cursor: pointer; font-size: .88rem; display: flex; align-items: center; gap: 7px;
+  transition: all .2s;
+}
+.pa-upload-btn:hover, .pa-camera-btn:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,.28), rgba(139,92,246,.28));
+  transform: translateY(-2px);
+}
+.pa-upload-btn::before, .pa-camera-btn::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+  animation: aiBtnGlow 1.8s ease .5s 1 forwards; pointer-events: none;
+}
+.pa-preview { margin-top: 16px; }
+.pa-preview img { max-width: 100%; max-height: 260px; border-radius: 14px; border: 1px solid var(--glass-border); display: block; }
+.pa-video-wrap { margin-top: 16px; }
+.pa-video-wrap video { width: 100%; max-height: 300px; border-radius: 14px; background: #000; display: block; object-fit: contain; }
+.pa-snap-btn { margin-top: 10px; }
+/* 雷达扫描特效 */
+.pa-radar {
+  display: none; position: relative; width: 150px; height: 150px; margin: 32px auto 0;
+  border-radius: 50%;
+  border: 2px solid rgba(99,102,241,.5);
+  box-shadow: 0 0 30px rgba(99,102,241,.25), inset 0 0 30px rgba(99,102,241,.12);
+  overflow: hidden;
+}
+.pa-radar.visible { display: block; }
+.pa-radar::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,.18) 0%, rgba(139,92,246,.06) 55%, transparent 70%);
+}
+.pa-radar::after {
+  content: ''; position: absolute; top: 50%; left: 50%; width: 70%; height: 70%;
+  transform: translate(-50%,-50%); border-radius: 50%;
+  border: 2px dashed rgba(139,92,246,.5);
+}
+.pa-sweep {
+  position: absolute; top: 50%; left: 50%; width: 50%; height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  transform-origin: left center;
+  animation: paSweep 1.4s linear infinite;
+  box-shadow: 0 0 12px rgba(139,92,246,.8);
+}
+.pa-sweep::before {
+  content: ''; position: absolute; right: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%;
+  background: #a78bfa; box-shadow: 0 0 10px #a78bfa;
+}
+.pa-ping { position: absolute; border-radius: 50%; border: 2px solid rgba(139,92,246,.6); animation: paPing 1.6s ease-out infinite; }
+.pa-ping.p1 { top: 22%; left: 30%; width: 16px; height: 16px; }
+.pa-ping.p2 { top: 55%; left: 60%; width: 10px; height: 10px; animation-delay: .5s; }
+.pa-ping.p3 { top: 70%; left: 38%; width: 22px; height: 22px; animation-delay: .9s; }
+@keyframes paSweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes paPing { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+.pa-analyzing-text { text-align: center; color: var(--text-dim); font-size: .9rem; margin-top: 12px; animation: paBlink 1.2s ease-in-out infinite; }
+@keyframes paBlink { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+/* 结果卡片 */
+.pa-result { margin-top: 20px; display: none; }
+.pa-result.visible { display: block; }
+.pa-result-card {
+  border-radius: 16px; overflow: hidden;
+  background: linear-gradient(135deg, rgba(59,130,246,.12), rgba(139,92,246,.12));
+  border: 1px solid rgba(99,102,241,.35);
+  padding: 16px;
+}
+.pa-result-top { display: flex; gap: 14px; align-items: center; }
+.pa-result-img { width: 96px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); flex-shrink: 0; background: #0d1520; }
+.pa-result-name { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+.pa-result-code { font-size: .8rem; color: var(--accent); margin-top: 2px; }
+.pa-conf { display: inline-block; margin-top: 6px; font-size: .72rem; padding: 3px 9px; border-radius: 999px; background: rgba(139,92,246,.2); color: #c4b5fd; }
+.pa-result-desc { margin-top: 12px; font-size: .86rem; line-height: 1.65; color: var(--text); background: rgba(0,0,0,.18); padding: 10px 12px; border-radius: 10px; }
+.pa-result-reason { margin-top: 10px; font-size: .78rem; color: var(--text-dim); }
+.pa-result-actions { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+.pa-detail-btn {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; color: #fff;
+  padding: 10px 18px; border-radius: 12px; font-size: .88rem; font-weight: 600; cursor: pointer;
+  transition: all .2s;
+}
+.pa-detail-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.pa-detail-btn::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  animation: aiBtnGlow 1.8s ease .5s 1 forwards; pointer-events: none;
+}
+.pa-retry-btn {
+  background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); color: var(--text);
+  padding: 10px 18px; border-radius: 12px; font-size: .88rem; cursor: pointer; transition: all .2s;
+}
+.pa-retry-btn:hover { background: rgba(255,255,255,.13); }
+.pa-cand-list { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.pa-cand-chip {
+  padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(99,102,241,.3);
+  background: rgba(255,255,255,.04); color: var(--text); font-size: .78rem; cursor: pointer; transition: all .2s;
+}
+.pa-cand-chip:hover { background: linear-gradient(135deg, rgba(59,130,246,.25), rgba(139,92,246,.25)); transform: translateY(-1px); }
+.pa-cand-chip.active { background: linear-gradient(135deg, rgba(59,130,246,.35), rgba(139,92,246,.35)); border-color: rgba(129,140,248,.7); color: #fff; }
+.pa-sub-title { margin-top: 14px; font-size: .78rem; color: rgba(255,255,255,.55); }
+.pa-err { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; font-size: .85rem; display: none; }
+/* 照片识机 - 移动端 */
+@media (max-width: 768px) {
+  #photoAiOverlay .pa-header { padding: 12px 14px; }
+  #photoAiOverlay .pa-content { padding: 16px 14px; }
+  .pa-opt { padding: 9px 13px; font-size: .82rem; }
+  .pa-result-top { flex-direction: column; align-items: flex-start; }
+  .pa-result-img { width: 100%; height: 170px; }
+}
+@media (max-width: 480px) {
+  .pa-opts { gap: 8px; }
+  .pa-opt { flex: 1 1 calc(50% - 8px); justify-content: center; text-align: center; }
+  .pa-start-btn { width: 100%; justify-content: center; }
+}
+
 /* ===== AI 知识图谱全屏面板 ===== */
 .kg-overlay {
   position: fixed; inset: 0; z-index: 10002;
@@ -3983,7 +4159,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260822-v43">
+<body data-version="20260822-v45">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4109,6 +4285,7 @@ body.light-mode .collect-record-panel {
     <button class="filter-chip quiz-btn" id="badgeBtn" onclick="openBadges()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.9 4.9l1.4 1.4"/><path d="M17.7 17.7l1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.9 19.1l1.4-1.4"/><path d="M17.7 6.3l1.4-1.4"/></svg><span id="badgeBtnText">成就</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="filter-chip collect-record-btn" id="collectRecordBtn" onclick="openCollectRecord()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21z"/></svg><span id="collectRecordBtnText">收藏记录</span><span class="collect-record-dot" id="collectRecordDot">0</span></button>
+    <button class="filter-chip ai-chat-btn" id="photoAiBtn" onclick="openPhotoAi()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg><span id="photoAiBtnText">照片识机</span></button>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
@@ -4188,6 +4365,64 @@ body.light-mode .collect-record-panel {
         换角度
       </button>
     </div>
+  </div>
+</div>
+
+
+<!-- 照片识机全屏面板 -->
+<div id="photoAiOverlay">
+  <div class="pa-header">
+    <div class="pa-title"><span class="pa-title-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg></span><span id="photoAiTitleText">照片识机 · AI 识别机型</span></div>
+    <button class="pa-close" onclick="closePhotoAi()" title="关闭">&times;</button>
+  </div>
+  <div class="pa-content">
+    <div class="pa-question">
+      <div class="pa-q-title" id="paQ1Title">第 1 题 · 飞机属于哪一类？</div>
+      <div class="pa-opts" id="paQ1Opts">
+        <button class="pa-opt" data-v="civil">民航客机</button>
+        <button class="pa-opt" data-v="fighter">战斗机</button>
+        <button class="pa-opt" data-v="bomber">轰炸机</button>
+        <button class="pa-opt" data-v="transport">运输机</button>
+        <button class="pa-opt" data-v="helicopter">直升机</button>
+      </div>
+    </div>
+    <div class="pa-question">
+      <div class="pa-q-title" id="paQ2Title">第 2 题 · 发动机布局属于哪种？</div>
+      <div class="pa-opts" id="paQ2Opts">
+        <button class="pa-opt" data-v="twin">双发喷气</button>
+        <button class="pa-opt" data-v="tri">三发喷气</button>
+        <button class="pa-opt" data-v="quad">四发喷气</button>
+        <button class="pa-opt" data-v="rotor">旋翼 / 单发</button>
+      </div>
+    </div>
+    <div class="pa-start-row">
+      <button class="pa-start-btn" id="paStartBtn" onclick="paShowMedia()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+        <span id="paStartBtnText">开始识别</span>
+      </button>
+      <span class="pa-start-hint" id="paStartHint">选完两道题后开始</span>
+    </div>
+    <div class="pa-media" id="paMedia">
+      <div class="pa-btns">
+        <button class="pa-upload-btn" onclick="document.getElementById('paFileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 上传照片</button>
+        <button class="pa-camera-btn" id="paCameraBtn" onclick="paOpenCamera()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> 拍照识别</button>
+      </div>
+      <input type="file" id="paFileInput" accept="image/*" style="display:none" onchange="paHandleFile(this)">
+      <div class="pa-preview" id="paPreview" style="display:none"></div>
+      <div class="pa-video-wrap" id="paVideoWrap" style="display:none">
+        <video id="paVideo" autoplay playsinline></video>
+        <button class="pa-upload-btn pa-snap-btn" onclick="paSnap()">📸 拍照并识别</button>
+      </div>
+    </div>
+    <div class="pa-radar" id="paRadar">
+      <div class="pa-sweep"></div>
+      <div class="pa-ping p1"></div>
+      <div class="pa-ping p2"></div>
+      <div class="pa-ping p3"></div>
+    </div>
+    <div class="pa-analyzing-text" id="paAnalyzing" style="display:none">AI 识别中…</div>
+    <div class="pa-result" id="paResult"></div>
+    <div class="pa-err" id="paErr"></div>
   </div>
 </div>
 
@@ -4400,7 +4635,21 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">照片加载大提速</span>·机型/涂装/搜索/Quiz 图片全部走压缩代理，打开即显示',
+    updateBanner: '<span class="banner-highlight">照片识机升级</span>·按外观系列识别更准，子型号一键切换',
+    photoAiTitle: '照片识机 · AI 识别机型',
+    photoAiBtn: '照片识机',
+    photoAiQ1: '第 1 题 · 飞机属于哪一类？',
+    photoAiQ2: '第 2 题 · 发动机布局属于哪种？',
+    photoAiStart: '开始识别',
+    photoAiHint: '选完两道题后开始',
+    photoAiUpload: '上传照片',
+    photoAiCamera: '拍照识别',
+    photoAiAnalyzing: 'AI 识别中…',
+    photoAiResultName: '识别结果',
+    photoAiOpenDetail: '查看机型详情',
+    photoAiRetry: '重新识别',
+    photoAiCand: '不确定？点选最接近的机型：',
+    photoAiErrNetwork: 'AI 识别服务连接失败，请稍后重试',
 
     // --- 涂装画廊 ---
     liveryGallery: '涂装画廊',
@@ -4694,7 +4943,21 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Faster Photo Loading</span> · All images now via compression proxy',
+    updateBanner: '<span class="banner-highlight">Photo AI upgraded</span> · series-level recognition + one-tap variant switch',
+    photoAiTitle: 'Photo AI · Identify Aircraft',
+    photoAiBtn: 'Photo AI',
+    photoAiQ1: 'Q1 · Which category?',
+    photoAiQ2: 'Q2 · Engine layout?',
+    photoAiStart: 'Start',
+    photoAiHint: 'Answer both questions to start',
+    photoAiUpload: 'Upload photo',
+    photoAiCamera: 'Take photo',
+    photoAiAnalyzing: 'AI analyzing…',
+    photoAiResultName: 'Result',
+    photoAiOpenDetail: 'View details',
+    photoAiRetry: 'Try again',
+    photoAiCand: 'Not sure? Pick the closest:',
+    photoAiErrNetwork: 'AI service unreachable, try again later',
 
     // --- Livery Gallery ---
     liveryGallery: 'Livery Gallery',
@@ -7169,6 +7432,11 @@ function closeDetail() {
   // 清除 hash，避免刷新时自动打开
   history.replaceState(null, '', window.location.pathname + window.location.search);
   restoreScrollState();
+  // 若从照片识机进入详情，关闭详情后恢复照片识机面板
+  var paOv = document.getElementById('photoAiOverlay');
+  if (paOv && paOv.classList.contains('pa-under')) {
+    paOv.classList.remove('pa-under');
+  }
 }
 
 document.querySelector('.filter-bar').addEventListener('click', (e) => {
@@ -7249,6 +7517,312 @@ const AI_CONFIG = {
   model: 'glm-4-flash',
   timeout: 15000
 };
+
+// ===== 照片识机 =====
+const PA_ENGINES = {1:4,2:2,3:2,4:2,5:2,6:2,7:2,8:2,9:2,10:2,20:2,21:2,22:4,23:4,24:4,25:0,26:4,27:4,28:4,29:3,30:3,31:2,32:2,33:4,34:4,35:4,36:4,37:2,38:2};
+const PA_CAT_ZH = { civil: '民航客机', fighter: '战斗机', bomber: '轰炸机', transport: '运输机', helicopter: '直升机' };
+const PA_ENG_ZH = { twin: '双发喷气', tri: '三发喷气', quad: '四发喷气', rotor: '旋翼 / 单发' };
+// 外观系列词典：同系列子型号外观几乎无法区分，识别到"系列"级别，子型号由用户手动切换
+const PA_SERIES = [
+  { code: 'A380', name: 'A380', members: [1], feats: '全球最大双层客机，机身圆胖，机翼下四台发动机' },
+  { code: '787', name: '787', members: [2], feats: '宽体双发，机头圆滑带黑色风挡，机翼有弧形小翼' },
+  { code: 'A350', name: 'A350', members: [3], feats: '宽体双发，风挡呈泪滴形，机翼末端独特上翘' },
+  { code: '777', name: '777', members: [4], feats: '宽体双发，发动机特别巨大，机翼平直' },
+  { code: 'C919', name: 'C919', members: [5], feats: '窄体双发，下单翼带小翼' },
+  { code: 'A320', name: 'A320', members: [6], feats: '窄体双发，下单翼带鲨鳍小翼' },
+  { code: '737', name: '737', members: [7, 31, 32], feats: '窄体双发，机头较尖，发动机紧贴机翼下方' },
+  { code: 'A330', name: 'A330', members: [8], feats: '宽体双发，机身粗壮' },
+  { code: 'E195', name: 'E195', members: [9], feats: '窄体双发，T字尾翼，机头圆润' },
+  { code: 'A220', name: 'A220', members: [10], feats: '窄体双发，T字尾翼，机头较尖' },
+  { code: '747', name: '747', members: [26, 33, 34, 35, 36], feats: '机头前部上层有驼峰凸起，四台发动机' },
+  { code: '707', name: '707', members: [27, 28], feats: '早期四发窄体客机，机身细长，翼下四台发动机' },
+  { code: '727', name: '727', members: [29, 30], feats: '三台发动机，T字尾翼，尾根处嵌发动机' },
+  { code: 'A300', name: 'A300', members: [37, 38], feats: '宽体双发，机身细长' },
+  { code: 'F-22', name: 'F-22', members: [20], feats: '隐身战斗机，菱形机翼，双垂尾向外倾斜' },
+  { code: 'J-20', name: 'J-20', members: [21], feats: '鸭式布局，机头前方有小鸭翼' },
+  { code: 'B-2', name: 'B-2', members: [22], feats: '飞翼无尾布局，整体扁平如三角' },
+  { code: 'C-17', name: 'C-17', members: [23], feats: '上单翼运输机，T字尾翼，四台发动机' },
+  { code: 'Y-20', name: 'Y-20', members: [24], feats: '上单翼运输机，T字尾翼，机翼带翼梢小翼' },
+  { code: 'AH-64', name: 'AH-64', members: [25], feats: '武装直升机，旋翼，机头下方球形光电塔' }
+];
+let paState = { q1: null, q2: null, stream: null, candidates: [] };
+
+function openPhotoAi() {
+  document.getElementById('photoAiOverlay').classList.add('visible');
+  paBindOpts();
+  paReset();
+}
+function paBindOpts() {
+  document.querySelectorAll('#paQ1Opts .pa-opt').forEach(function(b) {
+    b.onclick = function() { paSelectOpt(b, 1); };
+  });
+  document.querySelectorAll('#paQ2Opts .pa-opt').forEach(function(b) {
+    b.onclick = function() { paSelectOpt(b, 2); };
+  });
+}
+function closePhotoAi() {
+  document.getElementById('photoAiOverlay').classList.remove('visible');
+  document.getElementById('photoAiOverlay').classList.remove('pa-under');
+  paStopCamera();
+  document.body.style.overflow = '';
+}
+function paReset() {
+  paState = { q1: null, q2: null, stream: null, candidates: [] };
+  document.querySelectorAll('#photoAiOverlay .pa-opt').forEach(function(b) { b.classList.remove('selected'); });
+  document.getElementById('paStartBtn').classList.remove('enabled');
+  document.getElementById('paStartHint').textContent = t('photoAiHint');
+  var media = document.getElementById('paMedia'); media.classList.remove('visible');
+  var preview = document.getElementById('paPreview'); preview.style.display = 'none'; preview.innerHTML = '';
+  document.getElementById('paVideoWrap').style.display = 'none';
+  document.getElementById('paRadar').classList.remove('visible');
+  document.getElementById('paAnalyzing').style.display = 'none';
+  var res = document.getElementById('paResult'); res.classList.remove('visible'); res.innerHTML = '';
+  document.getElementById('paErr').style.display = 'none';
+  paStopCamera();
+}
+function paSelectOpt(btn, q) {
+  var wrap = document.getElementById(q === 1 ? 'paQ1Opts' : 'paQ2Opts');
+  wrap.querySelectorAll('.pa-opt').forEach(function(b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  paState['q' + q] = btn.getAttribute('data-v');
+  paUpdateStart();
+}
+function paUpdateStart() {
+  var ok = !!(paState.q1 && paState.q2);
+  document.getElementById('paStartBtn').classList.toggle('enabled', ok);
+  document.getElementById('paStartHint').textContent = ok ? t('photoAiStart') : t('photoAiHint');
+}
+function paBuildCandidates() {
+  var eng = paState.q2;
+  var need = { twin: 2, tri: 3, quad: 4, rotor: 0 }[eng];
+  return PA_SERIES.filter(function(s) {
+    var first = aircrafts.find(function(a) { return a.id === s.members[0]; });
+    if (!first || first.category !== paState.q1) return false;
+    var e = PA_ENGINES[first.id];
+    if (eng === 'rotor') return e === 0;
+    return e === need;
+  });
+}
+function paShowMedia() {
+  if (!paState.q1 || !paState.q2) return;
+  paState.candidates = paBuildCandidates();
+  document.getElementById('paMedia').classList.add('visible');
+}
+function paHandleFile(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  paStopCamera();
+  document.getElementById('paVideoWrap').style.display = 'none';
+  paCompressImage(file, function(dataUrl) {
+    var pv = document.getElementById('paPreview');
+    pv.innerHTML = '<img src="' + dataUrl + '" alt="待识别照片">';
+    pv.style.display = 'block';
+    paAnalyze(dataUrl);
+  });
+}
+function paOpenCamera() {
+  document.getElementById('paPreview').style.display = 'none';
+  var vw = document.getElementById('paVideoWrap');
+  vw.style.display = 'block';
+  var video = document.getElementById('paVideo');
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function(stream) {
+      paState.stream = stream;
+      video.srcObject = stream;
+      video.play().catch(function() {});
+    }).catch(function() { paShowErr(t('photoAiErrNetwork')); });
+  } else {
+    paShowErr('当前环境不支持摄像头，请改用上传照片');
+  }
+}
+function paStopCamera() {
+  if (paState.stream) {
+    paState.stream.getTracks().forEach(function(t) { t.stop(); });
+    paState.stream = null;
+  }
+  var v = document.getElementById('paVideo'); if (v) v.srcObject = null;
+}
+function paSnap() {
+  var video = document.getElementById('paVideo');
+  if (!video || !video.videoWidth) return;
+  var canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  paStopCamera();
+  document.getElementById('paVideoWrap').style.display = 'none';
+  var pv = document.getElementById('paPreview');
+  pv.innerHTML = '<img src="' + dataUrl + '" alt="待识别照片">';
+  pv.style.display = 'block';
+  paAnalyze(dataUrl);
+}
+function paCompressImage(file, cb) {
+  var img = new Image();
+  var url = URL.createObjectURL(file);
+  img.onload = function() {
+    var MAX = 1024;
+    var w = img.width, h = img.height;
+    if (w > MAX || h > MAX) {
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; }
+    }
+    var canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    URL.revokeObjectURL(url);
+    cb(canvas.toDataURL('image/jpeg', 0.85));
+  };
+  img.onerror = function() { URL.revokeObjectURL(url); paShowErr('图片读取失败，请换一张'); };
+  img.src = url;
+}
+function paAnalyze(dataUrl) {
+  document.getElementById('paRadar').classList.add('visible');
+  document.getElementById('paAnalyzing').style.display = 'block';
+  document.getElementById('paErr').style.display = 'none';
+  var res = document.getElementById('paResult'); res.classList.remove('visible');
+  var cands = paState.candidates && paState.candidates.length ? paState.candidates : PA_SERIES.slice();
+  paCallAI(dataUrl, cands).then(function(json) {
+    document.getElementById('paRadar').classList.remove('visible');
+    document.getElementById('paAnalyzing').style.display = 'none';
+    paRenderResult(json, cands);
+  }).catch(function() {
+    document.getElementById('paRadar').classList.remove('visible');
+    document.getElementById('paAnalyzing').style.display = 'none';
+    paShowErr(t('photoAiErrNetwork'));
+  });
+}
+function paCallAI(dataUrl, cands) {
+  var listStr = cands.map(function(s, i) {
+    var names = s.members.map(function(id) {
+      var a = aircrafts.find(function(x) { return x.id === id; });
+      return a ? a.code : '';
+    }).join(' / ');
+    return '[' + (i + 1) + '] ' + s.name + '（包含: ' + names + '）外观特征: ' + s.feats;
+  }).join('\n');
+  var prompt = '你是飞机型号识别专家。用户上传了一张飞机照片，请从下面候选系列中选出最匹配的系列，并尽可能判断具体子型号。候选系列列表（只允许从这些里面选）:\n' + listStr + '\n请严格只输出 JSON（不要输出任何其他内容）: {"series": 系列编号, "sub": 子型号编号, "reason": "一句话识别依据", "confidence": 0-100的置信度整数}。要求：1) series 必须是候选系列中方括号里的编号；2) sub 是该系列内具体子型号的编号（即"包含:"括号里的编号，不确定就填 0）；3) reason 用中文一句话，必须引用图片中真实可见的外观特征（发动机数量与位置、机翼形状、尾翼布局、机头形状等）；4) 若照片完全无法判断，输出 {"series": 0, "sub": 0, "reason": "无法确定", "confidence": 0}。';
+  var body = {
+    model: 'glm-4v-flash',
+    messages: [
+      { role: 'system', content: '你是专业飞机识别助手，擅长依据外观特征（发动机数量/位置、机翼、尾翼、机头）判断机型。' },
+      { role: 'user', content: [ { type: 'text', text: prompt }, { type: 'image_url', image_url: { url: dataUrl } } ] }
+    ],
+    temperature: 0.2,
+    max_tokens: 300
+  };
+  return fetch(AI_CONFIG.endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout((AI_CONFIG.timeout || 15000) + 10000)
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    var text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+    var m = text.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('bad response');
+    var json = JSON.parse(m[0]);
+    if (typeof json.series === 'string') json.series = parseInt(json.series, 10) || 0;
+    if (typeof json.sub === 'string' && json.sub.trim()) {
+      var subCode = json.sub.trim();
+      var foundId = 0;
+      cands.forEach(function(s) {
+        s.members.forEach(function(id) {
+          var a = aircrafts.find(function(x) { return x.id === id; });
+          if (a && (a.code === subCode || t(a.name) === subCode || subCode.indexOf(a.code) >= 0 || a.code.indexOf(subCode) >= 0)) foundId = id;
+        });
+      });
+      json.sub = foundId;
+    } else {
+      json.sub = parseInt(json.sub, 10) || 0;
+    }
+    json.confidence = parseInt(json.confidence, 10) || 0;
+    return json;
+  });
+}
+function paRenderResult(json, cands) {
+  var res = document.getElementById('paResult');
+  var series = null;
+  if (json && json.series) {
+    var idx = parseInt(json.series, 10);
+    series = (cands && cands[idx - 1]) || null;
+  }
+  if (!series) {
+    var chips = cands.slice(0, 8).map(function(s) {
+      return '<button class="pa-cand-chip" onclick="paPickSeries(\'' + s.code + '\')">' + s.name + '</button>';
+    }).join('');
+    res.innerHTML = '<div class="pa-result-card"><div class="pa-result-name" style="margin-bottom:8px">🤔 AI 无法确定机型</div>' +
+      '<div class="pa-result-desc">' + t('photoAiCand') + '</div><div class="pa-cand-list">' + chips + '</div></div>';
+  } else {
+    var targetId = series.members[0];
+    if (json && json.sub) {
+      var subId = parseInt(json.sub, 10);
+      if (series.members.indexOf(subId) >= 0) targetId = subId;
+    }
+    paRenderSeriesCard(series, targetId, 'AI 识别匹配', json && json.reason, json && json.confidence);
+    setTimeout(function() { paOpenDetail(targetId); }, 600);
+  }
+  res.classList.add('visible');
+}
+function paRenderSeriesCard(series, targetId, tag, reason, confidence) {
+  var a = aircrafts.find(function(x) { return x.id === targetId; });
+  if (!a) return;
+  var res = document.getElementById('paResult');
+  var imgSrc = a.image ? proxyUrl(a.image) : '';
+  var chips = '';
+  if (series && series.members && series.members.length > 1) {
+    chips = '<div class="pa-sub-title">该系列共 ' + series.members.length + ' 款，可切换：</div><div class="pa-cand-list">' +
+      series.members.map(function(id) {
+        var m = aircrafts.find(function(x) { return x.id === id; });
+        if (!m) return '';
+        var cls = id === targetId ? 'pa-cand-chip active' : 'pa-cand-chip';
+        return '<button class="' + cls + '" onclick="paPickManual(' + id + ')">' + m.code + '</button>';
+      }).join('') + '</div>';
+  }
+  res.innerHTML = '<div class="pa-result-card">' +
+    '<div class="pa-result-top">' +
+      (imgSrc ? '<img class="pa-result-img" src="' + imgSrc + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+      '<div><div class="pa-result-name">' + t(a.name) + '</div>' +
+      '<div class="pa-result-code">' + a.code + ' · ' + a.country + '</div>' +
+      '<span class="pa-conf">' + tag + (confidence ? ' · ' + confidence + '%' : '') + '</span></div>' +
+    '</div>' +
+    '<div class="pa-result-desc">' + paShortDesc(t(a.desc), 50) + '</div>' +
+    (reason ? '<div class="pa-result-reason">识别依据：' + reason + '</div>' : '') +
+    chips +
+    '<div class="pa-result-actions">' +
+      '<button class="pa-detail-btn" onclick="paOpenDetail(' + a.id + ')">' + t('photoAiOpenDetail') + '</button>' +
+      '<button class="pa-retry-btn" onclick="paRetry()">' + t('photoAiRetry') + '</button>' +
+    '</div></div>';
+}
+function paShortDesc(text, n) {
+  if (!text) return '';
+  var clean = String(text).replace(/\s+/g, ' ').trim();
+  if (clean.length <= n) return clean;
+  return clean.slice(0, n) + '…';
+}
+function paOpenDetail(id) {
+  document.getElementById('photoAiOverlay').classList.add('pa-under');
+  openDetail(id);
+}
+function paPickManual(id) {
+  var a = aircrafts.find(function(x) { return x.id === id; });
+  if (!a) return;
+  var series = PA_SERIES.find(function(s) { return s.members.indexOf(id) >= 0; }) || { members: [id] };
+  paRenderSeriesCard(series, id, '手动确认');
+  setTimeout(function() { paOpenDetail(id); }, 600);
+}
+function paPickSeries(code) {
+  var s = PA_SERIES.find(function(x) { return x.code === code; });
+  if (!s || !s.members.length) return;
+  var id = s.members[0];
+  paRenderSeriesCard(s, id, '手动确认');
+  setTimeout(function() { paOpenDetail(id); }, 600);
+}
+function paRetry() {
+  var res = document.getElementById('paResult'); res.classList.remove('visible'); res.innerHTML = '';
+  document.getElementById('photoAiOverlay').classList.remove('pa-under');
+  document.getElementById('paMedia').classList.add('visible');
+}
+function paShowErr(msg) {
+  var err = document.getElementById('paErr');
+  err.textContent = msg; err.style.display = 'block';
+}
 const NEWS_FEEDS = [
   'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fsimpleflying.com%2Ffeed',
   'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Faviationweek.com%2Frss.xml'
@@ -7603,6 +8177,12 @@ window.setLang = function(lang) {
   var liveryMyBtnEl = document.getElementById('liveryMyBtn'); if (liveryMyBtnEl) liveryMyBtnEl.title = (lang === 'en' ? 'My Liveries' : '我的涂装收藏');
   var npTitle = document.querySelector('#newsPanelOverlay .ai-review-title');
   if (npTitle) { var n = npTitle.firstChild; while (n && n.nodeType !== 3) n = n.nextSibling; if (n) n.textContent = (lang === 'en' ? 'Aviation News' : '航空快讯'); }
+  var paBtnEl = document.getElementById('photoAiBtnText'); if (paBtnEl) paBtnEl.textContent = t('photoAiBtn');
+  var paTitleEl = document.getElementById('photoAiTitleText'); if (paTitleEl) paTitleEl.textContent = t('photoAiTitle');
+  var paQ1El = document.getElementById('paQ1Title'); if (paQ1El) paQ1El.textContent = t('photoAiQ1');
+  var paQ2El = document.getElementById('paQ2Title'); if (paQ2El) paQ2El.textContent = t('photoAiQ2');
+  var paStartEl = document.getElementById('paStartBtnText'); if (paStartEl) paStartEl.textContent = t('photoAiStart');
+  var paHintEl = document.getElementById('paStartHint'); if (paHintEl) paHintEl.textContent = t('photoAiHint');
 };
 
 // ===== Hero Banner 轮播 =====
