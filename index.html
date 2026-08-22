@@ -3983,7 +3983,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260820-v42">
+<body data-version="20260822-v43">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4400,7 +4400,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">收藏记录全新上线</span>·机型与涂装收藏统一管理，无照片涂装已优化',
+    updateBanner: '<span class="banner-highlight">照片加载大提速</span>·机型/涂装/搜索/Quiz 图片全部走压缩代理，打开即显示',
 
     // --- 涂装画廊 ---
     liveryGallery: '涂装画廊',
@@ -4694,7 +4694,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Collection Record & Livery Gallery Upgraded</span>',
+    updateBanner: '<span class="banner-highlight">Faster Photo Loading</span> · All images now via compression proxy',
 
     // --- Livery Gallery ---
     liveryGallery: 'Livery Gallery',
@@ -6634,7 +6634,7 @@ function showSuggestions(query) {
   for (var j = 0; j < matches.length; j++) {
     var a = matches[j];
     html += '<div class="suggestion-item" data-id="' + a.id + '">' +
-      '<img class="suggestion-thumb" src="' + a.image + '" alt="">' +
+      '<img class="suggestion-thumb" src="' + proxyUrl(a.image) + '" alt="" onerror="this.style.display=\'none\'">' +
       '<div class="suggestion-info">' +
       '<span class="suggestion-name">' + t(a.name) + '</span>' +
       '<span class="suggestion-code">' + a.code + '</span>' +
@@ -9161,7 +9161,7 @@ function renderQuizQuestion() {
   }).join('');
   content.innerHTML =
     typeLabel +
-    '<img class="quiz-img" src="' + q.aircraft.image + '" alt="机型图片" loading="lazy">' +
+    '<img class="quiz-img" src="' + proxyUrl(q.aircraft.image) + '" alt="机型图片" onerror="this.style.display=\'none\'">' +
     '<div class="quiz-question-text">' + questionText + '</div>' +
     '<div class="quiz-options">' + optionHtml + '</div>' +
     '<div class="quiz-feedback" id="quizFeedback"></div>';
@@ -9418,10 +9418,18 @@ function switchCollectRecordTab(tab) {
 function collectRecordThumbForAircraft(a) {
   return '<div class="cr-thumb"><img src="' + proxyUrl(a.image) + '" alt="' + t(a.name) + '" loading="lazy" onerror="this.parentNode.style.background=\'linear-gradient(135deg,#1e3a8a,#7c3aed)\';this.remove()"><span class="cr-type-badge">' + t('collectRecordType') + '</span></div>';
 }
+function liveryImgFallback(el, id, idx) {
+  var lv = (LIVERIES[id] || [])[idx];
+  var a = liveryFindAircraft(id);
+  var code = a ? a.code : '';
+  if (!lv || !el || !el.parentNode) return;
+  el.parentNode.classList.add('img-fallback');
+  el.parentNode.innerHTML = liveryPosterHtml(lv, code);
+}
 function collectRecordThumbForLivery(id, idx, lv) {
   var a = liveryFindAircraft(id);
   var code = a ? a.code : '';
-  return '<div class="cr-thumb"><img src="' + lv.img + '" alt="' + lv.cn + '" loading="lazy" onerror="this.parentNode.innerHTML=' + "'" + liveryPosterHtml(lv, code).replace(/'/g, "\\'") + "'" + '"><span class="cr-type-badge" style="background:linear-gradient(135deg,' + lv.color + ',#1e3a8a)">' + t('collectRecordLiveryType') + '</span></div>';
+  return '<div class="cr-thumb"><img src="' + proxyUrl(lv.img) + '" alt="' + lv.cn + '" onerror="liveryImgFallback(this,' + id + ',' + idx + ')"><span class="cr-type-badge" style="background:linear-gradient(135deg,' + lv.color + ',#1e3a8a)">' + t('collectRecordLiveryType') + '</span></div>';
 }
 function renderCollectRecord() {
   var content = document.getElementById('collectRecordContent');
@@ -9489,7 +9497,7 @@ function liveryCardHtml(id, idx, lv) {
   var code = a ? a.code : '';
   var collected = liveryGetCollected().indexOf(liveryKeyOf(id, idx)) !== -1;
   var imgHtml = lv.img
-    ? '<img class="livery-card-img" src="' + lv.img + '" alt="' + lv.cn + '" loading="lazy" onerror="this.parentNode.classList.add(\'img-fallback\');this.parentNode.innerHTML=' + "'" + liveryPosterHtml(lv, code).replace(/'/g, "\\'") + "'" + '">'
+    ? '<img class="livery-card-img" src="' + proxyUrl(lv.img) + '" alt="' + lv.cn + '" onerror="liveryImgFallback(this,' + id + ',' + idx + ')">'
     : liveryPosterHtml(lv, code);
   return '<div class="livery-card">' +
     '<div class="livery-card-img-wrap">' + imgHtml +
