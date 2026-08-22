@@ -4159,7 +4159,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260822-v45">
+<body data-version="20260822-v47">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4635,7 +4635,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">照片识机升级</span>·按外观系列识别更准，子型号一键切换',
+    updateBanner: '<span class="banner-highlight">AI 超时修复</span>·问答与快讯总结超时放宽至 45 秒',
     photoAiTitle: '照片识机 · AI 识别机型',
     photoAiBtn: '照片识机',
     photoAiQ1: '第 1 题 · 飞机属于哪一类？',
@@ -4943,7 +4943,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Privacy policy updated</span> · Photo AI vision recognition details added',
+    updateBanner: '<span class="banner-highlight">AI timeout fixed</span> · Q&A & news summary timeout extended to 45s',
     photoAiTitle: 'Photo AI · Identify Aircraft',
     photoAiBtn: 'Photo AI',
     photoAiQ1: 'Q1 · Which category?',
@@ -7515,7 +7515,7 @@ const AI_CONFIG = {
   endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
   apiKey: '7ff9b790806a4b76a3ac3459aa27c9c3.zxxRjE1sdwBTvPVO',
   model: 'glm-4-flash',
-  timeout: 15000
+  timeout: 45000
 };
 
 // ===== 照片识机 =====
@@ -10516,7 +10516,7 @@ async function generateNewsSummaryInPanel() {
   var prompt = '以下是今日民航航空新闻标题，请写一篇约' + wordCount + '字的航空新闻综合摘要，按主题归类，直接陈述事实不要开场白和结束语，不要称呼观众，单纯输出内容，自然段落不要列点序号。\n\n' + titles;
   var systemPrompt = '你是资深航空编辑。用中文输出约' + wordCount + '字的航空新闻综合摘要，直接讲内容，不要任何寒暄或情感表达，段落形式流畅自然，不列点。';
   var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, 20000);
+  var timeoutId = setTimeout(function() { controller.abort(); }, 45000);
   try {
     var response = await fetch(AI_CONFIG.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey }, body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }], max_tokens: Math.max(wordCount * 3, 800), temperature: 0.6 }), signal: controller.signal });
     clearTimeout(timeoutId);
