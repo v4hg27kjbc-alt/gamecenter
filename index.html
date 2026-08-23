@@ -1473,6 +1473,32 @@ body.light-mode .airline-name { color: #1a1a2e; }
 .modal-body h2 { font-size: 1.7rem; color: #fff; margin-bottom: 3px; }
 .modal-code { color: var(--accent); font-size: 0.82rem; letter-spacing: 2px; margin-bottom: 14px; }
 .modal-desc { color: #ccc; line-height: 1.75; font-size: 0.93rem; margin-bottom: 20px; }
+.baike-section {
+  margin: 0 0 22px 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+.baike-head { margin: 0 0 8px 0; font-size: 1rem; color: #fff; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+.baike-head::before { content: '📖'; font-size: 0.95rem; }
+.baike-item { border-top: 1px dashed rgba(255,255,255,0.1); }
+.baike-item:first-of-type { border-top: none; }
+.baike-item summary {
+  cursor: pointer; padding: 11px 0 9px; font-size: 0.92rem; color: #90caf9;
+  list-style: none; display: flex; align-items: center; gap: 8px; user-select: none;
+}
+.baike-item summary::before { content: '▸'; color: #64b5f6; transition: transform 0.25s ease; font-size: 0.85rem; }
+.baike-item[open] summary::before { transform: rotate(90deg); }
+.baike-item summary::-webkit-details-marker { display: none; }
+.baike-item summary:hover { color: #64b5f6; }
+.baike-item p { margin: 0 0 12px 0; font-size: 0.86rem; line-height: 1.8; color: #c9d4e3; }
+body.light-mode .baike-section { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+body.light-mode .baike-head { color: #1a1a2e; }
+body.light-mode .baike-item { border-top-color: rgba(0,0,0,0.1); }
+body.light-mode .baike-item summary { color: #1565c0; }
+body.light-mode .baike-item summary::before { color: #1565c0; }
+body.light-mode .baike-item p { color: #444; }
 .modal-specs {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px;
 }
@@ -4159,7 +4185,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260822-v47">
+<body data-version="20260823-v48">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -5803,6 +5829,155 @@ const aircraftSlugs = {
 27: '707-120', 28: '707-320', 29: '727-100', 30: '727-200', 31: '737-100', 32: '737-200', 33: '747-100', 34: '747-200', 35: '747-sp', 36: '747-300', 37: 'a300b2', 38: 'a300b4', };
 aircrafts.forEach(a => { a.slug = aircraftSlugs[a.id] || ''; });
 
+const AIRCRAFT_BAIKE = {
+  1: {
+    history: { zh: "空客A380的研发始于20世纪90年代初，为挑战波音747在超大型客机市场的垄断地位，空客于1994年启动A3XX项目。2000年12月项目正式启动，2005年4月27日首飞，2007年10月25日由新加坡航空投入商业运营。项目研发成本一度超支至250亿美元，是航空史上最昂贵的民用飞机项目之一。", en: "Airbus started the A3XX project in 1994 to challenge the Boeing 747 in the very-large-aircraft market. The program launched in December 2000, first flew on 27 April 2005, and entered service with Singapore Airlines on 25 October 2007. Development costs ballooned to about USD 25 billion, making it one of the most expensive civil aircraft programs ever." },
+    tech: { zh: "A380是全球最大的双层、双通道客机，全机长约73米，翼展79.75米。采用四发设计，可选配罗尔斯·罗伊斯遄达900或发动机联盟GP7200。机身大量使用GLARE铝锂层板与碳纤维复合材料，客舱配备全功能双层结构，标准三舱可载525人，高密度布局理论可超850人，航程达1.52万公里，可直飞悉尼至伦敦等超远程航线。", en: "The A380 is the world's largest double-deck, twin-aisle airliner, about 73 m long with a 79.75 m wingspan. Powered by four engines (Rolls-Royce Trent 900 or Engine Alliance GP7200), it makes extensive use of GLARE laminates and carbon-fibre composites. Typical three-class seating is 525, with high-density layouts over 850; its 15,200 km range allows nonstop flights such as Sydney-London." },
+    trivia: { zh: "A380的机翼在设计时曾进行\"水毁测试\"：为验证机翼强度，工程师将机翼加载到极限的154%后整体断裂，试验数据帮助其成为首款获得\"延展式\"大角度俯冲认证的客机。由于销量未达预期，空客于2019年宣布2021年停产A380，但阿联酋航空至今仍是其最大用户。", en: "During certification, Airbus bent an A380 wing to 154% of ultimate load until it broke, proving the design and helping the jet become the first airliner certified for \"extended\" steep-descent operations. Sales fell short of expectations, so Airbus announced in 2019 that production would end in 2021; Emirates remains its biggest operator." },
+  },
+  2: {
+    history: { zh: "波音787\"梦想客机\"项目于2003年启动，最初名为7E7。波音希望通过数字化设计革命重塑客机制造流程，2009年12月15日首飞，2011年9月26日交付全日空投入运营。787-9是787系列的加长版，2013年首飞，2014年投入服务，主打航程与载客量的平衡。", en: "Boeing launched the 787 Dreamliner program (originally 7E7) in 2003 to revolutionise airliner production with digital design. It first flew on 15 December 2009 and entered service with All Nippon Airways on 26 September 2011. The stretched 787-9 first flew in 2013 and entered service in 2014, balancing capacity and range." },
+    tech: { zh: "787机身与机翼约50%采用碳纤维增强复合材料，是首款以复合材料为主体的干线客机，比同尺寸金属客机节油约20%。配备电致变色智能舷窗（无遮光板）、更高客舱湿度与更低舱压（1800米等效高度），大幅缓解长途飞行疲劳。787-9标准三舱载290人，航程达1.41万公里，可覆盖上海至纽约直飞。", en: "About 50% of the 787's airframe by weight is carbon-fibre reinforced plastic, making it the first composite-primary mainline airliner and about 20% more fuel-efficient than metal jets of similar size. It features electrochromic dimmable windows, higher cabin humidity and a lower cabin altitude (1,800 m equivalent), reducing jet lag. The 787-9 seats about 290 in three classes and flies up to 14,140 km." },
+    trivia: { zh: "787在研制中一度遭遇锂电池过热问题，2013年1月全球停飞三个月，波音随后重新设计了电池系统。首架787原型机ZA001由全日空涂装，而波音在埃弗雷特工厂的\"梦幻客机\"总装线曾以三架并行移动装配闻名，总装时间从初期的21天压缩至11天。", en: "The 787 was grounded worldwide for three months in early 2013 after lithium-ion battery incidents; Boeing redesigned the battery system before flights resumed. The first prototype ZA001 wore ANA livery, and Boeing's Everett line pioneered moving three-aircraft parallel assembly, cutting final assembly time from 21 days initially to about 11." },
+  },
+  3: {
+    history: { zh: "A350是空客为应对波音787与777的挑战而启动的全新宽体项目。空客最初曾计划在A330基础上小幅改进，后在客户强烈要求下于2006年彻底重新设计为全新机型。A350-900于2013年6月14日首飞，2015年1月交付卡塔尔航空投入运营。", en: "The A350 was Airbus's answer to the Boeing 787 and 777. Originally a modest A330 derivative, it was completely redesigned in 2006 after customer pressure. The A350-900 first flew on 14 June 2013 and entered service with Qatar Airways in January 2015." },
+    tech: { zh: "A350机身与机翼大量使用碳纤维增强复合材料，占比超过53%，是空客首款复合材料翼盒客机。搭载罗尔斯·罗伊斯遄达XWB发动机，这是全球推力最大的航空发动机之一（推力高达9.7万磅）。A350-900标准三舱载325人，航程达1.5万公里。其客舱配备更大的舷窗和先进的机舱压力系统，巡航高度客舱等效海拔仅1800米。", en: "Over 53% of the A350 airframe is carbon-fibre composite, including the first Airbus composite wing box. It is powered by Rolls-Royce Trent XWB engines, among the largest ever built (up to 97,000 lbf thrust). The A350-900 seats 325 in three classes, flies 15,000 km, and features larger windows and a 1,800 m equivalent cabin altitude." },
+    trivia: { zh: "A350的机头设计灵感来自A380，而驾驶舱侧窗与A330一脉相承。首架A350-900测试机MSN1的发动机在首飞前因高空结冰风险更换过叶片材料。A350家族还被戏称为\"墨镜侠\"，因为其黑色风挡与机头线条酷似戴墨镜的造型，深受飞友喜爱。", en: "The A350's nose design echoes the A380 while its cockpit side windows follow the A330 lineage. MSN1's engines were re-bladed before first flight over icing concerns. Enthusiasts nicknamed the A350 the \"sunglasses jet\" for its black cockpit window surrounds, making it a favourite with spotters." },
+  },
+  4: {
+    history: { zh: "波音777于1990年启动研发，是世界上首款完全通过计算机三维设计（CATIA）诞生的客机。777-300ER是777-300的远程增程版，2003年首飞，2004年投入运营，凭借超长航程与高载客量成为跨太平洋航线的主力机型。", en: "Boeing launched the 777 in 1990 as the first airliner designed entirely with 3D CAD (CATIA). The 777-300ER is the extended-range version of the 777-300, first flying in 2003 and entering service in 2004; it became the workhorse of trans-Pacific routes." },
+    tech: { zh: "777-300ER机身长73.9米，是当时最长的双发客机，标准三舱载368人，航程达1.37万公里。搭载两台GE90-115B涡扇发动机，单台推力达11.5万磅，是吉尼斯世界纪录认证的\"全球最强商用航空发动机\"，直径达3.4米，几乎与波音737机身相当。777系列还首创\"电传飞行控制\"与\"折叠式起落架\"等多项先进技术。", en: "At 73.9 m, the 777-300ER was the longest twin-engined airliner of its time, seating 368 in three classes with a 13,650 km range. Its two GE90-115B engines each produce 115,000 lbf — certified by Guinness as the world's most powerful commercial jet engine — with a 3.4 m fan nearly as wide as a 737 fuselage. The 777 also pioneered fly-by-wire and folding landing gear options." },
+    trivia: { zh: "波音为设计777曾向8家主要航空公司发放\"设计调查问卷\"，这在当时极为罕见。777的绰号\"Triple Seven\"来自机型编号；GE90发动机测试时曾在地面试车台达到12.75万磅推力，创造了纪录。此外，波音747-8的机翼后掠设计也参考了777系列的经验。", en: "Boeing famously sent design questionnaires to eight airlines before building the 777. Nicknamed \"Triple Seven\", it set records when a GE90 test engine reached 127,500 lbf on the ground testbed. The 747-8's wing sweep design also drew on 777 experience." },
+  },
+  5: {
+    history: { zh: "C919是中国商飞于2008年启动的大型客机项目，是国产大飞机\"三步走\"战略（运10-ARJ21-C919）的关键一步。2017年5月5日首飞，2022年12月9日交付东航全球首架，2023年5月28日完成上海至北京商业首航，标志着中国民航正式进入国产大飞机时代。", en: "The C919 is COMAC's large-airliner program launched in 2008, the key step in China's strategy of developing its own jetliners (Y-10, ARJ21, C919). It first flew on 5 May 2017, was delivered to China Eastern in December 2022, and completed its first commercial flight from Shanghai to Beijing on 28 May 2023." },
+    tech: { zh: "C919采用常规布局、下单翼与翼吊双发设计，机长约38.9米，标准三舱布局载168人，航程5555公里。机身大量采用铝锂合金与复合材料，其中复合材料占比约12%。航电系统采用IMA综合模块化架构，驾驶舱配备5块大尺寸液晶屏。动力选用CFM国际LEAP-1C发动机，并预留国产长江-1000A发动机换装空间，体现自主可控的产业布局。", en: "The C919 uses a conventional layout with low wings and two underwing engines, is about 38.9 m long, seats 168 in a typical layout and flies 5,555 km. It makes extensive use of aluminium-lithium alloys and composites (about 12% by weight), features an IMA avionics architecture and five large LCD cockpit displays. It is powered by CFM LEAP-1C engines with provision for the domestic CJ-1000A." },
+    trivia: { zh: "C919的机头涂装灵感源自中国国宝大熊猫，原型机首飞那天正是\"5·20\"表白日的前夕，被网友调侃为\"国产表白机\"。截至2026年，C919已开通数十条航线、通航数十座城市，并首次执飞国际商业航线，中国商飞还定下2029年实现年产能200架的目标。", en: "The C919's nose livery is inspired by the giant panda, and its first flight fell right before 20 May, a Chinese internet \"confession day\", earning it the nickname \"confession jet\". By 2026 it serves dozens of routes and cities and has flown its first international commercial route; COMAC aims for annual output of 200 by 2029." },
+  },
+  6: {
+    history: { zh: "A320neo是空客A320系列的\"新发动机选项\"升级版，项目于2010年启动，2014年9月25日首飞，2016年1月交付汉莎航空投入运营。neo（New Engine Option）是空客应对燃油价格高企与波音737 MAX竞争的核心产品。", en: "The A320neo (New Engine Option) is Airbus's re-engined upgrade of the A320 family. Launched in 2010, it first flew on 25 September 2014 and entered service with Lufthansa in January 2016, as Airbus's answer to fuel prices and the Boeing 737 MAX." },
+    tech: { zh: "A320neo可选装CFM国际LEAP-1A或普惠PW1100G-JM发动机，比上一代A320节油约15%-20%，噪声降低约50%。配备\"鲨鳍小翼\"（Sharklet）进一步优化气动效率，驾驶舱保留A320家族高度通用的电传飞控系统。A320neo最大航程约6300公里，标准两舱载165人。得益于客舱宽度优势，其经济舱座椅通常比737宽约4厘米。", en: "The A320neo offers a choice of CFM LEAP-1A or Pratt & Whitney PW1100G-JM engines, burning 15-20% less fuel and cutting noise by about 50% versus the original A320. Sharklet winglets improve aerodynamics, while the fly-by-wire cockpit stays common across the family. Range is about 6,300 km with 165 passengers in a typical two-class layout; its wider cabin gives economy seats about 4 cm more width than the 737." },
+    trivia: { zh: "A320neo项目启动当天，空客就拿到了包括IndiGo航空180架在内的巨量订单，创下航空史上单日最大订单纪录。为了区分不同发动机构型，A320neo机身尾部会喷涂\"CFM\"或\"PW\"字样标识。A320家族还是全球销量最高的单通道客机家族，截至2026年累计订单已超1.8万架。", en: "On launch day the A320neo won huge orders including 180 from IndiGo, setting a record for the largest single-day order in aviation history. To distinguish engine types, airlines paint \"CFM\" or \"PW\" tags near the tail. The A320 family is the best-selling single-aisle family ever, with over 18,000 orders by 2026." },
+  },
+  7: {
+    history: { zh: "737 MAX是波音737家族第四代产品，项目于2011年8月启动，2016年1月29日首飞，2017年投入运营。MAX项目最初为对抗空客A320neo而生，凭借更省油的发动机与改进气动设计，迅速成为波音最畅销机型，但两起致命空难令其遭遇全球停飞。", en: "The 737 MAX is the fourth generation of the Boeing 737 family, launched in August 2011, first flying on 29 January 2016 and entering service in 2017. Designed to counter the A320neo, it became Boeing's fastest-selling jet until two fatal crashes led to a worldwide grounding." },
+    tech: { zh: "737 MAX 8搭载两台CFM国际LEAP-1B发动机，采用更省油的大型风扇与锯齿状短舱降噪设计，比737NG节油约14%。机尾加装\"翼梢小翼\"（Advanced Technology Winglet）提升气动效率。MAX家族引入MCAS（机动特性增强系统）辅助飞行操纵，但该系统的设计缺陷正是两次空难的导火索，波音随后对其进行了重构与安全强化。", en: "The 737 MAX 8 uses two CFM LEAP-1B engines with larger, more efficient fans and chevron nacelles for noise reduction, saving about 14% fuel versus the 737NG. Split-tip winglets improve efficiency. The family introduced MCAS to assist pitch control, but flaws in that system contributed to two crashes; Boeing redesigned and reinforced it after the grounding." },
+    trivia: { zh: "737 MAX的两起空难（2018年狮航610、2019年埃塞俄比亚航空302）导致该机型在全球停飞近两年，波音为此付出了超过200亿美元的代价，并导致CEO换帅。为纪念危机后的重新认证，波音曾组织媒体试飞展示修复效果。MAX 7于2026年8月正式获得FAA认证，为家族补齐最后一块拼图。", en: "Two crashes (Lion Air 610 in 2018 and Ethiopian Airlines 302 in 2019) grounded the MAX for almost two years, costing Boeing over USD 20 billion and its CEO's job. After re-certification, Boeing hosted media flights to showcase fixes; the MAX 7 finally received FAA certification in August 2026, completing the family." },
+  },
+  8: {
+    history: { zh: "A330是空客在A300基础上发展的双发宽体客机，1987年启动，1992年11月2日首飞，1994年交付法国航空投入运营。A330-300是家族标准载客量最大的成员，凭借高可靠性成为跨洋航线主力之一，也是全球最成功的宽体机家族之一。", en: "The A330 is Airbus's twin-engined wide-body developed from the A300. Launched in 1987, it first flew on 2 November 1992 and entered service with Air France in 1994. The A330-300 is the family's highest-capacity member, a reliable transoceanic workhorse and one of the most successful wide-body families." },
+    tech: { zh: "A330-300机身长63.66米，标准三舱载277人，航程达1.18万公里。采用电传飞控技术（是空客首批全面采用电传操控的机型之一），配备两台罗尔斯·罗伊斯遄达700或GE CF6发动机。A330的玻璃驾驶舱与A320家族高度通用，飞行员可在两种机型间快速转训。其衍生型号A330neo换装遄达7000发动机后航程进一步提升。", en: "The A330-300 is 63.66 m long, seats 277 in three classes and flies 11,750 km. It was among Airbus's first fully fly-by-wire airliners, powered by Rolls-Royce Trent 700 or GE CF6 engines. Its glass cockpit is highly common with the A320 family, easing pilot cross-training; the A330neo derivative re-engined with Trent 7000 further extends range." },
+    trivia: { zh: "A330与A340是\"孪生兄弟\"：两者共用机翼与机身设计，区别仅在于A340为四发。为适应远程任务，A330-300曾在2016年推出\"零燃油重量提升\"改型，货机版A330-200F则采用全球首创的\"前货舱鼻锥吊装\"装卸方式。A330还经常被改装为加油机，全球多国空军选用A330 MRTT。", en: "The A330 and A340 are siblings sharing wing and fuselage design, differing mainly in that the A340 has four engines. The A330-200F freighter pioneered front cargo-door nose loading, and many air forces operate the A330 MRTT tanker derived from the airliner." },
+  },
+  9: {
+    history: { zh: "E-Jet E2系列是巴西航空工业公司于2013年启动的支线客机升级项目，是E-Jet家族的第三代产品。E195-E2是其中最大的型号，2017年3月29日首飞，2019年交付荷兰皇家航空旗下KLM Cityhopper投入运营，也是该家族中航程与载客量最均衡的机型。", en: "The E-Jet E2 program is Embraer's third-generation regional jet family, launched in 2013. The E195-E2, the largest variant, first flew on 29 March 2017 and entered service with KLM Cityhopper in 2019, offering the best balance of capacity and range in the family." },
+    tech: { zh: "E195-E2搭载两台普惠PW1900G齿轮涡扇发动机，比上一代E195节油约24%，噪声显著降低。采用全新设计的机翼与\"香蕉形\"翼梢小翼，最大航程达4800公里，标准两舱载132人。其客舱采用2+2布局，无中间座，旅客舒适度优于同级别3+3窄体机。E2系列还是同级别中唯一配备电传飞控的支线客机。", en: "The E195-E2 is powered by two Pratt & Whitney PW1900G geared turbofans, burning about 24% less fuel than the E195 with much lower noise. A new wing with raked wingtips gives a 4,800 km range and 132 seats in a typical two-class layout; the 2+2 cabin avoids middle seats. The E2 is the only regional jet family with fly-by-wire controls." },
+    trivia: { zh: "巴西航空工业公司曾是全球第三大客机制造商，E-Jet家族全球交付超过1800架，是支线市场的销量冠军。E195-E2的首发用户KLM Cityhopper以\"橙尾\"涂装闻名，而巴西人则称E-Jet为\"航空界的桑巴\"——飞行平稳又富有韵律。", en: "Embraer was once the world's third-largest airliner maker; the E-Jet family has delivered over 1,800 aircraft, leading the regional market. Launch customer KLM Cityhopper is famous for its orange tail, while Brazilians affectionately call the E-Jet \"the samba of the skies\" for its smooth, rhythmic flying." },
+  },
+  10: {
+    history: { zh: "A220的故事始于加拿大庞巴迪的C系列项目（2008年启动，2013年首飞）。2017年10月，空客收购C系列多数股权，并于2019年将品牌更名为A220。A220-300是加长版，2015年2月27日首飞，2016年投入运营，是全球最先进的百座级客机之一。", en: "The A220 began life as Bombardier's C Series (launched 2008, first flight 2013). Airbus acquired majority control in October 2017 and rebranded it A220 in 2019. The stretched A220-300 first flew on 27 February 2015 and entered service in 2016, one of the most advanced 100-seat airliners." },
+    tech: { zh: "A220-300搭载两台普惠PW1500G齿轮涡扇发动机，是同级中燃油效率最高、噪声最低的机型之一，比同级传统机型节油约20%。机身大量采用铝锂合金与复合材料，机翼采用先进空气动力学设计。标准两舱载130人，航程达6300公里，可执行跨大西洋的窄体机航线。2+3客舱布局搭配18.5英寸宽座椅，支线机也能享受宽体体验。", en: "The A220-300 uses two Pratt & Whitney PW1500G geared turbofans, among the most fuel-efficient and quietest in its class, saving about 20% fuel versus older peers. Extensive aluminium-lithium and composite use plus advanced aerodynamics give 6,300 km range with 130 seats in two classes; the 2+3 cabin with 18.5-inch seats offers wide-body comfort in a regional jet." },
+    trivia: { zh: "A220前身C系列曾因波音向美国商务部投诉\"倾销\"而引发美加贸易摩擦，空客接盘后在美国莫比尔设产线化解僵局。有趣的是，A220的翼尖采用了\"斜削小翼\"设计，与空客自家A350颇为神似，被飞友戏称为\"小A350\"。A220-100的航程甚至比部分远程宽体机还长。", en: "The C Series once sparked a US-Canada trade dispute after Boeing complained of dumping; Airbus resolved it partly by building an Alabama line. Enthusiasts call the A220 the \"little A350\" because its raked wingtips resemble the larger jet, and the A220-100's range beats some long-haul wide-bodies." },
+  },
+  20: {
+    history: { zh: "F-22\"猛禽\"源自美国空军1981年启动的先进战术战斗机（ATF）项目，旨在取代F-15。1997年9月7日首飞，2005年12月正式服役，是世界上首款量产的第五代隐身战斗机，由洛克希德·马丁与波音联合研制。", en: "The F-22 Raptor traces back to the US Air Force's Advanced Tactical Fighter (ATF) program of 1981, meant to replace the F-15. It first flew on 7 September 1997 and entered service in December 2005 as the world's first production fifth-generation stealth fighter, built by Lockheed Martin and Boeing." },
+    tech: { zh: "F-22融合了超音速巡航、超机动性、超级隐身与超级态势感知\"4S\"能力，是世界上首款具备超音速巡航能力的现役战斗机。搭载两台普惠F119-PW-100发动机，单台推力约15.6吨，不开加力即可超音速巡航。其隐身设计结合雷达吸波材料与内置弹舱，正面雷达反射截面仅相当于一枚弹珠。", en: "The F-22 combines supercruise, supermaneuverability, super stealth and super situational awareness — the four \"S\" capabilities — and is the first operational fighter able to cruise supersonically. Its two Pratt & Whitney F119-PW-100 engines each produce about 15.6 tonnes of thrust without afterburner; stealth shaping, RAM coatings and internal bays keep its frontal radar cross-section about the size of a marble." },
+    trivia: { zh: "F-22因造价高昂（单机约1.4亿美元）且冷战威胁消退，产量从原计划的750架被砍至187架，生产线于2011年关闭。美国国会曾立法禁止F-22出口，使其成为\"只供美军\"的传奇机型。2023年，一架F-22曾在阿拉斯加附近击落一个高空侦察气球，成为其首个\"实战战果\"。", en: "With a price tag of about USD 140 million each and the Cold War threat receding, F-22 production was cut from 750 planned aircraft to 187, and the line closed in 2011. Congress banned exports, making it a US-only legend. In 2023 an F-22 shot down a high-altitude surveillance balloon over Alaska — its first air-to-air kill." },
+  },
+  21: {
+    history: { zh: "歼-20\"威龙\"是中国成飞研制的第五代隐身战斗机，项目于2011年1月11日实现首飞——这一天恰逢美国国防部长盖茨访华，外界普遍解读为\"献礼\"。歼-20于2017年正式列装空军，2021年首次在珠海航展公开展示，是中国航空工业从追赶迈向并跑的标志性装备。", en: "The J-20 \"Mighty Dragon\" is Chengdu Aircraft's fifth-generation stealth fighter. Its first flight on 11 January 2011 coincided with US Defense Secretary Gates's visit to China, widely seen as a pointed debut. It entered PLAAF service in 2017, debuted publicly at Zhuhai in 2021, and symbolises China's rise in fighter aviation." },
+    tech: { zh: "歼-20采用鸭式气动布局与菱形机头设计，兼顾隐身与超音速性能，机长约21.2米。早期批次装备俄制AL-31F发动机，后期换装国产WS-10C\"太行\"发动机，未来将换装目标发动机WS-15实现完整超音速巡航能力。其机腹主弹舱可挂载多枚中距空空导弹，侧弹舱则专门装载近距格斗弹，实现\"隐身+火力\"平衡。", en: "The J-20 uses a canard-delta layout with a faceted nose for stealth and supersonic performance, about 21.2 m long. Early batches used Russian AL-31F engines; later ones use the domestic WS-10C \"Taihang\", with the WS-15 planned for full supercruise. A large belly bay carries medium-range AAMs while side bays hold short-range missiles, balancing stealth and firepower." },
+    trivia: { zh: "歼-20首飞消息公布后，全球军事媒体为之震动，西方将其比作\"中国版F-22\"。由于保密要求，歼-20的许多性能数据至今仍是猜测对象。2022年珠海航展上，歼-20首次以\"双机对冲+垂直爬升\"动作进行飞行表演，其机动性让观众惊叹，也让\"威龙\"的绰号更加名副其实。", en: "News of the J-20's first flight stunned military observers worldwide, with Western media dubbing it \"China's F-22\". Many performance figures remain classified and speculative. At Zhuhai 2022, J-20s wowed crowds with head-on passes and vertical climbs, living up to the \"Mighty Dragon\" name." },
+  },
+  22: {
+    history: { zh: "B-2\"幽灵\"隐身战略轰炸机是美国空军冷战后期\"先进技术轰炸机\"（ATB）项目的成果，由诺斯罗普·格鲁曼研制，1989年7月17日首飞，1997年服役。B-2是世界上最昂贵的飞机之一，单机造价高达约24亿美元，曾被称为\"会飞的黄金\"。", en: "The B-2 Spirit stealth strategic bomber came from the US Air Force's Advanced Technology Bomber (ATB) program, built by Northrop Grumman. It first flew on 17 July 1989 and entered service in 1997. With a unit cost around USD 2.4 billion, it is among the most expensive aircraft ever built, nicknamed \"flying gold\"." },
+    tech: { zh: "B-2采用独特的飞翼布局（无尾翼、无垂尾），通过翼身融合设计将雷达反射降至最低，雷达反射截面与一只鸟相当。搭载四台GE F118-GE-100无加力涡扇发动机，可在不加油情况下飞行约1.1万公里，经空中加油后航程可达全球任意目标。其武器舱可挂载核炸弹与常规精确制导弹药，具备\"全球到达、全球摧毁\"能力。", en: "The B-2's tailless flying-wing design blends wings and fuselage to minimise radar reflection — roughly the signature of a bird. Four GE F118-GE-100 non-afterburning turbofans give about 11,000 km unrefuelled range, extended worldwide with aerial refuelling. Internal bays carry nuclear and precision conventional weapons, enabling global reach and strike." },
+    trivia: { zh: "B-2机队仅量产21架，其中一架（\"堪萨斯幽灵\"号）2008年在关岛起飞时因传感器进水失事坠毁，损失惨重。B-2每次任务后都需在恒温恒湿机库中维护其隐身涂层，维护成本极高。2022年，美国公布下一代隐身轰炸机B-21\"突袭者\"，将逐步取代B-2。", en: "Only 21 B-2s were built; one, the \"Spirit of Kansas\", was destroyed in a 2008 takeoff crash in Guam. Its stealth coatings require hangar maintenance in climate-controlled conditions at huge cost. In 2022 the USAF unveiled the B-21 Raider as the B-2's eventual successor." },
+  },
+  23: {
+    history: { zh: "C-17\"环球霸王III\"是美国麦克唐纳·道格拉斯（后并入波音）研制的战略战术运输机，1981年开始设计，1991年9月15日首飞，1995年服役。C-17旨在同时取代C-141战略运输机与C-130战术运输机，实现\"战略投送、战术使用\"的兼顾。", en: "The C-17 Globemaster III is a strategic/tactical transport developed by McDonnell Douglas (later Boeing), designed from 1981, first flying on 15 September 1991 and entering service in 1995. It was meant to replace both the C-141 strategic and C-130 tactical transports, combining strategic reach with tactical flexibility." },
+    tech: { zh: "C-17最大起飞重量达265吨，可运载77吨货物或102名伞兵，航程约1.04万公里。具备短距起降能力，可在约900米长的简易跑道起降，并支持反向推力让飞机在跑道上倒车。机尾采用T形尾翼与后掠上单翼，货舱可并排装载两辆装甲车或一架阿帕奇直升机，尾部跳板可空中投放物资。", en: "With a 265-tonne MTOW, the C-17 carries up to 77 tonnes of cargo or 102 paratroopers over about 10,400 km. It can operate from roughly 900 m semi-prepared runways and even reverse on the runway using thrust reversers. The T-tail and high swept wing allow a cargo hold that fits two armoured vehicles side by side or an Apache helicopter, with an airdrop ramp." },
+    trivia: { zh: "C-17的绰号\"环球霸王\"源自二战传奇运输机C-54；美军士兵则昵称它为\"驮马\"（The Mule），因为它在历次人道救援与战争中任劳任怨。2008年汶川地震后，多国C-17曾向成都运送救援物资。C-17生产于2015年收官，全球共交付279架。", en: "The C-17's \"Globemaster\" name echoes the WWII-era C-54 transport. Troops nicknamed it \"The Mule\" for its tireless work in wars and humanitarian missions; after the 2008 Wenchuan earthquake, several nations flew C-17s of relief supplies into Chengdu. Production ended in 2015 after 279 deliveries." },
+  },
+  24: {
+    history: { zh: "运-20\"鲲鹏\"是中国自主研发的大型运输机，由中航西飞研制，2007年立项，2013年1月26日首飞，2016年正式列装。运-20的诞生填补了中国战略运输力量的空白，是\"大飞机三剑客\"（运-20、C919、AG600）之一。", en: "The Y-20 \"Kunpeng\" is China's domestically developed large transport aircraft built by AVIC Xi'an. The program began in 2007, first flew on 26 January 2013 and entered service in 2016, filling China's strategic airlift gap. It is one of China's \"three great aircraft\" (with the C919 and AG600)." },
+    tech: { zh: "运-20采用常规布局、上单翼与T形尾翼设计，机长47米，最大起飞重量220吨，最大载重约66吨，航程约7800公里。机体大量采用大型整体壁板与复合材料，降低结构重量。动力初期使用俄制D-30KP-2发动机，后续批次换装国产WS-20大涵道比涡扇，油耗与推力显著改善，未来还规划了加油机、预警机等衍生型号。", en: "The Y-20 uses a conventional layout with a high wing and T-tail; it is 47 m long, with a 220-tonne MTOW, about 66 tonnes of payload and 7,800 km range. Large integral panels and composites lighten the structure. Early batches used Russian D-30KP-2 engines; later ones switch to the domestic WS-20 high-bypass turbofan, with tanker and AWACS derivatives planned." },
+    trivia: { zh: "运-20的绰号\"鲲鹏\"取自《庄子·逍遥游》\"鲲之大，不知其几千里也；化而为鸟，其名为鹏\"，寓意大国重器展翅高飞。2020年新冠疫情暴发初期，运-20首次执行跨国运输任务，向多国运送抗疫物资，被网友亲切称为\"胖妞\"。2022年运-20还首次参加欧洲航展，亮相国际舞台。", en: "The Y-20's name \"Kunpeng\" comes from Zhuangzi's fable of a giant mythical bird, symbolising China's aerospace rise. During the early COVID outbreak in 2020 it made its first overseas missions delivering supplies, earning the affectionate nickname \"Chubby Girl\" among netizens. It also flew to a European airshow for the first time in 2022." },
+  },
+  25: {
+    history: { zh: "AH-64\"阿帕奇\"是美国休斯直升机公司（后并入波音）研制的重型武装直升机，1975年9月30日首飞，1986年服役。它诞生于美军\"先进武装直升机\"（AAH）项目，旨在对抗华约装甲洪流，海湾战争中的表现令其成为\"坦克杀手\"的代名词。", en: "The AH-64 Apache is a heavy attack helicopter developed by Hughes Helicopters (later Boeing), first flying on 30 September 1975 and entering service in 1986. Born from the US Army's Advanced Attack Helicopter (AAH) program to counter Warsaw Pact armour, its Gulf War performance made it the archetypal \"tank killer\"." },
+    tech: { zh: "阿帕奇搭载两台GE T700涡轴发动机，最大速度约293公里/小时。机鼻下方配备30毫米链式机关炮（备弹1200发），短翼挂架可携带地狱火反坦克导弹、火箭巢等武器，一次出击可摧毁一个装甲连。其目标获取与夜视系统（TADS/PNVS）可在夜间与恶劣天气下低空突防，\"长弓\"型号更配备毫米波雷达，可同时攻击16个目标。", en: "The Apache is powered by two GE T700 turboshafts, topping out around 293 km/h. A 30 mm chain gun sits under the nose, while stub wings carry Hellfire missiles and rocket pods — enough to destroy an armoured company in one sortie. The TADS/PNVS sensor suite allows night and adverse-weather low-level attack; the \"Longbow\" radar version can engage up to 16 targets simultaneously." },
+    trivia: { zh: "阿帕奇的绰号源自北美原住民阿帕奇族，美军所有武装直升机都以美洲原住民部落命名（如黑鹰、奇努克）。1989年美军入侵巴拿马时，阿帕奇在\"正义事业\"行动中完成首战；海湾战争期间，阿帕奇首战即摧毁伊拉克两座预警雷达站，为联军轰炸机开辟了\"隐身走廊\"。", en: "The Apache is named after the Native American tribe; US Army helicopters are traditionally named after tribes (Black Hawk, Chinook, etc.). It saw combat first in Panama in 1989, and in the Gulf War led the opening strike by knocking out two Iraqi early-warning radars, opening a \"stealth corridor\" for the coalition air campaign." },
+  },
+  26: {
+    history: { zh: "波音747-8是747系列最新一代，项目于2005年启动，2010年2月8日首飞，2011年交付汉莎航空投入运营。747-8分为客机版（-8I）与货机版（-8F），其设计融合了787的先进技术，是\"空中女王\"的终极进化。", en: "The 747-8 is the latest generation of the 747 family. Launched in 2005, it first flew on 8 February 2010 and entered service with Lufthansa in 2011. Offered as the -8I passenger and -8F freighter, it incorporates 787-derived technology as the ultimate evolution of the \"Queen of the Skies\"." },
+    tech: { zh: "747-8机身加长至76.25米，是当时全球最长的客机。搭载四台GE GEnx-2B67发动机，比747-400节油约16%，噪声更低。采用787式锯齿形发动机短舱、翼梢小翼与全新机翼设计，最大起飞重量达447.7吨，标准四舱载410人，航程约1.48万公里。上层客舱进一步加长，可增设更多商务舱或休息区。", en: "At 76.25 m the 747-8 was the world's longest airliner when introduced. Four GE GEnx-2B67 engines save about 16% fuel versus the 747-400 with lower noise. Chevron nacelles, raked wingtips and a new wing give a 447.7-tonne MTOW; typical four-class seating is 410 with about 14,816 km range, and the extended upper deck adds premium space." },
+    trivia: { zh: "747-8的机头保留了747标志性的\"驼峰\"上层客舱，但驾驶舱重新设计为玻璃座舱，并采用与787相同的舷窗风格。美国总统专机\"空军一号\"的新一代（VC-25B）正是基于747-8建造，预计2027年前后交付。由于四发客机市场萎缩，波音已于2023年交付最后一架747-8F，747家族就此收官。", en: "The 747-8 keeps the iconic hump, but with a modern glass cockpit and 787-style windows. The next Air Force One (VC-25B) is being built on the 747-8 and is expected around 2027. With the quad-jet market shrinking, Boeing delivered the final 747-8F in 2023, ending the 747 line." },
+  },
+  27: {
+    history: { zh: "波音707是世界上第一款成功的喷气式客机之一，源自波音1952年自筹资金研制的367-80（\"Dash 80\"）原型机。707-120是707的第一个生产型号，1957年12月20日首飞，1958年10月由泛美航空投入跨大西洋航线，开启了全球喷气式民航时代。", en: "The Boeing 707 is one of the world's first successful jet airliners, evolved from Boeing's privately funded 367-80 (\"Dash 80\") prototype of 1952. The 707-120, the first production variant, first flew on 20 December 1957 and entered transatlantic service with Pan Am in October 1958, opening the jet age." },
+    tech: { zh: "707-120机身长44.22米，标准布局载140人，搭载四台普惠JT3C涡喷发动机，巡航速度0.82马赫，航程约5000公里。采用后掠翼（35度）设计以提升高速性能，机翼下挂载发动机吊舱。707的机体设计直接衍生出军用KC-135加油机，两者共用大量结构件。", en: "The 707-120 was 44.22 m long, seating about 140, powered by four Pratt & Whitney JT3C turbojets with a 0.82 Mach cruise and about 5,000 km range. Its 35-degree swept wing enabled high-speed flight, with engines in underwing pods. The airframe also spawned the military KC-135 tanker, sharing much of the structure." },
+    trivia: { zh: "707的研发是波音的一场豪赌：公司在没有订单的情况下投入1600万美元（相当于今天的上亿美元）研制原型机，险些破产。传说1955年8月7日，试飞员Tex Johnston在华盛顿湖上空驾驶Dash 80做了一整圈桶滚机动，震惊波音高层与观众，也成就了航空史上最著名的\"违规表演\"之一。", en: "The 707 was a gamble: Boeing spent USD 16 million (over USD 100 million today) on the prototype with no orders, nearly bankrupting itself. Legend has it that test pilot Tex Johnston barrel-rolled the Dash 80 over Lake Washington on 7 August 1955, shocking Boeing executives and spectators in one of aviation's most famous \"unauthorised\" stunts." },
+  },
+  28: {
+    history: { zh: "707-320是707系列的远程增程版，1959年1月11日首飞，同年投入泛美航空跨太平洋航线。相比-120，-320加长了机身并增大了翼展与载油量，航程大幅提升，成为第一款能稳定执飞跨太平洋航线的喷气式客机。", en: "The 707-320 is the long-range version of the 707 family, first flying on 11 January 1959 and entering trans-Pacific service with Pan Am the same year. Compared with the -120 it featured a longer fuselage, greater wingspan and fuel capacity, becoming the first jetliner able to fly trans-Pacific routes reliably." },
+    tech: { zh: "707-320机身长46.61米，载141人，换装推力更大的普惠JT4A或JT3D发动机。其翼展从-120的39.9米增至44.4米，最大起飞重量151吨，航程达9300公里，可覆盖洛杉矶至东京航线。后期-320B/C型号换装低油耗JT3D涡扇发动机，是707系列产量最大的型号。", en: "The 707-320 stretched to 46.61 m, seating 141, with uprated Pratt & Whitney JT4A or JT3D engines. Wingspan grew from 39.9 m to 44.4 m, MTOW to 151 tonnes, and range to about 9,300 km, covering Los Angeles-Tokyo. Later -320B/C models used fuel-efficient JT3D turbofans and became the best-selling 707 variants." },
+    trivia: { zh: "707的远程型号奠定了\"跨洋干线客机\"的竞争格局，也直接刺激了欧洲各国联合研制空客。美国总统专机\"空军一号\"长期使用707平台（VC-137系列），约翰·肯尼迪是第一位乘坐喷气式专机的美国总统。中国空军也曾引进707作为专机与试验平台。", en: "The 707's long-range success reshaped global trunk routes and helped spur European cooperation that led to Airbus. Air Force One long used the 707 platform (VC-137), and John F. Kennedy was the first US president to fly on a jet. China's air force also operated 707s as VIP transports and testbeds." },
+  },
+  29: {
+    history: { zh: "波音727是波音研制的三发窄体客机，1963年2月9日首飞，1964年由东方航空投入运营。727-100是初始型号，设计目标是在较短跑道上执行中短程航线，同时具备出色的高原与高温性能，是波音早期最成功的机型之一。", en: "The Boeing 727 is a tri-jet narrow-body airliner; it first flew on 9 February 1963 and entered service with Eastern Air Lines in 1964. The 727-100, the original model, was designed to operate from shorter runways on medium routes with excellent hot-and-high performance, becoming one of Boeing's early successes." },
+    tech: { zh: "727-100机身长40.59米，载106人，搭载三台普惠JT8D涡扇发动机，其中一台安装在机尾进气道上方的\"S型进气道\"内，这种布局使机尾显得高耸，也成为727的标志性外观。采用后掠翼与机翼增升装置，起降性能优异，可在当时的小型机场运营，航程约3500公里。", en: "The 727-100 was 40.59 m long, seating 106, with three Pratt & Whitney JT8D turbofans — the middle one fed by an S-duct inlet above the tail, giving the jet its distinctive tall tail. Swept wings and powerful high-lift devices gave short-field capability for small airports, with about 3,500 km range." },
+    trivia: { zh: "727是波音首款产量破千的客机（共生产1832架），曾被誉为\"空中三剑客\"。其独特的机尾S形进气道让维修人员必须爬上机背才能检修中置发动机。727退役后，许多飞机被改造成餐厅、旅馆甚至教堂——德国一架727被改造成\"机场酒店\"至今仍在运营。", en: "The 727 was Boeing's first jetliner to exceed 1,000 units (1,832 built). Its S-duct meant mechanics had to climb atop the fuselage to service the middle engine. After retirement, many 727s were converted into restaurants, hotels and even a church — one in Germany still operates as an \"airport hotel\"." },
+  },
+  30: {
+    history: { zh: "727-200是727系列的加长版，1967年7月27日首飞，同年交付东北航空投入运营。相比-100，-200机身加长约6米，载客量显著提升，成为727家族产量最大、运营最广的型号，也是20世纪七八十年代全球中短程航线的绝对主力。", en: "The 727-200 is the stretched 727, first flying on 27 July 1967 and entering service with Northeast Airlines that year. About 6 m longer than the -100, it carried many more passengers and became the best-selling and most widely operated 727, dominating short-medium haul routes in the 1970s-80s." },
+    tech: { zh: "727-200机身长46.69米，标准布局载145人，最大载客可达189人。搭载三台普惠JT8D-9/15/17涡扇发动机，推力更大，最大起飞重量95吨，航程约4800公里。后期\"先进型\"（Advanced）换装静音发动机与改进航电，延长了使用寿命。", en: "The 727-200 was 46.69 m long, seating 145 typically and up to 189. Its three uprated Pratt & Whitney JT8D-9/15/17 turbofans gave 95 tonnes MTOW and about 4,800 km range. Later \"Advanced\" versions added quieter engines and improved avionics, extending service life." },
+    trivia: { zh: "727-200曾是全球产量最高的喷气式客机型号之一，直到被波音737超越。由于三发布局油耗高，随着双发延程飞行（ETOPS）标准放宽，727逐步被737与A320取代。中国民航也曾大量运营727-200，直到20世纪90年代才逐步退役。", en: "The 727-200 was once one of the most produced jetliners until the 737 overtook it. Its tri-jet fuel burn and relaxed ETOPS rules let twins replace it; China's airlines operated many 727-200s until the 1990s." },
+  },
+  31: {
+    history: { zh: "波音737是全球销量最高的客机家族，其传奇始于737-100。1964年波音启动项目，1967年4月9日首飞，1968年交付汉莎航空投入运营——汉莎因此成为737的启动用户。737-100是家族中最短的型号，仅生产30架。", en: "The Boeing 737, the best-selling airliner family ever, began with the 737-100. Boeing launched the program in 1964; it first flew on 9 April 1967 and entered service with Lufthansa in 1968, making Lufthansa the launch customer. The -100 was the shortest variant, with only 30 built." },
+    tech: { zh: "737-100机身长28.63米，标准布局载85人，搭载两台普惠JT8D涡扇发动机。采用翼下吊舱式双发布局、下单翼与T形尾翼设计，机翼前缘采用全翼展缝翼。为适应短跑道起降，737设计了独特的\"肥\"发动机短舱与贴近地面的低矮起落架，这一外观特征延续至今。", en: "The 737-100 was 28.63 m long, seating 85, with two Pratt & Whitney JT8D turbofans in underwing pods, a low wing and T-tail. Full-span leading-edge slats aided short-field performance. The distinctive flattened engine nacelles and low landing gear, designed to keep the jets low to the ground, remain 737 hallmarks today." },
+    trivia: { zh: "737-100的\"最小身材\"让它几乎没有市场，波音随即推出加长版-200。有趣的是，汉莎航空为感谢其启动用户身份，后来还专门为737-100举办过告别飞行。由于数量稀少，737-100如今成为航空博物馆的稀客，NASA也曾将一架737-100改装为训练与研究平台。", en: "The tiny -100 found few buyers, prompting Boeing to develop the stretched -200. Lufthansa later staged special farewell flights for its 737-100s; with so few built, survivors are museum rarities, and NASA converted one into a training and research platform." },
+  },
+  32: {
+    history: { zh: "737-200是737家族的第二个型号，1967年8月8日首飞，1968年交付联合航空投入运营。相比-100，-200机身加长约1.9米，载客量提升，成为737家族真正打开市场的功臣，也是20世纪七八十年代全球最成功的窄体客机之一。", en: "The 737-200, the second 737 variant, first flew on 8 August 1967 and entered service with United Airlines in 1968. About 1.9 m longer than the -100, it carried more passengers and was the model that truly launched the family, among the most successful narrow-bodies of the 1970s-80s." },
+    tech: { zh: "737-200机身长30.53米，标准布局载115人，最大载客130人。搭载两台普惠JT8D涡扇发动机，最大起飞重量52.4吨，航程约4200公里。后期型号可选装反推装置与改进型发动机（JT8D-17），并推出\"先进型\"（Advanced）版本增强航程与载荷，货机改型也广泛用于支线货运。", en: "The 737-200 was 30.53 m long, seating 115-130. Its two Pratt & Whitney JT8D turbofans gave 52.4 tonnes MTOW and about 4,200 km range. Later \"Advanced\" variants added thrust reversers, stronger engines and more range, while freight conversions served regional cargo fleets." },
+    trivia: { zh: "737-200是737家族中产量最大的早期型号（共1115架），直到新一代737经典型（Classic）出现。它曾服务于全球上百家航空公司，中国民航早年也大量引进。如今737-200仍在加拿大、非洲等地作为货运与灭火飞机服役，被称为\"长寿老兵\"。", en: "With 1,115 built, the -200 was the most numerous early 737 until the Classic series. It served over a hundred airlines worldwide, including many in China. Survivors still fly as cargo and firefighting aircraft in Canada and Africa — true old-timers." },
+  },
+  33: {
+    history: { zh: "波音747是全球首款宽体客机，1966年波音在输掉美军大型运输机竞标后，将其技术积累转向民用，推出\"空中女王\"。747-100是初始型号，1969年2月9日首飞，1970年1月由泛美航空投入纽约至伦敦航线。其双层客舱与巨大尺寸震惊世界，也奠定了波音在宽体机市场的统治地位。", en: "The Boeing 747, the world's first wide-body, was born when Boeing lost the US military's big transport contest in 1966 and redirected the technology to civil aviation. The 747-100 first flew on 9 February 1969 and entered New York-London service with Pan Am in January 1970. Its double deck and sheer size stunned the world and secured Boeing's wide-body dominance." },
+    tech: { zh: "747-100机身长70.66米，上层客舱较短（仅覆盖机头至翼根前段），标准布局载366人，高密度可达452人。搭载四台普惠JT9D涡扇发动机，最大起飞重量333吨，航程约8560公里。其机翼后掠37度，机身直径达6.5米，经济舱每排可布置10座。747还是首款采用\"双通道+双层\"客舱布局的客机。", en: "The 747-100 was 70.66 m long with a short upper deck, seating 366 typically and up to 452. Four Pratt & Whitney JT9D turbofans gave 333 tonnes MTOW and about 8,560 km range. With a 6.5 m fuselage diameter and 37-degree wing sweep, it was the first twin-aisle, double-deck airliner, with 10-abreast economy seating." },
+    trivia: { zh: "747的诞生源于泛美航空1965年向波音提出的\"比707大一倍\"的构想。为满足适航要求，747的驾驶舱被抬高到上层——这个\"驼峰\"反而成了它最标志性的外观。波音为生产747建造了全球最大的厂房——埃弗雷特工厂，如今该工厂的屋顶面积相当于75个足球场。", en: "The 747 came from Pan Am's 1965 request for a jet \"double the size of the 707\". Certification rules forced the cockpit onto the upper deck, creating the iconic hump. Boeing built the world's largest building by volume, the Everett factory, to produce it — its roof area equals about 75 football fields." },
+  },
+  34: {
+    history: { zh: "747-200是747家族的第二代型号，1970年10月11日首飞，1971年交付投入运营。相比-100，-200换装推力更大的发动机并提高最大起飞重量，航程大幅提升，成为首款能稳定执飞跨太平洋航线的宽体客机，也广泛用于政要专机。", en: "The 747-200, the second 747 generation, first flew on 11 October 1970 and entered service in 1971. With more powerful engines and higher MTOW, it gained much greater range, becoming the first wide-body to fly trans-Pacific routes reliably and a favourite for heads of state." },
+    tech: { zh: "747-200机身长70.66米，载366人，可选装普惠JT9D、GE CF6-50或罗尔斯·罗伊斯RB211三种发动机，这是747家族首次实现\"三选一\"动力配置。最大起飞重量378吨，航程达1.27万公里，可直飞东京至伦敦。747-200还衍生出多种改型：客机、客货混装（Combi）、纯货机以及\"特殊任务机\"。", en: "The 747-200 was 70.66 m long, seating 366, offered with a choice of Pratt & Whitney JT9D, GE CF6-50 or Rolls-Royce RB211 engines — the first 747 to offer three powerplant options. With 378 tonnes MTOW and 12,700 km range, it could fly Tokyo-London nonstop. Variants included passenger, Combi, freighter and special-mission aircraft." },
+    trivia: { zh: "747-200是各国元首专机的常客：美国的\"空军一号\"、日本的政府专机等都曾使用该型号。中国民航在20世纪80年代引进747-200，用于国际航线与专机任务。1991年，中国空军的一架747-200改装机还承担过\"空中加油机试验\"等特殊使命。", en: "The 747-200 served as VIP transport for many nations, including US Air Force One and Japanese government aircraft. CAAC/China's airlines acquired 747-200s in the 1980s for international routes and special missions, and a Chinese-modified 747-200 even supported tanker trials in 1991." },
+  },
+  35: {
+    history: { zh: "747-SP（Special Performance）是波音为应对远程航线竞争而推出的\"缩短机身+超长航程\"型号，1975年7月4日首飞，1976年由泛美航空投入运营。它通过缩短机身、减轻重量，换取跨太平洋等超远程直飞能力，填补了747-200与707之间的市场空白。", en: "The 747-SP (Special Performance) was Boeing's shortened-fuselage, ultra-long-range 747, first flying on 4 July 1975 and entering service with Pan Am in 1976. By cutting length and weight it gained extreme range for nonstop trans-Pacific flights, filling the gap between the 747-200 and the 707." },
+    tech: { zh: "747-SP机身长56.31米，比标准747短约14米，载276人，但最大航程高达1.54万公里，是当时航程最远的客机之一。其机翼、垂尾与发动机沿袭747-200，但机身缩短后飞行更灵活，爬升率更高，高空巡航性能优异。747-SP也是少数能轻松爬升至1.3万米以上的民航客机。", en: "At 56.31 m, the 747-SP was about 14 m shorter than standard 747s, seating 276 but flying up to 15,400 km — among the longest-range airliners of its era. Sharing 747-200 wings, tail and engines, its lighter airframe made it nimble with excellent climb and high-altitude cruise; few airliners topped 13,000 m as easily." },
+    trivia: { zh: "747-SP仅生产45架，数量稀少，如今已成\"稀有动物\"。NASA曾将一架747-SP改装成\"索菲亚\"（SOFIA）机载红外天文台，机腹开了一扇巨型舱门搭载2.5米反射望远镜，在1.3万米高空观测宇宙，服役至2022年。中国民航也曾运营过747-SP执行国际航线。", en: "Only 45 747-SPs were built, making them rarities today. NASA converted one into SOFIA, the Stratospheric Observatory for Infrared Astronomy, fitting a 2.5 m telescope behind a huge fuselage door to observe the cosmos from 13,000 m until 2022. CAAC also operated 747-SPs on international routes." },
+  },
+  36: {
+    history: { zh: "747-300是747家族的第二代加长型号，1982年10月5日首飞，1983年交付瑞士航空投入运营。相比-200，-300最大的变化是将上层客舱大幅加长（延伸至翼根后方），载客量显著提升，是747家族\"双层客舱\"特征的成熟定型。", en: "The 747-300, the second stretched 747, first flew on 5 October 1982 and entered service with Swissair in 1983. Its key change was extending the upper deck back past the wing root, markedly increasing capacity and maturing the 747's double-deck identity." },
+    tech: { zh: "747-300机身长70.66米，标准布局载400人，高密度可达496人。上层客舱加长后，经济舱也从下层延伸至上层的后段，形成真正的\"全双层\"客舱。搭载与-200相同的发动机选项（普惠JT9D、GE CF6、罗尔斯·罗伊斯RB211），最大起飞重量378吨，航程约1.1万公里。747-300还是747家族首款采用数字式发动机控制的型号之一。", en: "The 747-300 was 70.66 m long, seating 400-496. The stretched upper deck let economy seating extend upstairs, creating a true double-deck cabin. Engine options matched the -200 (JT9D, CF6 or RB211) with 378 tonnes MTOW and about 11,000 km range; it also introduced digital engine controls." },
+    trivia: { zh: "747-300是747家族中产量较少的型号（共81架），因为推出不久后波音就启动了下一代-400的研发。747-300最著名的用户之一是日本航空（JAL），其高密度布局让\"双层飞机\"成为日本旅客的集体记忆。如今绝大多数747-300已退役拆解，极少数作为货机仍在飞行。", en: "With only 81 built, the 747-300 was a transitional model, soon superseded by the -400. Japan Airlines was a prominent operator, making the double-decker a collective memory for Japanese travellers. Most -300s are now retired or scrapped, with a handful still flying as freighters." },
+  },
+  37: {
+    history: { zh: "A300是空客公司成立后研制的第一款飞机，也是全球首款双发宽体客机。A300B2是A300的初始生产型号，1972年10月28日首飞，1974年5月由法国航空投入运营。它的成功不仅奠定了空客的生存基础，也证明了两发宽体机在跨洋航线上的可行性。", en: "The A300 is the first aircraft built by Airbus and the world's first twin-engined wide-body. The A300B2, the initial production version, first flew on 28 October 1972 and entered service with Air France in May 1974. Its success secured Airbus's survival and proved twin-engined wide-bodies viable on transoceanic routes." },
+    tech: { zh: "A300B2机身长53.62米，标准布局载270人，搭载两台GE CF6-50C或普惠JT9D涡扇发动机，最大起飞重量137吨，航程约3400公里。采用双发翼吊布局、宽体机身（直径5.64米）与超临界机翼设计，经济性优于同期四发客机。其电传飞控与二人制驾驶舱设计也为后续空客机型奠定了基础。", en: "The A300B2 was 53.62 m long, seating 270, powered by two GE CF6-50C or Pratt & Whitney JT9D turbofans with 137 tonnes MTOW and about 3,400 km range. Its twin-pod layout, wide fuselage (5.64 m diameter) and supercritical wing delivered better economics than four-engined rivals, and its two-crew cockpit set the pattern for later Airbus jets." },
+    trivia: { zh: "A300项目初期几乎夭折：1972年首飞后订单寥寥，空客一度面临解散危机。幸运的是，1975年法国航空等客户的订单让项目起死回生。A300还被戏称为\"欧洲联合的空中纪念碑\"——它由法国、德国、英国、西班牙四国联合制造，是欧洲航空工业一体化的起点。", en: "The A300 nearly died young: after its 1972 first flight, orders were scarce and Airbus faced dissolution. Orders from Air France and others in 1975 rescued the program. Dubbed \"Europe's flying monument to cooperation\", it was built by France, Germany, Britain and Spain, kick-starting European aerospace integration." },
+  },
+  38: {
+    history: { zh: "A300B4是A300系列的加长航程型号，1974年12月26日首飞，1975年交付德国汉莎航空投入运营。相比B2，B4增加了中央油箱并提高了最大起飞重量，航程大幅提升，让A300从\"短程宽体\"升级为真正的中远程宽体客机。", en: "The A300B4 is the longer-range A300, first flying on 26 December 1974 and entering service with Lufthansa in 1975. By adding a centre fuel tank and raising MTOW, the B4 dramatically extended range, transforming the A300 from a short-haul wide-body into a true medium-to-long-haul type." },
+    tech: { zh: "A300B4机身长53.62米，载270人，搭载两台GE CF6-50C或普惠JT9D涡扇发动机，最大起飞重量165吨，航程约5300公里，可覆盖欧洲至中东、亚洲航线。B4还衍生出A300B4-600（后期称A300-600）等改进型号，换装数字式驾驶舱与更先进发动机，成为空客首款实现\"二人制\"玻璃座舱的量产宽体机。", en: "The A300B4 was 53.62 m long, seating 270, with two GE CF6-50C or Pratt & Whitney JT9D engines, 165 tonnes MTOW and about 5,300 km range covering Europe-Middle East and Asia. Improved A300B4-600 (later A300-600) variants added a two-crew glass cockpit and newer engines, Airbus's first production wide-body with that layout." },
+    trivia: { zh: "A300B4的\"超远程\"能力催生了著名的ETOPS概念：美国联邦航空局正是基于A300等双发飞机的优异可靠性，逐步放宽双发客机跨洋飞行的限制。A300系列还曾广泛用作货机与\"白色工程\"试验平台，如今仍在飞行的多为货机改型。", en: "The A300B4's capabilities helped birth ETOPS: the FAA progressively relaxed transoceanic rules for twins based on the A300's reliability record. Many A300s ended their lives as freighters or testbeds; survivors today are mostly cargo conversions." },
+  },
+};
+
+
 (function() {
   try {
     // 恢复 i18n
@@ -7399,6 +7574,7 @@ function openDetail(id) {
         <div class="modal-code">${highlightText(a.code || '', sq)} · ${highlightText(a.country, sq)}</div>
         ${(a.tags && a.tags.length) ? '<div class="modal-tags"><span class="modal-tags-title">标签</span>' + a.tags.map(function(tag) { var m = tagMeta.find(function(m) { return m.key === tag; }); return m ? '<span class="modal-tag-chip">' + highlightText(t(m.i18n), sq) + '</span>' : ''; }).join('') + '</div>' : ''}
         <div class="modal-desc">${highlightText(t(a.desc), sq)}</div>
+        ${renderBaikeSection(a)}
         <div class="modal-specs">
           ${Object.entries(a.specs).map(([k, v]) =>
             `<div class="spec-item"><div class="spec-label">${specLabel(k)}</div><div class="spec-value">${highlightText(v, sq)}</div></div>`
@@ -7424,6 +7600,27 @@ function openDetail(id) {
   document.body.style.overflow = 'hidden';
 
 
+}
+
+function renderBaikeSection(a) {
+  if (typeof AIRCRAFT_BAIKE === 'undefined') return '';
+  var bk = AIRCRAFT_BAIKE[a.id];
+  if (!bk) return '';
+  var lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh';
+  function pick(o) { return (o && o[lang]) ? o[lang] : (o && o.zh) ? o.zh : ''; }
+  var blocks = [
+    { key: 'history', title: '研发历史', en: 'Development History' },
+    { key: 'tech', title: '技术特点', en: 'Technical Highlights' },
+    { key: 'trivia', title: '趣闻', en: 'Trivia' }
+  ];
+  var html = '<div class="baike-section"><div class="baike-head">' + (lang === 'en' ? 'Aircraft Encyclopedia' : '机型小百科') + '</div>';
+  blocks.forEach(function(b, i) {
+    var text = pick(bk[b.key]);
+    if (!text) return;
+    html += '<details class="baike-item"' + (i === 0 ? ' open' : '') + '><summary>' + (lang === 'en' ? b.en : b.title) + '</summary><p>' + text + '</p></details>';
+  });
+  html += '</div>';
+  return html;
 }
 
 function closeDetail() {
@@ -7830,24 +8027,22 @@ const NEWS_FEEDS = [
 
 // 内置中文航空新闻兜底（≥15条），确保离线/file://协议下100%可显示
 const NEWS_STATIC = [
-  { title: '国产大飞机C919首次执飞国际商业航线 北京至乌兰巴托成功首航', snippet: '8月12日15时17分，由国航CA723航班执飞的国产大飞机C919从北京首都国际机场腾空而起，经过约1小时41分钟的飞行，平稳降落在蒙古国乌兰巴托新成吉思汗国际机场，标志着C919投入商业运营以来首次执飞常态化国际定期客运航线。该航线航班号为CA723/CA724，计划每日一班往返，单程经济舱票价1770元起。首航航班搭载111名旅客，乌兰巴托机场以民航最高礼遇"水门仪式"迎接。中国商飞数据显示，截至8月12日，由国航、东航、南航运营的C919累计开通58条航线、通航26座城市，安全运送旅客超750万人次。', pubDate: '2026-08-12', link: '#' },
-  { title: 'C919出海路线图：EASA认证最快2028年 商飞瞄准2029年产能200架', snippet: 'C919首条国际航线开通引发国际媒体广泛关注。分析指出，中蒙双边适航互认打通了国产客机出海的首条通道，欧美适航认证并非国产客机国际化的唯一硬性门槛。根据EASA此前披露的消息，C919的全套认证流程预计耗时3至6年，最快2028年、最晚可能延至2031年拿到欧洲适航证，一旦顺利拿证将有望进驻欧盟及全球90多个国家。中国商飞已明确提出到2029年实现年产能200架的目标，高原型、加长型与增程版等衍生机型也在不断丰富应用场景。', pubDate: '2026-08-13', link: '#' },
-  { title: '国航及深圳航空订购55架空客飞机 目录价超124亿美元', snippet: '中国国航公告，将与附属公司深圳航空向空中客车购买55架飞机，目录价格合计约124.4亿美元。其中国航购置15架A350-900宽体客机，目录价约60.9亿美元，预计2030年至2032年分批交付；深圳航空购置40架A320neo系列窄体机，目录价约63.5亿美元，预计2029年至2032年分批交付。空中客车就飞机给予较大价格优惠，实际代价低于目录价格。', pubDate: '2026-08-13', link: '#' },
-  { title: '波音7月交付53架继续落后空客 前7个月差距拉大至51架', snippet: '波音8月11日公布，7月共向客户交付53架商用飞机，同期空客交付67架。今年前七个月，波音累计交付367架，空客交付418架，两家制造商差距拉大至51架。波音7月交付了10架787梦想客机，美联航接收3架787-9，印度航空、汉莎航空、利雅得航空等客户也各获新机。订单方面，波音7月录得38架新订单，包括法恩伯勒航展上来自AerCap、Luxair和乌干达国家航空的采购。', pubDate: '2026-08-11', link: '#' },
-  { title: '空客年内净订单突破1000架 中国市场需求成重要引擎', snippet: '空客宣布今年净订单量已突破1000架大关，中国航空公司的强劲需求贡献了重要增量。7月空客共向39家客户交付67架飞机，其中靛蓝航空接收7架A320neo系列，南航接收4架，阿联酋航空接收3架A350-900，美国航空接收3架A321neo。订单方面，利雅得航空确认增购6架A350-1000，SMBC航空租赁订购100架新飞机，东航订购25架A330-900。空客重申2026年全年交付约870架商用飞机的目标。', pubDate: '2026-08-09', link: '#' },
-  { title: '大韩航空与韩亚航空合并获正式批准 年底前完成整合', snippet: '大韩航空董事会与韩亚航空股东已正式批准合并协议，为年底前启动合并后航空公司的运营扫清关键障碍。两家航司合并后将成为全球十大航空公司之一，机队规模超过230架。此前双方已陆续获得韩国公平贸易委员会等多个监管机构的批准，合并工作进入最后冲刺阶段。', pubDate: '2026-08-12', link: '#' },
-  { title: '北京强降雨致57架次航班取消 两大机场启动防汛保障', snippet: '8月12日北京迎来强降雨并启动防汛二级应急响应。受天气影响，民航计划取消进出港航班57架次，首都、大兴两大机场备足应急物资并延长餐饮营业时间。当日北京"八站两场"进出京旅客预计138.42万人次，其中民航进出港39.14万人次，铁路方面停运123趟列车。', pubDate: '2026-08-12', link: '#' },
-  { title: '东航国内机票免费退改政策放宽 提前14天不再区分舱位', snippet: '自8月起，东方航空调整国内客票自愿退改规则，免费退改时间由起飞前30天扩大至提前14天，14天前退改不再区分舱位权益。此举旨在破解机票退改规则复杂、客诉高发的行业痛点，为旅客提供更灵活便捷的退改体验，也反映出航空公司服务竞争正从票价向售后体验延伸。', pubDate: '2026-08-12', link: '#' },
-  { title: '印度航空客机空中骤降17人受伤 机长大麻检测呈阳性', snippet: '印度民航部披露，印航一架普吉岛至德里的A320neo航班在飞行途中骤降约91米，导致13名乘客和4名机组人员受伤。事件调查中发现执飞机长大麻毒检呈阳性。印度民航部已于8月11日紧急召见印航CEO，要求彻查并强化机组人员健康管理，全球民航安全"人因"防线再度引发关注。', pubDate: '2026-08-11', link: '#' },
-  { title: '山河星航"阿若拉"轻型运动飞机实现全面国产化', snippet: '湖南山河星航宣布，旗下"阿若拉"轻型运动飞机已完成发动机、航电系统、碳纤维材料等全部核心部件国产化攻坚，今年1月首架搭载国产发动机与国产航电系统的阿若拉交付。该机型是我国首款取得民航局适航认证的轻型运动飞机，同时取得美国FAA、澳大利亚CASA认证，国内外累计交付近500架，国内市场占有率超80%，可使用95号车用汽油，百公里油耗仅8升，最大航程达1300公里。', pubDate: '2026-08-13', link: '#' },
-  { title: '中飞租赁与土耳其航空签署7架A321neo租赁协议', snippet: '中飞租赁宣布与土耳其航空签署七架全新空客A321neo飞机租赁协议，标志着双方正式建立战略合作关系。该批飞机均配备普惠PW1133GA-JM发动机，由中飞租赁订单簿提供，预计2027年起陆续交付，将支持土耳其航空推进其"Vision 2033"机队扩张战略。土耳其航空是全球航点覆盖最广的航空公司之一。', pubDate: '2026-08-13', link: '#' },
-  { title: '中飞租赁向美联航交付第200架新飞机', snippet: '中飞租赁宣布已向美国联合航空交付一架全新空客A321neo飞机，这是双方签订的12架空客A321neo租赁项目中的首架，同时也是中飞租赁第200架订单新飞机交付。此次交付也是集团首次从空客位于美国莫比尔的制造工厂接收飞机，将用于支持美联航机队转型更新计划。', pubDate: '2026-08-14', link: '#' },
-  { title: '瑞安航空与谷歌云签署五年合作协议 推进数字化运营', snippet: '瑞安航空宣布与谷歌云签署为期五年的合作伙伴关系，将向旗下35000名员工推广Google Workspace和谷歌云服务，推动航空公司数字化运营升级。瑞安航空是欧洲最大的低成本航空公司，此次合作涵盖办公协作、数据分析与云基础设施等全方位数字化改造，也是欧洲航司加速上云的最新例证。', pubDate: '2026-08-12', link: '#' },
-  { title: 'AirBaltic削减A220机队三分之一 聚焦里加枢纽', snippet: '拉脱维亚国家航空AirBaltic宣布，计划在年底前将空客A220-300机队削减约三分之一，并将航线网络更集中地围绕枢纽里加布局。公司表示此举旨在优化运力结构、提升运营效率，以应对燃油价格高企与市场竞争加剧带来的成本压力。', pubDate: '2026-08-11', link: '#' },
-  { title: '波音完成787短进气道降噪测试 油耗有望再降0.5%', snippet: '波音宣布完成787梦想客机短进气道降噪测试飞行。测试旨在验证采用新型声学处理的进气道导管能否在保持现有噪声水平的同时，将燃油效率再提升最多0.5%。若测试通过，该技术将应用于787后续交付机型，进一步提升这款宽体机的运营经济性。', pubDate: '2026-08-12', link: '#' },
-  { title: 'FAA正式认证波音737 MAX 7 取证进程重大突破', snippet: '美国联邦航空管理局于8月3日正式认证波音737 MAX 7机型，为该机型投入商业运营扫清关键监管障碍。737 MAX 7是MAX家族中座位数最少、航程最远的成员，主要面向低成本航空公司的高密度航线需求。认证通过后有望加速波音窄体机交付进度，缓解其在窄体机市场的竞争压力。', pubDate: '2026-08-03', link: '#' },
-  { title: '达美航空将开通亚特兰大至利雅得直飞航线', snippet: '达美航空宣布将于10月23日开通亚特兰大至沙特利雅得的新直飞航线，使用空客A350-900执飞。这是达美航空连接美国与沙特的重要航线，将加强美沙两国商务与旅游往来，也反映中东市场在美航司国际网络中的权重持续上升。', pubDate: '2026-08-09', link: '#' },
-  { title: '空客7月向39家客户交付67架飞机 全年目标保持870架', snippet: '空客公布7月交付数据，共向39家客户交付67架商用飞机，与去年同期持平。今年累计交付418架，较去年同期373架增长12%。空客重申2026年全年交付约870架的目标。7月新接订单204架，扣除66架取消后净订单138架，年内净订单累计突破1000架。', pubDate: '2026-08-07', link: '#' }
+  { title: '民航局：7月民航旅客运输量7462.9万人次 同比增长3.9%', snippet: '民航局8月21日发布数据，7月份民航旅客运输量达7462.9万人次，同比增长3.9%，正班客座率86.3%。暑运旺季民航客流持续高位运行，航班管家预测2026年暑运民航旅客运输量约1.42亿人次，日均超228万人次，8月中下旬迎来暑运最高峰。', pubDate: '2026-08-21', link: '#' },
+  { title: '全球飞机交付陷入困局 C919迎来历史性发展窗口', snippet: '波音、空客积压未交付订单合计约一万五千架，交付周期拉长至八到十年，全球民航出现"有需求没飞机"的供需失衡。行业预测未来二十年全球需交付超四万架新客机，150-200座级窄体机占七成以上。C919凭借国内五十多条航线稳定运营和超1150架确认及意向订单，成为全球市场备受关注的第三选择。', pubDate: '2026-08-19', link: '#' },
+  { title: 'C919订单近1500架交付数十架 商业运营数据持续向好', snippet: '截至8月10日，C919已累计交付数十架、订单超千架（接近1500架），运送旅客突破750万人次。8月12日国航C919执飞北京至乌兰巴托定期航班，实现常态化国际定期客运飞行，航班接入全球售票系统。商飞计划到2029年实现年产能200架，高原型、加长型等衍生机型持续拓展。', pubDate: '2026-08-19', link: '#' },
+  { title: '空客8月再获大单：国泰订购30架A330neo 年内净订单413架', snippet: '空客8月确认新增40架飞机订单，其中国泰航空订购30架A330neo（A330-900，预计2028年起交付），波罗的海航空加购10架A220-300，另有私人客户预订3架A350-900与3架A320neo。今年前8个月空客净订单量达413架；8月共交付47架飞机，其中A320neo系列占36架。', pubDate: '2026-08-21', link: '#' },
+  { title: '空客A320产能爬坡承压 下半年交付量需增约48%', snippet: '空客上半年交付351架商用飞机，全年目标约870架，意味着下半年需交付519架、月均86.5架，较上半年月均58.5架提升约48%。截至6月底空客商用飞机储备订单9222架，其中A320系列7499架。公司维持2027年底A320家族月产70至75架的目标，发动机短缺仍是窄体机产能的主要约束。', pubDate: '2026-08-19', link: '#' },
+  { title: '中国航司半年买近480架空客飞机 创疫情后新高', snippet: '据经济观察报统计，截至8月21日中国航司累计宣布采购空客飞机近480架，创疫情后新高。其中国航采购15架A350-900、深航采购40架A320neo，海航购买40架A320neo，东航签下25架A330neo，南航及厦航合计采购137架A320neo系列。空客称航司机队建设正从"一招鲜"转向精细化匹配细分市场。', pubDate: '2026-08-21', link: '#' },
+  { title: '国航与约旦皇家航空签署合作谅解备忘录', snippet: '8月21日，中国国际航空与约旦皇家航空在北京正式签署合作谅解备忘录，双方将在航线网络、旅客服务、常旅客计划等领域深化合作。此举有助于拓展中国与中东地区的航空互联互通，为两国旅客提供更便捷的出行选择。', pubDate: '2026-08-21', link: '#' },
+  { title: '南航物流开通上海浦东—阿姆斯特丹—奥斯陆航线', snippet: '8月20日，南航物流正式开通上海浦东—阿姆斯特丹—奥斯陆定期货运航线，进一步加密中欧空中物流通道。航线串联荷兰与挪威两大欧洲门户，为跨境电商、生鲜冷链等高时效货物提供更优运力供给，助力中国与北欧经贸往来。', pubDate: '2026-08-20', link: '#' },
+  { title: '太原—芝加哥定期国际全货运航线正式开通', snippet: '8月19日22时34分，金鹏航空波音747全货机从太原起飞前往芝加哥，标志着太原—芝加哥定期国际全货运航线正式开通。这是山西首条直飞北美的全货运航线，搭建起山西通往北美的空中物流桥梁，将有力支撑本地及周边外贸产业发展。', pubDate: '2026-08-19', link: '#' },
+  { title: '腾冲机场3000米新跑道试飞成功 波音737-800首降', snippet: '8月19日，腾冲机场跑道延长及附属设施扩建工程飞行程序实地验证试飞圆满完成，昆明航空波音737-800首次降落本场3000米新跑道，标志该机场正式迈入3000米跑道时代。扩建完成后将显著提升机场保障能力，为开通更多远程航线创造条件。', pubDate: '2026-08-19', link: '#' },
+  { title: '青岛=清州航线即将复航 对韩航线实现"公交化"运营', snippet: '8月20日，青岛=清州开航发布仪式举行，青岛机场韩国航线日均往返达38架次，实现公交化运营。新航线将进一步巩固青岛作为中韩交流"桥头堡"的枢纽地位。同日越南公民经青岛等65个口岸可240小时过境免签，青岛机场东南亚航点已达7个，越南入境旅客量同比增长608%。', pubDate: '2026-08-20', link: '#' },
+  { title: '酷航10月26日开通新加坡—贵阳航线 每周3班', snippet: '酷航宣布将于10月26日开通新加坡—贵阳直飞航线，每周运营3班，由空客A320neo执飞。届时酷航在中国内地16座城市每周运营81个航班，贵阳将成为其在中国内地的最新航点，进一步加密新加坡与中国西南地区的空中联系。', pubDate: '2026-08-21', link: '#' },
+  { title: '卡塔尔航空成为全球首家运营星链787-9的航空公司', snippet: '卡塔尔航空近日成为全球首家运营搭载星链（Starlink）卫星互联网技术波音787-9客机的航空公司，旅客将在万米高空享受高速稳定的机上Wi-Fi体验。此举标志着卫星互联网正式进入干线宽体机规模化运营阶段，或将带动全球航司机上互联服务升级。', pubDate: '2026-08-22', link: '#' },
+  { title: '翎亚航空8月24日开通雅加达=楠榜=吉隆坡航线 由C909执飞', snippet: '印尼翎亚航空（TransNusa）计划8月24日开通雅加达—楠榜—吉隆坡航线，采用国产支线客机C909执飞，其中楠榜—吉隆坡段是该机场首条定期国际航线。C909此前已在印尼、老挝等东南亚国家开展商业运营并斩获海外订单，国产民机出海步伐持续加快。', pubDate: '2026-08-20', link: '#' },
+  { title: '瑞安航空预订首架737 MAX 10 300架订单2027年起交付', snippet: '瑞安航空于8月20日为旗下首架波音737 MAX 10预订注册号EI-HTA。该航司共订购300架MAX 10（含150架确认订单与150架可选订单），计划2027年3月至2034年间交付，其中首批15架计划2027年春季交付，分别投放都柏林与伦敦斯坦斯特德基地。', pubDate: '2026-08-21', link: '#' },
+  { title: 'AerCap交付第100架直购梦想客机 墨西哥航空机队再扩容', snippet: '航空租赁巨头AerCap向墨西哥航空交付第10架租赁的波音787，同时完成其从波音直接订单簿中的第100架梦想客机交付。AerCap目前拥有及订购约140架波音787，是全球最大的787机队所有者与租赁商，本次交付的787-9将支持墨西哥航空远程航线拓展。', pubDate: '2026-08-21', link: '#' },
 ];
 
 const AI_SYSTEM_PROMPTS = {
