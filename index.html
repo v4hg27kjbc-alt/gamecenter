@@ -4185,7 +4185,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260823-v48">
+<body data-version="20260823-v49">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4661,7 +4661,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">AI 超时修复</span>·问答与快讯总结超时放宽至 45 秒',
+    updateBanner: '<span class="banner-highlight">机型小百科上线</span>·29款机型新增研发历史/技术特点/趣闻，航空快讯已更新至 8/22',
     photoAiTitle: '照片识机 · AI 识别机型',
     photoAiBtn: '照片识机',
     photoAiQ1: '第 1 题 · 飞机属于哪一类？',
@@ -4969,7 +4969,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">AI timeout fixed</span> · Q&A & news summary timeout extended to 45s',
+    updateBanner: '<span class="banner-highlight">Aircraft Encyclopedia</span> · R&D history / tech highlights / trivia for all 29 aircraft, aviation news refreshed to 8/22',
     photoAiTitle: 'Photo AI · Identify Aircraft',
     photoAiBtn: 'Photo AI',
     photoAiQ1: 'Q1 · Which category?',
@@ -7696,10 +7696,10 @@ function dismissToast() {
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260818-v40', '1');
+  localStorage.setItem('aviation-update-20260823-v49', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260818-v40')) return;
+  if (localStorage.getItem('aviation-update-20260823-v49')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
