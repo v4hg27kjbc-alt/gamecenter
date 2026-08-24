@@ -3093,6 +3093,48 @@ body.light-mode .map-container .leaflet-tile-pane {
 .pa-cand-chip.active { background: linear-gradient(135deg, rgba(59,130,246,.35), rgba(139,92,246,.35)); border-color: rgba(129,140,248,.7); color: #fff; }
 .pa-sub-title { margin-top: 14px; font-size: .78rem; color: rgba(255,255,255,.55); }
 .pa-err { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; font-size: .85rem; display: none; }
+/* ===== AI 收藏分析 ===== */
+#collectAnalysisOverlay {
+  position: fixed; inset: 0; z-index: 9980;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#collectAnalysisOverlay.visible { display: flex; }
+.ca-empty-card { text-align: center; padding: 60px 20px; }
+.ca-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.ca-empty-title { font-size: 1.15rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.ca-empty-desc { font-size: .88rem; color: var(--text-dim); margin-bottom: 22px; }
+.ca-empty-btn { padding: 10px 26px; border-radius: 10px; border: none; cursor: pointer; color: #fff; font-size: .9rem; background: linear-gradient(135deg, rgba(59,130,246,.9), rgba(139,92,246,.9)); transition: all .2s; }
+.ca-empty-btn:hover { transform: translateY(-2px); opacity: .9; }
+#caLoading { display: flex; flex-direction: column; align-items: center; padding: 80px 20px; }
+.ca-radar { position: relative; width: 130px; height: 130px; }
+.ca-radar .ca-sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(99,102,241,.5), transparent 65%); animation: caSpin 1.2s linear infinite; }
+.ca-radar .ca-ping { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(129,140,248,.5); animation: caPing 1.6s ease-out infinite; }
+.ca-radar .ca-ping.p2 { animation-delay: .4s; }
+.ca-radar .ca-ping.p3 { animation-delay: .8s; }
+@keyframes caSpin { to { transform: rotate(360deg); } }
+@keyframes caPing { 0% { transform: scale(.25); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+.ca-loading-text { margin-top: 18px; font-size: .9rem; color: var(--text-dim); }
+.ca-report-head { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.ca-report { background: rgba(255,255,255,.04); border: 1px solid var(--glass-border); border-radius: 14px; padding: 20px; line-height: 1.75; font-size: .92rem; color: var(--text); }
+.ca-report p { margin: 0 0 12px; }
+.ca-report ul { margin: 6px 0 12px; padding-left: 20px; }
+.ca-report li { margin-bottom: 6px; }
+.ca-report strong { color: var(--accent); }
+.ca-actions { margin-top: 16px; text-align: center; }
+.ca-rebtn { padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; color: #fff; font-size: .88rem; background: linear-gradient(135deg, rgba(59,130,246,.9), rgba(139,92,246,.9)); transition: all .2s; }
+.ca-rebtn:hover { transform: translateY(-2px); opacity: .9; }
+.ca-err { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; font-size: .85rem; display: none; }
+.ca-err-rebtn { margin-left: 8px; padding: 3px 12px; border-radius: 8px; border: 1px solid rgba(239,68,68,.4); background: rgba(239,68,68,.15); color: #fca5a5; cursor: pointer; font-size: .8rem; }
+.ca-err-rebtn:hover { background: rgba(239,68,68,.25); }
+@media (max-width: 768px) {
+  #collectAnalysisOverlay .pa-header { padding: 12px 14px; }
+  #collectAnalysisOverlay .pa-content { padding: 16px 14px; }
+  .ca-empty-card { padding: 48px 16px; }
+  .ca-report { padding: 14px; font-size: .88rem; }
+}
 /* 照片识机 - 移动端 */
 @media (max-width: 768px) {
   #photoAiOverlay .pa-header { padding: 12px 14px; }
@@ -4185,7 +4227,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260823-v49">
+<body data-version="20260824-v50">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4312,6 +4354,7 @@ body.light-mode .collect-record-panel {
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="filter-chip collect-record-btn" id="collectRecordBtn" onclick="openCollectRecord()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21z"/></svg><span id="collectRecordBtnText">收藏记录</span><span class="collect-record-dot" id="collectRecordDot">0</span></button>
     <button class="filter-chip ai-chat-btn" id="photoAiBtn" onclick="openPhotoAi()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg><span id="photoAiBtnText">照片识机</span></button>
+    <button class="filter-chip ai-chat-btn" id="collectAnalysisBtn" onclick="openCollectAnalysis()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M3 3v18h18"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="12" y1="16" x2="12" y2="6"/><line x1="17" y1="16" x2="17" y2="13"/></svg><span id="collectAnalysisBtnText">AI 收藏分析</span></button>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
@@ -4540,6 +4583,38 @@ body.light-mode .collect-record-panel {
   <button class="compare-clear" id="clearCompareBtn" onclick="clearCompare()">清除</button>
 </div>
 
+<!-- ===== AI 收藏分析全屏面板 ===== -->
+<div id="collectAnalysisOverlay">
+  <div class="pa-header">
+    <div class="pa-title"><span class="pa-title-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="12" y1="16" x2="12" y2="6"/><line x1="17" y1="16" x2="17" y2="13"/></svg></span><span id="collectAnalysisTitleText">AI 收藏分析 · 机库洞察报告</span></div>
+    <button class="pa-close" onclick="closeCollectAnalysis()" title="关闭">&times;</button>
+  </div>
+  <div class="pa-content">
+    <div id="caState">
+      <div id="caEmpty" style="display:none">
+        <div class="ca-empty-card">
+          <div class="ca-empty-icon">&#128745;</div>
+          <div class="ca-empty-title" id="caEmptyTitle">机库还是空的</div>
+          <div class="ca-empty-desc" id="caEmptyDesc">先去收藏几架心仪的机型，AI 才能帮你分析收藏偏好哦～</div>
+          <button class="ca-empty-btn" id="caEmptyBtn" onclick="closeCollectAnalysis()">去逛逛</button>
+        </div>
+      </div>
+      <div id="caLoading" style="display:none">
+        <div class="ca-radar"><div class="ca-sweep"></div><div class="ca-ping p1"></div><div class="ca-ping p2"></div><div class="ca-ping p3"></div></div>
+        <div class="ca-loading-text" id="caLoadingText">AI 正在分析你的机库…</div>
+      </div>
+      <div id="caResultWrap" style="display:none">
+        <div class="ca-report-head" id="caReportHead">你的机库洞察报告</div>
+        <div class="ca-report" id="caReport"></div>
+        <div class="ca-actions">
+          <button class="ca-rebtn" id="collectAnalysisReBtnText" onclick="runCollectAnalysis()">换一批解读</button>
+        </div>
+      </div>
+      <div class="ca-err" id="caErr" style="display:none"><span id="caErrText"></span> <button class="ca-err-rebtn" id="caErrRetryBtn" onclick="runCollectAnalysis()">重试</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 涂装画廊弹窗 ===== -->
 <div id="liveryOverlay" class="livery-overlay" onclick="liveryBackdrop(event)">
   <div class="livery-panel">
@@ -4661,7 +4736,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">机型小百科上线</span>·29款机型新增研发历史/技术特点/趣闻，航空快讯已更新至 8/22',
+    updateBanner: '<span class="banner-highlight">AI 收藏分析上线</span>·一键解析你的机库收藏，趣味洞察报告等你解锁',
     photoAiTitle: '照片识机 · AI 识别机型',
     photoAiBtn: '照片识机',
     photoAiQ1: '第 1 题 · 飞机属于哪一类？',
@@ -4676,6 +4751,16 @@ const i18n = {
     photoAiRetry: '重新识别',
     photoAiCand: '不确定？点选最接近的机型：',
     photoAiErrNetwork: 'AI 识别服务连接失败，请稍后重试',
+
+    // --- AI 收藏分析 ---
+    collectAnalysisBtn: 'AI 收藏分析',
+    collectAnalysisTitle: 'AI 收藏分析 · 机库洞察报告',
+    collectAnalysisLoading: 'AI 正在分析你的机库…',
+    collectAnalysisEmptyTitle: '机库还是空的',
+    collectAnalysisEmptyDesc: '先去收藏几架心仪的机型，AI 才能帮你分析收藏偏好哦～',
+    collectAnalysisEmptyBtn: '去逛逛',
+    collectAnalysisReBtn: '换一批解读',
+    collectAnalysisErr: 'AI 分析服务连接失败，请稍后重试',
 
     // --- 涂装画廊 ---
     liveryGallery: '涂装画廊',
@@ -4969,7 +5054,7 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">Aircraft Encyclopedia</span> · R&D history / tech highlights / trivia for all 29 aircraft, aviation news refreshed to 8/22',
+    updateBanner: '<span class="banner-highlight">AI Hangar Analysis</span> · Get fun insight reports about your aircraft collection',
     photoAiTitle: 'Photo AI · Identify Aircraft',
     photoAiBtn: 'Photo AI',
     photoAiQ1: 'Q1 · Which category?',
@@ -4984,6 +5069,16 @@ const i18n = {
     photoAiRetry: 'Try again',
     photoAiCand: 'Not sure? Pick the closest:',
     photoAiErrNetwork: 'AI service unreachable, try again later',
+
+    // --- AI Collection Analysis ---
+    collectAnalysisBtn: 'AI Hangar Analysis',
+    collectAnalysisTitle: 'AI Hangar Analysis · Insight Report',
+    collectAnalysisLoading: 'AI is analyzing your hangar…',
+    collectAnalysisEmptyTitle: 'Your hangar is empty',
+    collectAnalysisEmptyDesc: 'Collect a few aircraft first, then AI can analyze your taste!',
+    collectAnalysisEmptyBtn: 'Go explore',
+    collectAnalysisReBtn: 'Re-interpret',
+    collectAnalysisErr: 'AI analysis service unreachable, try again later',
 
     // --- Livery Gallery ---
     liveryGallery: 'Livery Gallery',
@@ -7692,14 +7787,76 @@ function dismissToast() {
   if (toast) toast.classList.remove('show');
 }
 
+// ===== AI 收藏分析 =====
+function openCollectAnalysis() {
+  document.getElementById('collectAnalysisOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+  runCollectAnalysis();
+}
+function closeCollectAnalysis() {
+  document.getElementById('collectAnalysisOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+function caShow(which) {
+  document.getElementById('caEmpty').style.display = which === 'empty' ? 'block' : 'none';
+  document.getElementById('caLoading').style.display = which === 'loading' ? 'flex' : 'none';
+  document.getElementById('caResultWrap').style.display = which === 'result' ? 'block' : 'none';
+  document.getElementById('caErr').style.display = which === 'err' ? 'block' : 'none';
+}
+function runCollectAnalysis() {
+  var ids = collection ? Array.from(collection) : [];
+  if (!ids.length) { caShow('empty'); return; }
+  caShow('loading');
+  var lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh';
+  var catZh = { civil: '民航客机', fighter: '战斗机', bomber: '轰炸机', transport: '运输机', helicopter: '直升机' };
+  var catEn = { civil: 'Civil', fighter: 'Fighter', bomber: 'Bomber', transport: 'Transport', helicopter: 'Helicopter' };
+  var catMap = lang === 'en' ? catEn : catZh;
+  function fmt(a) { return a.code + '（' + (catMap[a.category] || a.category) + '，' + a.country + '）'; }
+  var list = ids.map(function(id) {
+    var a = aircrafts.find(function(x) { return x.id === id; });
+    return a ? fmt(a) : null;
+  }).filter(Boolean);
+  var allList = aircrafts.map(fmt).join('\n');
+  var prompt = '你是航空收藏品鉴专家。用户收藏了以下机型：\n' + list.join('\n') +
+    '\n\n可选机型全集（用于最后推荐尚未收藏的机型）：\n' + allList +
+    '\n\n请为用户生成一份生动有趣的「机库收藏洞察报告」，用' + (lang === 'en' ? 'English' : '中文') +
+    '输出，必须包含：1）一句话整体评价（如"你的机库偏爱宽体机""你是波音铁粉"）；2）分类偏好：宽体/窄体/支线/军用等倾向；3）制造商偏好：波音/空客/商飞/巴西等；4）时代偏好：经典复古还是现代前沿；5）趣味标签 2-3 个（如"宽体收藏家""波音铁粉""复古情怀党"）；6）收藏建议：从可选机型全集中推荐 1-2 款用户尚未收藏且符合其偏好的机型并说明理由。风格活泼有趣，适度使用 emoji，用 Markdown 格式（标题、列表、加粗）输出。';
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
+  fetch(AI_CONFIG.endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
+    body: JSON.stringify({
+      model: AI_CONFIG.model,
+      messages: [
+        { role: 'system', content: lang === 'en' ? 'You are a witty aviation collection analyst. Always reply in Markdown, lively and fun.' : '你是一位风趣的航空收藏品鉴专家，始终用活泼有趣的 Markdown 输出。' },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 900,
+      temperature: 0.8
+    }),
+    signal: controller.signal
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    clearTimeout(timeoutId);
+    var text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+    if (!text) throw new Error('empty');
+    document.getElementById('caReport').innerHTML = renderMarkdown(text);
+    caShow('result');
+  }).catch(function() {
+    clearTimeout(timeoutId);
+    document.getElementById('caErrText').textContent = t('collectAnalysisErr');
+    caShow('err');
+  });
+}
+
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260823-v49', '1');
+  localStorage.setItem('aviation-update-20260824-v50', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260823-v49')) return;
+  if (localStorage.getItem('aviation-update-20260824-v50')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -8378,6 +8535,14 @@ window.setLang = function(lang) {
   var paQ2El = document.getElementById('paQ2Title'); if (paQ2El) paQ2El.textContent = t('photoAiQ2');
   var paStartEl = document.getElementById('paStartBtnText'); if (paStartEl) paStartEl.textContent = t('photoAiStart');
   var paHintEl = document.getElementById('paStartHint'); if (paHintEl) paHintEl.textContent = t('photoAiHint');
+  var caBtnEl = document.getElementById('collectAnalysisBtnText'); if (caBtnEl) caBtnEl.textContent = t('collectAnalysisBtn');
+  var caTitleEl = document.getElementById('collectAnalysisTitleText'); if (caTitleEl) caTitleEl.textContent = t('collectAnalysisTitle');
+  var caEmptyTitleEl = document.getElementById('caEmptyTitle'); if (caEmptyTitleEl) caEmptyTitleEl.textContent = t('collectAnalysisEmptyTitle');
+  var caEmptyDescEl = document.getElementById('caEmptyDesc'); if (caEmptyDescEl) caEmptyDescEl.textContent = t('collectAnalysisEmptyDesc');
+  var caEmptyBtnEl = document.getElementById('caEmptyBtn'); if (caEmptyBtnEl) caEmptyBtnEl.textContent = t('collectAnalysisEmptyBtn');
+  var caLoadingEl = document.getElementById('caLoadingText'); if (caLoadingEl) caLoadingEl.textContent = t('collectAnalysisLoading');
+  var caReBtnEl = document.getElementById('collectAnalysisReBtnText'); if (caReBtnEl) caReBtnEl.textContent = t('collectAnalysisReBtn');
+  var caErrRetryEl = document.getElementById('caErrRetryBtn'); if (caErrRetryEl) caErrRetryEl.textContent = t('collectAnalysisErr');
 };
 
 // ===== Hero Banner 轮播 =====
