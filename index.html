@@ -4220,6 +4220,128 @@ body.light-mode .collect-record-panel {
 .privacy-body { font-size: 13.5px; line-height: 1.75; color: #c7cdde; }
 .privacy-body p { margin: 6px 0; }
 .privacy-body strong { color: #e8ebf7; }
+/* ===== 反馈与建议弹窗 ===== */
+#feedbackOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10,12,25,.66);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#feedbackOverlay.show { display: flex; }
+.feedback-card {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  max-height: 84vh;
+  background: linear-gradient(160deg, #1a1e33, #14172b);
+  border: 1px solid rgba(99,102,241,.25);
+  border-radius: 16px;
+  padding: 26px 24px 18px;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  animation: privacyPop .22s ease;
+}
+.feedback-title {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(90deg,#6366f1,#a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+.feedback-desc {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #8b93a7;
+  margin: 6px 0 4px;
+}
+.fb-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8ebf7;
+  margin: 16px 0 8px;
+}
+.fb-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.fb-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  border: 1px solid rgba(99,102,241,.35);
+  background: rgba(99,102,241,.08);
+  color: #c7cdde;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.fb-chip:hover { border-color: #818cf8; color: #fff; transform: translateY(-1px); }
+.fb-chip.on {
+  background: linear-gradient(90deg,#6366f1,#a855f7);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(99,102,241,.35);
+}
+.fb-textarea, .fb-input {
+  width: 100%;
+  background: rgba(10,12,25,.5);
+  border: 1px solid rgba(99,102,241,.3);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #e8ebf7;
+  font-size: 13.5px;
+  line-height: 1.6;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color .15s ease;
+}
+.fb-textarea { min-height: 110px; resize: vertical; }
+.fb-input { height: 40px; }
+.fb-textarea:focus, .fb-input:focus { border-color: #818cf8; }
+.fb-textarea::placeholder, .fb-input::placeholder { color: #5d667f; }
+.fb-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.fb-btn-main {
+  background: linear-gradient(90deg,#6366f1,#a855f7);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 9px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 2px 10px rgba(99,102,241,.35);
+}
+.fb-btn-main:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,.5); }
+.fb-btn-ghost {
+  background: transparent;
+  color: #a5b0ff;
+  border: 1px solid rgba(99,102,241,.4);
+  border-radius: 20px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.fb-btn-ghost:hover { background: rgba(99,102,241,.15); color: #fff; }
+.fb-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8b93a7;
+  margin-top: 12px;
+  min-height: 18px;
+}
+.fb-note.err { color: #f87171; }
+@media (max-width: 480px) {
+  .feedback-card { padding: 20px 16px 14px; }
+  .fb-btn-main, .fb-btn-ghost { flex: 1 1 auto; text-align: center; }
+}
 
 </style>
 
@@ -4227,7 +4349,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260824-v50">
+<body data-version="20260824-v51">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4736,7 +4858,7 @@ const i18n = {
 
 
     // --- 更新横幅 ---
-    updateBanner: '<span class="banner-highlight">AI 收藏分析上线</span>·一键解析你的机库收藏，趣味洞察报告等你解锁',
+    updateBanner: '<span class="banner-highlight">反馈与建议上线</span>·你的每一条建议，都会帮助我们做得更好，快来告诉我们吧！',
     photoAiTitle: '照片识机 · AI 识别机型',
     photoAiBtn: '照片识机',
     photoAiQ1: '第 1 题 · 飞机属于哪一类？',
@@ -4761,6 +4883,28 @@ const i18n = {
     collectAnalysisEmptyBtn: '去逛逛',
     collectAnalysisReBtn: '换一批解读',
     collectAnalysisErr: 'AI 分析服务连接失败，请稍后重试',
+
+    // --- 反馈与建议 ---
+    feedbackBtn: '反馈与建议',
+    feedbackTitle: '反馈与建议',
+    feedbackDesc: '你的每一条建议，都会帮助我们做得更好。提交后内容将公开记录在项目的 GitHub Issues 中，便于维护者集中跟进与统计。',
+    fbTypeLabel: '反馈类型',
+    fbFeature: '功能建议',
+    fbBug: 'Bug 反馈',
+    fbContentType: '内容纠错',
+    fbUx: '体验优化',
+    fbOther: '其他',
+    fbContentLabel: '反馈内容',
+    fbContentPh: '请描述你的建议、遇到的问题或想说的任何话…',
+    fbContactLabel: '联系方式（选填）',
+    fbContactPh: '微信号 / 邮箱，方便我们与你联系',
+    fbSubmit: '提交反馈',
+    fbCopy: '复制内容',
+    fbExport: '导出记录',
+    fbNoteOk: '反馈已保存到本地记录，并已在新的 GitHub Issues 页面预填内容，点击「Submit new issue」即可完成提交。',
+    fbNoteCopy: '反馈内容已复制到剪贴板，可前往 GitHub Issues 新建 Issue 粘贴提交。',
+    fbNoteExport: '已导出本地反馈记录（JSON 文件），可用于自行统计。',
+    fbNoteErr: '请先填写反馈内容',
 
     // --- 涂装画廊 ---
     liveryGallery: '涂装画廊',
@@ -5054,7 +5198,28 @@ const i18n = {
     tag_attack: 'Armed',
 
     // --- Update Banner ---
-    updateBanner: '<span class="banner-highlight">AI Hangar Analysis</span> · Get fun insight reports about your aircraft collection',
+    updateBanner: '<span class="banner-highlight">Feedback &amp; Suggestions</span> · Help us make the site better, share your thoughts now',
+    // --- Feedback & Suggestions ---
+    feedbackBtn: 'Feedback & Suggestions',
+    feedbackTitle: 'Feedback & Suggestions',
+    feedbackDesc: 'Every suggestion helps us improve. Submissions will be recorded publicly in the GitHub Issues of this project for maintainers to track and analyze.',
+    fbTypeLabel: 'Feedback Type',
+    fbFeature: 'Feature Request',
+    fbBug: 'Bug Report',
+    fbContentType: 'Content Correction',
+    fbUx: 'UX Improvement',
+    fbOther: 'Other',
+    fbContentLabel: 'Feedback',
+    fbContentPh: 'Describe your suggestion, the issue you met, or anything you want to say…',
+    fbContactLabel: 'Contact (optional)',
+    fbContactPh: 'WeChat ID / Email, so we can reach you',
+    fbSubmit: 'Submit',
+    fbCopy: 'Copy Content',
+    fbExport: 'Export Records',
+    fbNoteOk: 'Saved to local records, and pre-filled in a new GitHub Issue page. Click "Submit new issue" to finish.',
+    fbNoteCopy: 'Feedback copied to clipboard. You can paste it into a new GitHub Issue.',
+    fbNoteExport: 'Exported local feedback records (JSON file) for your own analysis.',
+    fbNoteErr: 'Please fill in the feedback first',
     photoAiTitle: 'Photo AI · Identify Aircraft',
     photoAiBtn: 'Photo AI',
     photoAiQ1: 'Q1 · Which category?',
@@ -7849,14 +8014,100 @@ function runCollectAnalysis() {
   });
 }
 
+// ===== 反馈与建议 =====
+var FB_REPO = 'v4hg27kjbc-alt/gamecenter';
+var FB_LABEL = { '功能建议': 'feature', 'Bug 反馈': 'bug', '内容纠错': 'content', '体验优化': 'ux', '其他': 'other' };
+function openFeedback() {
+  var o = document.getElementById('feedbackOverlay');
+  if (o) o.classList.add('show');
+}
+function closeFeedback() {
+  var o = document.getElementById('feedbackOverlay');
+  if (o) o.classList.remove('show');
+}
+function feedbackBackdrop(e) {
+  if (e && e.target && e.target.id === 'feedbackOverlay') closeFeedback();
+}
+function fbPickType(btn) {
+  var chips = document.querySelectorAll('#feedbackOverlay .fb-chip');
+  for (var i = 0; i < chips.length; i++) chips[i].classList.remove('on');
+  btn.classList.add('on');
+}
+function fbBuildText() {
+  var type = '功能建议';
+  var sel = document.querySelector('#feedbackOverlay .fb-chip.on');
+  if (sel) type = sel.getAttribute('data-fb');
+  var content = (document.getElementById('fbContent').value || '').trim();
+  if (!content) return null;
+  var contact = (document.getElementById('fbContact').value || '').trim();
+  var lines = ['【反馈类型】' + type, '', content];
+  if (contact) lines.push('', '【联系方式】' + contact);
+  return { type: type, content: content, contact: contact, text: lines.join('\n') };
+}
+function fbLog(rec) {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem('aviation-feedback-log') || '[]'); } catch (e) { arr = []; }
+  arr.push(rec);
+  try { localStorage.setItem('aviation-feedback-log', JSON.stringify(arr)); } catch (e) {}
+}
+function submitFeedback() {
+  var fb = fbBuildText();
+  if (!fb) { fbNote('err'); return; }
+  fbLog({ type: fb.type, content: fb.content, contact: fb.contact, time: new Date().toISOString() });
+  var title = '[' + fb.type + '] ' + fb.content.slice(0, 40);
+  var label = FB_LABEL[fb.type] || 'other';
+  var url = 'https://github.com/' + FB_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(fb.text) + '&labels=' + encodeURIComponent(label);
+  window.open(url, '_blank');
+  fbNote('ok');
+}
+function copyFeedback() {
+  var fb = fbBuildText();
+  if (!fb) { fbNote('err'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fb.text).then(function() { fbNote('copy'); }).catch(function() { legacyCopy(fb.text); });
+  } else {
+    legacyCopy(fb.text);
+  }
+}
+function legacyCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); fbNote('copy'); } catch (e) { fbNote('err'); }
+  ta.remove();
+}
+function exportFeedbackLog() {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem('aviation-feedback-log') || '[]'); } catch (e) { arr = []; }
+  var blob = new Blob([JSON.stringify(arr, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'aviation-feedback-log.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  fbNote('export');
+}
+function fbNote(kind) {
+  var el = document.getElementById('fbNote');
+  if (!el) return;
+  var key = kind === 'ok' ? 'fbNoteOk' : kind === 'copy' ? 'fbNoteCopy' : kind === 'export' ? 'fbNoteExport' : 'fbNoteErr';
+  el.textContent = t(key);
+  el.className = 'fb-note' + (kind === 'err' ? ' err' : '');
+}
+
 // ===== 更新通知横幅 =====
 function dismissUpdateBanner() {
   const banner = document.getElementById('updateBanner');
   if (banner) banner.classList.remove('visible');
-  localStorage.setItem('aviation-update-20260824-v50', '1');
+  localStorage.setItem('aviation-update-20260824-v51', '1');
 }
 function initUpdateBanner() {
-  if (localStorage.getItem('aviation-update-20260824-v50')) return;
+  if (localStorage.getItem('aviation-update-20260824-v51')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
@@ -8543,6 +8794,23 @@ window.setLang = function(lang) {
   var caLoadingEl = document.getElementById('caLoadingText'); if (caLoadingEl) caLoadingEl.textContent = t('collectAnalysisLoading');
   var caReBtnEl = document.getElementById('collectAnalysisReBtnText'); if (caReBtnEl) caReBtnEl.textContent = t('collectAnalysisReBtn');
   var caErrRetryEl = document.getElementById('caErrRetryBtn'); if (caErrRetryEl) caErrRetryEl.textContent = t('collectAnalysisErr');
+  var fbBtnEl = document.getElementById('feedbackBtnText'); if (fbBtnEl) fbBtnEl.textContent = t('feedbackBtn');
+  var fbTitleEl = document.getElementById('feedbackTitleText'); if (fbTitleEl) fbTitleEl.textContent = t('feedbackTitle');
+  var fbDescEl = document.getElementById('feedbackDescText'); if (fbDescEl) fbDescEl.textContent = t('feedbackDesc');
+  var fbTypeLblEl = document.getElementById('fbTypeLabel'); if (fbTypeLblEl) fbTypeLblEl.textContent = t('fbTypeLabel');
+  var fbContentLblEl = document.getElementById('fbContentLabel'); if (fbContentLblEl) fbContentLblEl.textContent = t('fbContentLabel');
+  var fbContactLblEl = document.getElementById('fbContactLabel'); if (fbContactLblEl) fbContactLblEl.textContent = t('fbContactLabel');
+  var fbContentEl = document.getElementById('fbContent'); if (fbContentEl) fbContentEl.placeholder = t('fbContentPh');
+  var fbContactEl = document.getElementById('fbContact'); if (fbContactEl) fbContactEl.placeholder = t('fbContactPh');
+  var fbSubmitEl = document.getElementById('fbSubmitBtn'); if (fbSubmitEl) fbSubmitEl.textContent = t('fbSubmit');
+  var fbCopyEl = document.getElementById('fbCopyBtn'); if (fbCopyEl) fbCopyEl.textContent = t('fbCopy');
+  var fbExportEl = document.getElementById('fbExportBtn'); if (fbExportEl) fbExportEl.textContent = t('fbExport');
+  var fbChipsEl = document.getElementById('fbChips');
+  if (fbChipsEl) {
+    var map = { '功能建议': t('fbFeature'), 'Bug 反馈': t('fbBug'), '内容纠错': t('fbContentType'), '体验优化': t('fbUx'), '其他': t('fbOther') };
+    var chips = fbChipsEl.querySelectorAll('.fb-chip');
+    chips.forEach(function(c) { var k = c.getAttribute('data-fb'); if (map[k]) c.textContent = map[k]; });
+  }
 };
 
 // ===== Hero Banner 轮播 =====
@@ -11210,13 +11478,15 @@ function privacyBackdrop(e) {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closePrivacyPolicy();
+  if (e.key === 'Escape') closeFeedback();
 });
 </script>
 
 <footer class="site-footer">
   <div class="footer-watermark">Aviation Collection © 2026</div>
   <button class="footer-policy-btn" onclick="openPrivacyPolicy()">协议政策</button>
-  <div class="footer-update">隐私政策更新：2026-08-22</div>
+  <button class="footer-policy-btn" onclick="openFeedback()"><span id="feedbackBtnText">反馈与建议</span></button>
+  <div class="footer-update">隐私政策更新：2026-08-24</div>
 </footer>
 
 <div id="privacyOverlay" onclick="privacyBackdrop(event)">
@@ -11239,6 +11509,8 @@ document.addEventListener('keydown', function(e) {
       <p>6. <strong>航空快讯（rss2json.com）</strong>：页面中的「航空快讯」功能通过第三方 RSS 解析服务 rss2json.com 抓取公开新闻源（如 Simple Flying、Aviation Week 等）的 RSS 内容。当您浏览快讯时，您的浏览器会直接向 rss2json.com 发起请求以获取新闻数据，该服务可能按其自身政策记录标准的访问日志；本网站不通过该渠道采集任何访客信息。</p>
       <p>7. <strong>托管平台（Cloudflare Pages）</strong>：本网站由 Cloudflare Pages 提供静态托管与 CDN 加速。Cloudflare 作为基础设施服务商，其网络边缘节点在传输过程中可能产生标准的访问日志（如 IP 地址、访问时间、请求路径），该日志属于托管平台的常规运维数据，本网站所有者不主动采集、不用于用户画像，也不向任何商业机构出售。</p>
       <p>8. <strong>访问统计（Umami）</strong>：本网站接入 Umami 开源网站统计后台，用于了解页面访问量、来源渠道与访问趋势等宏观运行数据。Umami 为隐私友好型统计方案：不采集个人身份信息、不使用 Cookie、不进行跨站追踪、不生成用户画像，所有统计数据均为匿名聚合，仅用于网站维护者优化内容与体验，不会向任何第三方出售或共享。</p>
+      <p>9. <strong>AI 收藏分析（智谱 AI 文本模型）</strong>：当您使用「AI 收藏分析」功能时，本网站会将您当前设备本地存储中已收藏的机型清单（机型名称、类别、国家）及页面内置的全部机型列表发送至智谱 AI（BigModel）的文本生成接口（GLM-4-flash），用于生成机库收藏洞察报告。传输内容仅包含上述机型清单文本，不包含您的设备信息、位置信息、浏览记录或任何其他本地数据；收藏清单始终保存在您自己的设备上，本网站不存储、不备份、不上传除上述 AI 分析请求以外的任何内容。第三方服务商将按其自身隐私政策处理该内容，生成的分析报告仅用于本次即时展示，本网站不保存任何报告记录。</p>
+      <p>10. <strong>反馈与建议（GitHub Issues）</strong>：页面底部的「反馈与建议」入口用于收集访客对网站功能、内容、体验等方面的意见。您填写的反馈类型、反馈内容及选填的联系方式，将在您点击「提交反馈」后，以公开 Issue 的形式提交至本项目托管于 GitHub 的开源仓库（GitHub Issues 页面），任何访问该仓库的人均可查看，便于维护者公开跟进、分类统计与答复。该提交行为由您主动发起并跳转至 GitHub 完成，本网站自身不存储、不上传您的反馈内容；若您不希望公开，可通过页面提供的「复制内容」功能自行私信维护者，或直接添加页面下方公布的联系方式。GitHub 平台将按其自身隐私政策处理提交内容，建议您不要在反馈中填写身份证号、银行账号、密码等敏感个人信息，联系方式建议使用公开微信或邮箱。</p>
       <p><strong>四、信息收集声明</strong></p>
       <p>1. 本网站不主动收集您的任何个人信息，包括姓名、电话、邮箱、地址、位置、设备标识等。</p>
       <p>2. 本网站不包含任何广告联盟代码、第三方统计埋点（如百度统计、Google Analytics）、Cookie 追踪、指纹识别或行为画像分析组件。页面内置一套纯本地的轻量行为记录机制：为优化浏览体验，会在您当前设备浏览器本地存储中记录访问事件（如页面浏览、收藏、点击、搜索关键词、屏幕分辨率、浏览器类型等）及一个随机生成的访客标识，该数据仅保存在您自己的设备上，不会上传至任何服务器或第三方，也不会用于跨站追踪或用户画像。</p>
@@ -11265,10 +11537,36 @@ document.addEventListener('keydown', function(e) {
       <p><strong>八、说明变更</strong></p>
       <p>本说明可能随网站功能调整而更新，更新后将在页面中展示最新版本，更新日期以页面标注为准。若您对隐私保护有任何疑问，可通过下方联系方式与网站维护者沟通。</p>
       <p><strong>九、意见反馈与联系方式</strong></p>
-      <p>欢迎各界朋友对本网站提出功能、内容或安全等方面的宝贵意见与建议，您的每一条反馈都是我们进步的动力。网站维护者微信号：<strong>15652760512</strong>。添加好友时请备注来意，以便我们及时、高效地为您服务。</p>
+      <p>欢迎各界朋友对本网站提出功能、内容或安全等方面的宝贵意见与建议，您的每一条反馈都是我们进步的动力。您可点击页面底部「反馈与建议」按钮在线提交（提交后将公开记录于项目 GitHub Issues，便于维护者集中跟进与统计），也可直接联系维护者。网站维护者微信号：<strong>15652760512</strong>。添加好友时请备注来意，以便我们及时、高效地为您服务。</p>
       <p><strong>十、免责声明</strong></p>
       <p>本网站展示的机型信息、历史资料及图片均来源于公开资料，仅供航空爱好者交流学习使用，不用于任何商业用途。如涉及版权问题，请联系维护者处理。</p>
     </div>
+  </div>
+</div>
+
+<div id="feedbackOverlay" onclick="feedbackBackdrop(event)">
+  <div class="feedback-card">
+    <button class="privacy-close" onclick="closeFeedback()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="feedback-title" id="feedbackTitleText">反馈与建议</div>
+    <div class="feedback-desc" id="feedbackDescText">你的每一条建议，都会帮助我们做得更好。提交后内容将公开记录在项目的 GitHub Issues 中，便于维护者集中跟进与统计。</div>
+    <div class="fb-label" id="fbTypeLabel">反馈类型</div>
+    <div class="fb-chips" id="fbChips">
+      <button class="fb-chip on" data-fb="功能建议" onclick="fbPickType(this)">功能建议</button>
+      <button class="fb-chip" data-fb="Bug 反馈" onclick="fbPickType(this)">Bug 反馈</button>
+      <button class="fb-chip" data-fb="内容纠错" onclick="fbPickType(this)">内容纠错</button>
+      <button class="fb-chip" data-fb="体验优化" onclick="fbPickType(this)">体验优化</button>
+      <button class="fb-chip" data-fb="其他" onclick="fbPickType(this)">其他</button>
+    </div>
+    <div class="fb-label" id="fbContentLabel">反馈内容</div>
+    <textarea class="fb-textarea" id="fbContent" placeholder="请描述你的建议、遇到的问题或想说的任何话…"></textarea>
+    <div class="fb-label" id="fbContactLabel">联系方式（选填）</div>
+    <input class="fb-input" id="fbContact" placeholder="微信号 / 邮箱，方便我们与你联系">
+    <div class="fb-actions">
+      <button class="fb-btn-main" id="fbSubmitBtn" onclick="submitFeedback()">提交反馈</button>
+      <button class="fb-btn-ghost" id="fbCopyBtn" onclick="copyFeedback()">复制内容</button>
+      <button class="fb-btn-ghost" id="fbExportBtn" onclick="exportFeedbackLog()">导出记录</button>
+    </div>
+    <div class="fb-note" id="fbNote"></div>
   </div>
 </div>
 
