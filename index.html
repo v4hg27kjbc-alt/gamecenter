@@ -249,15 +249,6 @@ body.light-mode .header h1 {
   letter-spacing: 5px; text-transform: uppercase;
 }
 
-/* ===== 恢复冷知识链接 ===== */
-.restore-coldfact {
-  display: inline-block; margin-top: 8px;
-  font-size: 0.72rem; color: var(--text-dim);
-  cursor: pointer; letter-spacing: 1px;
-  transition: color 0.3s; user-select: none;
-}
-.restore-coldfact:hover { color: var(--accent); }
-
 /* ===== 深色/浅色模式切换按钮 ===== */
 
 
@@ -758,45 +749,6 @@ body.light-mode .ai-loading { background: #f1f5f9; }
   box-shadow: none !important;
 }
 .airline-route-tooltip::before { border-right-color: rgba(7, 14, 23, 0.85) !important; }
-
-/* ===== 冷知识弹幕 ===== */
-.cold-fact-toast {
-  position: fixed; z-index: 9999;
-  bottom: 90px; right: -100%;
-  max-width: 420px; padding: 10px 36px 10px 16px;
-  background: rgba(13, 21, 32, 0.92); border: 1px solid rgba(255, 152, 0, 0.4);
-  border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-  color: #e0e0e0; font-size: 13px; line-height: 1.5;
-  white-space: normal; user-select: none;
-  animation: coldFactSlide 16s linear;
-  cursor: default;
-}
-.cold-fact-toast::before {
-  content: '✈ 冷知识';
-  display: block; font-size: 10px; color: #ff9800;
-  margin-bottom: 2px; letter-spacing: 1px;
-}
-.cold-fact-toast .cold-fact-toast-close {
-  position: absolute; top: 8px; right: 8px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: rgba(255,255,255,0.1); border: none; color: #999;
-  font-size: 11px; cursor: pointer; display: flex;
-  align-items: center; justify-content: center;
-  transition: all 0.2s; line-height: 1; padding: 0;
-}
-.cold-fact-toast .cold-fact-toast-close:hover {
-  background: rgba(255,255,255,0.25); color: #fff;
-}
-.cold-fact-toast .cold-fact-toast-hint {
-  display: block; font-size: 9px; color: rgba(255,255,255,0.3);
-  margin-top: 4px; letter-spacing: 0.5px;
-}
-@keyframes coldFactSlide {
-  0%   { right: -100%; }
-  5%   { right: 10px; }
-  85%  { right: 10px; }
-  100% { right: -100%; }
-}
 
 /* ===== 统计面板 ===== */
 .stats-panel {
@@ -1656,8 +1608,6 @@ body.light-mode .baike-item p { color: #444; }
   .compare-bar .compare-clear { font-size: 0.7rem; }
   .airline-card { flex-direction: column; align-items: center; text-align: center; }
   .airline-logo { width: 40px; height: 40px; }
-  .cold-fact-toast { max-width: 320px; bottom: 70px; font-size: 12px; padding: 8px 30px 8px 12px; }
-  .cold-fact-toast .cold-fact-toast-hint { font-size: 8px; margin-top: 2px; }
   .export-collection-btn { padding: 5px 10px; font-size: 0.7rem; margin-left: 4px; }
 }
 
@@ -1683,7 +1633,6 @@ body.light-mode .baike-item p { color: #444; }
   .filter-chip { padding: 4px 8px; font-size: 0.65rem; }
   .search-input { font-size: 0.8rem; padding: 8px 36px 8px 14px; }
   .sort-chip { padding: 5px 8px; font-size: 0.65rem; }
-  .cold-fact-toast { max-width: 260px; bottom: 60px; font-size: 11px; right: 10px; }
   .back-to-top { bottom: 16px; right: 10px; width: 36px; height: 36px; }
   .fab-add { bottom: 66px; right: 10px; width: 36px; height: 36px; }
   .compare-bar { padding: 8px 10px; }
@@ -1692,8 +1641,6 @@ body.light-mode .baike-item p { color: #444; }
   .compare-table-val { font-size: 0.75rem; padding: 2px 4px; }
   .compare-table-param { font-size: 0.66rem; }
   .compare-table-head .compare-table-name { font-size: 0.7rem; }
-  .cold-fact-toast .cold-fact-toast-close { width: 18px; height: 18px; top: 6px; right: 6px; font-size: 10px; }
-  .cold-fact-toast .cold-fact-toast-hint { font-size: 7px; }
   /* 航空快讯面板 */
   #newsPanelOverlay .ai-review-title { font-size: 0.95rem; }
   #newsPanelOverlay .news-summary-btn { font-size: 0.72rem; padding: 6px 10px; }
@@ -2949,7 +2896,7 @@ body.light-mode .map-container .leaflet-tile-pane {
 
 /* ===== AI 机型评价面板 ===== */
 #aiReviewOverlay {
-  position: fixed; inset: 0; z-index: 10001;
+  position: fixed; inset: 0; z-index: 10020;
   background: var(--body-bg);
   display: none;
   flex-direction: column;
@@ -3409,8 +3356,31 @@ body.light-mode .map-container .leaflet-tile-pane {
   border-color: rgba(99,102,241,0.6) !important;
   transform: translateY(-2px);
 }
+/* ===== 客舱实拍按钮（亮紫蓝，与详情操作按钮同系但不过淡） ===== */
+.cabin-entry-btn {
+  background: linear-gradient(135deg, rgba(59,130,246,0.55), rgba(139,92,246,0.55)) !important;
+  border: 1px solid rgba(99,102,241,0.75) !important;
+  color: #fff !important;
+  box-shadow: 0 0 12px rgba(99,102,241,0.22), inset 0 0 12px rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+}
+.cabin-entry-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: aiBtnGlow 1.8s ease 0.5s 1 forwards;
+  pointer-events: none;
+}
+.cabin-entry-btn:hover {
+  background: linear-gradient(135deg, rgba(59,130,246,0.75), rgba(139,92,246,0.75)) !important;
+  border-color: rgba(129,140,248,0.9) !important;
+  box-shadow: 0 0 18px rgba(99,102,241,0.4) !important;
+  transform: translateY(-2px);
+}
 .livery-overlay {
-  position: fixed; inset: 0; z-index: 2000;
+  position: fixed; inset: 0; z-index: 10040;
   background: rgba(4,8,18,0.82);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -3472,6 +3442,79 @@ body.light-mode .map-container .leaflet-tile-pane {
   padding: 20px 24px 26px;
   overflow-y: auto;
   flex: 1;
+}
+.cabin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  padding: 2px;
+}
+.cabin-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.cabin-photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  cursor: zoom-in;
+  overflow: hidden;
+  background: #101a33;
+}
+.cabin-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.cabin-photo:hover img {
+  transform: scale(1.05);
+}
+.cabin-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.cabin-tag.eco {
+  background: linear-gradient(135deg, #14b8a6, #10b981);
+}
+.cabin-desc {
+  padding: 12px 14px 4px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #d8dee9;
+}
+.cabin-desc strong { color: #e0e7ff; }
+.cabin-src {
+  display: block;
+  margin: 6px 14px 14px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+.cabin-src a {
+  color: #a5b4fc;
+  text-decoration: none;
+}
+.cabin-src a:hover { text-decoration: underline; }
+.cabin-img-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.05);
+  color: #94a3b8;
+  font-size: 0.85rem;
 }
 .livery-aircraft-title {
   display: flex; align-items: baseline; gap: 10px;
@@ -3739,7 +3782,7 @@ body.light-mode .livery-toast { background: rgba(255,255,255,0.95); color: #1a1a
 
 /* ===== 收藏记录弹窗 ===== */
 .collect-record-overlay {
-  position: fixed; inset: 0; z-index: 9000;
+  position: fixed; inset: 0; z-index: 10042;
   display: none; align-items: center; justify-content: center;
   background: rgba(5,10,22,0.72); backdrop-filter: blur(10px);
 }
@@ -4437,7 +4480,7 @@ body.light-mode .collect-record-panel {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260827-v53">
+<body data-version="20260905-v57">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -4451,10 +4494,25 @@ body.light-mode .collect-record-panel {
 </div>
 
 <div class="app-container">
+  <div class="sky-window" id="skyWindow" data-sky="night">
+    <div class="sky-layer sky-layer-dawn"></div>
+    <div class="sky-layer sky-layer-day"></div>
+    <div class="sky-layer sky-layer-dusk"></div>
+    <div class="sky-layer sky-layer-night"></div>
+    <div class="sky-sun"></div>
+    <div class="sky-moon"></div>
+    <div class="sky-cloud c1"></div>
+    <div class="sky-cloud c2"></div>
+    <div class="sky-planes">
+      <div class="sky-plane plane-a380" aria-hidden="true"><svg viewBox="0 0 980 300" fill="currentColor" preserveAspectRatio="xMidYMid meet"><path d="M 250.0,169.8 L 257.1,169.8 L 264.1,169.8 L 271.2,169.8 L 278.2,169.8 L 285.3,169.8 L 292.4,156.2 L 299.4,144.0 L 306.5,137.4 L 313.5,133.3 L 320.6,130.9 L 327.6,129.8 L 334.7,129.8 L 341.8,129.8 L 348.8,129.8 L 355.9,129.8 L 362.9,129.8 L 370.0,129.8 L 377.1,129.8 L 384.1,129.8 L 391.2,129.8 L 398.2,129.8 L 405.3,129.8 L 412.4,129.8 L 419.4,129.8 L 426.5,129.8 L 433.5,129.8 L 440.6,129.8 L 447.6,129.8 L 454.7,129.8 L 461.8,129.8 L 468.8,129.8 L 475.9,129.8 L 482.9,129.8 L 490.0,129.8 L 497.1,129.8 L 504.1,129.8 L 511.2,129.8 L 518.2,129.8 L 525.3,129.8 L 532.4,129.8 L 539.4,129.8 L 546.5,129.8 L 553.5,129.8 L 560.6,129.8 L 567.6,129.8 L 574.7,129.8 L 581.8,129.8 L 588.8,129.8 L 595.9,129.8 L 602.9,129.8 L 610.0,129.8 L 617.1,129.8 L 624.1,129.8 L 631.2,129.8 L 638.2,129.8 L 645.3,129.8 L 652.4,129.8 L 659.4,129.8 L 666.5,129.8 L 673.5,129.8 L 680.6,129.8 L 687.6,129.8 L 694.7,135.1 L 701.8,142.1 L 708.8,149.0 L 715.9,155.9 L 722.9,162.8 L 730.0,169.8 L 730.0,169.8 L 722.9,176.7 L 715.9,183.6 L 708.8,190.5 L 701.8,197.4 L 694.7,204.4 L 687.6,209.8 L 680.6,209.8 L 673.5,209.8 L 666.5,209.8 L 659.4,209.8 L 652.4,209.8 L 645.3,209.8 L 638.2,209.8 L 631.2,209.8 L 624.1,209.8 L 617.1,209.8 L 610.0,209.8 L 602.9,209.8 L 595.9,209.8 L 588.8,209.8 L 581.8,209.8 L 574.7,209.8 L 567.6,209.8 L 560.6,209.8 L 553.5,209.8 L 546.5,209.8 L 539.4,209.8 L 532.4,209.8 L 525.3,209.8 L 518.2,209.8 L 511.2,209.8 L 504.1,209.8 L 497.1,209.8 L 490.0,209.8 L 482.9,209.8 L 475.9,209.8 L 468.8,209.8 L 461.8,209.8 L 454.7,209.8 L 447.6,209.8 L 440.6,209.8 L 433.5,209.8 L 426.5,209.8 L 419.4,209.8 L 412.4,209.8 L 405.3,209.8 L 398.2,209.8 L 391.2,209.8 L 384.1,209.8 L 377.1,209.8 L 370.0,209.8 L 362.9,209.8 L 355.9,209.8 L 348.8,209.8 L 341.8,209.8 L 334.7,209.8 L 327.6,209.7 L 320.6,208.6 L 313.5,206.2 L 306.5,202.1 L 299.4,195.5 L 292.4,183.3 L 285.3,169.8 L 278.2,169.8 L 271.2,169.8 L 264.1,169.8 L 257.1,169.8 L 250.0,169.8 Z M 530.8,129.8 L 645.5,33.8 L 722.8,126.9 L 729.0,147.8 Z M 672.4,186.6 L 668.1,201.8 L 638.2,193.8 Z M 398.9,159.8 L 405.1,159.8 L 403.9,198.2 L 396.9,198.2 Z M 432.9,222.2 L 432.1,216.0 L 429.7,210.2 L 425.9,205.3 L 420.9,201.5 L 415.1,199.1 L 408.9,198.2 L 402.7,199.1 L 396.9,201.5 L 391.9,205.3 L 388.1,210.2 L 385.7,216.0 L 384.9,222.2 L 359.9,222.2 L 360.7,228.5 L 363.1,234.2 L 366.9,239.2 L 371.9,243.0 L 377.7,245.4 L 383.9,246.2 L 390.1,245.4 L 395.9,243.0 L 400.9,239.2 L 404.7,234.2 L 407.1,228.5 L 407.9,222.2 Z M 437.3,159.8 L 443.5,159.8 L 442.3,198.2 L 435.3,198.2 Z M 471.3,222.2 L 470.5,216.0 L 468.1,210.2 L 464.3,205.3 L 459.3,201.5 L 453.5,199.1 L 447.3,198.2 L 441.1,199.1 L 435.3,201.5 L 430.3,205.3 L 426.5,210.2 L 424.1,216.0 L 423.3,222.2 L 398.3,222.2 L 399.1,228.5 L 401.5,234.2 L 405.3,239.2 L 410.3,243.0 L 416.1,245.4 L 422.3,246.2 L 428.5,245.4 L 434.3,243.0 L 439.3,239.2 L 443.1,234.2 L 445.5,228.5 L 446.3,222.2 Z M 502.0,159.8 L 508.0,159.8 L 506.8,198.2 L 500.1,198.2 Z M 534.8,221.3 L 534.0,215.3 L 531.7,209.8 L 528.0,204.9 L 523.2,201.3 L 517.6,198.9 L 511.6,198.2 L 505.6,198.9 L 500.0,201.3 L 495.2,204.9 L 491.5,209.8 L 489.2,215.3 L 488.4,221.3 L 464.4,221.3 L 465.2,227.4 L 467.5,232.9 L 471.2,237.8 L 476.0,241.4 L 481.6,243.8 L 487.6,244.6 L 493.6,243.8 L 499.2,241.4 L 504.0,237.8 L 507.7,232.9 L 510.0,227.4 L 510.8,221.3 Z M 540.4,159.8 L 546.4,159.8 L 545.2,198.2 L 538.5,198.2 Z M 573.2,221.3 L 572.4,215.3 L 570.1,209.8 L 566.4,204.9 L 561.6,201.3 L 556.0,198.9 L 550.0,198.2 L 544.0,198.9 L 538.4,201.3 L 533.6,204.9 L 529.9,209.8 L 527.6,215.3 L 526.8,221.3 L 502.8,221.3 L 503.6,227.4 L 505.9,232.9 L 509.6,237.8 L 514.4,241.4 L 520.0,243.8 L 526.0,244.6 L 532.0,243.8 L 537.6,241.4 L 542.4,237.8 L 546.1,232.9 L 548.4,227.4 L 549.2,221.3 Z"/></svg></div>
+      <div class="sky-plane plane-b787" aria-hidden="true"><svg viewBox="0 0 980 300" fill="currentColor" preserveAspectRatio="xMidYMid meet"><path d="M 262.5,154.9 L 269.2,154.9 L 275.9,154.9 L 282.6,154.9 L 289.3,154.9 L 296.0,140.9 L 302.6,132.4 L 309.3,127.9 L 316.0,125.6 L 322.7,124.9 L 329.4,124.9 L 336.1,124.9 L 342.8,124.9 L 349.5,124.9 L 356.2,124.9 L 362.9,124.9 L 369.6,124.9 L 376.2,124.9 L 382.9,124.9 L 389.6,124.9 L 396.3,124.9 L 403.0,124.9 L 409.7,124.9 L 416.4,124.9 L 423.1,124.9 L 429.8,124.9 L 436.5,124.9 L 443.2,124.9 L 449.9,124.9 L 456.5,124.9 L 463.2,124.9 L 469.9,124.9 L 476.6,124.9 L 483.3,124.9 L 490.0,124.9 L 496.7,124.9 L 503.4,124.9 L 510.1,124.9 L 516.8,124.9 L 523.5,124.9 L 530.1,124.9 L 536.8,124.9 L 543.5,124.9 L 550.2,124.9 L 556.9,124.9 L 563.6,124.9 L 570.3,124.9 L 577.0,124.9 L 583.7,124.9 L 590.4,124.9 L 597.1,124.9 L 603.8,124.9 L 610.4,124.9 L 617.1,124.9 L 623.8,124.9 L 630.5,124.9 L 637.2,124.9 L 643.9,124.9 L 650.6,124.9 L 657.3,124.9 L 664.0,124.9 L 670.7,124.9 L 677.4,124.9 L 684.0,128.9 L 690.7,134.1 L 697.4,139.3 L 704.1,144.5 L 710.8,149.7 L 717.5,154.9 L 717.5,154.9 L 710.8,160.1 L 704.1,165.3 L 697.4,170.5 L 690.7,175.7 L 684.0,180.9 L 677.4,184.9 L 670.7,184.9 L 664.0,184.9 L 657.3,184.9 L 650.6,184.9 L 643.9,184.9 L 637.2,184.9 L 630.5,184.9 L 623.8,184.9 L 617.1,184.9 L 610.4,184.9 L 603.8,184.9 L 597.1,184.9 L 590.4,184.9 L 583.7,184.9 L 577.0,184.9 L 570.3,184.9 L 563.6,184.9 L 556.9,184.9 L 550.2,184.9 L 543.5,184.9 L 536.8,184.9 L 530.1,184.9 L 523.5,184.9 L 516.8,184.9 L 510.1,184.9 L 503.4,184.9 L 496.7,184.9 L 490.0,184.9 L 483.3,184.9 L 476.6,184.9 L 469.9,184.9 L 463.2,184.9 L 456.5,184.9 L 449.9,184.9 L 443.2,184.9 L 436.5,184.9 L 429.8,184.9 L 423.1,184.9 L 416.4,184.9 L 409.7,184.9 L 403.0,184.9 L 396.3,184.9 L 389.6,184.9 L 382.9,184.9 L 376.2,184.9 L 369.6,184.9 L 362.9,184.9 L 356.2,184.9 L 349.5,184.9 L 342.8,184.9 L 336.1,184.9 L 329.4,184.9 L 322.7,184.9 L 316.0,184.2 L 309.3,181.9 L 302.6,177.4 L 296.0,168.9 L 289.3,154.9 L 282.6,154.9 L 275.9,154.9 L 269.2,154.9 L 262.5,154.9 Z M 556.0,124.9 L 645.4,60.9 L 710.3,123.0 L 716.5,138.4 Z M 660.6,167.5 L 656.5,178.9 L 628.2,172.9 Z M 467.7,147.4 L 474.5,147.4 L 473.2,159.1 L 465.5,159.1 Z M 508.6,189.1 L 507.6,181.3 L 504.6,174.1 L 499.8,167.9 L 493.6,163.1 L 486.4,160.1 L 478.6,159.1 L 470.9,160.1 L 463.6,163.1 L 457.4,167.9 L 452.6,174.1 L 449.6,181.3 L 448.6,189.1 L 421.3,189.1 L 422.3,196.9 L 425.3,204.1 L 430.1,210.3 L 436.3,215.1 L 443.6,218.1 L 451.3,219.1 L 459.1,218.1 L 466.3,215.1 L 472.5,210.3 L 477.3,204.1 L 480.3,196.9 L 481.3,189.1 Z M 513.0,147.4 L 519.4,147.4 L 518.1,159.9 L 511.0,159.9 Z M 552.0,188.7 L 551.0,181.2 L 548.2,174.2 L 543.6,168.3 L 537.6,163.7 L 530.7,160.8 L 523.2,159.9 L 515.8,160.8 L 508.8,163.7 L 502.9,168.3 L 498.3,174.2 L 495.4,181.2 L 494.4,188.7 L 468.9,188.7 L 469.9,196.1 L 472.8,203.1 L 477.4,209.0 L 483.3,213.6 L 490.3,216.5 L 497.7,217.4 L 505.2,216.5 L 512.1,213.6 L 518.1,209.0 L 522.7,203.1 L 525.6,196.1 L 526.5,188.7 Z"/></svg></div>
+      <div class="sky-plane plane-b737" aria-hidden="true"><svg viewBox="0 0 980 300" fill="currentColor" preserveAspectRatio="xMidYMid meet"><path d="M 340.0,160.8 L 344.4,160.8 L 348.8,160.8 L 353.2,160.8 L 357.6,160.8 L 362.1,151.9 L 366.5,146.0 L 370.9,142.9 L 375.3,141.3 L 379.7,140.8 L 384.1,140.8 L 388.5,140.8 L 392.9,140.8 L 397.4,140.8 L 401.8,140.8 L 406.2,140.8 L 410.6,140.8 L 415.0,140.8 L 419.4,140.8 L 423.8,140.8 L 428.2,140.8 L 432.6,140.8 L 437.1,140.8 L 441.5,140.8 L 445.9,140.8 L 450.3,140.8 L 454.7,140.8 L 459.1,140.8 L 463.5,140.8 L 467.9,140.8 L 472.4,140.8 L 476.8,140.8 L 481.2,140.8 L 485.6,140.8 L 490.0,140.8 L 494.4,140.8 L 498.8,140.8 L 503.2,140.8 L 507.6,140.8 L 512.1,140.8 L 516.5,140.8 L 520.9,140.8 L 525.3,140.8 L 529.7,140.8 L 534.1,140.8 L 538.5,140.8 L 542.9,140.8 L 547.4,140.8 L 551.8,140.8 L 556.2,140.8 L 560.6,140.8 L 565.0,140.8 L 569.4,140.8 L 573.8,140.8 L 578.2,140.8 L 582.6,140.8 L 587.1,140.8 L 591.5,140.8 L 595.9,140.8 L 600.3,140.8 L 604.7,140.8 L 609.1,140.8 L 613.5,140.8 L 617.9,143.4 L 622.4,146.9 L 626.8,150.4 L 631.2,153.8 L 635.6,157.3 L 640.0,160.8 L 640.0,160.8 L 635.6,164.2 L 631.2,167.7 L 626.8,171.1 L 622.4,174.6 L 617.9,178.1 L 613.5,180.8 L 609.1,180.8 L 604.7,180.8 L 600.3,180.8 L 595.9,180.8 L 591.5,180.8 L 587.1,180.8 L 582.6,180.8 L 578.2,180.8 L 573.8,180.8 L 569.4,180.8 L 565.0,180.8 L 560.6,180.8 L 556.2,180.8 L 551.8,180.8 L 547.4,180.8 L 542.9,180.8 L 538.5,180.8 L 534.1,180.8 L 529.7,180.8 L 525.3,180.8 L 520.9,180.8 L 516.5,180.8 L 512.1,180.8 L 507.6,180.8 L 503.2,180.8 L 498.8,180.8 L 494.4,180.8 L 490.0,180.8 L 485.6,180.8 L 481.2,180.8 L 476.8,180.8 L 472.4,180.8 L 467.9,180.8 L 463.5,180.8 L 459.1,180.8 L 454.7,180.8 L 450.3,180.8 L 445.9,180.8 L 441.5,180.8 L 437.1,180.8 L 432.6,180.8 L 428.2,180.8 L 423.8,180.8 L 419.4,180.8 L 415.0,180.8 L 410.6,180.8 L 406.2,180.8 L 401.8,180.8 L 397.4,180.8 L 392.9,180.8 L 388.5,180.8 L 384.1,180.8 L 379.7,180.7 L 375.3,180.2 L 370.9,178.6 L 366.5,175.5 L 362.1,169.6 L 357.6,160.8 L 353.2,160.8 L 348.8,160.8 L 344.4,160.8 L 340.0,160.8 Z M 520.0,140.8 L 582.7,80.8 L 634.8,138.9 L 639.3,149.8 Z M 599.5,169.2 L 596.8,176.8 L 578.1,172.8 Z M 439.5,155.8 L 444.4,155.8 L 443.4,164.8 L 437.9,164.8 Z M 464.6,182.1 L 464.0,177.6 L 462.3,173.4 L 459.6,169.9 L 456.0,167.2 L 451.9,165.4 L 447.4,164.8 L 442.9,165.4 L 438.8,167.2 L 435.2,169.9 L 432.5,173.4 L 430.8,177.6 L 430.2,182.0 L 410.4,182.0 L 411.0,186.5 L 412.7,190.7 L 415.4,194.2 L 419.0,196.9 L 423.1,198.7 L 427.6,199.2 L 432.1,198.7 L 436.2,196.9 L 439.8,194.2 L 442.5,190.6 L 444.2,186.5 L 444.8,182.1 Z M 467.9,155.8 L 472.5,155.8 L 471.6,164.9 L 466.4,164.9 Z M 492.1,181.8 L 491.5,177.4 L 489.8,173.3 L 487.2,169.9 L 483.7,167.2 L 479.6,165.5 L 475.3,164.9 L 471.0,165.5 L 466.9,167.2 L 463.4,169.9 L 460.8,173.3 L 459.1,177.4 L 458.5,181.8 L 439.9,181.8 L 440.5,186.1 L 442.2,190.2 L 444.8,193.6 L 448.3,196.3 L 452.4,198.0 L 456.7,198.6 L 461.0,198.0 L 465.1,196.3 L 468.6,193.6 L 471.2,190.2 L 472.9,186.1 L 473.5,181.8 Z"/></svg></div>
+    </div>
+    <div class="sky-label"><span class="sky-label-dot"></span><span id="skyLabelText">夜间 · 巡航</span></div>
+  </div>
   <div class="header">
     <h1 id="headerTitle" class="title-fade-in" style="animation-delay:0.1s">民航客机收藏馆</h1>
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
-    <span class="restore-coldfact" id="restoreColdFact" onclick="restoreColdFact()" title="恢复冷知识弹幕" style="display:none">&#9733; 恢复冷知识</span>
     <button class="theme-toggle-btn letter-btn" id="letterBtn" aria-label="一封信" title="一封信"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg> 一封信</button>
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
     
@@ -4561,6 +4619,7 @@ body.light-mode .collect-record-panel {
     <button class="filter-chip news-btn" id="newsBtn" onclick="openNewsPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg><span id="newsBtnText">航空快讯</span></button>
     <button class="filter-chip kg-btn" id="kgBtn" onclick="openKgPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="19" r="2"/><line x1="14.5" y1="9.5" x2="17.5" y2="6.5"/><line x1="9.5" y1="9.5" x2="6.5" y2="6.5"/><line x1="14.5" y1="14.5" x2="17.5" y2="17.5"/><line x1="9.5" y1="14.5" x2="6.5" y2="17.5"/></svg><span id="kgBtnText">AI 知识图谱</span></button>
     <button class="filter-chip quiz-btn" id="quizBtn" onclick="openQuiz()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114.5 1.6c-.8.8-2 1.4-2 2.9"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="quizBtnText">机型 Quiz</span></button>
+    <button class="filter-chip quiz-btn" id="coldfactBtn" onclick="openColdFacts()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M9.2 18a3.5 3.5 0 005.6 0"/><path d="M12 2a6 6 0 00-6 6c0 3 1.4 4.6 2.6 6h6.8c1.2-1.4 2.6-3 2.6-6a6 6 0 00-6-6z"/><line x1="10" y1="20.5" x2="14" y2="20.5"/></svg><span id="coldfactBtnText">AI 冷知识</span></button>
     <button class="filter-chip quiz-btn" id="badgeBtn" onclick="openBadges()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.9 4.9l1.4 1.4"/><path d="M17.7 17.7l1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.9 19.1l1.4-1.4"/><path d="M17.7 6.3l1.4-1.4"/></svg><span id="badgeBtnText">成就</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="filter-chip collect-record-btn" id="collectRecordBtn" onclick="openCollectRecord()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21z"/></svg><span id="collectRecordBtnText">收藏记录</span><span class="collect-record-dot" id="collectRecordDot">0</span></button>
@@ -4851,6 +4910,24 @@ body.light-mode .collect-record-panel {
   </div>
 </div>
 
+<!-- ===== 客舱实拍弹窗 ===== -->
+<div id="cabinOverlay" class="livery-overlay" onclick="cabinBackdrop(event)">
+  <div class="livery-panel">
+    <div class="livery-header">
+      <div class="livery-header-title">
+        <span id="cabinTitle">客舱实拍</span>
+        <span class="livery-title-sub" id="cabinSub"></span>
+      </div>
+      <div class="livery-header-actions">
+        <button class="quiz-close" onclick="closeCabin()" title="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="livery-content" id="cabinContent"></div>
+  </div>
+</div>
+
 <div id="overlayContainer"></div>
 
 <!-- ===== 收藏记录弹窗（机型+涂装统一） ===== -->
@@ -5039,28 +5116,6 @@ const i18n = {
     aiError: 'AI 暂时不可用，请稍后重试',
     aiClose: '关闭',
 
-
-    // --- 冷知识弹幕 ---
-    coldFact_1: '波音 747 的垂直尾翼高达 19.4 米，相当于六层楼的高度',
-    coldFact_2: '空客 A380 的机翼面积约 845 平方米，相当于 3 个网球场',
-    coldFact_3: '飞机餐口味偏淡是因为高空气压降低了约 30% 的味觉敏感度',
-    coldFact_4: '黑匣子的外壳其实是醒目的橙色，便于事故后搜寻',
-    coldFact_5: '民航客机万米巡航时外界温度低至 -50°C，靠空调系统维持客舱 20°C',
-    coldFact_6: '飞机舷窗底部的小孔用于平衡内外气压差，保护窗户结构',
-    coldFact_7: '闪电击中飞机时电流沿金属机身表面传导逸散，舱内人员毫发无损',
-    coldFact_8: '协和号超音速飞行时因空气摩擦热膨胀，机身会拉长约 30 厘米',
-    coldFact_9: '飞机客舱内的空气每 2-3 分钟经过 HEPA 过滤完全更换一次',
-    coldFact_10: '民航飞机轮胎充填的是氮气而非普通空气，防止高温高压爆胎',
-    coldFact_11: '一架波音 747 由约 600 万个独立零件组装而成',
-    coldFact_12: '世界上最短的商业航班位于苏格兰，航程仅 47 秒',
-    coldFact_13: '飞机起飞和降落阶段的油耗占整个航程的 25%',
-    coldFact_14: '民航客机降落时通常逆风着陆，增加升力、缩短滑跑距离',
-    coldFact_15: '飞行员和副驾驶在飞行途中吃不同餐食，以防同时食物中毒',
-    coldFact_16: '飞机发动机吸入鸟类时称为鸟击，90% 发生在起降阶段',
-    coldFact_17: '一条跑道可承载的最大起飞重量超过 500 吨',
-    coldFact_18: '空客和波音驾驶舱最大的区别是：空客用侧杆，波音用中央操纵杆',
-    coldFact_19: 'A350 机身 53% 由碳纤维复合材料制成，比同级别飞机轻 20%',
-    coldFact_20: '民航客机每飞行一小时需接受约 12 小时的地面维护检查',
 
     // --- 规格标签 ---
     specCruiseSpeed: '巡航速度',
@@ -5375,28 +5430,6 @@ const i18n = {
     aiClose: 'Close',
 
 
-    // --- Cold Facts ---
-    coldFact_1: 'The Boeing 747\'s tail fin stands 19.4m tall, equivalent to a six-story building',
-    coldFact_2: 'The Airbus A380\'s wing area is about 845 sqm, roughly 3 tennis courts',
-    coldFact_3: 'Airline food tastes bland because high altitude reduces taste sensitivity by ~30%',
-    coldFact_4: 'Black boxes are actually bright orange for easier recovery after accidents',
-    coldFact_5: 'At cruising altitude, outside temperature drops to -50; cabin A/C maintains 20\u00b0C',
-    coldFact_6: 'The tiny hole in airplane windows balances pressure differentials to protect the window',
-    coldFact_7: 'When lightning strikes an aircraft, current travels along the metal skin safely away',
-    coldFact_8: 'Concorde stretched about 30cm during supersonic flight due to frictional heating',
-    coldFact_9: 'Cabin air is completely replaced every 2-3 minutes through HEPA filtration',
-    coldFact_10: 'Aircraft tires are filled with nitrogen not air, preventing high-temp blowouts',
-    coldFact_11: 'A single Boeing 747 is assembled from approximately 6 million individual parts',
-    coldFact_12: 'The shortest commercial flight in Scotland lasts only 47 seconds',
-    coldFact_13: 'Takeoff and landing account for 25% of total fuel consumption per flight',
-    coldFact_14: 'Airliners typically land against the wind to increase lift and shorten rollout',
-    coldFact_15: 'Pilots and co-pilots eat different meals to avoid simultaneous food poisoning',
-    coldFact_16: 'Bird strikes occur when engines ingest birds, 90% happen during takeoff/landing',
-    coldFact_17: 'A single runway can support a maximum takeoff weight exceeding 500 tons',
-    coldFact_18: 'Key cockpit difference: Airbus uses sidestick, Boeing uses central yoke',
-    coldFact_19: 'The A350 fuselage is 53% carbon fiber composite, 20% lighter than peers',
-    coldFact_20: 'For every hour of flight, an airliner requires about 12 hours of ground maintenance',
-
     // --- Spec Labels ---
     specCruiseSpeed: 'Cruise Speed',
     specMaxSpeed: 'Max Speed',
@@ -5666,6 +5699,15 @@ const airlineRoutes = {
   'af': { hub: 'CDG', routes: [['CDG','JFK'],['CDG','PEK'],['CDG','GRU'],['CDG','SIN'],['CDG','DEL']] },
   'ua': { hub: 'SFO', routes: [['SFO','LHR'],['SFO','NRT'],['SFO','SYD'],['EWR','SIN'],['ORD','CDG']] },
   'dl': { hub: 'ATL', routes: [['ATL','AMS'],['ATL','CDG'],['ATL','HND'],['JFK','LHR'],['LAX','SYD']] }
+};
+
+const CABIN_SHOTS = {
+  1: { code: 'A380', display: 'Airbus A380', biz: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Emirates_Airbus_A380-861_biz_class_Iwelumo.jpg/960px-Emirates_Airbus_A380-861_biz_class_Iwelumo.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Emirates_Airbus_A380-861_biz_class_Iwelumo.jpg', airline: '阿联酋航空', desc: '阿联酋航空 A380 上层商务舱实拍，座椅宽大并带专属娱乐屏幕，双层巨无霸营造出民航客机中最开阔的客舱空间。' }, eco: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Emirates_economy_class_cabin_A380.jpg/960px-Emirates_economy_class_cabin_A380.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Emirates_economy_class_cabin_A380.jpg', airline: '阿联酋航空', desc: '阿联酋航空 A380 下层经济舱实拍，高密度布局配上个人娱乐屏幕，同一架双层客机能搭载五百多名旅客。' } },
+  2: { code: '787', display: 'Boeing 787-9', biz: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/Eva_Air_Boeing_787-9_Business_Class.jpg/960px-Eva_Air_Boeing_787-9_Business_Class.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Eva_Air_Boeing_787-9_Business_Class.jpg', airline: '长荣航空', desc: '长荣航空 787-9 商务舱实拍，座椅宽大可平躺，专属娱乐屏与无级调光舷窗共同提升洲际飞行体验。' }, eco: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/ANA_Boeing_787-8_Dreamliner_cabin_LED_windows.jpg/960px-ANA_Boeing_787-8_Dreamliner_cabin_LED_windows.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:ANA_Boeing_787-8_Dreamliner_cabin_LED_windows.jpg', airline: '全日空', desc: '全日空 787 经济舱实拍，蓝色座椅排列整齐，顶部舷窗无遮光板——电致变色调光是梦幻客机的标志性设计。' } },
+  3: { code: 'A350', display: 'Airbus A350-900', biz: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/Business_class_seat_of_B-322H_%2820250405151819%29.jpg/960px-Business_class_seat_of_B-322H_%2820250405151819%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Business_class_seat_of_B-322H_(20250405151819).jpg', airline: 'B-322H', desc: 'A350-900 商务舱实拍（B-322H），红紫撞色座椅辨识度极高，宽大屏幕与充足储物让长途旅行更从容。' }, eco: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/3-3-3_seat_configuration_of_the_A350_economy-class_cabin.jpg/960px-3-3-3_seat_configuration_of_the_A350_economy-class_cabin.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:3-3-3_seat_configuration_of_the_A350_economy-class_cabin.jpg', airline: 'A350-900', desc: 'A350-900 经济舱标准 3-3-3 布局实拍，座椅宽度在同级宽体机中领先，头顶大尺寸行李舱让登机更顺畅。' } },
+  4: { code: '777', display: 'Boeing 777-300ER', biz: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Aeroflot_Boeing_777-300ER_Business_Class_Cabin.jpg/960px-Aeroflot_Boeing_777-300ER_Business_Class_Cabin.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Aeroflot_Boeing_777-300ER_Business_Class_Cabin.jpg', airline: '俄罗斯航空', desc: '俄罗斯航空 777-300ER 商务舱实拍，宽体机商务座椅可调至平躺睡床，是长途航线的舒适担当。' }, eco: { img: 'https://upload.wikimedia.org/wikipedia/commons/3/34/Emirates_777_Economy_class_cabin.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Emirates_777_Economy_class_cabin.jpg', airline: '阿联酋航空', desc: '阿联酋航空 777 经济舱实拍，宽体双通道客舱布局开阔，个人娱乐屏覆盖每个座位。' } },
+  6: { code: 'A320neo', display: 'Airbus A320neo', biz: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Business_class_seat_of_B-8500_%2820230927171659%29.jpg/960px-Business_class_seat_of_B-8500_%2820230927171659%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Business_class_seat_of_B-8500_(20230927171659).jpg', airline: 'B-8500', desc: 'A320neo 商务舱实拍（B-8500），窄体干线机同样保留两舱配置，红紫相间皮椅更显活力。' }, eco: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/04-NOV-2023_-_PC5036_FRA-AYT_%28TC-NCK_-_A320neo%29_%2802%29.jpg/960px-04-NOV-2023_-_PC5036_FRA-AYT_%28TC-NCK_-_A320neo%29_%2802%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:04-NOV-2023_-_PC5036_FRA-AYT_(TC-NCK_-_A320neo)_(02).jpg', airline: '飞马航空', desc: '飞马航空 A320neo 经济舱实拍，低成本航司采用全经济舱高密度布局，黑色皮椅简约利落。' } },
+  7: { code: '737MAX', display: 'Boeing 737 MAX 8', biz: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Business_class_interior_of_B-1385_%2820180212115025%29.jpg/960px-Business_class_interior_of_B-1385_%2820180212115025%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Business_class_interior_of_B-1385_(20180212115025).jpg', airline: 'B-1385', desc: '737 MAX 8 商务舱实拍（B-1385），米色皮椅配软隔帘分区，窄体机同样保留两舱服务。' }, eco: { img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Economy_class_interior_of_B-1385_%2820180212154323%29.jpg/960px-Economy_class_interior_of_B-1385_%2820180212154323%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', src: 'https://commons.wikimedia.org/wiki/File:Economy_class_interior_of_B-1385_(2018021212154323).jpg', airline: 'B-1385', desc: '737 MAX 8 经济舱实拍（B-1385），3+3 标准布局配波音天空内饰，头顶屏幕清晰明亮。' } }
 };
 
 const LIVERIES = {
@@ -7764,10 +7806,8 @@ function openImageLightbox(imageSrc) {
 function closeImageLightbox() {
   var lb = document.querySelector('.image-lightbox');
   if (lb) lb.remove();
-  // Only restore scrolling if detail overlay is also closed
-  if (!document.getElementById('overlayContainer').children.length) {
-    document.body.style.overflow = '';
-  }
+  // 统一滚动守护：若下层仍有全屏层则保持锁定
+  syncBodyScrollLock();
 }
 
 // ===== P4: 相关推荐逻辑 =====
@@ -7938,6 +7978,7 @@ function openDetail(id) {
           <button class="modal-action-btn ai-review-entry-btn"
                   onclick="event.stopPropagation();openAiReview(${a.id})">AI 评</button>
           ${(LIVERIES[a.id] || []).some(function(lv) { return !!lv.img; }) ? '<button class="modal-action-btn livery-entry-btn" onclick="event.stopPropagation();openLivery(' + a.id + ')">涂装画廊</button>' : ''}
+          ${CABIN_SHOTS[a.id] ? '<button class="modal-action-btn cabin-entry-btn" onclick="event.stopPropagation();openCabin(' + a.id + ')">客舱实拍</button>' : ''}
         </div>
         ${airlineCards ? `<div class="airlines-section"><h3>${t('operatingAirlines')}</h3>${airlineCards}</div>` : ''}
         ${renderRelatedSection(a.id)}
@@ -8088,6 +8129,8 @@ document.addEventListener('keydown', (e) => {
   if (document.getElementById('badgeOverlay') && document.getElementById('badgeOverlay').classList.contains('visible')) { closeBadges(); return; }
   if (document.getElementById('aiReviewOverlay').classList.contains('visible')) { closeAiReview(); return; }
   if (document.getElementById('newsPanelOverlay') && document.getElementById('newsPanelOverlay').classList.contains('visible')) { closeNewsPanel(); return; }
+  if (document.getElementById('cfDetailOverlay') && document.getElementById('cfDetailOverlay').classList.contains('visible')) { v57CloseFactDetail(); return; }
+  if (document.getElementById('coldfactOverlay') && document.getElementById('coldfactOverlay').classList.contains('visible')) { closeColdFacts(); return; }
   closeDetail();
 });
 
@@ -8602,22 +8645,21 @@ const NEWS_FEEDS = [
 
 // 内置中文航空新闻兜底（≥15条），确保离线/file://协议下100%可显示
 const NEWS_STATIC = [
-  { title: '民航局：7月民航旅客运输量7462.9万人次 同比增长3.9%', snippet: '民航局8月21日发布数据，7月份民航旅客运输量达7462.9万人次，同比增长3.9%，正班客座率86.3%。暑运旺季民航客流持续高位运行，航班管家预测2026年暑运民航旅客运输量约1.42亿人次，日均超228万人次，8月中下旬迎来暑运最高峰。', pubDate: '2026-08-21', link: '#' },
-  { title: '全球飞机交付陷入困局 C919迎来历史性发展窗口', snippet: '波音、空客积压未交付订单合计约一万五千架，交付周期拉长至八到十年，全球民航出现"有需求没飞机"的供需失衡。行业预测未来二十年全球需交付超四万架新客机，150-200座级窄体机占七成以上。C919凭借国内五十多条航线稳定运营和超1150架确认及意向订单，成为全球市场备受关注的第三选择。', pubDate: '2026-08-19', link: '#' },
-  { title: 'C919订单近1500架交付数十架 商业运营数据持续向好', snippet: '截至8月10日，C919已累计交付数十架、订单超千架（接近1500架），运送旅客突破750万人次。8月12日国航C919执飞北京至乌兰巴托定期航班，实现常态化国际定期客运飞行，航班接入全球售票系统。商飞计划到2029年实现年产能200架，高原型、加长型等衍生机型持续拓展。', pubDate: '2026-08-19', link: '#' },
-  { title: '空客8月再获大单：国泰订购30架A330neo 年内净订单413架', snippet: '空客8月确认新增40架飞机订单，其中国泰航空订购30架A330neo（A330-900，预计2028年起交付），波罗的海航空加购10架A220-300，另有私人客户预订3架A350-900与3架A320neo。今年前8个月空客净订单量达413架；8月共交付47架飞机，其中A320neo系列占36架。', pubDate: '2026-08-21', link: '#' },
-  { title: '空客A320产能爬坡承压 下半年交付量需增约48%', snippet: '空客上半年交付351架商用飞机，全年目标约870架，意味着下半年需交付519架、月均86.5架，较上半年月均58.5架提升约48%。截至6月底空客商用飞机储备订单9222架，其中A320系列7499架。公司维持2027年底A320家族月产70至75架的目标，发动机短缺仍是窄体机产能的主要约束。', pubDate: '2026-08-19', link: '#' },
-  { title: '中国航司半年买近480架空客飞机 创疫情后新高', snippet: '据经济观察报统计，截至8月21日中国航司累计宣布采购空客飞机近480架，创疫情后新高。其中国航采购15架A350-900、深航采购40架A320neo，海航购买40架A320neo，东航签下25架A330neo，南航及厦航合计采购137架A320neo系列。空客称航司机队建设正从"一招鲜"转向精细化匹配细分市场。', pubDate: '2026-08-21', link: '#' },
-  { title: '国航与约旦皇家航空签署合作谅解备忘录', snippet: '8月21日，中国国际航空与约旦皇家航空在北京正式签署合作谅解备忘录，双方将在航线网络、旅客服务、常旅客计划等领域深化合作。此举有助于拓展中国与中东地区的航空互联互通，为两国旅客提供更便捷的出行选择。', pubDate: '2026-08-21', link: '#' },
-  { title: '南航物流开通上海浦东—阿姆斯特丹—奥斯陆航线', snippet: '8月20日，南航物流正式开通上海浦东—阿姆斯特丹—奥斯陆定期货运航线，进一步加密中欧空中物流通道。航线串联荷兰与挪威两大欧洲门户，为跨境电商、生鲜冷链等高时效货物提供更优运力供给，助力中国与北欧经贸往来。', pubDate: '2026-08-20', link: '#' },
-  { title: '太原—芝加哥定期国际全货运航线正式开通', snippet: '8月19日22时34分，金鹏航空波音747全货机从太原起飞前往芝加哥，标志着太原—芝加哥定期国际全货运航线正式开通。这是山西首条直飞北美的全货运航线，搭建起山西通往北美的空中物流桥梁，将有力支撑本地及周边外贸产业发展。', pubDate: '2026-08-19', link: '#' },
-  { title: '腾冲机场3000米新跑道试飞成功 波音737-800首降', snippet: '8月19日，腾冲机场跑道延长及附属设施扩建工程飞行程序实地验证试飞圆满完成，昆明航空波音737-800首次降落本场3000米新跑道，标志该机场正式迈入3000米跑道时代。扩建完成后将显著提升机场保障能力，为开通更多远程航线创造条件。', pubDate: '2026-08-19', link: '#' },
-  { title: '青岛=清州航线即将复航 对韩航线实现"公交化"运营', snippet: '8月20日，青岛=清州开航发布仪式举行，青岛机场韩国航线日均往返达38架次，实现公交化运营。新航线将进一步巩固青岛作为中韩交流"桥头堡"的枢纽地位。同日越南公民经青岛等65个口岸可240小时过境免签，青岛机场东南亚航点已达7个，越南入境旅客量同比增长608%。', pubDate: '2026-08-20', link: '#' },
-  { title: '酷航10月26日开通新加坡—贵阳航线 每周3班', snippet: '酷航宣布将于10月26日开通新加坡—贵阳直飞航线，每周运营3班，由空客A320neo执飞。届时酷航在中国内地16座城市每周运营81个航班，贵阳将成为其在中国内地的最新航点，进一步加密新加坡与中国西南地区的空中联系。', pubDate: '2026-08-21', link: '#' },
-  { title: '卡塔尔航空成为全球首家运营星链787-9的航空公司', snippet: '卡塔尔航空近日成为全球首家运营搭载星链（Starlink）卫星互联网技术波音787-9客机的航空公司，旅客将在万米高空享受高速稳定的机上Wi-Fi体验。此举标志着卫星互联网正式进入干线宽体机规模化运营阶段，或将带动全球航司机上互联服务升级。', pubDate: '2026-08-22', link: '#' },
-  { title: '翎亚航空8月24日开通雅加达=楠榜=吉隆坡航线 由C909执飞', snippet: '印尼翎亚航空（TransNusa）计划8月24日开通雅加达—楠榜—吉隆坡航线，采用国产支线客机C909执飞，其中楠榜—吉隆坡段是该机场首条定期国际航线。C909此前已在印尼、老挝等东南亚国家开展商业运营并斩获海外订单，国产民机出海步伐持续加快。', pubDate: '2026-08-20', link: '#' },
-  { title: '瑞安航空预订首架737 MAX 10 300架订单2027年起交付', snippet: '瑞安航空于8月20日为旗下首架波音737 MAX 10预订注册号EI-HTA。该航司共订购300架MAX 10（含150架确认订单与150架可选订单），计划2027年3月至2034年间交付，其中首批15架计划2027年春季交付，分别投放都柏林与伦敦斯坦斯特德基地。', pubDate: '2026-08-21', link: '#' },
-  { title: 'AerCap交付第100架直购梦想客机 墨西哥航空机队再扩容', snippet: '航空租赁巨头AerCap向墨西哥航空交付第10架租赁的波音787，同时完成其从波音直接订单簿中的第100架梦想客机交付。AerCap目前拥有及订购约140架波音787，是全球最大的787机队所有者与租赁商，本次交付的787-9将支持墨西哥航空远程航线拓展。', pubDate: '2026-08-21', link: '#' },
+  { title: '大湾区航空开通香港—昆明往返航线 首航落地', snippet: '9月3日11时13分，大湾区航空HB836航班降落在昆明长水国际机场，香港—昆明往返航线正式通航，执飞机型为B737-800。139名入境旅客仅用20分钟即完成通关。目前昆明长水机场执飞香港的国际航线每天最高往返已达4班；今年以来昆明—香港出入境旅客超16.1万人次，同比增长43%。', pubDate: '2026-09-03', link: '#' },
+  { title: '祥鹏航空乌鲁木齐=和田=阿里航线顺利首航 填补和田进藏空白', snippet: '9月3日，祥鹏航空乌鲁木齐—和田—阿里航线完成首航（8L9993/8L9994），机场以“过水门”最高礼仪迎接。该航线每周二、四、六执飞，打通南疆连接西藏阿里的便捷空中廊道，是和田首条进藏航线，填补了和田直连西藏阿里的航空运输空白。', pubDate: '2026-09-03', link: '#' },
+  { title: '西藏民航双喜：阿里新开乌鲁木齐方向航线 定日将通航拉萨', snippet: '9月3日，阿里昆莎机场新开阿里昆莎—和田—乌鲁木齐往返航线，每周二、四、六各一班，由祥鹏航空执飞，是阿里继喀什、乌鲁木齐后在飞的第三条新疆方向航线。9月5日起，日喀则定日机场还将开通定日—拉萨贡嘎往返航线，进一步织密西藏立体交通网。', pubDate: '2026-09-04', link: '#' },
+  { title: '大湾区航空开通乌鲁木齐—香港直飞航线', snippet: '9月2日，大湾区航空乌鲁木齐—香港直飞航线正式首航，为季节性航班，9月2日至10月7日每天一班。至此乌鲁木齐机场直飞香港单日航班最多达4班，成为继国泰、南航、香港航空后又一家开通该航线的香港基地航司。', pubDate: '2026-09-02', link: '#' },
+  { title: '国航回应CA982纽约地面加油车事件：部件损伤 已启动专项预案', snippet: '8月31日，国航CA982航班在纽约肯尼迪机场地面加油时，加油车在未取下加油管的情况下驶离，扯下机翼加油管、燃油外溢，飞机部件损伤，航班取消。国航回应称已启动国际航班专项预案，全力做好旅客服务保障；事件引发对境外地面保障安全的高度关注。', pubDate: '2026-09-02', link: '#' },
+  { title: '东航亚洲最大宽体机维修机库正式投运', snippet: '9月2日，东航旗下东航飞机维修工程（上海）有限公司揭牌，亚洲最大宽体机维修机库正式投运，将显著提升宽体机深度维修与大修能力，为东航及第三方航司机队提供保障支撑。', pubDate: '2026-09-02', link: '#' },
+  { title: '川航两度免费运送红十字救灾物资至尼泊尔', snippet: '8月31日和9月2日，四川航空3U3901航班（成都天府—加德满都）先后两次免费运送中国红十字会救灾物资前往尼泊尔，助力尼泊尔灾区救援工作，所有运输均免费执行。', pubDate: '2026-09-02', link: '#' },
+  { title: '春秋航空开通上海浦东—莎车航线', snippet: '8月31日，春秋航空开通上海浦东至新疆莎车航线，两地由此告别航空出行必须中转的历史，进一步完善上海对口支援新疆的空中通道与南疆航线网络。', pubDate: '2026-09-02', link: '#' },
+  { title: '海口美兰加密海口—莫斯科航线至每周5班', snippet: '自9月3日起，海南航空海口—莫斯科航线由每周一、三、六加密至每周一、三、四、六、日共5班，采用空客A330机型执飞，进一步便利海南与俄罗斯之间的经贸文旅往来。', pubDate: '2026-09-03', link: '#' },
+  { title: '南京—河内航线提前开通 护航APEC人力资源开发部长会', snippet: 'APEC人力资源开发部长会将于9月21日在南京举行，约600位代表参会。东部机场集团协调厦门航空将原定9月24日开通的南京—河内航线提前至9月16、20、23日执行3班，为越南参会代表提供直航服务。', pubDate: '2026-09-04', link: '#' },
+  { title: '海南航空《只此青绿》主题航班启航 北京—波士顿万米高空“展卷”', snippet: '9月2日，海南航空HU729北京—波士顿航班拉开“飞悦万里，展卷云端”主题航班帷幕。客舱以《千里江山图》青绿山水为设计主线，座椅头片、行李架贴纸、登机牌、机上广播全面融入宋代美学，让千年东方山水从云端走向纽约。', pubDate: '2026-09-02', link: '#' },
+  { title: '台风“沙德尔”来袭 厦金、泉金等两岸航线9月3日停航', snippet: '受今年第18号台风“沙德尔”影响，厦门、泉州两地9月3日全天停航厦金、泉金客运航线；福建沿海共24条客渡运航线停运、65艘客渡船停航，两岸“小三通”客运航线全部停航，复航时间另行通知。', pubDate: '2026-09-03', link: '#' },
+  { title: '民航局召开秋季候鸟迁徙鸟击防范专题调度会', snippet: '9月2日，民航局组织秋季候鸟迁徙鸟击防范专题调度会，分析当前鸟防形势与挑战，检视问题不足，对秋季迁徙季鸟击防范工作进行部署，确保航班运行安全。', pubDate: '2026-09-02', link: '#' },
+  { title: '首都机场集团暑运保障旅客4500万人次', snippet: '今年暑运期间，首都机场集团所辖成员机场共保障旅客4500万人次、航班29万架次，暑运高峰保障平稳有序，多项服务指标保持高位。', pubDate: '2026-09-02', link: '#' },
+  { title: '南航暑运执行客运航班超20万班次 运送旅客超3398万人次', snippet: '今年暑运期间，南航集团共计执行客运航班超20万班次，运送旅客超3398万人次，客座率与运输总量保持高位，旺季运力投放与旅客服务保障平稳收官。', pubDate: '2026-09-02', link: '#' },
 ];
 
 const AI_SYSTEM_PROMPTS = {
@@ -8812,7 +8854,7 @@ function openAiReview(id) {
 
 function closeAiReview() {
   document.getElementById('aiReviewOverlay').classList.remove('visible');
-  document.body.style.overflow = '';
+  syncBodyScrollLock();
   document.getElementById('aiReviewContent').innerHTML = '';
   aiReviewContext = null;
 }
@@ -8961,6 +9003,13 @@ window.setLang = function(lang) {
   var caLoadingEl = document.getElementById('caLoadingText'); if (caLoadingEl) caLoadingEl.textContent = t('collectAnalysisLoading');
   var caReBtnEl = document.getElementById('collectAnalysisReBtnText'); if (caReBtnEl) caReBtnEl.textContent = t('collectAnalysisReBtn');
   var caErrRetryEl = document.getElementById('caErrRetryBtn'); if (caErrRetryEl) caErrRetryEl.textContent = t('collectAnalysisErr');
+  var cfBtnEl = document.getElementById('coldfactBtnText'); if (cfBtnEl) cfBtnEl.textContent = (lang === 'en' ? 'AI Cold Facts' : 'AI 冷知识');
+  var cfTitleEl = document.getElementById('coldfactTitleText'); if (cfTitleEl) cfTitleEl.textContent = (lang === 'en' ? 'AI Cold Facts' : 'AI 冷知识');
+  var cfSubEl = document.getElementById('coldfactSubText'); if (cfSubEl) cfSubEl.textContent = (lang === 'en' ? 'Real civil-aviation trivia worth sharing' : '真实民航小知识 · 有据可查');
+  var cfNoteEl = document.getElementById('coldfactNoteText'); if (cfNoteEl) cfNoteEl.textContent = (lang === 'en' ? 'Facts compiled from public civil-aviation engineering & operations sources.' : '内容来自公开可查的民航工程与运营资料，供爱好者学习交流。');
+  var cfBtnT = document.getElementById('coldfactCloseTitle'); if (cfBtnT) cfBtnT.textContent = (lang === 'en' ? 'Close' : '关闭');
+  if (typeof v56RefreshSkyLabel === 'function') v56RefreshSkyLabel();
+  if (typeof v56RefreshPanel === 'function') v56RefreshPanel();
   var fbBtnEl = document.getElementById('feedbackBtnText'); if (fbBtnEl) fbBtnEl.textContent = t('feedbackBtn');
   var fbTitleEl = document.getElementById('feedbackTitleText'); if (fbTitleEl) fbTitleEl.textContent = t('feedbackTitle');
   var fbDescEl = document.getElementById('feedbackDescText'); if (fbDescEl) fbDescEl.textContent = t('feedbackDesc');
@@ -10582,6 +10631,7 @@ function showQuizResult() {
       '<div class="quiz-result-score">' + quizScore + ' / 10</div>' +
       '<div class="quiz-result-title">' + title + '</div>' +
       '<div class="quiz-result-desc">' + desc + '</div>' +
+      v56QuizFactHtml() +
       '<div class="quiz-result-btns">' +
         '<button class="quiz-primary-btn" onclick="openQuiz()">再来一局</button>' +
         '<button class="quiz-ghost-btn" onclick="closeQuiz()">返回首页</button>' +
@@ -10782,7 +10832,7 @@ function closeCollectRecord(e) {
   if (e && e.target !== e.currentTarget && !(e.target.classList && e.target.classList.contains('quiz-close'))) return;
   var el = document.getElementById('collectRecordOverlay');
   if (el) el.classList.remove('visible');
-  document.body.style.overflow = '';
+  syncBodyScrollLock();
 }
 function switchCollectRecordTab(tab) {
   collectRecordTab = tab;
@@ -10890,6 +10940,67 @@ function liveryCardHtml(id, idx, lv) {
     '</div>' +
   '</div>';
 }
+function cabinImgFallback(img) {
+  if (!img || !img.parentNode) return;
+  var d = document.createElement('div');
+  d.className = 'cabin-img-fallback';
+  d.textContent = '图片加载失败';
+  img.parentNode.replaceChild(d, img);
+}
+/* 统一弹窗滚动守护：关闭上层弹窗后，若下层仍有全屏层，则继续保持滚动锁定 */
+function anyTopOverlayOpen() {
+  var ids = ['aiChatOverlay','aiReviewOverlay','photoAiOverlay','collectAnalysisOverlay',
+    'newsPanelOverlay','quizOverlay','badgeOverlay','badgeDetailOverlay','letterOverlay',
+    'liveryOverlay','cabinOverlay','collectRecordOverlay'];
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el && (el.classList.contains('visible') || el.classList.contains('show'))) return true;
+  }
+  if (document.querySelector('.kg-overlay.visible, .kg-overlay.show, .livery-overlay.visible, .livery-overlay.show')) return true;
+  return document.getElementById('overlayContainer').children.length > 0;
+}
+function syncBodyScrollLock() {
+  document.body.style.overflow = anyTopOverlayOpen() ? 'hidden' : '';
+}
+function openCabin(id) {
+  var a = liveryFindAircraft(id);
+  var c = CABIN_SHOTS[id];
+  if (!c) return;
+  var el = document.getElementById('cabinOverlay');
+  if (!el) return;
+  document.getElementById('cabinTitle').textContent = a ? t(a.name) : ('#' + id);
+  document.getElementById('cabinSub').textContent = (c.display || ('#' + id)) + ' · 客舱实拍';
+  var content = document.getElementById('cabinContent');
+  var groups = [
+    { key: 'biz', tag: '商务舱' },
+    { key: 'eco', tag: '经济舱' }
+  ];
+  var html = '<div class="cabin-grid">';
+  groups.forEach(function(g) {
+    var d = c[g.key];
+    if (!d || !d.img) return;
+    html += '<div class="cabin-card">' +
+      '<div class="cabin-photo">' +
+        '<img src="' + d.img + '" alt="' + (c.display || '') + ' ' + g.tag + '" onclick="openImageLightbox(' + d.img + ')" onerror="cabinImgFallback(this)">' +
+        '<div class="cabin-tag' + (g.key === 'eco' ? ' eco' : '') + '">' + g.tag + '</div>' +
+      '</div>' +
+      '<div class="cabin-desc"><strong>' + d.airline + '</strong> ' + d.desc + '</div>' +
+      '<div class="cabin-src"><a href="' + d.src + '" target="_blank" rel="noopener">图片来源 · Wikimedia Commons</a></div>' +
+    '</div>';
+  });
+  html += '</div>';
+  content.innerHTML = html;
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function closeCabin() {
+  var el = document.getElementById('cabinOverlay');
+  if (el) el.classList.remove('visible');
+  syncBodyScrollLock();
+}
+function cabinBackdrop(e) {
+  if (e.target === e.currentTarget) closeCabin();
+}
 function openLivery(id) {
   var a = liveryFindAircraft(id);
   var all = LIVERIES[id] || [];
@@ -10914,7 +11025,7 @@ function openLivery(id) {
 function closeLivery() {
   var el = document.getElementById('liveryOverlay');
   if (el) el.classList.remove('visible');
-  document.body.style.overflow = '';
+  syncBodyScrollLock();
 }
 function liveryBackdrop(e) {
   if (e.target === e.currentTarget) closeLivery();
@@ -11342,224 +11453,6 @@ async function generateNewsSummaryInPanel() {
 
 <!-- 主题选择弹窗 -->
 /div>
-
-<script>
-// ===== 冷知识弹幕 =====
-/* global restoreColdFact */
-(function() {
-  'use strict';
-
-  /* 检查用户是否已关闭冷知识 */
-  function isDisabled() {
-    try { return localStorage.getItem('coldFactDisabled') === 'true'; } catch(e) { return false; }
-  }
-
-  /* 更新恢复链接显示状态 */
-  function updateRestoreLink() {
-    var link = document.getElementById('restoreColdFact');
-    if (link) { link.style.display = isDisabled() ? 'inline-block' : 'none'; }
-  }
-
-  /* 初始化时更新链接 */
-  updateRestoreLink();
-
-  /* 如果已关闭，不执行后续逻辑 */
-  if (isDisabled()) return;
-
-  var pool = (function() {
-    var f = [];
-    for (var i = 1; i <= 20; i++) { f.push(i18n.zh['coldFact_' + i]); }
-    return f;
-  })();
-  var lastIdx = -1, timer = null, _spawning = false;
-
-  /* 空闲检测：用户超过1分钟无操作自动暂停冷知识 */
-  var _idlePaused = false, _idleTimer = null, _idleTimeout = 60000;
-
-  function clearIdleTimer() {
-    if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null; }
-    if (_idlePaused) {
-      _idlePaused = false;
-      spawn();
-    }
-  }
-
-  function startIdleTimer() {
-    clearIdleTimer();
-    _idleTimer = setTimeout(function() {
-      _idlePaused = true;
-      cancelLongPress();
-      if (timer) { clearTimeout(timer); timer = null; }
-      var existing = document.querySelector('.cold-fact-toast');
-      if (existing) existing.remove();
-    }, _idleTimeout);
-  }
-
-  /* 监听用户活动恢复冷知识 */
-  ['click', 'touchstart', 'scroll', 'keydown', 'mousemove'].forEach(function(evt) {
-    document.addEventListener(evt, function() { if (!isDisabled()) startIdleTimer(); }, { passive: true });
-  });
-  startIdleTimer();
-
-  /* 长按处理器 */
-  var _longPressTimer = null;
-  function cancelLongPress() {
-    if (_longPressTimer) { clearTimeout(_longPressTimer); _longPressTimer = null; }
-  }
-
-  function spawn() {
-    /* 每次 spawn 前检查是否被禁用或空闲暂停 */
-    if (isDisabled() || _idlePaused) return;
-
-    var idx;
-    do { idx = Math.floor(Math.random() * pool.length); }
-    while (pool.length > 1 && idx === lastIdx);
-    lastIdx = idx;
-
-    var el = document.createElement('div');
-    el.className = 'cold-fact-toast';
-
-    /* 文字内容 */
-    var textSpan = document.createElement('span');
-    textSpan.textContent = pool[idx];
-    el.appendChild(textSpan);
-
-    /* 长按提示 */
-    var hint = document.createElement('span');
-    hint.className = 'cold-fact-toast-hint';
-    hint.textContent = '长按可关闭冷知识';
-    el.appendChild(hint);
-
-    /* 关闭按钮 */
-    var closeBtn = document.createElement('button');
-    closeBtn.className = 'cold-fact-toast-close';
-    closeBtn.textContent = '×';
-    closeBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      el.remove();
-    });
-    el.appendChild(closeBtn);
-
-    /* 长按检测 */
-    el.addEventListener('touchstart', function(e) {
-      cancelLongPress();
-      _longPressTimer = setTimeout(function() {
-        _longPressTimer = null;
-        showColdFactConfirm();
-      }, 800);
-    }, { passive: true });
-    el.addEventListener('mousedown', function(e) {
-      cancelLongPress();
-      _longPressTimer = setTimeout(function() {
-        _longPressTimer = null;
-        showColdFactConfirm();
-      }, 800);
-    });
-    el.addEventListener('touchend', cancelLongPress);
-    el.addEventListener('touchmove', cancelLongPress);
-    el.addEventListener('mouseup', cancelLongPress);
-    el.addEventListener('mouseleave', cancelLongPress);
-
-    document.body.appendChild(el);
-
-    el.addEventListener('animationend', function() {
-      el.remove();
-      cancelLongPress();
-    });
-
-    _spawning = false;
-    var next = 15000 + Math.random() * 25000; /* 15~40 秒间隔 */
-    timer = setTimeout(function() { _spawning = false; spawn(); }, next);
-  }
-
-  /* 展示关闭冷知识的确认弹窗 */
-  function showColdFactConfirm() {
-    /* 避免重复弹出 */
-    if (document.getElementById('coldFactConfirmOverlay')) return;
-
-    var overlay = document.createElement('div');
-    overlay.id = 'coldFactConfirmOverlay';
-    overlay.style.cssText = 'position:fixed;z-index:99999;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;animation:overlayIn 0.2s ease;';
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay) overlay.remove();
-    });
-
-    var box = document.createElement('div');
-    box.style.cssText = 'background:rgba(22,33,52,0.95);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:28px 24px;max-width:340px;width:88%;text-align:center;color:#e0e0e0;box-shadow:0 12px 40px rgba(0,0,0,0.5);';
-    box.innerHTML = '<p style="margin:0 0 6px;font-size:1.05rem;font-weight:600;">冷知识弹幕</p>' +
-      '<p style="margin:0 0 20px;font-size:0.85rem;color:#999;">确定不再显示冷知识弹幕吗？<br>可随时在标题下方恢复。</p>' +
-      '<button id="cfDisableBtn" style="margin:0 8px;padding:10px 28px;border-radius:22px;border:1px solid #ff5252;background:rgba(255,82,82,0.15);color:#ff5252;font-size:0.85rem;cursor:pointer;">不再显示</button>' +
-      '<button id="cfKeepBtn" style="margin:0 8px;padding:10px 28px;border-radius:22px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#ccc;font-size:0.85rem;cursor:pointer;">继续显示</button>';
-
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-
-    document.getElementById('cfDisableBtn').addEventListener('click', function() {
-      try { localStorage.setItem('coldFactDisabled', 'true'); } catch(e) {}
-      updateRestoreLink();
-      /* 移除所有现有弹幕并清空定时器 */
-      if (timer) { clearTimeout(timer); timer = null; }
-      var toasts = document.querySelectorAll('.cold-fact-toast');
-      for (var t = 0; t < toasts.length; t++) { toasts[t].remove(); }
-      overlay.remove();
-    });
-    document.getElementById('cfKeepBtn').addEventListener('click', function() {
-      overlay.remove();
-    });
-  }
-
-  /* 首页展示弹幕，详情页暂停 */
-  function checkAndStart() {
-    if (isDisabled()) return;
-    if (_spawning) return;
-    _spawning = true;
-    if (timer) { clearTimeout(timer); timer = null; }
-    var isDetail = !!document.getElementById('detail-panel');
-    if (!isDetail) { spawn(); } else { _spawning = false; }
-  }
-
-  checkAndStart();
-  /* 监听 detail-panel 的出现 / 消失，忽略 toast 自身的 DOM 变动 */
-  var _obsDebounce = null;
-  var obs = new MutationObserver(function(mutations) {
-    if (_obsDebounce) return;
-    _obsDebounce = setTimeout(function() {
-      _obsDebounce = null;
-      for (var i = 0; i < mutations.length; i++) {
-        var m = mutations[i];
-        if (m.type !== 'childList') continue;
-        for (var j = 0; j < m.addedNodes.length; j++) {
-          var node = m.addedNodes[j];
-          if (node.nodeType !== 1) continue;
-          if (node.classList && node.classList.contains('cold-fact-toast')) continue;
-          if (node.id === 'coldFactConfirmOverlay') continue;
-          if (node.id === 'detail-panel' || (node.querySelector && node.querySelector('#detail-panel'))) {
-            checkAndStart(); return;
-          }
-        }
-        for (var k = 0; k < m.removedNodes.length; k++) {
-          var rn = m.removedNodes[k];
-          if (rn.nodeType !== 1) continue;
-          if (rn.id === 'detail-panel' || (rn.querySelector && rn.querySelector('#detail-panel'))) {
-            checkAndStart(); return;
-          }
-        }
-      }
-    }, 100);
-  });
-  obs.observe(document.body, { childList: true, subtree: true, attributes: false });
-})();
-
-/* 恢复冷知识（全局函数，供 HTML onclick 调用） */
-function restoreColdFact() {
-  try { localStorage.removeItem('coldFactDisabled'); } catch(e) {}
-  var link = document.getElementById('restoreColdFact');
-  if (link) { link.style.display = 'none'; }
-  /* 重新加载页面以重新启动冷知识机制 */
-  location.reload();
-}
-</script>
-
 <!-- Auto version detection -->
 <script>
 (function() {
@@ -11884,6 +11777,465 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="letter-sign">—— henry<br>2026年8月27日</div>
   </div>
 </div>
+
+<style id="v56style">
+/* ===== v56：AI 冷知识面板 / 动态天空窗 ===== */
+/* ---------- 动态天空窗 ---------- */
+.sky-window {
+  position: relative; width: 100%; height: clamp(148px, 22vw, 204px);
+  border-radius: 24px; overflow: hidden; margin-bottom: 32px;
+  background: linear-gradient(180deg,#05070f 0%,#0a1122 45%,#121f3c 100%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,.05);
+  isolation: isolate;
+}
+.sky-layer { position: absolute; inset: 0; opacity: 0; transition: opacity 1.8s ease; pointer-events: none; }
+.sky-window[data-sky="dawn"]  .sky-layer-dawn,
+.sky-window[data-sky="day"]   .sky-layer-day,
+.sky-window[data-sky="dusk"]  .sky-layer-dusk,
+.sky-window[data-sky="night"] .sky-layer-night { opacity: 1; }
+.sky-layer-dawn  { background: linear-gradient(180deg,#2b3a68 0%,#6b77b4 34%,#c78f7f 64%,#f2bd8d 100%); }
+.sky-layer-day   { background: linear-gradient(180deg,#25509c 0%,#4f8fd0 38%,#93c6ec 72%,#d6ecfa 100%); }
+.sky-layer-dusk  { background: linear-gradient(180deg,#1e2349 0%,#3a3165 30%,#9c5b68 60%,#e08a5a 86%,#f6b46b 100%); }
+.sky-layer-night { background: linear-gradient(180deg,#04060e 0%,#0a1122 45%,#152544 100%); }
+.sky-sun, .sky-moon { position: absolute; border-radius: 50%; opacity: 0; pointer-events: none; transition: opacity 1.6s ease, transform 4s ease; }
+.sky-sun {
+  width: 44px; height: 44px; left: 74%; top: 46%;
+  background: radial-gradient(circle at 38% 36%, #fff3d0, #ffd98a 58%, #f2a25b 100%);
+  box-shadow: 0 0 60px 18px rgba(255,198,116,.5);
+}
+.sky-moon {
+  width: 28px; height: 28px; left: 76%; top: 22%;
+  background: radial-gradient(circle at 40% 38%, #ffffff, #e4ebfb 58%, #aebfe0 100%);
+  box-shadow: 0 0 44px 12px rgba(206,220,255,.36);
+}
+.sky-window[data-sky="dawn"] .sky-sun { opacity: .95; transform: translateY(0); }
+.sky-window[data-sky="day"] .sky-sun { opacity: 1; top: 12%; left: 78%; transform: scale(1.12); }
+.sky-window[data-sky="dusk"] .sky-sun { opacity: .98; top: 52%; left: 70%; }
+.sky-window[data-sky="night"] .sky-sun { opacity: 0; }
+.sky-window[data-sky="night"] .sky-moon { opacity: 1; }
+.sky-cloud { position: absolute; border-radius: 999px; filter: blur(16px); opacity: 0; pointer-events: none; transition: opacity 2s ease; background: rgba(255,255,255,.5); }
+.c1 { width: 190px; height: 20px; left: 16%; top: 30%; }
+.c2 { width: 120px; height: 14px; left: 58%; top: 64%; }
+.sky-window[data-sky="day"] .sky-cloud { opacity: .7; }
+.sky-window[data-sky="dawn"] .c2, .sky-window[data-sky="dusk"] .c1 { opacity: .45; }
+.sky-window[data-sky="night"] .sky-cloud { opacity: .1; }
+.sky-window[data-sky="day"] .c1 { transform: translateX(6px); }
+.sky-planes { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+.sky-plane { position: absolute; left: 0; color: #0b1626; opacity: .94; will-change: transform; }
+.sky-plane svg { display: block; width: 100%; height: auto; }
+.sky-window[data-sky="day"] .sky-plane   { color: #0a1626; opacity: .85; }
+.sky-window[data-sky="dawn"] .sky-plane  { color: #141c33; opacity: .8; }
+.sky-window[data-sky="dusk"] .sky-plane  { color: #131a30; opacity: .78; }
+.sky-window[data-sky="night"] .sky-plane { color: #18253f; opacity: .68; }
+.plane-a380 { width: clamp(150px, 26vw, 262px); top: 22%; animation: v56PlaneFly 84s linear infinite; animation-delay: -12s; }
+.plane-b787 { width: clamp(118px, 21vw, 216px); top: 46%; animation: v56PlaneFly 72s linear infinite; animation-delay: -48s; }
+.plane-b737 { width: clamp(92px, 16vw, 168px); top: 66%; animation: v56PlaneFly 60s linear infinite; animation-delay: -30s; }
+@keyframes v56PlaneFly {
+  0%   { transform: translate3d(-30vw, 0, 0); }
+  100% { transform: translate3d(104vw, 0, 0); }
+}
+.sky-label {
+  position: absolute; left: 16px; bottom: 12px; z-index: 3;
+  display: flex; align-items: center; gap: 8px;
+  font-size: .74rem; letter-spacing: 2px; color: rgba(255,255,255,.94);
+  text-shadow: 0 1px 8px rgba(0,0,0,.4); pointer-events: none;
+}
+.sky-label-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px #fff; }
+@media (max-width: 768px) {
+  .sky-window { height: 128px; border-radius: 18px; margin-bottom: 20px; }
+  .plane-a380 { top: 18%; } .plane-b787 { top: 44%; } .plane-b737 { top: 64%; }
+  .sky-label { left: 12px; bottom: 8px; font-size: .66rem; letter-spacing: 1px; }
+}
+@media (max-width: 480px) {
+  .sky-window { height: 104px; border-radius: 14px; }
+}
+/* ---------- AI 冷知识面板 ---------- */
+#coldfactOverlay {
+  position: fixed; inset: 0; z-index: 10060; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(3,7,18,.62);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  padding: 18px; animation: overlayIn .18s ease;
+}
+#coldfactOverlay.visible { display: flex; }
+.cf-panel {
+  width: min(1040px, 100%); max-height: 88vh;
+  display: flex; flex-direction: column;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: 24px; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.55);
+  backdrop-filter: blur(26px) saturate(150%); -webkit-backdrop-filter: blur(26px) saturate(150%);
+  animation: cfIn .3s cubic-bezier(.2,.86,.32,1.16);
+}
+@keyframes cfIn { from { opacity: 0; transform: translateY(20px) scale(.97); } to { opacity: 1; transform: none; } }
+.cf-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 15px 20px; border-bottom: 1px solid var(--glass-border); flex-shrink: 0;
+}
+.cf-title { display: flex; align-items: center; gap: 11px; font-size: 1.02rem; font-weight: 700; letter-spacing: 1px; color: var(--text); }
+.cf-title-icon {
+  width: 34px; height: 34px; border-radius: 12px; flex: none;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  box-shadow: 0 4px 16px rgba(99,102,241,.42);
+}
+.cf-sub { font-size: .7rem; color: var(--text-dim); margin-top: 3px; letter-spacing: 1px; }
+.cf-close {
+  width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .25s ease; flex: none;
+}
+.cf-close:hover { background: var(--card-bg-hover); color: var(--text); }
+.cf-close svg { width: 20px; height: 20px; }
+.cf-scroll { overflow-y: auto; padding: 20px 22px 24px; }
+.cf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.cf-card {
+  position: relative; border-radius: 18px; padding: 15px 16px 14px; overflow: hidden;
+  background: linear-gradient(150deg, rgba(59,102,255,.12), rgba(30,42,86,.22));
+  border: 1px solid rgba(130,145,250,.24);
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.cf-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(129,140,248,.9), transparent);
+}
+.cf-card:hover { transform: translateY(-3px); border-color: rgba(129,140,248,.6); box-shadow: 0 10px 28px rgba(16,26,60,.4); }
+.cf-card-icon {
+  width: 34px; height: 34px; border-radius: 11px; margin-bottom: 9px;
+  background: rgba(59,130,246,.16); border: 1px solid rgba(99,102,241,.36);
+  display: flex; align-items: center; justify-content: center; font-size: 1.06rem;
+}
+.cf-card-title { margin: 0 0 5px; font-size: .9rem; font-weight: 700; color: var(--text); letter-spacing: .5px; }
+.cf-card-text { margin: 0; font-size: .79rem; line-height: 1.7; color: var(--text-dim); }
+.cf-note { margin-top: 16px; font-size: .7rem; text-align: center; color: var(--text-dim); opacity: .75; letter-spacing: .5px; }
+/* Quiz 结果冷知识 */
+.quiz-result-fact {
+  display: flex; align-items: flex-start; gap: 9px; text-align: left;
+  width: min(580px, 94%); margin: 4px auto 22px; padding: 12px 15px;
+  border-radius: 14px; font-size: .82rem; line-height: 1.7; color: var(--text-dim);
+  background: linear-gradient(120deg, rgba(59,130,246,.13), rgba(139,92,246,.13));
+  border: 1px solid rgba(129,140,248,.34);
+}
+.quiz-result-fact .qr-icon { flex: none; font-size: 1rem; margin-top: 1px; }
+.quiz-result-fact strong { color: #a5b4fc; font-weight: 600; margin-right: 5px; }
+@media (max-width: 900px) { .cf-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .cf-grid { grid-template-columns: 1fr; } #coldfactOverlay { padding: 10px; } .cf-panel { max-height: 92vh; } }
+</style>
+
+<!-- ===== AI 冷知识面板 (v56) ===== -->
+<div id="coldfactOverlay">
+  <div class="cf-panel">
+    <div class="cf-head">
+      <div>
+        <div class="cf-title">
+          <span class="cf-title-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 18a3.5 3.5 0 005.6 0"/><path d="M12 2a6 6 0 00-6 6c0 3 1.4 4.6 2.6 6h6.8c1.2-1.4 2.6-3 2.6-6a6 6 0 00-6-6z"/><line x1="10" y1="20.5" x2="14" y2="20.5"/></svg></span>
+          <div><div id="coldfactTitleText">AI 冷知识</div><div class="cf-sub" id="coldfactSubText">真实民航小知识 · 有据可查</div></div>
+        </div>
+      </div>
+      <button class="cf-close" id="coldfactCloseTitle" title="关闭" aria-label="关闭" onclick="closeColdFacts()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="cf-scroll">
+      <div class="cf-grid" id="cfGrid"></div>
+      <div class="cf-note" id="coldfactNoteText">内容来自公开可查的民航工程与运营资料，供爱好者学习交流。</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== v56：Quiz 冷知识 / AI 冷知识面板 / 动态天空窗 =====
+(function () {
+  'use strict';
+
+  // ---------- 真实航空冷知识数据池（中英双语，来源：公开民航工程与运营资料） ----------
+  var V56_FACTS = [
+    { ic: '\u{1F6EC}', t: { zh: '千度刹车', en: '900\u00b0C Brakes' }, x: { zh: '空客 A380 着陆时碳刹车盘温度可达 900\u00b0C，需充分冷却后起落架舱门才会收起。', en: 'The Airbus A380\u2019s carbon brakes can reach 900\u00b0C on landing; its gear doors only close after they cool down.' } },
+    { ic: '\u{1F4FA}', t: { zh: '橙色黑匣子', en: 'Orange Recorder' }, x: { zh: '飞行数据记录仪俗称\u201c黑匣子\u201d，其实是醒目的橙色，便于事故后快速搜寻。', en: 'Flight recorders \u2014 the \u201cblack boxes\u201d \u2014 are painted bright orange for easy recovery after an accident.' } },
+    { ic: '\u{1F4CF}', t: { zh: '六层楼高的尾翼', en: 'Tail Like a Tower' }, x: { zh: '波音 747 的垂直尾翼高约 19.4 米，接近六层楼房的高度。', en: 'The Boeing 747\u2019s vertical stabiliser stands about 19.4 metres tall \u2014 nearly six storeys.' } },
+    { ic: '\u{1F3BE}', t: { zh: '三个网球场', en: 'Three Tennis Courts' }, x: { zh: 'A380 的机翼面积约 845 平方米，大约相当于三个网球场。', en: 'The A380\u2019s wing area is about 845 m\u00b2 \u2014 roughly three tennis courts.' } },
+    { ic: '\u{1FA9F}', t: { zh: '舷窗的小孔', en: 'The Tiny Window Hole' }, x: { zh: '客舱舷窗底部的小孔用于平衡内外气压差，防止窗户结构受压破裂。', en: 'The tiny hole at the base of cabin windows balances air pressure to protect the pane.' } },
+    { ic: '\u{1F6DE}', t: { zh: '氮气轮胎', en: 'Nitrogen Tyres' }, x: { zh: '民航客机轮胎充的是氮气而非空气，以降低高温起火风险。', en: 'Aircraft tyres are filled with nitrogen instead of air to reduce fire risk at high temperature.' } },
+    { ic: '\u{1F4A8}', t: { zh: '三分钟换气', en: 'Fresh Air in 3 Minutes' }, x: { zh: '客舱空气每 2\u20133 分钟就会经 HEPA 滤网完成一次全量更换。', en: 'Cabin air is completely replaced every 2\u20133 minutes through HEPA filters.' } },
+    { ic: '\u{1F32C}', t: { zh: '逆风着陆', en: 'Landing Into Wind' }, x: { zh: '客机大多选择逆风着陆：逆风能带来额外升力，显著缩短滑跑距离。', en: 'Airliners mostly land into the wind: headwind adds lift and shortens the landing roll.' } },
+    { ic: '\u{1F426}', t: { zh: '鸟击高发时段', en: 'When Birds Strike' }, x: { zh: '约九成鸟击发生在飞机的起飞与降落阶段，此时高度低、鸟类活动密集。', en: 'About 90% of bird strikes occur during take-off and landing, when aircraft are low and birds are active.' } },
+    { ic: '\u{1F4AA}', t: { zh: '推力之王', en: 'The Power King' }, x: { zh: '波音 777 搭载的 GE90-115B 单台最大推力约 12.79 万磅，是现役推力最大的商用涡扇发动机之一。', en: 'The GE90-115B on the Boeing 777 produces up to 127,900 lbf \u2014 one of the most powerful commercial turbofans in service.' } },
+    { ic: '\u{1F914}', t: { zh: '十五分钟氧气', en: '15 Minutes of Oxygen' }, x: { zh: '客舱氧气面罩的供氧时间约 15 分钟，足以让机组将飞机下降到可呼吸高度。', en: 'Passenger oxygen masks supply about 15 minutes of oxygen \u2014 enough for pilots to descend to a breathable altitude.' } },
+    { ic: '\u{1F7E5}', t: { zh: '红绿跑道灯', en: 'Green and Red Lights' }, x: { zh: '跑道入口灯为绿色、跑道末端的警示灯为红色，帮助飞行员判断进近方向。', en: 'Runway threshold lights are green and runway-end lights are red, guiding the approach direction.' } },
+    { ic: '\u{1F9CA}', t: { zh: '碳纤维之躯', en: 'Carbon Body' }, x: { zh: 'A350 的机身约 53% 为碳纤维复合材料，比同级金属机身轻约 20%。', en: 'About 53% of the A350 airframe is carbon-fibre composite \u2014 roughly 20% lighter than a metal airframe of the same class.' } },
+    { ic: '\u{1F525}', t: { zh: '热胀三十厘米', en: '30 cm of Stretch' }, x: { zh: '协和号超音速飞行时因气动加热，机身会热胀拉长约 30 厘米。', en: 'Concorde stretched about 30 cm during supersonic flight due to aerodynamic heating.' } },
+    { ic: '\u{1F37D}', t: { zh: '分开的机长餐', en: 'Different Meals' }, x: { zh: '许多航司会让正副驾驶吃不同餐食，防止两人因同一份食物同时不适。', en: 'Many airlines serve captains and first officers different meals so food illness cannot hit both at once.' } }
+  ];
+  window.__V56_FACTS = V56_FACTS;
+  var v56Lang = function () { return (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'en' : 'zh'; };
+  var v56Txt = function (o) { var l = v56Lang(); return o && o[l] ? o[l] : o.zh; };
+
+  // ---------- Quiz 结果冷知识 ----------
+  var v56QuizLast = -1;
+  window.v56QuizFactHtml = function () {
+    var n = V56_FACTS.length;
+    var idx;
+    do { idx = Math.floor(Math.random() * n); } while (n > 1 && idx === v56QuizLast);
+    v56QuizLast = idx;
+    var f = V56_FACTS[idx];
+    return '<div class="quiz-result-fact"><span class="qr-icon">' + f.ic + '</span><span><strong>' +
+      v56Txt(f.t) + '</strong>' + v56Txt(f.x) + '</span></div>';
+  };
+
+  // ---------- AI 冷知识面板 ----------
+  window.openColdFacts = function () {
+    var ov = document.getElementById('coldfactOverlay');
+    if (!ov) return;
+    v56RefreshPanel();
+    ov.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeColdFacts = function () {
+    var ov = document.getElementById('coldfactOverlay');
+    if (ov) ov.classList.remove('visible');
+    document.body.style.overflow = '';
+  };
+  window.coldfactBackdrop = function (e) { if (e.target === e.currentTarget) closeColdFacts(); };
+  window.v56RefreshPanel = function () {
+    var grid = document.getElementById('cfGrid');
+    if (!grid) return;
+    var h = [];
+    for (var i = 0; i < V56_FACTS.length; i++) {
+      var f = V56_FACTS[i];
+      h.push('<div class="cf-card"><div class="cf-card-icon">' + f.ic + '</div><div class="cf-card-title">' +
+        v56Txt(f.t) + '</div><div class="cf-card-text">' + v56Txt(f.x) + '</div></div>');
+    }
+    grid.innerHTML = h.join('');
+  };
+  var cfOv = document.getElementById('coldfactOverlay');
+  if (cfOv) cfOv.addEventListener('click', coldfactBackdrop);
+
+  // ---------- 动态天空窗 ----------
+  window.v56RefreshSkyLabel = function () {
+    var w = document.getElementById('skyWindow');
+    if (!w) return;
+    var p = w.getAttribute('data-sky') || 'night';
+    var map = {
+      dawn: { zh: '日出时分 · 天光渐亮', en: 'Dawn Glow' },
+      day: { zh: '日间巡航 · 万里晴空', en: 'Daylight' },
+      dusk: { zh: '日落黄昏 · 归航时刻', en: 'Golden Dusk' },
+      night: { zh: '夜空繁星 · 夜航模式', en: 'Starry Night' }
+    };
+    var el = document.getElementById('skyLabelText');
+    if (el) el.textContent = map[p] ? v56Txt(map[p]) : map.night.zh;
+  };
+  window.v56RefreshSky = function () {
+    var w = document.getElementById('skyWindow');
+    if (!w) return;
+    var h = new Date().getHours();
+    var p;
+    if (h >= 6 && h < 10) p = 'dawn';
+    else if (h >= 10 && h < 17) p = 'day';
+    else if (h >= 17 && h < 20) p = 'dusk';
+    else p = 'night';
+    if (w.getAttribute('data-sky') !== p) w.setAttribute('data-sky', p);
+    v56RefreshSkyLabel();
+  };
+  window.v56RefreshSky();
+  setInterval(v56RefreshSky, 30000);
+})();
+</script>
+
+<style id="v57style">
+/* ===== v57: 长按彩蛋 + 冷知识卡片详情 ===== */
+.sky-window, .sky-window * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.cf-card { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.v57-fx { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; z-index: 6; }
+.v57-fx-plane { position: absolute; top: 0; left: 0; color: #fff; width: clamp(64px, 15vw, 150px); opacity: 0; will-change: transform, opacity; animation-name: v57DashAcross; animation-timing-function: cubic-bezier(.45,0,.72,1); animation-fill-mode: forwards; filter: drop-shadow(0 0 9px rgba(255,255,255,.55)); }
+.v57-fx-plane svg { display: block; width: 100%; height: auto; }
+.v57-fx-meteor { position: absolute; top: 0; right: -60px; width: 150px; height: 2px; border-radius: 999px; background: linear-gradient(270deg, #fff 0%, rgba(180,210,255,.85) 55%, rgba(255,255,255,0) 100%); box-shadow: 0 0 10px rgba(210,230,255,.95), 0 0 26px rgba(150,190,255,.55); transform: rotate(-24deg); transform-origin: right center; opacity: 0; will-change: transform, opacity; animation-name: v57MeteorShoot; animation-timing-function: cubic-bezier(.35,0,.85,1); animation-fill-mode: forwards; }
+@keyframes v57DashAcross { 0% { transform: translate3d(-34vw,0,0) scale(var(--fs,0.8)); opacity: 0; } 7% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translate3d(116vw,0,0) scale(var(--fs,0.8)); opacity: 0; } }
+@keyframes v57MeteorShoot { 0% { transform: rotate(-24deg) translateX(0); opacity: 0; } 8% { opacity: 1; } 100% { transform: rotate(-24deg) translateX(-128vw); opacity: 0; } }
+@media (max-width:768px){ .v57-fx-plane { width: clamp(54px,17vw,96px); } .v57-fx-meteor { width: 120px; } }
+#cfDetailOverlay { position: fixed; inset: 0; z-index: 10090; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(10,12,28,.58); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+#cfDetailOverlay.visible { display: flex; animation: v57FadeIn .2s ease-out; }
+.cf-detail-panel { width: min(640px,100%); max-height: 88vh; overflow: auto; border-radius: 20px; padding: 22px 24px 24px; background: linear-gradient(160deg,rgba(31,36,66,.94),rgba(18,20,40,.97)); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 22px 60px rgba(0,0,0,.5); color: #eef1ff; display: flex; flex-direction: column; gap: 12px; }
+.cf-detail-head { display: flex; align-items: flex-start; gap: 12px; }
+.cf-detail-icon { font-size: 30px; line-height: 1; }
+.cf-detail-headtxt { flex: 1; min-width: 0; }
+.cf-detail-title { font-size: 18px; font-weight: 700; color: #fff; }
+.cf-detail-sub { font-size: 12px; color: rgba(190,200,255,.7); margin-top: 3px; }
+.cf-detail-close { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 10px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: #cdd5ff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.cf-detail-close svg { width: 15px; height: 15px; }
+.cf-detail-close:hover { background: rgba(255,255,255,.14); }
+.cf-detail-block { border-radius: 14px; padding: 12px 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07); }
+.cf-detail-block .bd-label { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; color: rgba(160,175,255,.75); margin-bottom: 7px; }
+.cf-detail-quote { font-size: 15px; line-height: 1.65; color: #dfe5ff; border-left: 3px solid #6b7cff; padding: 2px 0 2px 10px; }
+.cf-detail-ext { font-size: 14.5px; line-height: 1.8; color: #eef1ff; }
+.cf-detail-meta { font-size: 12.5px; color: rgba(170,182,235,.85); }
+.cf-detail-note { font-size: 11.5px; color: rgba(150,158,200,.6); }
+@keyframes v57FadeIn { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width:480px){ #cfDetailOverlay { padding: 10px; } .cf-detail-panel { padding: 16px 14px 18px; border-radius: 16px; max-height: 90vh; } .cf-detail-title { font-size: 16px; } .cf-detail-ext { font-size: 14px; line-height: 1.7; } }
+</style>
+
+<div id="cfDetailOverlay" aria-hidden="true">
+  <div class="cf-detail-panel" role="dialog" aria-modal="true">
+    <div class="cf-detail-head">
+      <span class="cf-detail-icon" id="cfDetailIcon"></span>
+      <div class="cf-detail-headtxt">
+        <div class="cf-detail-title" id="cfDetailTitleText"></div>
+        <div class="cf-detail-sub" id="cfDetailSubText"></div>
+      </div>
+      <button class="cf-detail-close" id="cfDetailCloseBtn" title="Close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="cf-detail-block"><div class="bd-label" id="cfDetailQuoteLabel">原卡片速览</div><div class="cf-detail-quote" id="cfDetailQuote"></div></div>
+    <div class="cf-detail-block"><div class="bd-label" id="cfDetailExtLabel">延伸阅读</div><div class="cf-detail-ext" id="cfDetailExt"></div></div>
+    <div class="cf-detail-meta" id="cfDetailMeta"></div>
+    <div class="cf-detail-note" id="cfDetailNoteText">延伸内容基于公开民航工程与运营资料归纳整理，仅供学习交流。</div>
+  </div>
+</div>
+
+<script>
+// ===== v57: 长按天空彩蛋 + 冷知识卡片详情 =====
+(function () {
+  'use strict';
+
+  // ---------- 每条冷知识的真实延伸（中英双语，来源：公开民航工程与运营资料） ----------
+  var V57_EXT = [
+    { tag: { zh: 'A380 · 起落架与刹车', en: 'A380 Landing Gear and Brakes' }, d: { zh: 'A380 的主起落架共有 20 个机轮，配备碳复合刹车盘。着陆滑跑阶段刹车与发动机反推协同减速；若刹车盘过热，驾驶舱会收到提示，机务须待其充分冷却并复查后方可放行。相比钢刹车，整套碳刹车更轻，也有利于降低空机重量。', en: 'The A380 has 20 main-gear wheels with carbon brakes. During the landing roll, wheel brakes and thrust reversers work together to slow the aircraft; overheated brake discs trigger cockpit warnings, and ground crews must wait for them to cool before dispatch. Carbon brakes are also much lighter than steel units, which helps cut empty weight.' } },
+    { tag: { zh: '飞行记录系统 · 搜寻', en: 'Flight Recorders and Recovery' }, d: { zh: '黑匣子通常成对安装：驾驶舱话音记录器（CVR）负责保存舱内语音，飞行数据记录器（FDR）持续记录高度、速度、舵面和发动机等数百项参数。新一代适航标准已要求话音记录至少保存 25 小时。记录器上还装有水下定位信标，便于失事后被搜索打捞。', en: 'Recorders normally come in a pair: the cockpit voice recorder (CVR) and the flight data recorder (FDR). The FDR continuously logs hundreds of parameters such as altitude, speed, control surfaces and engine readings; new airworthiness standards now require at least 25 hours of cockpit voice. An underwater locator beacon (ULB) helps search teams find the recorders after an accident.' } },
+    { tag: { zh: '波音 747 · 垂尾结构', en: 'Boeing 747 Vertical Fin' }, d: { zh: '波音 747-400 的垂尾高约 19.4 米，约占整机长度 70.7 米的四分之一。高大的垂尾为这类巨型客机提供充足的方向稳定性，即使起飞时一侧发动机失效，也能帮助飞机保持直线飞行。', en: 'The Boeing 747-400 vertical fin is about 19.4 metres high, roughly one quarter of the 70.7-metre fuselage length. The tall fin gives the big airliner strong directional stability, helping it track straight even if one engine fails on take-off.' } },
+    { tag: { zh: 'A380 · 机翼与机场等级', en: 'A380 Wing and Airport Class' }, d: { zh: 'A380 的翼展达 79.75 米，因此只能在 4F 级大型机场起降。巨大的机翼内部还承担了大部分燃油的储存。空客曾表示，按每位乘客计算，A380 的油耗低于多数老一代宽体客机。', en: 'With a wingspan of 79.75 metres, the A380 can only operate at 4F-class large airports. The huge wing also acts as the main fuel tank, holding most of the aircraft fuel inside its structure. Airbus points out that per passenger, the A380 burns less fuel than many older wide-body jets.' } },
+    { tag: { zh: '舷窗结构 · 气压管理', en: 'Cabin Window Pressure' }, d: { zh: '客机舷窗分外层结构窗与内层保护窗两层。底部的小孔让夹层气压与客舱平衡，真正承受座舱压差的是外层窗；这一设计也降低了内层的受力与应力风险。即使外层出现裂纹，内层仍能提供一道临时保护。', en: 'Aircraft windows have an outer structural pane and an inner protective pane. The tiny bleed hole lets pressure between the panes equalise with the cabin, so the outer pane carries the real pressure load; it also reduces stress on the inner pane and gives the cabin crew a layer of protection if the outer pane cracks.' } },
+    { tag: { zh: '机轮 · 轮胎与氮气', en: 'Tyres and Nitrogen' }, d: { zh: '飞机轮胎需承受每秒数十米的触地速度和整机重量，常见胎压约 200 psi（约 13.8 巴）。氮气受热膨胀更小、不易助燃，可在高温刹车和高速滑跑中保持胎压更稳定，也降低起火隐患。', en: 'Airliner tyres touch down at high speed and support huge loads, often at around 200 psi. Nitrogen expands less with heat and does not feed combustion, keeping tyre pressure more stable during hot braking and fast rolling while lowering the risk of fire.' } },
+    { tag: { zh: '客舱空气 · HEPA', en: 'Cabin Air and HEPA' }, d: { zh: '客舱中的再循环空气经 HEPA 高效滤芯过滤，通常可拦下 99.97% 的 0.3 微米级颗粒；同时发动机引气不断补充新鲜空气，混合后全舱空气约每 2-3 分钟更新一次。滤芯按维护计划定期更换。', en: 'Cabin recirculated air passes through HEPA filters that capture 99.97% of particles at 0.3 micron; engine bleed air continuously adds fresh air, and the mixed air renews the whole cabin about every 2-3 minutes. Filters are replaced on a fixed maintenance schedule.' } },
+    { tag: { zh: '着陆性能 · 风的影响', en: 'Landing Performance and Wind' }, d: { zh: '起飞与着陆性能计算都会考虑风分量：逆风让相同空速下的地速更低，从而缩短着陆滑跑距离、减轻轮胎与刹车负担。侧风过强时，机组须按机型侧风限制决定是否等待或备降；顺风着陆则需要更长的跑道裕度。', en: 'Take-off and landing performance calculations include wind: with a headwind, ground speed is lower at the same airspeed, which shortens the landing roll and eases brakes and tyres. Strong crosswinds are limited by aircraft type, while a tailwind landing needs much more runway margin.' } },
+    { tag: { zh: '鸟击 · 机场与发动机', en: 'Bird Strikes and Engines' }, d: { zh: '绝大多数鸟击发生在机场附近低空，即起飞爬升、进近与着陆阶段。机场普遍采用声波驱鸟、猎鹰驱赶、生态治理等综合手段。发动机取证前还要通过“吞鸟”试验，吸入鸟后仍能保持安全状态。', en: 'Most bird strikes happen near airports at low altitude, during climb-out, approach and landing. Airports use sound deterrents, falconry and habitat management to reduce risk. Jet engines must also pass bird-ingestion tests before certification, so they stay controllable after striking birds.' } },
+    { tag: { zh: 'GE90-115B · 777', en: 'GE90-115B on the 777' }, d: { zh: 'GE90-115B 是波音 777-300ER 的配套发动机，风扇直径约 3.25 米，比不少客机机身还粗。它属于 11.5 万磅级推力，2002 年试车曾短暂达到 12.79 万磅，是民航史上推力最强的发动机之一。', en: 'The GE90-115B powers the Boeing 777-300ER and has a fan about 3.25 metres across, wider than many fuselages. Its thrust class reaches 115,000 lbf, and a 2002 test recorded 127,900 lbf, making it one of the most powerful commercial engines ever certified.' } },
+    { tag: { zh: '应急供氧 · 紧急下降', en: 'Oxygen and Emergency Descent' }, d: { zh: '面罩弹出后，化学产氧器或中央储氧系统会供氧约 15 分钟，这段时间足够机组执行紧急下降，把飞机从巡航高度降到约 1 万英尺以下的可呼吸高度。这正是先戴好自己的面罩再帮助他人的原因。', en: 'When the masks drop, chemical oxygen generators or central oxygen systems feed about 15 minutes of oxygen. That is enough for pilots to perform an emergency descent to below roughly 10,000 feet, where air is breathable. This is why you should put on your own mask first before helping others.' } },
+    { tag: { zh: '跑道灯光 · PAPI', en: 'Runway Lights and PAPI' }, d: { zh: '进近方向的跑道入口灯为绿色，起飞方向的跑道末端灯为红色，用来标定着陆区的起止。进近末段还可参考 PAPI 灯：红灯多代表下滑道偏低，白灯多代表偏高。', en: 'Threshold lights are green when seen from the approach side, while runway-end lights show red from the take-off direction, marking where the landing area ends. During final approach, PAPI lights use white and red bars to tell pilots whether their glide path is high or low.' } },
+    { tag: { zh: 'A350 · 复合材料', en: 'A350 Composite Airframe' }, d: { zh: 'A350 的机身筒段采用自动铺丝工艺整体成型，接头更少、表面更平滑。复合材料机翼与机身降低了结构重量，也让客舱气压与湿度可以更高，乘坐更舒适，同时减少机体疲劳检查的工作量。', en: 'The A350 fuselage barrels are laid up by automated fibre placement, which means fewer joints and smoother surfaces. The composite airframe lowers weight and permits higher cabin pressure and humidity, improving passenger comfort and reducing fatigue-inspection work over the aircraft life.' } },
+    { tag: { zh: '协和号 · 超音速热胀', en: 'Concorde Thermal Expansion' }, d: { zh: '协和号以约 2 马赫巡航时，机身表面温度超过 100°C，整机热胀约 30 厘米，结构设计为此预留了伸缩余量。它是历史上唯一投入商用的超音速客机，2003 年退役后民航至今尚未再有超音速客机投入运营。', en: 'Concorde cruised at about Mach 2, heating the skin to well over 100 degrees Celsius and stretching the fuselage by about 30 cm, which the design had to accommodate. It remained the only supersonic airliner in commercial service until retirement in 2003.' } },
+    { tag: { zh: '机组餐食 · 运行风险', en: 'Crew Meal Policy' }, d: { zh: '不少航司会让机长与副驾驶错峰用餐，或提供不同餐食，避免同一份被污染的食物同时影响两名飞行员。这种“机组餐食隔离”是航空公司普遍采取的风险管理习惯，并非所有国家都强制规定。', en: 'Many airlines stagger the crews meals or serve different menus to the captain and first officer, so that a single contaminated dish cannot incapacitate both pilots at once. The practice is a common risk-management habit in airline operations, not a legal requirement everywhere.' } }
+  ];
+  window.__V57_EXT = V57_EXT;
+
+  function v57Lang() { return (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'en' : 'zh'; }
+
+  // ---------- 功能2：点击冷知识卡片 → 详情视图 ----------
+  window.v57OpenFactDetail = function (idx) {
+    var ov = document.getElementById('cfDetailOverlay');
+    var facts = window.__V56_FACTS;
+    if (!ov || !facts || !facts[idx] || !V57_EXT[idx]) return;
+    var f = facts[idx], e = V57_EXT[idx], l = v57Lang();
+    var byId = function (id) { return document.getElementById(id); };
+    byId('cfDetailIcon').textContent = f.ic;
+    byId('cfDetailTitleText').textContent = f.t[l];
+    byId('cfDetailSubText').textContent = e.tag[l];
+    byId('cfDetailQuoteLabel').textContent = l === 'en' ? 'Card Snapshot' : '原卡片速览';
+    byId('cfDetailExtLabel').textContent = l === 'en' ? 'Go Deeper' : '延伸阅读';
+    byId('cfDetailQuote').textContent = f.x[l];
+    byId('cfDetailExt').textContent = e.d[l];
+    byId('cfDetailMeta').textContent = l === 'en'
+      ? 'Press ESC or tap the background to close'
+      : '按 ESC 或点击背景空白处可关闭';
+    ov.classList.add('visible');
+    ov.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  window.v57CloseFactDetail = function () {
+    var ov = document.getElementById('cfDetailOverlay');
+    if (!ov) return;
+    ov.classList.remove('visible');
+    ov.setAttribute('aria-hidden', 'true');
+    var co = document.getElementById('coldfactOverlay');
+    document.body.style.overflow = (co && co.classList.contains('visible')) ? 'hidden' : '';
+  };
+  var detailOv = document.getElementById('cfDetailOverlay');
+  if (detailOv) {
+    detailOv.addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) v57CloseFactDetail();
+    });
+    var closeBtn = document.getElementById('cfDetailCloseBtn');
+    if (closeBtn) closeBtn.addEventListener('click', v57CloseFactDetail);
+  }
+  var grid = document.getElementById('cfGrid');
+  if (grid) {
+    grid.addEventListener('click', function (e) {
+      var card = e.target && e.target.closest ? e.target.closest('.cf-card') : null;
+      if (!card) return;
+      var idx = Array.prototype.indexOf.call(grid.children, card);
+      if (idx >= 0) v57OpenFactDetail(idx);
+    });
+  }
+
+  // ---------- 功能1：长按天空窗约 0.85s 触发趣味彩蛋 ----------
+  var sky = document.getElementById('skyWindow');
+  if (sky) {
+    var holdTimer = null, startX = 0, startY = 0;
+    var curLayer = null, clearTimer = null;
+
+    function clearFx() {
+      if (clearTimer) { clearTimeout(clearTimer); clearTimer = null; }
+      if (curLayer) { var p = curLayer.parentNode; if (p) p.removeChild(curLayer); }
+      curLayer = null;
+    }
+    function spawn() {
+      clearFx();
+      var period = sky.getAttribute('data-sky') || 'night';
+      var sources = [];
+      var sels = ['.plane-a380 svg', '.plane-b787 svg', '.plane-b737 svg'];
+      for (var k = 0; k < sels.length; k++) { var n = sky.querySelector(sels[k]); if (n) sources.push(n); }
+      if (!sources.length) return;
+      var fx = document.createElement('div');
+      fx.className = 'v57-fx';
+      sky.appendChild(fx);
+      curLayer = fx;
+      var color = period === 'day' ? '#3c4662' : (period === 'dawn' ? '#c9d6ec' : '#ffffff');
+      var planes = 2 + Math.floor(Math.random() * 2); // 2~3 架
+      var probMap = { night: 0.85, dusk: 0.42, dawn: 0.12, day: 0.06 };
+      var prob = probMap[period];
+      if (prob === undefined) prob = 0.12;
+      var meteors = (Math.random() < prob) ? (Math.random() < 0.35 ? 2 : 1) : 0; // 最多 2 颗
+      var i, w, m;
+      for (i = 0; i < planes; i++) {
+        var src = sources[Math.floor(Math.random() * sources.length)];
+        w = document.createElement('div');
+        w.className = 'v57-fx-plane';
+        w.style.top = (6 + Math.random() * 40) + '%';
+        w.style.setProperty('--fs', (0.45 + Math.random() * 0.65).toFixed(2));
+        w.style.color = color;
+        w.style.animationDuration = (2.6 + Math.random() * 1.3) + 's';
+        w.style.animationDelay = (Math.random() * 0.5) + 's';
+        if (period === 'day') w.style.filter = 'none';
+        w.appendChild(src.cloneNode(true));
+        fx.appendChild(w);
+      }
+      for (i = 0; i < meteors; i++) {
+        m = document.createElement('div');
+        m.className = 'v57-fx-meteor';
+        m.style.top = (2 + Math.random() * 34) + '%';
+        m.style.animationDuration = (0.7 + Math.random() * 0.8) + 's';
+        m.style.animationDelay = (0.1 + Math.random() * 0.8) + 's';
+        fx.appendChild(m);
+      }
+      fx.addEventListener('animationend', function (ev) {
+        var t = ev.target;
+        if (t && t !== fx && t.parentNode) t.parentNode.removeChild(t);
+      });
+      clearTimer = setTimeout(clearFx, 9500);
+    }
+    function cancelHold() { if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; } }
+    sky.addEventListener('pointerdown', function (e) {
+      cancelHold();
+      startX = e.clientX; startY = e.clientY;
+      holdTimer = setTimeout(spawn, 850); // 0.8~1s 档位：0.85s
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+      sky.addEventListener(ev, cancelHold);
+    });
+    sky.addEventListener('pointermove', function (e) {
+      if (!holdTimer) return;
+      if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) cancelHold();
+    });
+    window.v57TriggerEasterEgg = spawn;
+  }
+})();
+</script>
 
 </body>
 </html>
