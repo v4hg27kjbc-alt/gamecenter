@@ -4474,6 +4474,133 @@ body.light-mode .collect-record-panel {
   .letter-card { padding: 40px 20px 30px; font-size: 14px; max-height: 82vh; }
   .letter-ctrl { top: 14px; right: 14px; }
 }
+/* ===== 三期：拖拽上传 / 推荐进度 / AI 智能填写 ===== */
+.af-drop-zone {
+  margin-top: 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border: 1.5px dashed rgba(99,102,241,0.45);
+  border-radius: 12px;
+  background: rgba(99,102,241,0.06);
+  color: #8899aa;
+  font-size: 0.82rem; text-align: center; line-height: 1.6;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.af-drop-zone:hover, .af-drop-zone.dragover {
+  border-color: rgba(99,102,241,0.85);
+  background: rgba(99,102,241,0.14);
+  color: #c7d2fe;
+}
+.af-drop-zone.dragover { transform: scale(1.01); }
+.af-drop-zone svg { width: 22px; height: 22px; stroke: currentColor; fill: none; }
+.af-thumb-wrap { display: none; margin-top: 10px; position: relative; }
+.af-thumb-wrap.show { display: block; }
+.af-thumb-wrap img {
+  width: 100%; max-height: 170px; object-fit: cover;
+  border-radius: 12px; border: 1px solid rgba(99,102,241,0.3); display: block;
+}
+.af-thumb-del {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: rgba(4,8,18,0.75); color: #fff;
+  font-size: 15px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+}
+.af-thumb-del:hover { background: rgba(99,102,241,0.85); }
+.af-hint { font-size: 0.75rem; color: #8899aa; margin-top: 6px; line-height: 1.6; }
+.af-hint.warn { color: #f0a35e; }
+.ai-fill-btn {
+  margin-top: 10px;
+  padding: 9px 18px;
+  border-radius: 12px; border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all 0.25s;
+  box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: 100%;
+}
+.ai-fill-btn:hover { box-shadow: 0 6px 22px rgba(102,126,234,0.5); transform: translateY(-1px); }
+.ai-fill-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+.ai-fill-btn svg { width: 15px; height: 15px; stroke: #fff; fill: none; flex-shrink: 0; }
+.rec-status {
+  display: inline-block; padding: 2px 10px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 600; margin-left: 8px; white-space: nowrap;
+}
+.rec-status.pending { background: rgba(99,102,241,0.18); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); }
+.rec-status.approved { background: rgba(52,211,153,0.16); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.4); }
+.rec-status.rejected { background: rgba(248,113,113,0.16); color: #fca5a5; border: 1px solid rgba(248,113,113,0.4); }
+.rec-item {
+  border: 1px solid rgba(99,102,241,0.2);
+  background: rgba(255,255,255,0.04);
+  border-radius: 14px; padding: 12px 14px; margin-bottom: 12px;
+}
+.rec-item-title { font-size: 0.92rem; font-weight: 600; color: #e0e0e0; line-height: 1.5; }
+.rec-item-meta { font-size: 0.75rem; color: #8899aa; margin-top: 4px; }
+.rec-item-reply {
+  font-size: 0.8rem; color: #c7d2fe; margin-top: 8px;
+  padding: 8px 10px; border-radius: 10px;
+  background: rgba(99,102,241,0.12);
+  border-left: 3px solid rgba(99,102,241,0.6);
+  line-height: 1.6;
+}
+.rec-empty, .rec-loading { text-align: center; color: #8899aa; padding: 36px 0; font-size: 0.86rem; line-height: 1.7; }
+.user-added-tag { font-size: 0.72rem; color: #8899aa; margin-top: 4px; letter-spacing: 0.2px; }
+.modal-user-added { font-size: 0.76rem; color: #8899aa; margin: 4px 0 0 0; }
+body.light-mode .af-drop-zone { background: rgba(21,101,192,0.05); border-color: rgba(21,101,192,0.35); color: #666; }
+body.light-mode .af-drop-zone:hover, body.light-mode .af-drop-zone.dragover { background: rgba(21,101,192,0.12); border-color: rgba(21,101,192,0.7); color: #1565c0; }
+body.light-mode .rec-item { background: rgba(0,0,0,0.03); border-color: rgba(21,101,192,0.2); }
+body.light-mode .rec-item-title { color: #1a1a2e; }
+body.light-mode .rec-item-reply { background: rgba(21,101,192,0.08); color: #1565c0; border-left-color: #1565c0; }
+body.light-mode .af-hint, body.light-mode .rec-empty, body.light-mode .rec-loading, body.light-mode .rec-item-meta, body.light-mode .user-added-tag, body.light-mode .modal-user-added { color: #777; }
+@media (max-width: 480px) {
+  .af-drop-zone { padding: 12px 8px; font-size: 0.76rem; }
+  .ai-fill-btn { font-size: 0.78rem; padding: 8px 12px; }
+  .rec-item { padding: 10px 12px; }
+}
+
+
+/* ===== 三期：推荐确认弹窗 / 我的推荐（复用 livery 弹窗体系） ===== */
+.rec-ask-panel { width: min(500px, 100%); }
+.rec-ask-content { padding: 20px 22px 22px; }
+.rec-ask-title { margin: 0 0 10px; font-size: 1.05rem; font-weight: 600; color: #fff; line-height: 1.5; }
+.rec-ask-desc { margin: 0 0 14px; font-size: 0.84rem; color: #a9b4c8; line-height: 1.75; }
+.rec-ask-aircraft {
+  font-size: 0.82rem; color: #c7d2fe; line-height: 1.65;
+  background: rgba(99,102,241,0.12); border-left: 3px solid rgba(99,102,241,0.6);
+  padding: 10px 12px; border-radius: 10px; margin-bottom: 14px;
+  word-break: break-word;
+}
+.rec-ask-aircraft img { max-width: 100%; max-height: 130px; border-radius: 8px; display: block; margin-top: 8px; }
+.rec-ask-status {
+  font-size: 0.82rem; line-height: 1.65; padding: 10px 12px;
+  border-radius: 10px; margin-bottom: 14px; display: none; word-break: break-word;
+}
+.rec-ask-status.show { display: block; }
+.rec-ask-status.ok { background: rgba(52,211,153,0.14); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.35); }
+.rec-ask-status.err { background: rgba(248,113,113,0.14); color: #fca5a5; border: 1px solid rgba(248,113,113,0.35); }
+.rec-ask-status.info { background: rgba(99,102,241,0.14); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.35); }
+.rec-ask-btns { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; margin-top: 4px; }
+.myrec-panel { width: min(620px, 100%); }
+.myrec-content { padding: 18px 20px 22px; }
+.myrec-tip { font-size: 0.78rem; color: #8899aa; line-height: 1.7; margin-bottom: 14px; }
+.myrec-list { max-height: 58vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+body.light-mode .rec-ask-title { color: #1a1a2e; }
+body.light-mode .rec-ask-desc, body.light-mode .myrec-tip { color: #555; }
+body.light-mode .rec-ask-aircraft { background: rgba(21,101,192,0.08); color: #1565c0; border-left-color: #1565c0; }
+@media (max-width: 480px) {
+  .rec-ask-content, .myrec-content { padding: 16px 14px 18px; }
+  .rec-ask-btns { justify-content: stretch; }
+  .rec-ask-btns .btn-submit, .rec-ask-btns .btn-cancel { flex: 1 1 auto; padding: 11px 12px; font-size: 0.86rem; }
+  .myrec-list { max-height: 62vh; }
+}
+
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -7114,6 +7241,7 @@ function renderCards() {
       <div class="card-body">
         <h3>${highlightText(t(a.name), sq)}</h3>
         <div class="model-code">${highlightText(a.code, sq)}</div>
+        ${a._userAdded ? '<div class="user-added-tag">该机型为用户添加</div>' : ''}
         <div class="desc">${highlightText(t(a.desc), sq)}</div>
         ${tagsHtml}
         <div class="card-stats">
@@ -7637,7 +7765,9 @@ function buildAddForm(modal) {
     '</div>' +
     '<div class="form-row">' +
       '<div class="form-group"><label>' + t('fieldCountry') + '</label><input id="af_country" placeholder="例: 法国"></div>' +
-      '<div class="form-group"><label>' + t('fieldImage') + '</label><input id="af_image" placeholder="https://..."></div>' +
+    '</div>' +
+    '<div class="form-row single">' +
+      '<div class="form-group"><label>' + t('fieldImage') + '</label>' + afBuildImageBlock() + '</div>' +
     '</div>' +
     '<div class="form-row">' +
       '<div class="form-group"><label>' + t('fieldSpeed') + '</label><input id="af_speed" placeholder="例: 0.85 马赫"></div>' +
@@ -7660,6 +7790,8 @@ function buildAddForm(modal) {
       '<button class="btn-cancel" onclick="closeAddForm()">' + t('btnCancel') + '</button>' +
       '<button class="btn-submit" onclick="submitCustomAircraft()">' + t('btnSubmit') + '</button>' +
     '</div>';
+  afResetImageState();
+  afBindImageDrop();
 }
 
 function submitCustomAircraft() {
@@ -7667,7 +7799,7 @@ function submitCustomAircraft() {
   var code = document.getElementById('af_code').value.trim();
   var category = document.getElementById('af_category').value;
   var country = document.getElementById('af_country').value.trim();
-  var image = document.getElementById('af_image').value.trim();
+  var image = afGetImageValue();
   var speed = document.getElementById('af_speed').value.trim();
   var range = document.getElementById('af_range').value.trim();
   var capacity = document.getElementById('af_capacity').value.trim();
@@ -7676,6 +7808,10 @@ function submitCustomAircraft() {
   var descZh = document.getElementById('af_descZh').value.trim();
 
   if (!zh || !code) { alert('中文名称和型号为必填项'); return; }
+
+  // 三期：推荐前与站内机型库查重
+  var dupAircraft = recFindDuplicate(code, zh);
+  if (dupAircraft && !confirm('站内已有该机型：' + t(dupAircraft.name) + '（' + dupAircraft.code + '）。仍要添加吗？')) { return; }
 
   var nameKey = 'name_custom_' + _customIdCounter;
   var descKey = 'desc_custom_' + _customIdCounter;
@@ -7711,7 +7847,14 @@ function submitCustomAircraft() {
   if (descZh) i18n.zh[descKey] = descZh;
   else i18n.zh[descKey] = '';
 
+  // 三期：单张图片压缩后超过 300 KB 提示
+  if (afImageState.dataUrl && afImageState.size > P3_IMAGE_MAX_BYTES) {
+    if (!confirm('照片压缩后约 ' + Math.round(afImageState.size / 1024) + ' KB，已超过 300 KB 上限，可能无法保存到本机。是否继续？')) { return; }
+  }
+
   // 保存到 localStorage
+  var saveOk = true;
+  var saveErr = '';
   try {
     var custom = JSON.parse(localStorage.getItem('custom_aircrafts') || '[]');
     custom.push({
@@ -7726,7 +7869,12 @@ function submitCustomAircraft() {
     savedI18n[nameKey] = { zh: zh };
     savedI18n[descKey] = { zh: descZh || '' };
     localStorage.setItem('custom_i18n', JSON.stringify(savedI18n));
-  } catch(e) {}
+  } catch(e) {
+    saveOk = false;
+    saveErr = (e && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED'))
+      ? '本机浏览器存储空间不足，该机型未能保存到本机。建议换一张更小的照片（压缩后 300 KB 以内），或清理浏览器站点数据后重试。'
+      : '本机保存失败（' + (e && e.name ? e.name : '未知错误') + '），该机型未能写入本机缓存。';
+  }
 
   // 加入当前 aircrafts
   aircrafts.push(newAircraft);
@@ -7735,6 +7883,12 @@ function submitCustomAircraft() {
   closeAddForm();
   renderCards();
   if (document.getElementById('timeline').style.display !== 'none') initTimeline();
+
+  // 三期：本机保存失败必须明确提示
+  if (!saveOk) alert(saveErr);
+
+  // 二期：提交后询问是否推荐到公开网页（是 / 否两路均有反馈）
+  recOpenAsk(newAircraft, { localSaveFailed: !saveOk });
 }
 
 
@@ -7961,6 +8115,7 @@ function openDetail(id) {
       <div class="modal-body">
         <h2 style="margin:0 0 2px 0">${highlightText(t(a.name), sq)}</h2>
         <div class="modal-code">${highlightText(a.code || '', sq)} · ${highlightText(a.country, sq)}</div>
+        ${a._userAdded ? '<p class="modal-user-added">该机型为用户添加</p>' : ''}
         ${(a.tags && a.tags.length) ? '<div class="modal-tags"><span class="modal-tags-title">标签</span>' + a.tags.map(function(tag) { var m = tagMeta.find(function(m) { return m.key === tag; }); return m ? '<span class="modal-tag-chip">' + highlightText(t(m.i18n), sq) + '</span>' : ''; }).join('') + '</div>' : ''}
         <div class="modal-desc">${highlightText(t(a.desc), sq)}</div>
         ${renderBaikeSection(a)}
@@ -11394,7 +11549,7 @@ async function loadNewsPanel() {
   renderNewsContent(content, selected);
 
   // ===== 阶段二：后台异步尝试RSS获取，成功后替换 =====
-  tryFetchRSSAndUpdate(content, today, shownTitles, history.shownUrls);
+  p3TryBackendNews(content, today, shownTitles, history.shownUrls);
 }
 
 async function refreshNewsPanel() {
@@ -11449,6 +11604,54 @@ async function generateNewsSummaryInPanel() {
 <!-- 添加模态窗口 -->
 <div class="add-modal-overlay" id="addModalOverlay">
   <div class="add-modal" id="addModal"></div>
+</div>
+
+<!-- ===== 三期：推荐确认弹窗 ===== -->
+<div id="recommendOverlay" class="livery-overlay" onclick="recBackdrop(event)">
+  <div class="livery-panel rec-ask-panel">
+    <div class="livery-header">
+      <div class="livery-header-title">
+        <span>机型推荐</span>
+        <span class="livery-title-sub">经站长审核后有机会上首页</span>
+      </div>
+      <div class="livery-header-actions">
+        <button class="quiz-close" onclick="closeRecommendAsk()" title="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="livery-content rec-ask-content">
+      <h3 class="rec-ask-title">要把这架机型推荐到公开网页吗？</h3>
+      <p class="rec-ask-desc">当前这架机型只保存在你的浏览器本机。推荐后会提交给站长审核，审核通过后有机会展示在公开首页，并在卡片上标注「该机型为用户添加」。</p>
+      <div class="rec-ask-aircraft" id="recAskAircraft"></div>
+      <div class="rec-ask-status" id="recAskStatus"></div>
+      <div class="rec-ask-btns">
+        <button class="btn-cancel" id="recAskNoBtn" onclick="recAskDecline()">暂时不用</button>
+        <button class="btn-submit" id="recAskYesBtn" onclick="recAskAccept()">好的，推荐</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 三期：我的推荐弹窗 ===== -->
+<div id="myRecOverlay" class="livery-overlay" onclick="myRecBackdrop(event)">
+  <div class="livery-panel myrec-panel">
+    <div class="livery-header">
+      <div class="livery-header-title">
+        <span>我的推荐</span>
+        <span class="livery-title-sub">查看审核进度与站长反馈</span>
+      </div>
+      <div class="livery-header-actions">
+        <button class="quiz-close" onclick="closeMyRecommendations()" title="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="livery-content myrec-content">
+      <div class="myrec-tip">这里只展示你在本机提交的推荐记录。身份使用本机随机生成的匿名标识，不含姓名、电话、邮箱等个人信息。</div>
+      <div class="myrec-list" id="myRecList"></div>
+    </div>
+  </div>
 </div>
 
 <!-- 主题选择弹窗 -->
@@ -11661,20 +11864,618 @@ document.addEventListener('DOMContentLoaded', function() {
   var lb = document.getElementById('letterBtn');
   if (lb) lb.addEventListener('click', openLetter);
 });
+
+/* ============================================================
+   三期模块：照片拖拽上传 / AI 智能填写 / 重复校验 / 推荐 / 已采纳机型 / 快讯接口
+   说明：全部函数为全局函数，供 buildAddForm / submitCustomAircraft / loadNewsPanel 调用
+   ============================================================ */
+var P3_API_BASE = 'https://henry126923-admincenter.pages.dev';
+var P3_ANON_UID_KEY = 'aviation_anon_uid_v1';
+var P3_APPROVED_ID_BASE = 900000;
+var P3_IMAGE_MAX_BYTES = 300 * 1024;
+var P3_REC_LOCAL_KEY = 'aviation_my_rec_v1';
+
+/* ---------- 基础工具 ---------- */
+function p3GetAnonUid() {
+  try {
+    var uid = localStorage.getItem(P3_ANON_UID_KEY);
+    if (!uid) {
+      uid = 'anon-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(P3_ANON_UID_KEY, uid);
+    }
+    return uid;
+  } catch (e) {
+    return 'anon-temp-' + Math.random().toString(36).slice(2, 10);
+  }
+}
+
+function p3NormCode(s) {
+  return String(s || '').toLowerCase().replace(/[\s\-_·]/g, '');
+}
+
+function p3Get(path) {
+  return fetch(P3_API_BASE + path, {
+    method: 'GET',
+    cache: 'no-store',
+    headers: { 'Accept': 'application/json' },
+    signal: AbortSignal.timeout(8000)
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+
+function p3Post(path, data) {
+  return fetch(P3_API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+    signal: AbortSignal.timeout(12000)
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+
+function p3PickList(res) {
+  if (!res) return [];
+  if (Array.isArray(res)) return res;
+  return res.items || res.data || res.list || res.recommendations || res.aircrafts || res.news || [];
+}
+
+/* ============================================================
+   一、照片拖拽上传区（复用 paCompressImage 站内压缩能力）
+   ============================================================ */
+var afImageState = { dataUrl: '', size: 0, name: '' };
+
+function afBuildImageBlock() {
+  return '<div class="af-drop-zone" id="afDropZone">' +
+      '<svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
+      '<div>拖入照片 / 点击选择 / 粘贴截图</div>' +
+      '<div class="af-hint" id="afHint">自动压缩至最长边 1024px · JPEG 0.85</div>' +
+    '</div>' +
+    '<input type="file" id="af_file" accept="image/*" style="display:none">' +
+    '<div class="af-thumb-wrap" id="afThumbWrap">' +
+      '<img id="af_thumb" alt="预览">' +
+      '<button type="button" class="af-thumb-del" onclick="afClearImage()" title="移除图片">&#215;</button>' +
+    '</div>' +
+    '<input id="af_image" placeholder="或粘贴图片 URL https://...">' +
+    '<button type="button" class="ai-fill-btn" id="af_aiBtn" onclick="afAiFill()">' +
+      '<svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M12 3l1.9 4.6 4.6 1.9-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>AI 智能填写</button>' +
+    '<div class="af-hint" id="afAiHint"></div>';
+}
+
+function afSetHint(msg, warn) {
+  var h = document.getElementById('afHint');
+  if (!h) return;
+  h.textContent = msg || '';
+  if (warn) h.classList.add('warn'); else h.classList.remove('warn');
+}
+
+function afSetAiHint(msg, warn) {
+  var h = document.getElementById('afAiHint');
+  if (!h) return;
+  h.textContent = msg || '';
+  if (warn) h.classList.add('warn'); else h.classList.remove('warn');
+}
+
+function afApplyImage(file) {
+  if (!file) return;
+  if (!/^image\//.test(file.type || '')) { afSetAiHint('请选择图片文件（JPG / PNG / WebP）', true); return; }
+  afSetAiHint('正在压缩处理…');
+  paCompressImage(file, function(dataUrl) {
+    if (!dataUrl) { afSetAiHint('图片处理失败，请换一张重试', true); return; }
+    afImageState.dataUrl = dataUrl;
+    afImageState.name = file.name || '';
+    var b64 = dataUrl.split(',')[1] || '';
+    afImageState.size = Math.round(b64.length * 3 / 4);
+    var thumb = document.getElementById('af_thumb');
+    var wrap = document.getElementById('afThumbWrap');
+    if (thumb && wrap) { thumb.src = dataUrl; wrap.classList.add('show'); }
+    if (afImageState.size > P3_IMAGE_MAX_BYTES) {
+      afSetHint('压缩后约 ' + Math.round(afImageState.size / 1024) + ' KB，已超过 300 KB 上限，可能无法保存到本机，建议换一张更小的图片', true);
+    } else {
+      afSetHint('已就绪：' + Math.round(afImageState.size / 1024) + ' KB · 最长边 1024px / JPEG 0.85');
+    }
+    afSetAiHint('照片已就绪，可点击「AI 智能填写」自动补全机型信息');
+  });
+}
+
+function afBindImageDrop() {
+  var zone = document.getElementById('afDropZone');
+  var fileInput = document.getElementById('af_file');
+  var urlInput = document.getElementById('af_image');
+  if (!zone || !fileInput) return;
+
+  zone.addEventListener('click', function(e) {
+    if (e.target && e.target.closest && e.target.closest('.af-thumb-wrap')) return;
+    fileInput.click();
+  });
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files && fileInput.files[0]) afApplyImage(fileInput.files[0]);
+    fileInput.value = '';
+  });
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    zone.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      zone.classList.add('dragover');
+    });
+  });
+  zone.addEventListener('dragleave', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    if (e.relatedTarget && zone.contains(e.relatedTarget)) return;
+    zone.classList.remove('dragover');
+  });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    zone.classList.remove('dragover');
+    var dt = e.dataTransfer;
+    if (!dt) return;
+    if (dt.files && dt.files.length) { afApplyImage(dt.files[0]); return; }
+    var txt = dt.getData('text/uri-list') || dt.getData('text/plain');
+    if (txt && /^https?:\/\//i.test(txt.trim())) {
+      if (urlInput) urlInput.value = txt.trim();
+      afSetHint('已读取图片链接，可直接提交或点击「AI 智能填写」补全信息');
+    }
+  });
+  if (urlInput) {
+    urlInput.addEventListener('input', function() {
+      if (urlInput.value.trim()) afSetHint('使用图片链接，保存后按原链接加载');
+    });
+  }
+  if (!window.__p3PasteBound) {
+    window.__p3PasteBound = true;
+    document.addEventListener('paste', function(e) {
+      var ov = document.getElementById('addModalOverlay');
+      if (!ov || !ov.classList.contains('show')) return;
+      if (!e.clipboardData) return;
+      var items = e.clipboardData.items || [];
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].type && items[i].type.indexOf('image') === 0) {
+          var f = items[i].getAsFile();
+          if (f) { afApplyImage(f); e.preventDefault(); return; }
+        }
+      }
+    });
+  }
+}
+
+function afResetImageState() {
+  afImageState.dataUrl = '';
+  afImageState.size = 0;
+  afImageState.name = '';
+}
+
+function afClearImage() {
+  afImageState.dataUrl = '';
+  afImageState.size = 0;
+  afImageState.name = '';
+  var thumb = document.getElementById('af_thumb');
+  if (thumb) thumb.removeAttribute('src');
+  var wrap = document.getElementById('afThumbWrap');
+  if (wrap) wrap.classList.remove('show');
+  afSetAiHint('');
+  afSetHint('已移除图片，可重新拖入 / 选择 / 粘贴');
+}
+
+function afGetImageValue() {
+  if (afImageState.dataUrl) return afImageState.dataUrl;
+  var el = document.getElementById('af_image');
+  return el ? (el.value || '').trim() : '';
+}
+
+/* ============================================================
+   二、AI 智能填写（照片识机 + 字段补全 + 简介生成）
+   ============================================================ */
+function afSetField(id, val) {
+  var el = document.getElementById(id);
+  if (el && val) el.value = val;
+}
+
+function afFillFromAircraft(a, json) {
+  afSetField('af_nameZh', String(t(a.name)).replace(/^[^\u4e00-\u9fa5A-Za-z0-9]+/, ''));
+  afSetField('af_code', a.code || '');
+  afSetField('af_country', a.country || '');
+  var catEl = document.getElementById('af_category');
+  if (catEl && a.category) catEl.value = a.category;
+  var sp = a.specs || {};
+  afSetField('af_speed', sp['cruise_speed'] || sp['max_speed'] || '');
+  afSetField('af_range', sp['range'] || '');
+  afSetField('af_capacity', sp['capacity'] || '');
+  afSetField('af_wingspan', sp['wingspan'] || sp['rotor_diameter'] || '');
+  var urlEl = document.getElementById('af_image');
+  if (urlEl && !afImageState.dataUrl && !urlEl.value && a.image) urlEl.value = a.image;
+}
+
+function afGenDesc(a, reason) {
+  var p = '请用中文写一段 60-90 字的航空机型简介。机型：' + t(a.name) + '（' + (a.code || '') + '，' + (a.country || '') + '）；关键规格：' + JSON.stringify(a.specs || {}) +
+    (reason ? '；外观识别依据：' + reason : '') + '。要求：只输出简介正文，不要标题、不要分点、不要换行、不要引号。';
+  var body = {
+    model: 'glm-4-flash',
+    messages: [{ role: 'user', content: p }],
+    temperature: 0.6,
+    max_tokens: 240
+  };
+  return fetch(AI_CONFIG.endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout((AI_CONFIG.timeout || 45000) + 10000)
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+    txt = String(txt).replace(/\s+/g, ' ').trim().replace(/^["「']|["」']$/g, '');
+    var el = document.getElementById('af_descZh');
+    if (el && txt) el.value = txt.slice(0, 200);
+  }).catch(function() {
+    var el = document.getElementById('af_descZh');
+    if (el && !el.value) el.value = paShortDesc(t(a.desc), 70);
+  });
+}
+
+function afAiFill() {
+  var btn = document.getElementById('af_aiBtn');
+  if (btn && btn.disabled) return;
+  afSetAiHint('');
+  if (!afImageState.dataUrl) {
+    afSetAiHint('请先拖入或粘贴一张飞机照片，再使用 AI 智能填写', true);
+    return;
+  }
+  if (btn) btn.disabled = true;
+  afSetAiHint('AI 正在识别机型…');
+  paCallAI(afImageState.dataUrl, PA_SERIES).then(function(json) {
+    var series = null;
+    if (json && json.series) {
+      var idx = parseInt(json.series, 10);
+      if (idx > 0 && idx <= PA_SERIES.length) series = PA_SERIES[idx - 1];
+    }
+    if (!series) throw new Error('nodetect');
+    var targetId = series.members[0];
+    if (json && json.sub) {
+      var subId = parseInt(json.sub, 10);
+      if (series.members.indexOf(subId) >= 0) targetId = subId;
+    }
+    var a = aircrafts.find(function(x) { return x.id === targetId; });
+    if (!a) throw new Error('nodetect');
+    afFillFromAircraft(a, json);
+    afSetAiHint('已识别：' + t(a.name) + (json && json.confidence ? '（置信度 ' + json.confidence + '%）' : '') + '，正在生成中文简介…');
+    return afGenDesc(a, (json && json.reason) || '').then(function() {
+      var dup = recFindDuplicate(document.getElementById('af_code') ? document.getElementById('af_code').value : '', document.getElementById('af_nameZh') ? document.getElementById('af_nameZh').value : '');
+      afSetAiHint(dup
+        ? '已自动填写完成。注意：站内已有该机型（' + t(dup.name) + ' · ' + dup.code + '），无需重复添加'
+        : '已自动填写完成，请核对后提交', !!dup);
+      if (btn) btn.disabled = false;
+    });
+  }).catch(function() {
+    if (btn) btn.disabled = false;
+    afSetAiHint('AI 识别失败或无法确定机型，请手动填写，或换一张更清晰的照片', true);
+  });
+}
+
+/* ============================================================
+   三、站内机型库查重
+   ============================================================ */
+function recFindDuplicate(code, nameZh) {
+  var nc = p3NormCode(code);
+  var nn = p3NormCode(nameZh);
+  if (!nc && !nn) return null;
+  for (var i = 0; i < aircrafts.length; i++) {
+    var a = aircrafts[i];
+    var ac = p3NormCode(a.code);
+    var an = p3NormCode(t(a.name));
+    if (nc && ac) {
+      if (ac === nc) return a;
+      if (ac.indexOf(nc) >= 0 || nc.indexOf(ac) >= 0) return a;
+    }
+    if (nn && an && an === nn) return a;
+  }
+  return null;
+}
+
+/* ============================================================
+   四、推荐确认弹窗 / 我的推荐
+   ============================================================ */
+var recState = { aircraft: null, submitting: false };
+
+function recSetStatus(msg, type) {
+  var el = document.getElementById('recAskStatus');
+  if (!el) return;
+  el.className = 'rec-ask-status' + (msg ? ' show ' + (type || 'info') : '');
+  el.textContent = msg || '';
+}
+
+function recSetButtons(mode) {
+  var yes = document.getElementById('recAskYesBtn');
+  var no = document.getElementById('recAskNoBtn');
+  if (yes) {
+    if (mode === 'done' || mode === 'declined') { yes.style.display = 'none'; }
+    else { yes.style.display = ''; yes.disabled = false; yes.textContent = '好的，推荐'; }
+  }
+  if (no) {
+    no.textContent = (mode === 'done' || mode === 'declined') ? '关闭' : '暂时不用';
+    no.setAttribute('onclick', (mode === 'done' || mode === 'declined') ? 'closeRecommendAsk()' : 'recAskDecline()');
+  }
+}
+
+function recOpenAsk(aircraft, opts) {
+  opts = opts || {};
+  var el = document.getElementById('recommendOverlay');
+  if (!el || !aircraft) return;
+  recState.aircraft = aircraft;
+  recState.submitting = false;
+  var info = document.getElementById('recAskAircraft');
+  if (info) {
+    var img = aircraft.image ? ('<img src="' + (aircraft.image.indexOf('data:') === 0 ? aircraft.image : proxyUrl(aircraft.image)) + '" alt="" onerror="this.style.display=\'none\'">') : '';
+    info.innerHTML = '<div><strong>' + t(aircraft.name) + '</strong></div>' +
+      '<div>' + (aircraft.code || '') + ' · ' + (aircraft.country || '--') + '</div>' + img;
+  }
+  var tip = opts.localSaveFailed ? '注意：本机浏览器存储空间不足，该机型未能写入本机缓存，但仍可直接推荐给站长审核。' : '';
+  recSetStatus(tip, tip ? 'err' : 'info');
+  var yes = document.getElementById('recAskYesBtn');
+  var no = document.getElementById('recAskNoBtn');
+  if (yes) { yes.style.display = ''; yes.disabled = false; yes.textContent = '好的，推荐'; yes.setAttribute('onclick', 'recAskAccept()'); }
+  if (no) { no.textContent = '暂时不用'; no.setAttribute('onclick', 'recAskDecline()'); }
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRecommendAsk() {
+  var el = document.getElementById('recommendOverlay');
+  if (el) el.classList.remove('visible');
+  syncBodyScrollLock();
+}
+
+function recBackdrop(e) {
+  if (e && e.target === e.currentTarget) closeRecommendAsk();
+}
+
+function p3BuildPayload(a) {
+  return {
+    uid: p3GetAnonUid(),
+    submittedAt: new Date().toISOString(),
+    nameZh: t(a.name),
+    code: a.code || '',
+    category: a.category || '',
+    country: a.country || '--',
+    image: a.image || '',
+    descZh: i18n.zh[a.desc] || '',
+    specs: a.specs || {},
+    prodDate: a.prodDate || '',
+    airlineIds: a.airlineIds || []
+  };
+}
+
+function recAskAccept() {
+  if (recState.submitting || !recState.aircraft) return;
+  var a = recState.aircraft;
+  recState.submitting = true;
+  var yes = document.getElementById('recAskYesBtn');
+  if (yes) { yes.disabled = true; yes.textContent = '提交中…'; }
+  recSetStatus('正在把推荐提交给站长，请稍候…', 'info');
+  var payload = p3BuildPayload(a);
+  p3Post('/api/recommend', payload).then(function(res) {
+    recState.submitting = false;
+    var rid = (res && (res.id || res.recId || res.recordId)) || '';
+    var rec = { id: String(rid || ''), nameZh: payload.nameZh, code: payload.code, category: payload.category,
+      country: payload.country, image: payload.image, ts: Date.now(), status: 'pending', reply: '', remote: true };
+    p3SaveLocalRec(rec);
+    recSetStatus('推荐已提交成功。站长审核通过后，这架机型有机会展示在公开首页，并标注「该机型为用户添加」。可点击页面底部「我的推荐」查看审核进度。', 'ok');
+    recSetButtons('done');
+  }).catch(function() {
+    recState.submitting = false;
+    var rec = { id: '', nameZh: payload.nameZh, code: payload.code, category: payload.category,
+      country: payload.country, image: payload.image, ts: Date.now(), status: 'pending', reply: '', remote: false };
+    p3SaveLocalRec(rec);
+    if (yes) { yes.disabled = false; yes.textContent = '重试推荐'; }
+    recSetStatus('推荐提交失败（网络或后台暂时不可用）。这架机型已经保存在本机，稍后可点击页面底部「我的推荐」重新提交。', 'err');
+  });
+}
+
+function recAskDecline() {
+  recSetStatus('好的，这架机型已保存在本机，不会提交到公开网页。以后随时可以点击页面底部「我的推荐」再次推荐。', 'info');
+  recSetButtons('declined');
+}
+
+/* ---------- 本地推荐记录 ---------- */
+function p3LoadLocalRecs() {
+  try {
+    var arr = JSON.parse(localStorage.getItem(P3_REC_LOCAL_KEY) || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+
+function p3SaveLocalRec(rec) {
+  try {
+    var arr = p3LoadLocalRecs();
+    arr.unshift(rec);
+    localStorage.setItem(P3_REC_LOCAL_KEY, JSON.stringify(arr.slice(0, 100)));
+  } catch (e) {}
+}
+
+function p3StatusText(s) {
+  if (s === 'approved') return '已采纳';
+  if (s === 'rejected') return '未通过';
+  return '待审核';
+}
+
+function p3StatusClass(s) {
+  if (s === 'approved') return 'approved';
+  if (s === 'rejected') return 'rejected';
+  return 'pending';
+}
+
+function p3RenderRecList(remote, local) {
+  var box = document.getElementById('myRecList');
+  if (!box) return;
+  var map = {};
+  var order = [];
+  (remote || []).forEach(function(r) {
+    var key = String(r.id || r.recId || r.code || '').toLowerCase();
+    if (!key) return;
+    if (!map[key]) { map[key] = Object.assign({}, r); order.push(key); }
+  });
+  (local || []).slice().reverse().forEach(function(l) {
+    var key = String(l.id || '').toLowerCase();
+    if (!key) key = 'local-' + String(l.code || '').toLowerCase() + '-' + (l.ts || 0);
+    if (!map[key]) { map[key] = Object.assign({}, l); order.push(key); }
+    else {
+      if (!map[key].status || map[key].status === 'pending') map[key].status = l.status || map[key].status;
+      if (!map[key].reply) map[key].reply = l.reply || '';
+    }
+  });
+
+  var items = order.map(function(k) { return map[k]; }).sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+  if (!items.length) {
+    box.innerHTML = '<div class="rec-empty">你还没有推荐过机型。<br>在「添加机型」提交后选择「好的，推荐」，即可在这里查看进度。</div>';
+    return;
+  }
+  box.innerHTML = items.map(function(it) {
+    var st = String(it.status || 'pending').toLowerCase();
+    var title = it.nameZh || it.name || '(未命名机型)';
+    var meta = [it.code || '', it.country || '', it.ts ? new Date(it.ts).toLocaleString('zh-CN', { hour12: false }) : ''].filter(function(x) { return !!x && x !== '--'; }).join(' · ');
+    var reply = it.reply || it.adminReply || '';
+    var img = it.image ? ('<img src="' + (String(it.image).indexOf('data:') === 0 ? it.image : proxyUrl(it.image)) + '" alt="" style="max-width:100%;max-height:120px;border-radius:10px;margin-top:8px;display:block" onerror="this.style.display=\'none\'">') : '';
+    return '<div class="rec-item">' +
+      '<div class="rec-item-title">' + title + '<span class="rec-status ' + p3StatusClass(st) + '">' + p3StatusText(st) + '</span></div>' +
+      (meta ? '<div class="rec-item-meta">' + meta + '</div>' : '') +
+      img +
+      (reply ? '<div class="rec-item-reply">站长反馈：' + reply + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+function openMyRecommendations() {
+  var el = document.getElementById('myRecOverlay');
+  if (!el) return;
+  var box = document.getElementById('myRecList');
+  if (box) box.innerHTML = '<div class="rec-loading">正在读取推荐记录…</div>';
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+  var local = p3LoadLocalRecs();
+  p3Get('/api/my-recommendations?uid=' + encodeURIComponent(p3GetAnonUid())).then(function(res) {
+    p3RenderRecList(p3PickList(res), local);
+  }).catch(function() {
+    p3RenderRecList([], local);
+  });
+}
+
+function closeMyRecommendations() {
+  var el = document.getElementById('myRecOverlay');
+  if (el) el.classList.remove('visible');
+  syncBodyScrollLock();
+}
+
+function myRecBackdrop(e) {
+  if (e && e.target === e.currentTarget) closeMyRecommendations();
+}
+
+/* ============================================================
+   五、已采纳机型合并（卡片 / 详情显示灰字）
+   ============================================================ */
+function p3MergeApproved(list) {
+  var added = 0;
+  list.forEach(function(item, i) {
+    if (!item) return;
+    var id = P3_APPROVED_ID_BASE + i;
+    if (aircrafts.some(function(x) { return x.id === id; })) return;
+    var nameKey = 'p3n_' + id;
+    var descKey = 'p3d_' + id;
+    var nameZh = item.nameZh || item.name || ('用户添加机型 ' + (i + 1));
+    i18n.zh[nameKey] = nameZh;
+    i18n.zh[descKey] = item.descZh || item.desc || '';
+    aircrafts.push({
+      id: id,
+      name: nameKey,
+      code: item.code || '--',
+      category: item.category || 'civil',
+      country: item.country || '--',
+      image: item.image || '',
+      desc: descKey,
+      specs: item.specs || { cruise_speed: '--', range: '--', capacity: '--', wingspan: '--' },
+      airlineIds: item.airlineIds || [],
+      slug: '',
+      prodDate: item.prodDate || '',
+      _userAdded: true
+    });
+    added++;
+  });
+  return added;
+}
+
+function p3LoadApprovedAircrafts() {
+  if (window.__p3ApprovedLoaded) return true;
+  var store = null;
+  try { store = aircrafts; } catch (e) { return false; }
+  if (!store || !store.length) return false;
+  window.__p3ApprovedLoaded = true;
+  p3Get('/api/aircrafts/approved').then(function(res) {
+    var list = p3PickList(res);
+    if (!list.length) return;
+    if (p3MergeApproved(list) > 0) {
+      try { renderCards(); } catch (e) {}
+    }
+  }).catch(function() {
+    window.__p3ApprovedLoaded = false;
+  });
+  return true;
+}
+
+(function p3Boot() {
+  function tick(tries) {
+    if (!p3LoadApprovedAircrafts() && tries < 8) setTimeout(function() { tick(tries + 1); }, 1000);
+  }
+  function start() { setTimeout(function() { tick(0); }, 900); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+
+/* ============================================================
+   六、航空快讯后端接口（先接接口，失败回退既有 RSS / 静态兜底）
+   ============================================================ */
+function p3TryBackendNews(content, today, shownTitles, shownUrls) {
+  return p3Get('/api/news').then(function(res) {
+    var raw = p3PickList(res);
+    var list = raw.map(function(it) {
+      return {
+        title: it.title || '',
+        snippet: it.snippet || it.summary || it.desc || it.content || '',
+        pubDate: it.pubDate || it.date || today,
+        link: it.link || it.url || '#'
+      };
+    }).filter(function(it) { return !!it.title; }).slice(0, 5);
+    if (!list.length) throw new Error('empty');
+    newsPanelItems = list;
+    renderNewsContent(content, list);
+    try {
+      localStorage.setItem('aviationNewsHistory', JSON.stringify({
+        date: today,
+        shownTitles: (shownTitles || []).concat(list.map(function(x) { return x.title; })).slice(-200),
+        shownUrls: (shownUrls || []).concat(list.map(function(x) { return x.link; })).slice(-200)
+      }));
+    } catch (e) {}
+    return true;
+  }).catch(function() {
+    try { tryFetchRSSAndUpdate(content, today, shownTitles, shownUrls); } catch (e) {}
+    return false;
+  });
+}
+
 </script>
 
 <footer class="site-footer">
   <div class="footer-watermark">Aviation Collection © 2026</div>
   <button class="footer-policy-btn" onclick="openPrivacyPolicy()">协议政策</button>
+    <button class="footer-policy-btn" onclick="openMyRecommendations()"><span id="myRecBtnText">我的推荐</span></button>
   <button class="footer-policy-btn" onclick="openFeedback()"><span id="feedbackBtnText">反馈与建议</span></button>
-  <div class="footer-update">隐私政策更新：2026-08-27</div>
+  <div class="footer-update">隐私政策更新：2026-09-11</div>
 </footer>
 
 <div id="privacyOverlay" onclick="privacyBackdrop(event)">
   <div class="privacy-card">
     <button class="privacy-close" onclick="closePrivacyPolicy()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="privacy-title">隐私保护与网站安全说明</div>
-    <div class="privacy-date">更新日期：2026-08-22</div>
+    <div class="privacy-date">更新日期：2026-09-11</div>
     <div class="privacy-body">
       <p><strong>一、网站性质</strong></p>
       <p>本网站是由个人维护的民航机型收藏展示项目，采用单文件静态网页技术构建，部署于 Cloudflare Pages 全球加速网络（CDN）。网站本身不包含服务器后台程序、不维护用户数据库、不设立用户账号体系，因此不存在传统意义上的"用户注册信息"。</p>
@@ -11693,11 +12494,16 @@ document.addEventListener('DOMContentLoaded', function() {
       <p>9. <strong>AI 收藏分析（智谱 AI 文本模型）</strong>：当您使用「AI 收藏分析」功能时，本网站会将您当前设备本地存储中已收藏的机型清单（机型名称、类别、国家）及页面内置的全部机型列表发送至智谱 AI（BigModel）的文本生成接口（GLM-4-flash），用于生成机库收藏洞察报告。传输内容仅包含上述机型清单文本，不包含您的设备信息、位置信息、浏览记录或任何其他本地数据；收藏清单始终保存在您自己的设备上，本网站不存储、不备份、不上传除上述 AI 分析请求以外的任何内容。第三方服务商将按其自身隐私政策处理该内容，生成的分析报告仅用于本次即时展示，本网站不保存任何报告记录。</p>
       <p>10. <strong>反馈与建议（GitHub Issues）</strong>：页面底部的「反馈与建议」入口用于收集访客对网站功能、内容、体验等方面的意见。您填写的反馈类型、反馈内容及选填的联系方式，将在您点击「提交反馈」后，以公开 Issue 的形式提交至本项目托管于 GitHub 的开源仓库（GitHub Issues 页面），任何访问该仓库的人均可查看，便于维护者公开跟进、分类统计与答复。该提交行为由您主动发起并跳转至 GitHub 完成，本网站自身不存储、不上传您的反馈内容；若您不希望公开，可通过页面提供的「复制内容」功能自行私信维护者，或直接添加页面下方公布的联系方式。GitHub 平台将按其自身隐私政策处理提交内容，建议您不要在反馈中填写身份证号、银行账号、密码等敏感个人信息，联系方式建议使用公开微信或邮箱。</p>
       <p>11. <strong>AI 机型故事（智谱 AI 文本模型）</strong>：当您在机型详情页点击「AI 机型故事」时，本网站会将所查看机型的名称、型号、类别、国家及页面内置的该机型百科资料（研发历史、技术特点、趣闻）发送至智谱 AI（BigModel）的文本生成接口（GLM-4-flash），用于生成一段拟人化叙事故事。传输内容仅包含上述机型信息文本，不包含您的设备信息、位置信息、浏览记录、收藏清单或任何其他本地数据；生成的故事仅用于本次即时展示，本网站不保存任何记录。</p>
+      <p>12. <strong>机型投稿与推荐后端（Cloudflare）</strong>：当您使用「添加机型」并选择推荐时，相关机型资料会通过本网站自有的后端接口（部署于 Cloudflare Pages / Workers）提交并存储，用于站长审核与首页展示，不经由任何第三方商业平台。</p>
       <p><strong>四、信息收集声明</strong></p>
       <p>1. 本网站不主动收集您的任何个人信息，包括姓名、电话、邮箱、地址、位置、设备标识等。</p>
       <p>2. 本网站不包含任何广告联盟代码、第三方统计埋点（如百度统计、Google Analytics）、Cookie 追踪、指纹识别或行为画像分析组件。页面内置一套纯本地的轻量行为记录机制：为优化浏览体验，会在您当前设备浏览器本地存储中记录访问事件（如页面浏览、收藏、点击、搜索关键词、屏幕分辨率、浏览器类型等）及一个随机生成的访客标识，该数据仅保存在您自己的设备上，不会上传至任何服务器或第三方，也不会用于跨站追踪或用户画像。</p>
       <p>3. 您主动输入的内容（如 AI 问答问题）仅在您使用对应功能时按上文说明发生传输，本网站不保存。</p>
       <p>4. 除「照片识机」功能需要您主动提供照片外，本网站不提供注册、登录、评论、留言等其他会采集信息的交互功能；您主动提供的照片仅按上文说明传输至 AI 服务进行本次识别，本网站不存储、不保留。</p>
+      <p>5. <strong>机型投稿与推荐（您主动提交）</strong>：当您使用「添加机型」功能并选择推荐时，本网站会收集您主动填写的机型信息（中文名称、型号、分类、国家、规格参数、中文简介）、您主动上传或填写的机型照片，以及一个在本机随机生成的匿名标识与提交时间。上述内容仅用于站长审核，审核通过后可能展示在公开首页并标注「该机型为用户添加」。</p>
+      <p>6. 上述过程不会收集您的姓名、电话、邮箱、位置等个人信息；匿名标识在本机随机生成、不含个人身份信息，仅用于您查看自己的推荐进度，您可在浏览器中清除本站点数据以删除该标识。</p>
+      <p>7. 您上传的照片仅用于机型审核与展示，不作其他用途；如您希望删除已提交的机型信息或照片，可通过页面底部「反馈与建议」联系维护者申请删除。</p>
+      <p>8. 上述投稿与推荐数据由本站托管于 Cloudflare 的后端接口接收与保存（详见第三部分第 12 条）。</p>
       <p><strong>五、网站安全信息</strong></p>
       <p>1. <strong>传输安全</strong>：本网站全站启用 HTTPS 加密传输（由 Cloudflare 提供证书），您与网站之间的所有数据传输均经过加密保护，可有效防止内容在传输途中被窃听、拦截或篡改。</p>
       <p>2. <strong>托管防护</strong>：网站部署于 Cloudflare 全球网络，依托其 DDoS 防护、WAF 边缘防护与智能安全能力，持续抵御恶意攻击、爬虫与异常流量，保障网站稳定可用。</p>
