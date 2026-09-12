@@ -5606,8 +5606,6 @@ const i18n = {
     fieldProdDate: '面世年份',
     btnSubmit: '添 加',
     btnCancel: '取消',
-    afBtnNo: '否',
-    afBtnYes: '是',
     catCivil: '民航客机',
     catFighter: '战斗机',
     catBomber: '轰炸机',
@@ -5861,8 +5859,6 @@ const i18n = {
     fieldProdDate: 'Year',
     btnSubmit: 'Submit',
     btnCancel: 'Cancel',
-    afBtnNo: 'No',
-    afBtnYes: 'Yes',
     catCivil: 'Airliner',
     catFighter: 'Fighter',
     catBomber: 'Bomber',
@@ -8007,8 +8003,8 @@ function buildAddForm(modal) {
       '<div class="form-group"><label>' + t('fieldAirlines') + '</label><div class="airline-chips" id="af_airlineChips">' + airlineChips + '</div></div>' +
     '</div>' +
     '<div class="btn-row af-btn-row">' +
-      '<button class="btn-cancel" onclick="closeAddForm()">' + t('afBtnNo') + '</button>' +
-      '<button class="btn-submit" onclick="submitCustomAircraft()">' + t('afBtnYes') + '</button>' +
+      '<button class="btn-cancel" onclick="closeAddForm()">' + t('btnCancel') + '</button>' +
+      '<button class="btn-submit" onclick="submitCustomAircraft()">' + t('btnSubmit') + '</button>' +
     '</div>';
   afResetImageState();
   afAskReset();
