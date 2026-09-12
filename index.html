@@ -1702,6 +1702,95 @@ body.light-mode .announcement-toast {
 body.light-mode .announcement-toast .toast-close { background: rgba(0,0,0,0.08); color: #555; }
 body.light-mode .announcement-toast .toast-close:hover { background: rgba(0,0,0,0.15); }
 
+/* ===== 三期 v59：公告触达（常驻板块 + 进入弹窗；接口不可用时静默隐藏） ===== */
+.ann-panel {
+  display: none;
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  background: rgba(15, 30, 60, 0.9);
+  border: 1px solid rgba(102, 126, 234, 0.32);
+  border-left: 4px solid #667eea;
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  color: #e6ecff;
+  animation: bannerFadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ann-panel.visible { display: block; }
+body.light-mode .ann-panel {
+  background: rgba(255, 255, 255, 0.92);
+  color: #26325a;
+  border-color: rgba(102, 126, 234, 0.28);
+  border-left-color: #667eea;
+}
+.ann-panel-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ann-panel-badge {
+  flex: 0 0 auto; font-size: 0.68rem; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 10px; border-radius: 999px; color: #fff; white-space: nowrap;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+}
+.ann-panel-title { flex: 1 1 140px; min-width: 0; font-size: 0.9rem; font-weight: 700; line-height: 1.5; word-break: break-word; }
+.ann-panel-more {
+  flex: 0 0 auto; border: none; cursor: pointer; font-size: 0.76rem; font-weight: 600;
+  color: #fff; padding: 6px 14px; border-radius: 999px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.ann-panel-more:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(102, 126, 234, 0.45); }
+.ann-panel-list { margin-top: 10px; display: grid; gap: 8px; }
+.ann-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px; padding: 10px 12px;
+}
+body.light-mode .ann-item { background: rgba(21, 101, 192, 0.05); border-color: rgba(21, 101, 192, 0.14); }
+.ann-item-title { font-size: 0.84rem; font-weight: 700; margin-bottom: 4px; word-break: break-word; }
+.ann-item-body { font-size: 0.8rem; line-height: 1.7; white-space: pre-line; word-break: break-word; opacity: 0.92; }
+.ann-item-time { margin-top: 6px; font-size: 0.68rem; opacity: 0.6; }
+.ann-overlay {
+  position: fixed; inset: 0; z-index: 360; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(4, 10, 25, 0.62);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.ann-overlay.visible { display: flex; }
+.ann-modal {
+  width: min(92vw, 560px); max-width: 100%; max-height: 80vh; overflow-y: auto;
+  border-radius: 18px; padding: 22px 22px 18px;
+  background: linear-gradient(160deg, rgba(23, 34, 66, 0.98), rgba(14, 20, 42, 0.98));
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  color: #e6ecff;
+  animation: bannerFadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.light-mode .ann-modal {
+  background: linear-gradient(160deg, #ffffff, #f4f7ff);
+  color: #26325a;
+  border-color: rgba(102, 126, 234, 0.3);
+}
+.ann-modal-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.ann-modal-title { flex: 1 1 auto; min-width: 0; font-size: 1rem; font-weight: 700; word-break: break-word; }
+.ann-modal-close {
+  flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255, 255, 255, 0.12); color: inherit; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.ann-modal-close:hover { background: rgba(255, 255, 255, 0.24); }
+body.light-mode .ann-modal-close { background: rgba(0, 0, 0, 0.06); }
+body.light-mode .ann-modal-close:hover { background: rgba(0, 0, 0, 0.12); }
+.ann-modal-body { display: grid; gap: 10px; }
+.ann-modal-foot { margin-top: 18px; display: flex; justify-content: flex-end; }
+.ann-modal-foot .ann-modal-ok { margin-top: 0; padding: 10px 26px; }
+@media (max-width: 480px) {
+  .ann-panel { padding: 12px 14px; }
+  .ann-panel-badge { font-size: 0.64rem; padding: 3px 8px; }
+  .ann-panel-more { padding: 6px 12px; font-size: 0.72rem; }
+  .ann-modal { padding: 16px 14px 14px; }
+  .ann-modal-foot { justify-content: stretch; }
+  .ann-modal-foot .ann-modal-ok { width: 100%; justify-content: center; }
+}
+
 /* ===== 更新通知横幅 ===== */
 .update-banner {
   backdrop-filter: blur(14px) saturate(180%);
@@ -2325,6 +2414,52 @@ body.light-mode .add-modal .form-group select {
 }
 body.light-mode .add-modal .btn-cancel { border-color: rgba(0,0,0,0.15); color: #666; }
 body.light-mode .add-modal .btn-cancel:hover { background: rgba(0,0,0,0.05); color: #333; }
+/* ===== 三期 v59：添加机型确认按钮（仅「否 / 是」，统一蓝紫渐变 + 扫光） ===== */
+.add-modal .af-btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+.add-modal .af-btn-row .btn-cancel,
+.add-modal .af-btn-row .btn-submit {
+  min-width: 108px;
+  padding: 11px 30px;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.add-modal .af-btn-row .btn-submit {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+.add-modal .af-btn-row .btn-cancel {
+  background: linear-gradient(135deg, rgba(102,126,234,0.28), rgba(118,75,162,0.28));
+  color: #dbe4ff;
+  border: 1px solid rgba(102, 126, 234, 0.45);
+}
+body.light-mode .add-modal .af-btn-row .btn-cancel {
+  background: linear-gradient(135deg, rgba(102,126,234,0.16), rgba(118,75,162,0.16));
+  color: #4a4f7a;
+}
+.add-modal .af-btn-row .btn-cancel::before,
+.add-modal .af-btn-row .btn-submit::before {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-20deg);
+}
+.add-modal .af-btn-row .btn-cancel:hover::before,
+.add-modal .af-btn-row .btn-submit:hover::before { animation: afBtnShine 0.9s ease; }
+.add-modal .af-btn-row .btn-cancel:hover,
+.add-modal .af-btn-row .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(102,126,234,0.5); }
+@keyframes afBtnShine { from { left: -60%; } to { left: 120%; } }
+@media (max-width: 480px) {
+  .add-modal .af-btn-row { justify-content: stretch; }
+  .add-modal .af-btn-row .btn-cancel,
+  .add-modal .af-btn-row .btn-submit { flex: 1 1 0; min-width: 0; padding: 11px 12px; }
+}
 body.light-mode .add-modal h2,
 body.light-mode .add-modal .modal-subtitle { color: #1a1a2e; }
 body.light-mode .add-modal .form-group label { color: #555; }
@@ -4515,7 +4650,8 @@ body.light-mode .collect-record-panel {
 .af-thumb-del:hover { background: rgba(99,102,241,0.85); }
 .af-hint { font-size: 0.75rem; color: #8899aa; margin-top: 6px; line-height: 1.6; }
 .af-hint.warn { color: #f0a35e; }
-.ai-fill-btn {
+.ai-fill-btn,
+.ann-modal-ok {
   margin-top: 10px;
   padding: 9px 18px;
   border-radius: 12px; border: none;
@@ -4524,11 +4660,22 @@ body.light-mode .collect-record-panel {
   cursor: pointer; transition: all 0.25s;
   box-shadow: 0 4px 15px rgba(102,126,234,0.3);
   display: inline-flex; align-items: center; gap: 6px;
-  max-width: 100%;
+  max-width: 100%; position: relative; overflow: hidden;
 }
-.ai-fill-btn:hover { box-shadow: 0 6px 22px rgba(102,126,234,0.5); transform: translateY(-1px); }
-.ai-fill-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
-.ai-fill-btn svg { width: 15px; height: 15px; stroke: #fff; fill: none; flex-shrink: 0; }
+.ai-fill-btn:hover,
+.ann-modal-ok:hover { box-shadow: 0 6px 22px rgba(102,126,234,0.5); transform: translateY(-1px); }
+.ai-fill-btn:disabled,
+.ann-modal-ok:disabled { opacity: 0.6; cursor: default; transform: none; }
+.ai-fill-btn svg,
+.ann-modal-ok svg { width: 15px; height: 15px; stroke: #fff; fill: none; flex-shrink: 0; }
+.ai-fill-btn::before,
+.ann-modal-ok::before {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-20deg);
+}
+.ai-fill-btn:hover::before,
+.ann-modal-ok:hover::before { animation: afBtnShine 0.9s ease; }
 /* 三期 v58：AI 引导问答（上传照片后先两问再识别） */
 .af-ask {
   display: none; margin-top: 12px; padding: 12px 12px 14px;
@@ -4763,6 +4910,16 @@ body.light-mode .rec-ask-aircraft { background: rgba(21,101,192,0.08); color: #1
   <div class="update-banner" id="updateBanner">
     <span id="updateBannerText"></span>
     <button class="banner-close" onclick="dismissUpdateBanner()" title="关闭">&times;</button>
+  </div>
+
+  <!-- ===== 三期 v59：公告常驻板块（无公告时自动隐藏） ===== -->
+  <div class="ann-panel" id="annPanel">
+    <div class="ann-panel-head">
+      <span class="ann-panel-badge">公告</span>
+      <span class="ann-panel-title" id="annPanelTitle"></span>
+      <button class="ann-panel-more" id="annPanelMore" onclick="openAnnModal()">查看详情</button>
+    </div>
+    <div class="ann-panel-list" id="annPanelList"></div>
   </div>
   
   <div class="search-sort-row">
@@ -5449,6 +5606,8 @@ const i18n = {
     fieldProdDate: '面世年份',
     btnSubmit: '添 加',
     btnCancel: '取消',
+    afBtnNo: '否',
+    afBtnYes: '是',
     catCivil: '民航客机',
     catFighter: '战斗机',
     catBomber: '轰炸机',
@@ -5702,6 +5861,8 @@ const i18n = {
     fieldProdDate: 'Year',
     btnSubmit: 'Submit',
     btnCancel: 'Cancel',
+    afBtnNo: 'No',
+    afBtnYes: 'Yes',
     catCivil: 'Airliner',
     catFighter: 'Fighter',
     catBomber: 'Bomber',
@@ -7807,11 +7968,8 @@ function buildAddForm(modal) {
       '<div class="form-group"><label>自定义机型名称（AI 自动填写）</label>' +
         '<div class="af-name-row">' +
           '<input id="af_customName" placeholder="例: 波音 777-300ER / A350-900 / C919">' +
-          '<button type="button" class="ai-fill-btn" id="af_nameAiBtn" onclick="afAiFillByName()">' +
-            '<svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M12 3l1.9 4.6 4.6 1.9-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>AI 自动填写</button>' +
         '</div>' +
-        '<div class="af-hint" id="af_nameAiHint">输入机型名称后点击「AI 自动填写」，AI 会补全中英文名、制造商、类别、国家、首飞年份、座位数、航程与简介，并自动查重</div>' +
+        '<div class="af-hint" id="af_nameAiHint">输入机型名称后，点击下方图片区的「AI 自动填写」，AI 会补全中英文名、制造商、类别、国家、首飞年份、座位数、航程与简介，并自动查重</div>' +
       '</div>' +
     '</div>' +
     '<div class="form-row">' +
@@ -7848,9 +8006,9 @@ function buildAddForm(modal) {
     '<div class="form-row single">' +
       '<div class="form-group"><label>' + t('fieldAirlines') + '</label><div class="airline-chips" id="af_airlineChips">' + airlineChips + '</div></div>' +
     '</div>' +
-    '<div class="btn-row">' +
-      '<button class="btn-cancel" onclick="closeAddForm()">' + t('btnCancel') + '</button>' +
-      '<button class="btn-submit" onclick="submitCustomAircraft()">' + t('btnSubmit') + '</button>' +
+    '<div class="btn-row af-btn-row">' +
+      '<button class="btn-cancel" onclick="closeAddForm()">' + t('afBtnNo') + '</button>' +
+      '<button class="btn-submit" onclick="submitCustomAircraft()">' + t('afBtnYes') + '</button>' +
     '</div>';
   afResetImageState();
   afAskReset();
@@ -8382,6 +8540,148 @@ function showToast() {
 function dismissToast() {
   const toast = document.getElementById('announceToast');
   if (toast) toast.classList.remove('show');
+}
+
+/* ============================================================
+   三期 v59：公告触达（对外公告）
+   数据源：GET /api/announcements?scope=public（走统一后端基址 P3_API_BASE）
+   行为：进入页面拉取一次 + 定时轮询；有公告→常驻板块出现并自动弹窗；
+        公告被撤回 / 接口不可用→板块与弹窗静默隐藏，不报错、不阻塞页面。
+   ============================================================ */
+var ANN_POLL_MS = 60000;
+var annState = { items: [], timer: null, seenKey: '', closedKey: '', inited: false };
+
+function annEsc(s) {
+  return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+  });
+}
+
+function annTimeText(iso) {
+  var s = String(iso || '').trim();
+  if (!s) return '';
+  var d = new Date(s);
+  if (isNaN(d.getTime())) return '';
+  function p(n) { return (n < 10 ? '0' : '') + n; }
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+/* 只保留对外公告（scope=public），并做空值清洗 */
+function annNormalize(list) {
+  if (!Array.isArray(list)) return [];
+  var out = [];
+  for (var i = 0; i < list.length; i++) {
+    var it = list[i] || {};
+    var scope = String(it.scope || 'public');
+    if (scope && scope !== 'public') continue;
+    var title = String(it.title || '').trim();
+    var content = String(it.content || it.body || it.text || '').trim();
+    if (!title && !content) continue;
+    out.push({
+      id: String(it.id || it.key || ''),
+      title: title,
+      content: content,
+      createdAt: String(it.createdAt || it.created_at || it.ts || '')
+    });
+  }
+  return out;
+}
+
+function annFetch() {
+  return p3Get('/api/announcements?scope=public').then(function(res) {
+    var list = Array.isArray(res) ? res : ((res && (res.items || res.data || res.list || res.announcements)) || []);
+    return annNormalize(list);
+  });
+}
+
+function annItemHtml(it) {
+  var t2 = annTimeText(it.createdAt);
+  return '<div class="ann-item">' +
+    (it.title ? '<div class="ann-item-title">' + annEsc(it.title) + '</div>' : '') +
+    (it.content ? '<div class="ann-item-body">' + annEsc(it.content) + '</div>' : '') +
+    (t2 ? '<div class="ann-item-time">' + annEsc(t2) + '</div>' : '') +
+    '</div>';
+}
+
+function annRender() {
+  var panel = document.getElementById('annPanel');
+  var listEl = document.getElementById('annPanelList');
+  var titleEl = document.getElementById('annPanelTitle');
+  if (!panel || !listEl) return;
+  var items = annState.items;
+  if (!items.length) {
+    panel.classList.remove('visible');
+    listEl.innerHTML = '';
+    if (titleEl) titleEl.textContent = '';
+    closeAnnModal();
+    return;
+  }
+  if (titleEl) titleEl.textContent = items[0].title || '最新公告';
+  var html = '';
+  for (var i = 0; i < items.length && i < 3; i++) html += annItemHtml(items[i]);
+  listEl.innerHTML = html;
+  panel.classList.add('visible');
+}
+
+function annKeyOf(items) {
+  return (items || []).map(function(x) { return x.id + '|' + x.title + '|' + x.content; }).join('##');
+}
+
+function openAnnModal() {
+  if (!annState.items.length) return;
+  var body = document.getElementById('annModalBody');
+  var titleEl = document.getElementById('annModalTitle');
+  if (titleEl) titleEl.textContent = annState.items[0].title || '公告';
+  if (body) {
+    var html = '';
+    for (var i = 0; i < annState.items.length; i++) html += annItemHtml(annState.items[i]);
+    body.innerHTML = html;
+  }
+  var el = document.getElementById('annOverlay');
+  if (el) { el.classList.add('visible'); document.body.style.overflow = 'hidden'; }
+  annState.closedKey = annKeyOf(annState.items);
+}
+
+function closeAnnModal() {
+  var el = document.getElementById('annOverlay');
+  if (!el) return;
+  el.classList.remove('visible');
+  try { syncBodyScrollLock(); } catch (e) { document.body.style.overflow = ''; }
+}
+
+function annBackdrop(e) {
+  if (e && e.target === e.currentTarget) closeAnnModal();
+}
+
+function annApply(items) {
+  annState.items = items || [];
+  annRender();
+  if (!annState.items.length) return;
+  var key = annKeyOf(annState.items);
+  if (key && key !== annState.seenKey && key !== annState.closedKey) {
+    annState.seenKey = key;
+    openAnnModal();
+  }
+}
+
+function annLoadOnce() {
+  return annFetch().then(function(items) {
+    annApply(items);
+    return items;
+  }).catch(function() {
+    // 接口不可用：静默隐藏板块与弹窗，页面不报错、不阻塞
+    annState.items = [];
+    annRender();
+    return [];
+  });
+}
+
+function initAnnouncements() {
+  annState.inited = true;
+  if (!document.getElementById('annPanel')) return;
+  annLoadOnce();
+  if (annState.timer) clearInterval(annState.timer);
+  annState.timer = setInterval(annLoadOnce, ANN_POLL_MS);
 }
 
 // ===== AI 收藏分析 =====
@@ -9585,6 +9885,20 @@ function initTimeline() {
 })();
 
 showToast();
+// 公告触达：p3Get 定义在后续脚本块，须等脚本全部就绪后再启动，避免解析期 ReferenceError
+(function annBoot() {
+  var booted = false;
+  function boot() {
+    if (booted) return;
+    if (typeof initAnnouncements !== 'function' || typeof p3Get !== 'function') return;
+    booted = true;
+    try { initAnnouncements(); } catch (e) {}
+  }
+  if (document.readyState === 'complete') { boot(); }
+  else { window.addEventListener('load', boot); }
+  setTimeout(boot, 600);
+  setTimeout(boot, 2000);
+})();
 initUpdateBanner();
 createStars();
 renderCountryBar();
@@ -11677,6 +11991,22 @@ async function generateNewsSummaryInPanel() {
   <div class="add-modal" id="addModal"></div>
 </div>
 
+<!-- ===== 三期 v59：公告弹窗（进入页面/登录时自动弹出，撤回后自动消失） ===== -->
+<div id="annOverlay" class="ann-overlay" onclick="annBackdrop(event)">
+  <div class="ann-modal">
+    <div class="ann-modal-head">
+      <span class="ann-panel-badge">公告</span>
+      <span class="ann-modal-title" id="annModalTitle">公告</span>
+      <button class="ann-modal-close" onclick="closeAnnModal()" title="关闭">&times;</button>
+    </div>
+    <div class="ann-modal-body" id="annModalBody"></div>
+    <div class="ann-modal-foot">
+      <button type="button" class="ann-modal-ok" onclick="closeAnnModal()">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>我知道了</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 三期：推荐确认弹窗 ===== -->
 <div id="recommendOverlay" class="livery-overlay" onclick="recBackdrop(event)">
   <div class="livery-panel rec-ask-panel">
@@ -11697,8 +12027,8 @@ async function generateNewsSummaryInPanel() {
       <div class="rec-ask-aircraft" id="recAskAircraft"></div>
       <div class="rec-ask-status" id="recAskStatus"></div>
       <div class="rec-ask-btns">
-        <button class="btn-cancel" id="recAskNoBtn" onclick="recAskDecline()">暂时不用</button>
-        <button class="btn-submit" id="recAskYesBtn" onclick="recAskAccept()">好的，推荐</button>
+        <button class="btn-cancel" id="recAskNoBtn" onclick="recAskDecline()">否</button>
+        <button class="btn-submit" id="recAskYesBtn" onclick="recAskAccept()">是</button>
       </div>
     </div>
   </div>
@@ -12012,20 +12342,10 @@ function afBuildImageBlock() {
       '<button type="button" class="af-thumb-del" onclick="afClearImage()" title="移除图片">&#215;</button>' +
     '</div>' +
     '<input id="af_image" placeholder="或粘贴图片 URL https://...">' +
-    '<button type="button" class="ai-fill-btn" id="af_aiBtn" onclick="afAiFill()">' +
+    '<button type="button" class="ai-fill-btn" id="af_nameAiBtn" onclick="afAiFillByName()">' +
       '<svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-        '<path d="M12 3l1.9 4.6 4.6 1.9-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>AI 智能填写</button>' +
-    '<div class="af-hint" id="afAiHint"></div>' +
-    '<div class="af-ask" id="afAsk">' +
-      '<div class="af-ask-step" id="afAskStep"></div>' +
-      '<div class="af-ask-title" id="afAskTitle"></div>' +
-      '<div class="af-ask-opts" id="afAskOpts"></div>' +
-      '<input class="af-ask-input" id="afAskInput">' +
-      '<div class="af-ask-actions">' +
-        '<button type="button" class="ai-fill-btn" id="afAskNext" onclick="afAskNext()">下一步</button>' +
-        '<button type="button" class="af-ask-skip" id="afAskSkip" onclick="afSkipAsk()">跳过，直接识别</button>' +
-      '</div>' +
-    '</div>';
+        '<path d="M12 3l1.9 4.6 4.6 1.9-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>AI 自动填写</button>' +
+    '<div class="af-hint" id="afAiHint"></div>';
 }
 
 function afSetHint(msg, warn) {
@@ -12060,8 +12380,7 @@ function afApplyImage(file) {
     } else {
       afSetHint('已就绪：' + Math.round(afImageState.size / 1024) + ' KB · 最长边 1024px / JPEG 0.85');
     }
-    afSetAiHint('照片已就绪：先回答 2 个小问题（制造商 / 类别）再识别，AI 准确率更高');
-    afAskOpen();
+    afSetAiHint('照片已就绪，提交时会随推荐一起上传');
   });
 }
 
@@ -12465,10 +12784,10 @@ function recSetButtons(mode) {
   var no = document.getElementById('recAskNoBtn');
   if (yes) {
     if (mode === 'done' || mode === 'declined') { yes.style.display = 'none'; }
-    else { yes.style.display = ''; yes.disabled = false; yes.textContent = '好的，推荐'; }
+    else { yes.style.display = ''; yes.disabled = false; yes.textContent = '是'; }
   }
   if (no) {
-    no.textContent = (mode === 'done' || mode === 'declined') ? '关闭' : '暂时不用';
+    no.textContent = (mode === 'done' || mode === 'declined') ? '关闭' : '否';
     no.setAttribute('onclick', (mode === 'done' || mode === 'declined') ? 'closeRecommendAsk()' : 'recAskDecline()');
   }
 }
@@ -12489,8 +12808,8 @@ function recOpenAsk(aircraft, opts) {
   recSetStatus(tip, tip ? 'err' : 'info');
   var yes = document.getElementById('recAskYesBtn');
   var no = document.getElementById('recAskNoBtn');
-  if (yes) { yes.style.display = ''; yes.disabled = false; yes.textContent = '好的，推荐'; yes.setAttribute('onclick', 'recAskAccept()'); }
-  if (no) { no.textContent = '暂时不用'; no.setAttribute('onclick', 'recAskDecline()'); }
+  if (yes) { yes.style.display = ''; yes.disabled = false; yes.textContent = '是'; yes.setAttribute('onclick', 'recAskAccept()'); }
+  if (no) { no.textContent = '否'; no.setAttribute('onclick', 'recAskDecline()'); }
   el.classList.add('visible');
   document.body.style.overflow = 'hidden';
 }
@@ -12526,7 +12845,7 @@ function recAskAccept() {
   var a = recState.aircraft;
   recState.submitting = true;
   var yes = document.getElementById('recAskYesBtn');
-  if (yes) { yes.disabled = true; yes.textContent = '提交中…'; }
+  if (yes) { yes.disabled = true; yes.textContent = '是'; }
   recSetStatus('正在把推荐提交给站长，请稍候…', 'info');
   var payload = p3BuildPayload(a);
   p3Post('/api/recommend', payload).then(function(res) {
@@ -12542,7 +12861,7 @@ function recAskAccept() {
     var rec = { id: '', nameZh: payload.nameZh, code: payload.code, category: payload.category,
       country: payload.country, image: payload.image, ts: Date.now(), status: 'pending', reply: '', remote: false };
     p3SaveLocalRec(rec);
-    if (yes) { yes.disabled = false; yes.textContent = '重试推荐'; }
+    if (yes) { yes.disabled = false; yes.textContent = '是'; }
     recSetStatus('推荐提交失败（网络或后台暂时不可用）。这架机型已经保存在本机，稍后可点击页面底部「我的推荐」重新提交。', 'err');
   });
 }
