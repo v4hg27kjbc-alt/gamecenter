@@ -5957,9 +5957,18 @@ function placeholdImage(img, name, code, category) {
 }
 
 // ===== 图片代理：解决维基图片国内加载问题 =====
+// 注意：后端（管理端接口）返回的图片可能是相对路径 /api/image/xxx，
+// 该路径只在后台域名下存在，直接放到主站页面会 404（页面命中整页 HTML）导致照片不显示，
+// 因此这里统一把相对路径补全为后台 API 的绝对地址。
 function proxyUrl(url) {
-  if (!url || (!url.includes('wikimedia.org') && !url.includes('wikipedia.org') && !url.includes('clearbit.com'))) return url;
-  return 'https://wsrv.nl/?url=' + encodeURIComponent(url.replace(/^https?:\/\//, '')) + '&w=800&output=webp';
+  if (!url) return url;
+  var s = String(url);
+  if (s.charAt(0) === '/' && s.charAt(1) !== '/') {
+    var apiBase = (typeof P3_API_BASE !== 'undefined' && P3_API_BASE) ? P3_API_BASE : 'https://henry126923-admincenter.pages.dev';
+    s = apiBase + s;
+  }
+  if (!s.includes('wikimedia.org') && !s.includes('wikipedia.org') && !s.includes('clearbit.com')) return s;
+  return 'https://wsrv.nl/?url=' + encodeURIComponent(s.replace(/^https?:\/\//, '')) + '&w=800&output=webp';
 }
 
 // ===== 航空公司数据库 =====
