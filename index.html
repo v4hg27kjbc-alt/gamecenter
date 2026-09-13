@@ -4801,7 +4801,7 @@ body.light-mode .rec-ask-aircraft { background: rgba(21,101,192,0.08); color: #1
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260905-v57">
+<body data-version="20260913-v63">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -6330,6 +6330,34 @@ const airlines = {
 };
 
 // ===== 飞机器数据库 =====
+/* ===== 规格(specs)归一化：后台返回的 specs 可能是 JSON 字符串，统一解析为对象，
+   避免被 Object.entries / Object.keys 逐字符拆开渲染成乱码 ===== */
+function p3SpecFallback() {
+  return { cruise_speed: '--', range: '--', capacity: '--', wingspan: '--' };
+}
+function p3NormSpecs(raw) {
+  var fb = p3SpecFallback();
+  if (!raw) return fb;
+  if (typeof raw === 'object') return Array.isArray(raw) ? fb : raw;
+  if (typeof raw === 'string') {
+    var str = raw.trim();
+    if (str) {
+      try {
+        var obj = JSON.parse(str);
+        if (obj && typeof obj === 'object' && !Array.isArray(obj)) return obj;
+        if (typeof obj === 'string' && obj.trim().charAt(0) === '{') return p3NormSpecs(obj);
+      } catch (e) {}
+    }
+  }
+  return fb;
+}
+function p3SpecEntries(a) { return Object.entries(p3NormSpecs(a && a.specs)); }
+function p3SpecGet(a, keys) {
+  var sp = p3NormSpecs(a && a.specs);
+  for (var i = 0; i < keys.length; i++) { if (sp[keys[i]]) return sp[keys[i]]; }
+  return '--';
+}
+
 const aircrafts = [
   {
     id: 1, name: 'name_a380', code: 'Airbus A380',
@@ -7188,8 +7216,9 @@ function exportAirlineImage() {
     ctx.textAlign = 'right';
     ctx.fillStyle = '#78909c';
     ctx.font = '9px -apple-system, "PingFang SC", sans-serif';
-    var specKeys = Object.keys(a.specs || {});
-    var specsStr = specKeys.slice(0, 3).map(function(k) { return a.specs[k]; }).join(' · ');
+    var _spCard = p3NormSpecs(a.specs);
+    var specKeys = Object.keys(_spCard);
+    var specsStr = specKeys.slice(0, 3).map(function(k) { return _spCard[k]; }).join(' · ');
     ctx.fillText(specsStr, W - padding, y + 18);
 
     // Code + brief desc on second line
@@ -7266,14 +7295,15 @@ function extractNumeric(specStr) {
 
 function getSortValue(a) {
   if (!a.specs) return 0;
+  const _sp = p3NormSpecs(a.specs);
   if (sortBy === 'speed') {
-    const speedKey = a.specs['cruise_speed'] || a.specs['max_speed'] || '0';
+    const speedKey = _sp['cruise_speed'] || _sp['max_speed'] || '0';
     return extractNumeric(speedKey);
   } else if (sortBy === 'range') {
-    const rangeKey = a.specs['max_range'] || a.specs['range'] || a.specs['combat_radius'] || '0';
+    const rangeKey = _sp['max_range'] || _sp['range'] || _sp['combat_radius'] || '0';
     return extractNumeric(rangeKey);
   } else if (sortBy === 'capacity') {
-    const capKey = a.specs['capacity'] || a.specs['payload'] || '0';
+    const capKey = _sp['capacity'] || _sp['payload'] || '0';
     return extractNumeric(capKey);
   }
   return 0;
@@ -7458,8 +7488,8 @@ function renderCards() {
         <div class="desc">${highlightText(t(a.desc), sq)}</div>
         ${tagsHtml}
         <div class="card-stats">
-          <div class="stat"><div class="stat-value">${(a.specs && a.specs['cruise_speed']) || (a.specs && a.specs['max_speed']) || '--'}</div><div class="stat-label">${t('sortSpeed')}</div></div>
-          <div class="stat"><div class="stat-value">${(a.specs && a.specs['wingspan']) || (a.specs && a.specs['rotor_diameter']) || '--'}</div><div class="stat-label">${t('specWingspan')}</div></div>
+          <div class="stat"><div class="stat-value">${p3SpecGet(a, ['cruise_speed', 'max_speed'])}</div><div class="stat-label">${t('sortSpeed')}</div></div>
+          <div class="stat"><div class="stat-value">${p3SpecGet(a, ['wingspan', 'rotor_diameter'])}</div><div class="stat-label">${t('specWingspan')}</div></div>
         </div>
       </div>
     </div>`;
@@ -7625,10 +7655,11 @@ function showCompare() {
   const COMPARE_KEYS = ['engine','mtow','seats','length','height',
     'cruise_speed','max_speed','max_range','range','combat_radius',
     'capacity','payload','wingspan','ceiling','rotor_diameter'];
-  const keys = COMPARE_KEYS.filter(k => a1.specs[k] !== undefined || a2.specs[k] !== undefined);
+  const _s1 = p3NormSpecs(a1.specs), _s2 = p3NormSpecs(a2.specs);
+  const keys = COMPARE_KEYS.filter(k => _s1[k] !== undefined || _s2[k] !== undefined);
   const extraKeys = [];
-  Object.keys(a1.specs).forEach(k => { if (keys.indexOf(k) === -1 && extraKeys.indexOf(k) === -1) extraKeys.push(k); });
-  Object.keys(a2.specs).forEach(k => { if (keys.indexOf(k) === -1 && extraKeys.indexOf(k) === -1) extraKeys.push(k); });
+  Object.keys(_s1).forEach(k => { if (keys.indexOf(k) === -1 && extraKeys.indexOf(k) === -1) extraKeys.push(k); });
+  Object.keys(_s2).forEach(k => { if (keys.indexOf(k) === -1 && extraKeys.indexOf(k) === -1) extraKeys.push(k); });
   const allKeys = keys.concat(extraKeys);
 
   // 数值型参数参与高亮，文本参数（如发动机型号）不比较
@@ -7636,8 +7667,8 @@ function showCompare() {
     'max_range','range','combat_radius','capacity','payload','wingspan','ceiling','rotor_diameter'];
 
   const rowsHTML = allKeys.map(key => {
-    const v1 = a1.specs[key] !== undefined ? a1.specs[key] : '--';
-    const v2 = a2.specs[key] !== undefined ? a2.specs[key] : '--';
+    const v1 = _s1[key] !== undefined ? _s1[key] : '--';
+    const v2 = _s2[key] !== undefined ? _s2[key] : '--';
     let better1 = '', better2 = '';
     if (NUMERIC_KEYS.indexOf(key) !== -1) {
       const n1 = extractNumeric(v1);
@@ -8351,7 +8382,7 @@ function openDetail(id) {
         ${renderBaikeSection(a)}
         ${renderStorySection(a)}
         <div class="modal-specs">
-          ${Object.entries(a.specs).map(([k, v]) =>
+          ${p3SpecEntries(a).map(([k, v]) =>
             `<div class="spec-item"><div class="spec-label">${specLabel(k)}</div><div class="spec-value">${highlightText(v, sq)}</div></div>`
           ).join('')}
         </div>
@@ -9367,7 +9398,7 @@ function openAiReview(id) {
     code: a.code || '',
     country: a.country || '',
     desc: t(a.desc),
-    specs: a.specs || {}
+    specs: p3NormSpecs(a.specs)
   };
 
   document.getElementById('aiReviewModelName').textContent = t(a.name);
@@ -9414,7 +9445,7 @@ async function generateAiReview() {
   var a = aiReviewContext;
   var specsText = '';
   if (a.specs) {
-    specsText = Object.entries(a.specs).map(function(e) { return e[0] + ': ' + e[1]; }).join(', ');
+    specsText = p3SpecEntries(a).map(function(e) { return e[0] + ': ' + e[1]; }).join(', ');
   }
 
   var prompt = '请对以下机型进行专业评价，聚焦于【' + aspects.join('、') + '】方面，约150字。机型信息：名称=' + a.name + '，型号=' + a.code + '，国家=' + a.country + '，简介=' + a.desc + '，规格=' + specsText + '。请直接输出评价内容，不要前缀说明，保持专业客观的语言风格。';
@@ -9996,9 +10027,9 @@ function renderRanking(type) {
   var data = aircrafts.map(function(a) {
     var val = 0;
     if (type === 'range') {
-      val = parseRange(a.specs && a.specs.max_range);
+      val = parseRange(p3NormSpecs(a.specs)['max_range']);
     } else if (type === 'capacity') {
-      val = parseCapacity(a.specs && a.specs.capacity);
+      val = parseCapacity(p3NormSpecs(a.specs)['capacity']);
     } else if (type === 'firstFlight') {
       var descKey = a.desc;
       var desc = '';
@@ -10487,7 +10518,7 @@ function getCollectionData() {
         code: a.code,
         category: a.category,
         country: a.country,
-        specs: a.specs,
+        specs: p3NormSpecs(a.specs),
         desc: a.desc,
         image: a.image,
         id: a.id
@@ -10719,10 +10750,11 @@ function exportCollectionImage() {
     if (item.specs) {
       ctx.fillStyle = '#90a4ae';
       ctx.font = '11px -apple-system, "PingFang SC", sans-serif';
-      var keys = Object.keys(item.specs);
+      var _spItem = p3NormSpecs(item.specs);
+      var keys = Object.keys(_spItem);
       var specsParts = [];
       keys.slice(0, 3).forEach(function(k) {
-        specsParts.push((specLabelMap[k] || k) + ': ' + item.specs[k]);
+        specsParts.push((specLabelMap[k] || k) + ': ' + _spItem[k]);
       });
       ctx.fillText(specsParts.join('  |  '), cx + CARD_PADDING, ty + 62);
     }
@@ -10804,7 +10836,7 @@ function exportSingleAircraft(id) {
   ctx.font = 'bold 15px -apple-system, "PingFang SC", sans-serif';
   ctx.fillText('规格参数', padding, specsY);
 
-  var specEntries = Object.entries(a.specs || {});
+  var specEntries = p3SpecEntries(a);
   var specLabels = { cruise_speed: '巡航速度', max_speed: '最大速度', max_range: '最大航程', range: '航程', combat_radius: '作战半径', capacity: '载客量', load: '载重', wingspan: '翼展', ceiling: '升限', rotor_diameter: '旋翼直径' };
   var sx = padding, sy = specsY + 30;
   ctx.fillStyle = '#333';
@@ -12487,7 +12519,7 @@ function afFillFromAircraft(a, json) {
   afSetField('af_country', a.country || '');
   var catEl = document.getElementById('af_category');
   if (catEl && a.category) catEl.value = a.category;
-  var sp = a.specs || {};
+  var sp = p3NormSpecs(a.specs);
   afSetField('af_speed', sp['cruise_speed'] || sp['max_speed'] || '');
   afSetField('af_range', sp['range'] || '');
   afSetField('af_capacity', sp['capacity'] || '');
@@ -12497,7 +12529,7 @@ function afFillFromAircraft(a, json) {
 }
 
 function afGenDesc(a, reason, maker, cat) {
-  var p = '请用中文写一段 60-90 字的航空机型简介。机型：' + t(a.name) + '（' + (a.code || '') + '，' + (a.country || '') + '）；关键规格：' + JSON.stringify(a.specs || {}) +
+  var p = '请用中文写一段 60-90 字的航空机型简介。机型：' + t(a.name) + '（' + (a.code || '') + '，' + (a.country || '') + '）；关键规格：' + JSON.stringify(p3NormSpecs(a.specs)) +
     (reason ? '；外观识别依据：' + reason : '') +
     ((maker || cat) ? '；用户已确认线索：制造商 ' + (maker || '未确认') + '、类别 ' + (cat || '未确认') : '') +
     '。要求：只输出简介正文，不要标题、不要分点、不要换行、不要引号。';
@@ -12839,7 +12871,7 @@ function p3BuildPayload(a) {
     country: a.country || '--',
     image: a.image || '',
     descZh: i18n.zh[a.desc] || '',
-    specs: a.specs || {},
+    specs: p3NormSpecs(a.specs),
     prodDate: a.prodDate || '',
     airlineIds: a.airlineIds || []
   };
@@ -12991,7 +13023,7 @@ function p3MergeApproved(list) {
       country: item.country || '--',
       image: item.image || '',
       desc: descKey,
-      specs: item.specs || { cruise_speed: '--', range: '--', capacity: '--', wingspan: '--' },
+      specs: p3NormSpecs(item.specs),
       airlineIds: item.airlineIds || [],
       slug: '',
       prodDate: item.prodDate || '',
