@@ -4508,6 +4508,9 @@ body.light-mode .collect-record-panel {
 .fb-input { height: 40px; }
 .fb-textarea:focus, .fb-input:focus { border-color: #818cf8; }
 .fb-textarea::placeholder, .fb-input::placeholder { color: #5d667f; }
+/* v67：联系方式提示（手机号 / 通知邮箱 选填说明） */
+.fb-hint { margin-top: 8px; font-size: 11.5px; line-height: 1.6; color: #6b7492; }
+.fb-input + .fb-hint { margin-bottom: 2px; }
 .fb-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
 .fb-btn-main {
   background: linear-gradient(90deg,#6366f1,#a855f7);
@@ -5402,12 +5405,17 @@ const i18n = {
     fbOther: '其他',
     fbContentLabel: '反馈内容',
     fbContentPh: '请描述你的建议、遇到的问题或想说的任何话…',
-    fbContactLabel: '联系方式（选填）',
-    fbContactPh: '微信号 / 邮箱，方便我们与你联系',
+    fbNameLabel: '姓名（选填）',
+    fbNamePh: '便于我们称呼你，不填也可正常提交',
+    fbPhoneLabel: '手机号（选填）',
+    fbPhonePh: '便于我们联系你，不填也可正常提交',
+    fbEmailLabel: '接收受理通知的邮箱（选填）',
+    fbEmailPh: '填写后，受理与处理结果会邮件通知你',
+    fbContactHint: '姓名与联系方式均可选填，仅用于本次反馈的沟通与受理通知，不会公开。',
     fbSubmit: '提交反馈',
     fbCopy: '复制内容',
     fbExport: '导出记录',
-    fbNoteOk: '反馈已保存到本地记录，并已在新的 GitHub Issues 页面预填内容，点击「Submit new issue」即可完成提交。',
+    fbNoteOk: '反馈已保存到本地记录，并已同步提交至站内后台；同时在新窗口打开了 GitHub Issues 预填页，点击「Submit new issue」可再公开提交一份。如填写了邮箱，受理结果会邮件通知你。',
     fbNoteCopy: '反馈内容已复制到剪贴板，可前往 GitHub Issues 新建 Issue 粘贴提交。',
     fbNoteExport: '已导出本地反馈记录（JSON 文件），可用于自行统计。',
     fbNoteErr: '请先填写反馈内容',
@@ -5695,12 +5703,17 @@ const i18n = {
     fbOther: 'Other',
     fbContentLabel: 'Feedback',
     fbContentPh: 'Describe your suggestion, the issue you met, or anything you want to say…',
-    fbContactLabel: 'Contact (optional)',
-    fbContactPh: 'WeChat ID / Email, so we can reach you',
+    fbNameLabel: 'Name (optional)',
+    fbNamePh: 'So we know how to address you; leave blank if you prefer',
+    fbPhoneLabel: 'Phone (optional)',
+    fbPhonePh: 'So we can reach you; leave blank if you prefer',
+    fbEmailLabel: 'Email for acceptance notice (optional)',
+    fbEmailPh: 'Fill in to receive acceptance & result emails',
+    fbContactHint: 'Name and contact info are optional, used only for this feedback thread and notifications, never published.',
     fbSubmit: 'Submit',
     fbCopy: 'Copy Content',
     fbExport: 'Export Records',
-    fbNoteOk: 'Saved to local records, and pre-filled in a new GitHub Issue page. Click "Submit new issue" to finish.',
+    fbNoteOk: 'Saved to local records and synced to our own backend. A pre-filled GitHub Issue page was also opened — click "Submit new issue" to publish it as well. If you left an email, you will be notified of the result.',
     fbNoteCopy: 'Feedback copied to clipboard. You can paste it into a new GitHub Issue.',
     fbNoteExport: 'Exported local feedback records (JSON file) for your own analysis.',
     fbNoteErr: 'Please fill in the feedback first',
@@ -8836,16 +8849,24 @@ function fbPickType(btn) {
   for (var i = 0; i < chips.length; i++) chips[i].classList.remove('on');
   btn.classList.add('on');
 }
+function fbFieldValue(id) {
+  var el = document.getElementById(id);
+  return el ? String(el.value || '').trim() : '';
+}
 function fbBuildText() {
   var type = '功能建议';
   var sel = document.querySelector('#feedbackOverlay .fb-chip.on');
   if (sel) type = sel.getAttribute('data-fb');
   var content = (document.getElementById('fbContent').value || '').trim();
   if (!content) return null;
-  var contact = (document.getElementById('fbContact').value || '').trim();
+  var name = fbFieldValue('fbName');
+  var phone = fbFieldValue('fbPhone');
+  var email = fbFieldValue('fbEmail');
   var lines = ['【反馈类型】' + type, '', content];
-  if (contact) lines.push('', '【联系方式】' + contact);
-  return { type: type, content: content, contact: contact, text: lines.join('\n') };
+  if (name) lines.push('', '【姓名】' + name);
+  if (phone) lines.push('', '【手机号】' + phone);
+  if (email) lines.push('', '【通知邮箱】' + email);
+  return { type: type, content: content, name: name, phone: phone, email: email, text: lines.join('\n') };
 }
 function fbLog(rec) {
   var arr = [];
@@ -8853,14 +8874,49 @@ function fbLog(rec) {
   arr.push(rec);
   try { localStorage.setItem('aviation-feedback-log', JSON.stringify(arr)); } catch (e) {}
 }
+/* v67：同步后台落库后，回写本地记录的同步状态（ok:受理通知状态 / failed / unsupported） */
+function fbMarkSync(time, status) {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem('aviation-feedback-log') || '[]'); } catch (e) { return; }
+  for (var i = arr.length - 1; i >= 0; i--) {
+    if (arr[i] && arr[i].time === time) { arr[i].sync = status; break; }
+  }
+  try { localStorage.setItem('aviation-feedback-log', JSON.stringify(arr)); } catch (e) {}
+}
+/* v67：同步提交到自有后台（POST /api/feedback）；失败不阻塞本地记录与 GitHub 流程 */
+function fbSyncToBackend(fb, recTime) {
+  if (typeof p3Post !== 'function') { fbMarkSync(recTime, 'unsupported'); return; }
+  var payload = {
+    type: fb.type,
+    content: fb.content,
+    uid: (typeof p3GetAnonUid === 'function') ? p3GetAnonUid() : '',
+    submittedAt: recTime
+  };
+  if (fb.name) payload.name = fb.name;
+  if (fb.phone) payload.phone = fb.phone;
+  if (fb.email) payload.email = fb.email;
+  p3Post('/api/feedback', payload).then(function (res) {
+    var st = (res && res.notify && res.notify.status) ? ('ok:' + res.notify.status) : 'ok';
+    fbMarkSync(recTime, st);
+  }).catch(function (err) {
+    fbMarkSync(recTime, 'failed');
+    console.warn('[feedback] 后台同步失败（本地记录已保留）：', (err && err.message) ? err.message : err);
+  });
+}
 function submitFeedback() {
   var fb = fbBuildText();
   if (!fb) { fbNote('err'); return; }
-  fbLog({ type: fb.type, content: fb.content, contact: fb.contact, time: new Date().toISOString() });
+  var recTime = new Date().toISOString();
+  var rec = { type: fb.type, content: fb.content, time: recTime, sync: 'pending' };
+  if (fb.name) rec.name = fb.name;
+  if (fb.phone) rec.phone = fb.phone;
+  if (fb.email) rec.email = fb.email;
+  fbLog(rec);
   var title = '[' + fb.type + '] ' + fb.content.slice(0, 40);
   var label = FB_LABEL[fb.type] || 'other';
   var url = 'https://github.com/' + FB_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(fb.text) + '&labels=' + encodeURIComponent(label);
   window.open(url, '_blank');
+  fbSyncToBackend(fb, recTime);
   fbNote('ok');
 }
 function copyFeedback() {
@@ -10029,9 +10085,14 @@ window.setLang = function(lang) {
   var fbDescEl = document.getElementById('feedbackDescText'); if (fbDescEl) fbDescEl.textContent = t('feedbackDesc');
   var fbTypeLblEl = document.getElementById('fbTypeLabel'); if (fbTypeLblEl) fbTypeLblEl.textContent = t('fbTypeLabel');
   var fbContentLblEl = document.getElementById('fbContentLabel'); if (fbContentLblEl) fbContentLblEl.textContent = t('fbContentLabel');
-  var fbContactLblEl = document.getElementById('fbContactLabel'); if (fbContactLblEl) fbContactLblEl.textContent = t('fbContactLabel');
+  var fbNameLblEl = document.getElementById('fbNameLabel'); if (fbNameLblEl) fbNameLblEl.textContent = t('fbNameLabel');
+  var fbPhoneLblEl = document.getElementById('fbPhoneLabel'); if (fbPhoneLblEl) fbPhoneLblEl.textContent = t('fbPhoneLabel');
+  var fbEmailLblEl = document.getElementById('fbEmailLabel'); if (fbEmailLblEl) fbEmailLblEl.textContent = t('fbEmailLabel');
+  var fbContactHintEl = document.getElementById('fbContactHint'); if (fbContactHintEl) fbContactHintEl.textContent = t('fbContactHint');
   var fbContentEl = document.getElementById('fbContent'); if (fbContentEl) fbContentEl.placeholder = t('fbContentPh');
-  var fbContactEl = document.getElementById('fbContact'); if (fbContactEl) fbContactEl.placeholder = t('fbContactPh');
+  var fbNameEl = document.getElementById('fbName'); if (fbNameEl) fbNameEl.placeholder = t('fbNamePh');
+  var fbPhoneEl = document.getElementById('fbPhone'); if (fbPhoneEl) fbPhoneEl.placeholder = t('fbPhonePh');
+  var fbEmailEl = document.getElementById('fbEmail'); if (fbEmailEl) fbEmailEl.placeholder = t('fbEmailPh');
   var fbSubmitEl = document.getElementById('fbSubmitBtn'); if (fbSubmitEl) fbSubmitEl.textContent = t('fbSubmit');
   var fbCopyEl = document.getElementById('fbCopyBtn'); if (fbCopyEl) fbCopyEl.textContent = t('fbCopy');
   var fbExportEl = document.getElementById('fbExportBtn'); if (fbExportEl) fbExportEl.textContent = t('fbExport');
@@ -13630,8 +13691,13 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
     </div>
     <div class="fb-label" id="fbContentLabel">反馈内容</div>
     <textarea class="fb-textarea" id="fbContent" placeholder="请描述你的建议、遇到的问题或想说的任何话…"></textarea>
-    <div class="fb-label" id="fbContactLabel">联系方式（选填）</div>
-    <input class="fb-input" id="fbContact" placeholder="微信号 / 邮箱，方便我们与你联系">
+    <div class="fb-label" id="fbNameLabel">姓名（选填）</div>
+    <input class="fb-input" id="fbName" type="text" autocomplete="name" placeholder="便于我们称呼你，不填也可正常提交">
+    <div class="fb-label" id="fbPhoneLabel">手机号（选填）</div>
+    <input class="fb-input" id="fbPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="便于我们联系你，不填也可正常提交">
+    <div class="fb-label" id="fbEmailLabel">接收受理通知的邮箱（选填）</div>
+    <input class="fb-input" id="fbEmail" type="email" inputmode="email" autocomplete="email" placeholder="填写后，受理与处理结果会邮件通知你">
+    <div class="fb-hint" id="fbContactHint">联系方式可选填，仅用于本次反馈的沟通与受理通知，不会公开。</div>
     <div class="fb-actions">
       <button class="fb-btn-main" id="fbSubmitBtn" onclick="submitFeedback()">提交反馈</button>
       <button class="fb-btn-ghost" id="fbCopyBtn" onclick="copyFeedback()">复制内容</button>
