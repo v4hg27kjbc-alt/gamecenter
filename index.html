@@ -5396,7 +5396,7 @@ const i18n = {
     // --- 反馈与建议 ---
     feedbackBtn: '反馈与建议',
     feedbackTitle: '反馈与建议',
-    feedbackDesc: '你的每一条建议，都会帮助我们做得更好。提交后内容将公开记录在项目的 GitHub Issues 中，便于维护者集中跟进与统计。',
+    feedbackDesc: '你的每一条建议，都会帮助我们做得更好。提交后内容将直接提交至本站自营后台（仅站长可见，不再经过任何第三方平台），可在页面底部「我的反馈记录」查看处理进度与站长回复；如填写了邮箱，受理与处理结果会邮件通知你。',
     fbTypeLabel: '反馈类型',
     fbFeature: '功能建议',
     fbBug: 'Bug 反馈',
@@ -5415,10 +5415,23 @@ const i18n = {
     fbSubmit: '提交反馈',
     fbCopy: '复制内容',
     fbExport: '导出记录',
-    fbNoteOk: '反馈已保存到本地记录，并已同步提交至站内后台；同时在新窗口打开了 GitHub Issues 预填页，点击「Submit new issue」可再公开提交一份。如填写了邮箱，受理结果会邮件通知你。',
-    fbNoteCopy: '反馈内容已复制到剪贴板，可前往 GitHub Issues 新建 Issue 粘贴提交。',
+    fbNoteOk: '反馈已提交至站内自营后台，并已保存到本机记录。可点击页面底部「我的反馈记录」查看当前处理进度与站长回复；如填写了邮箱，受理与处理结果会邮件通知你。',
+    fbNoteCopy: '反馈内容已复制到剪贴板，可自行粘贴保存或通过页面底部公布的联系方式发给站长。',
     fbNoteExport: '已导出本地反馈记录（JSON 文件），可用于自行统计。',
     fbNoteErr: '请先填写反馈内容',
+    myFbBtn: '我的反馈记录',
+    myFbTitle: '我的反馈记录',
+    myFbSub: '查看处理进度与站长回复',
+    myFbTip: '这里只展示你在本机提交过的反馈：不联网时读取本机留底，联网后按本机随机生成的匿名标识同步站内后台的最新处理进度与站长回复（不包含姓名、电话、邮箱等联系方式）。',
+    myFbLoading: '正在读取反馈记录…',
+    myFbEmpty: '你还没有提交过反馈。点击底部「反馈与建议」即可提交，提交后可在这里查看处理进度与站长回复。',
+    myFbLocalTag: '本机留底',
+    myFbRemoteTag: '站内后台',
+    myFbProgress: '处理进度',
+    myFbReply: '站长回复：',
+    myFbStNew: '待处理',
+    myFbStDoing: '处理中',
+    myFbStDone: '已处理',
 
     // --- 涂装画廊 ---
     liveryGallery: '涂装画廊',
@@ -5694,7 +5707,7 @@ const i18n = {
     // --- Feedback & Suggestions ---
     feedbackBtn: 'Feedback & Suggestions',
     feedbackTitle: 'Feedback & Suggestions',
-    feedbackDesc: 'Every suggestion helps us improve. Submissions will be recorded publicly in the GitHub Issues of this project for maintainers to track and analyze.',
+    feedbackDesc: 'Every suggestion helps us improve. Submissions go straight to our own backend (visible to the site owner only, no third-party platform involved) and you can track the progress and the owner\'s reply in "My Feedback" at the bottom of the page. If you leave an email, we will notify you when it is accepted and resolved.',
     fbTypeLabel: 'Feedback Type',
     fbFeature: 'Feature Request',
     fbBug: 'Bug Report',
@@ -5713,10 +5726,23 @@ const i18n = {
     fbSubmit: 'Submit',
     fbCopy: 'Copy Content',
     fbExport: 'Export Records',
-    fbNoteOk: 'Saved to local records and synced to our own backend. A pre-filled GitHub Issue page was also opened — click "Submit new issue" to publish it as well. If you left an email, you will be notified of the result.',
-    fbNoteCopy: 'Feedback copied to clipboard. You can paste it into a new GitHub Issue.',
+    fbNoteOk: 'Submitted to our own backend and saved to your local records. Tap "My Feedback" at the bottom of the page to track the progress and the owner\'s reply; if you left an email, you will be notified when it is accepted and resolved.',
+    fbNoteCopy: 'Feedback copied to clipboard. You can save it yourself or send it to the owner via the contact info at the bottom of the page.',
     fbNoteExport: 'Exported local feedback records (JSON file) for your own analysis.',
     fbNoteErr: 'Please fill in the feedback first',
+    myFbBtn: 'My Feedback',
+    myFbTitle: 'My Feedback',
+    myFbSub: 'Track progress and the owner\'s reply',
+    myFbTip: 'Only the feedback you submitted on this device is shown here: your local copy is used offline, and once online the latest progress and the owner\'s reply are synced from our own backend via the anonymous ID generated on this device (no name, phone or email involved).',
+    myFbLoading: 'Loading your feedback records…',
+    myFbEmpty: 'You have not submitted any feedback yet. Tap "Feedback & Suggestions" at the bottom of the page to submit, then come back here to track the progress and the owner\'s reply.',
+    myFbLocalTag: 'Local copy',
+    myFbRemoteTag: 'Our backend',
+    myFbProgress: 'Progress',
+    myFbReply: 'Owner\'s reply: ',
+    myFbStNew: 'Pending',
+    myFbStDoing: 'In progress',
+    myFbStDone: 'Resolved',
     photoAiTitle: 'Photo AI · Identify Aircraft',
     photoAiBtn: 'Photo AI',
     photoAiQ1: 'Q1 · Which category?',
@@ -8830,9 +8856,7 @@ function runCollectAnalysis() {
   });
 }
 
-// ===== 反馈与建议 =====
-var FB_REPO = 'v4hg27kjbc-alt/gamecenter';
-var FB_LABEL = { '功能建议': 'feature', 'Bug 反馈': 'bug', '内容纠错': 'content', '体验优化': 'ux', '其他': 'other' };
+// ===== 反馈与建议（v69：仅提交至站内自营后台，不再使用任何第三方代码托管平台） =====
 function openFeedback() {
   var o = document.getElementById('feedbackOverlay');
   if (o) o.classList.add('show');
@@ -8874,16 +8898,17 @@ function fbLog(rec) {
   arr.push(rec);
   try { localStorage.setItem('aviation-feedback-log', JSON.stringify(arr)); } catch (e) {}
 }
-/* v67：同步后台落库后，回写本地记录的同步状态（ok:受理通知状态 / failed / unsupported） */
-function fbMarkSync(time, status) {
+/* v67：同步后台落库后，回写本地记录的同步状态（ok:受理通知状态 / failed / unsupported）
+   v69：一并回写后台反馈 id，供「我的反馈记录」按 id 对齐线上处理进度 */
+function fbMarkSync(time, status, id) {
   var arr = [];
   try { arr = JSON.parse(localStorage.getItem('aviation-feedback-log') || '[]'); } catch (e) { return; }
   for (var i = arr.length - 1; i >= 0; i--) {
-    if (arr[i] && arr[i].time === time) { arr[i].sync = status; break; }
+    if (arr[i] && arr[i].time === time) { arr[i].sync = status; if (id) arr[i].id = id; break; }
   }
   try { localStorage.setItem('aviation-feedback-log', JSON.stringify(arr)); } catch (e) {}
 }
-/* v67：同步提交到自有后台（POST /api/feedback）；失败不阻塞本地记录与 GitHub 流程 */
+/* v67：同步提交到自有后台（POST /api/feedback）；失败不阻塞本地记录与站内提交流程 */
 function fbSyncToBackend(fb, recTime) {
   if (typeof p3Post !== 'function') { fbMarkSync(recTime, 'unsupported'); return; }
   var payload = {
@@ -8897,7 +8922,7 @@ function fbSyncToBackend(fb, recTime) {
   if (fb.email) payload.email = fb.email;
   p3Post('/api/feedback', payload).then(function (res) {
     var st = (res && res.notify && res.notify.status) ? ('ok:' + res.notify.status) : 'ok';
-    fbMarkSync(recTime, st);
+    fbMarkSync(recTime, st, (res && res.id) ? res.id : '');
   }).catch(function (err) {
     fbMarkSync(recTime, 'failed');
     console.warn('[feedback] 后台同步失败（本地记录已保留）：', (err && err.message) ? err.message : err);
@@ -8912,10 +8937,7 @@ function submitFeedback() {
   if (fb.phone) rec.phone = fb.phone;
   if (fb.email) rec.email = fb.email;
   fbLog(rec);
-  var title = '[' + fb.type + '] ' + fb.content.slice(0, 40);
-  var label = FB_LABEL[fb.type] || 'other';
-  var url = 'https://github.com/' + FB_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(fb.text) + '&labels=' + encodeURIComponent(label);
-  window.open(url, '_blank');
+  // v69：已取消第三方 Issues 跳转，反馈统一提交至站内自营后台（提交后可在「我的反馈记录」查看进度）
   fbSyncToBackend(fb, recTime);
   fbNote('ok');
 }
@@ -8957,6 +8979,138 @@ function fbNote(kind) {
   var key = kind === 'ok' ? 'fbNoteOk' : kind === 'copy' ? 'fbNoteCopy' : kind === 'export' ? 'fbNoteExport' : 'fbNoteErr';
   el.textContent = t(key);
   el.className = 'fb-note' + (kind === 'err' ? ' err' : '');
+}
+
+/* ============================================================
+   v69：我的反馈记录
+   - 离线：读取本机留底（localStorage: aviation-feedback-log）
+   - 联网：按本机随机匿名标识请求站内自营后台 GET /api/my-feedback?uid=…
+     拉取本人反馈的最新处理进度（new / doing / done）与站长回复
+   ============================================================ */
+function myFbEsc(s) {
+  return String(s === undefined || s === null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function myFbLoadLocal() {
+  var arr = [];
+  try { arr = JSON.parse(localStorage.getItem('aviation-feedback-log') || '[]'); } catch (e) { arr = []; }
+  return Array.isArray(arr) ? arr : [];
+}
+function myFbTime(v) {
+  if (!v) return '';
+  var d = new Date(v);
+  if (isNaN(d.getTime())) return String(v);
+  function p(n) { return (n < 10 ? '0' : '') + n; }
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function myFbStatusKey(v) {
+  var s = String(v || '').toLowerCase();
+  if (s === 'doing' || s === 'processing' || s === 'in_progress' || s === 'accepted') return 'doing';
+  if (s === 'done' || s === 'resolved' || s === 'closed' || s === 'replied') return 'done';
+  return 'new';
+}
+function myFbStatusText(v) {
+  var k = myFbStatusKey(v);
+  return k === 'doing' ? t('myFbStDoing') : (k === 'done' ? t('myFbStDone') : t('myFbStNew'));
+}
+function myFbBadge(v) {
+  var k = myFbStatusKey(v);
+  var color = k === 'done' ? 'rgba(56,220,180,.55)' : (k === 'doing' ? 'rgba(64,145,255,.6)' : 'rgba(255,255,255,.22)');
+  var bg = k === 'done' ? 'rgba(56,220,180,.16)' : (k === 'doing' ? 'rgba(64,145,255,.18)' : 'rgba(255,255,255,.08)');
+  var fg = k === 'done' ? '#9ff2dc' : (k === 'doing' ? '#bcd9ff' : 'rgba(215,232,255,.75)');
+  return '<span class="rec-status" style="border-color:' + color + ';background:' + bg + ';color:' + fg + '">' + myFbStatusText(v) + '</span>';
+}
+function myFbSteps(v) {
+  var order = ['new', 'doing', 'done'];
+  var labels = [t('myFbStNew'), t('myFbStDoing'), t('myFbStDone')];
+  var idx = order.indexOf(myFbStatusKey(v));
+  var html = '<span style="color:rgba(215,232,255,.55)">' + myFbEsc(t('myFbProgress')) + '：</span>';
+  for (var i = 0; i < 3; i++) {
+    var on = i <= idx;
+    html += '<span style="display:inline-block;padding:1px 8px;border-radius:8px;margin:0 6px 0 0;font-size:11.5px;'
+      + 'border:1px solid ' + (on ? 'rgba(120,200,255,.55)' : 'rgba(255,255,255,.14)') + ';'
+      + 'background:' + (on ? 'rgba(64,145,255,.20)' : 'transparent') + ';'
+      + 'color:' + (on ? '#cfe6ff' : 'rgba(200,220,245,.45)') + '">' + myFbEsc(labels[i]) + '</span>';
+  }
+  return html;
+}
+function myFbItemHtml(it) {
+  var type = it.type || '反馈';
+  var content = it.content || '';
+  var reply = it.reply || '';
+  var meta = [];
+  if (it.timeText) meta.push(myFbEsc(it.timeText));
+  meta.push(myFbEsc(it.from === 'remote' ? t('myFbRemoteTag') : t('myFbLocalTag')));
+  var img = '';
+  return '<div class="rec-item">'
+    + '<div class="rec-item-title">【' + myFbEsc(type) + '】' + myFbEsc(content.slice(0, 22)) + (content.length > 22 ? '…' : '') + myFbBadge(it.status) + '</div>'
+    + '<div class="rec-item-meta">' + meta.join(' · ') + '</div>'
+    + '<div style="margin-top:8px;font-size:12.5px;line-height:1.7;color:rgba(215,232,255,.9);white-space:pre-wrap;word-break:break-word">' + myFbEsc(content) + '</div>'
+    + '<div class="rec-item-meta" style="margin-top:10px">' + myFbSteps(it.status) + '</div>'
+    + (reply ? '<div class="rec-item-reply">' + myFbEsc(t('myFbReply')) + myFbEsc(reply) + '</div>' : '')
+    + img
+    + '</div>';
+}
+function myFbRender(remote, local) {
+  var box = document.getElementById('myFbList');
+  if (!box) return;
+  var map = {};
+  var order = [];
+  var push = function(key, obj) { if (!map[key]) { map[key] = obj; order.push(key); } };
+  // 先放线上（含最新进度与站长回复）
+  (remote || []).forEach(function(r) {
+    var id = String(r.id || r.fbId || '').toLowerCase();
+    var key = id ? ('id:' + id) : ('t:' + String(r.createdAt || r.submittedAt || r.time || ''));
+    if (!key || key === 't:') return;
+    push(key, { type: r.type, content: r.content, status: r.status, reply: r.reply || r.adminReply || '', timeText: myFbTime(r.createdAt || r.submittedAt || r.time), from: 'remote', sortKey: String(r.createdAt || r.submittedAt || r.time || '') });
+  });
+  // 再合并本机留底：同 id 或同时间视为同一条，缺失字段用本机数据补全
+  (local || []).forEach(function(l) {
+    var id = String(l.id || '').toLowerCase();
+    var key = id ? ('id:' + id) : ('t:' + String(l.time || ''));
+    if (!key || key === 't:') return;
+    if (map[key]) {
+      if (!map[key].type) map[key].type = l.type;
+      if (!map[key].content) map[key].content = l.content;
+      if (!map[key].timeText) map[key].timeText = myFbTime(l.time);
+      if (!map[key].reply && l.reply) map[key].reply = l.reply;
+      return;
+    }
+    push(key, { type: l.type, content: l.content, status: l.status, reply: l.reply || '', timeText: myFbTime(l.time), from: 'local', sortKey: String(l.time || '') });
+  });
+  var items = order.map(function(k) { return map[k]; }).sort(function(a, b) { return String(b.sortKey).localeCompare(String(a.sortKey)); });
+  if (!items.length) {
+    box.innerHTML = '<div class="rec-empty">' + myFbEsc(t('myFbEmpty')) + '</div>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < items.length; i++) html += myFbItemHtml(items[i]);
+  box.innerHTML = html;
+}
+function openMyFeedback() {
+  var el = document.getElementById('myFbOverlay');
+  if (!el) return;
+  var box = document.getElementById('myFbList');
+  var local = myFbLoadLocal();
+  if (box) box.innerHTML = '<div class="rec-loading">' + myFbEsc(t('myFbLoading')) + '</div>';
+  el.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+  // 先渲染本机留底（离线可用），再联网刷新线上进度
+  myFbRender([], local);
+  p3Get('/api/my-feedback?uid=' + encodeURIComponent(p3GetAnonUid())).then(function(res) {
+    myFbRender(p3PickList(res), local);
+  }).catch(function() {
+    myFbRender([], local);
+  });
+}
+function closeMyFeedback() {
+  var el = document.getElementById('myFbOverlay');
+  if (el) el.classList.remove('visible');
+  syncBodyScrollLock();
+}
+function myFbBackdrop(e) {
+  if (e && e.target === e.currentTarget) closeMyFeedback();
 }
 
 // ===== 更新通知横幅 =====
@@ -10081,6 +10235,10 @@ window.setLang = function(lang) {
   if (typeof v56RefreshSkyLabel === 'function') v56RefreshSkyLabel();
   if (typeof v56RefreshPanel === 'function') v56RefreshPanel();
   var fbBtnEl = document.getElementById('feedbackBtnText'); if (fbBtnEl) fbBtnEl.textContent = t('feedbackBtn');
+  var myFbBtnEl = document.getElementById('myFbBtnText'); if (myFbBtnEl) myFbBtnEl.textContent = t('myFbBtn');
+  var myFbTitleEl = document.getElementById('myFbTitleText'); if (myFbTitleEl) myFbTitleEl.textContent = t('myFbTitle');
+  var myFbSubEl = document.getElementById('myFbSubText'); if (myFbSubEl) myFbSubEl.textContent = t('myFbSub');
+  var myFbTipEl = document.getElementById('myFbTipText'); if (myFbTipEl) myFbTipEl.textContent = t('myFbTip');
   var fbTitleEl = document.getElementById('feedbackTitleText'); if (fbTitleEl) fbTitleEl.textContent = t('feedbackTitle');
   var fbDescEl = document.getElementById('feedbackDescText'); if (fbDescEl) fbDescEl.textContent = t('feedbackDesc');
   var fbTypeLblEl = document.getElementById('fbTypeLabel'); if (fbTypeLblEl) fbTypeLblEl.textContent = t('fbTypeLabel');
@@ -12605,6 +12763,27 @@ async function generateNewsSummaryInPanel() {
   </div>
 </div>
 
+<!-- ===== v69：我的反馈记录弹窗 ===== -->
+<div id="myFbOverlay" class="livery-overlay" onclick="myFbBackdrop(event)">
+  <div class="livery-panel myrec-panel">
+    <div class="livery-header">
+      <div class="livery-header-title">
+        <span id="myFbTitleText">我的反馈记录</span>
+        <span class="livery-title-sub" id="myFbSubText">查看处理进度与站长回复</span>
+      </div>
+      <div class="livery-header-actions">
+        <button class="quiz-close" onclick="closeMyFeedback()" title="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="livery-content myrec-content">
+      <div class="myrec-tip" id="myFbTipText">这里只展示你在本机提交过的反馈：不联网时读取本机留底，联网后按本机随机生成的匿名标识同步站内后台的最新处理进度与站长回复（不包含姓名、电话、邮箱等联系方式）。</div>
+      <div class="myrec-list" id="myFbList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- 主题选择弹窗 -->
 /div>
 <!-- Auto version detection -->
@@ -13612,14 +13791,15 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
   <button class="footer-policy-btn" onclick="openPrivacyPolicy()">协议政策</button>
     <button class="footer-policy-btn" onclick="openMyRecommendations()"><span id="myRecBtnText">我的推荐</span></button>
   <button class="footer-policy-btn" onclick="openFeedback()"><span id="feedbackBtnText">反馈与建议</span></button>
-  <div class="footer-update">隐私政策更新：2026-09-11</div>
+  <button class="footer-policy-btn" onclick="openMyFeedback()"><span id="myFbBtnText">我的反馈记录</span></button>
+  <div class="footer-update">隐私政策更新：2026-09-19</div>
 </footer>
 
 <div id="privacyOverlay" onclick="privacyBackdrop(event)">
   <div class="privacy-card">
     <button class="privacy-close" onclick="closePrivacyPolicy()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="privacy-title">隐私保护与网站安全说明</div>
-    <div class="privacy-date">更新日期：2026-09-11</div>
+    <div class="privacy-date">更新日期：2026-09-19</div>
     <div class="privacy-body">
       <p><strong>一、网站性质</strong></p>
       <p>本网站是由个人维护的民航机型收藏展示项目，采用单文件静态网页技术构建，部署于 Cloudflare Pages 全球加速网络（CDN）。网站本身不包含服务器后台程序、不维护用户数据库、不设立用户账号体系，因此不存在传统意义上的"用户注册信息"。</p>
@@ -13636,7 +13816,7 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
       <p>7. <strong>托管平台（Cloudflare Pages）</strong>：本网站由 Cloudflare Pages 提供静态托管与 CDN 加速。Cloudflare 作为基础设施服务商，其网络边缘节点在传输过程中可能产生标准的访问日志（如 IP 地址、访问时间、请求路径），该日志属于托管平台的常规运维数据，本网站所有者不主动采集、不用于用户画像，也不向任何商业机构出售。</p>
       <p>8. <strong>访问统计（Umami）</strong>：本网站接入 Umami 开源网站统计后台，用于了解页面访问量、来源渠道与访问趋势等宏观运行数据。Umami 为隐私友好型统计方案：不采集个人身份信息、不使用 Cookie、不进行跨站追踪、不生成用户画像，所有统计数据均为匿名聚合，仅用于网站维护者优化内容与体验，不会向任何第三方出售或共享。</p>
       <p>9. <strong>AI 收藏分析（智谱 AI 文本模型）</strong>：当您使用「AI 收藏分析」功能时，本网站会将您当前设备本地存储中已收藏的机型清单（机型名称、类别、国家）及页面内置的全部机型列表发送至智谱 AI（BigModel）的文本生成接口（GLM-4-flash），用于生成机库收藏洞察报告。传输内容仅包含上述机型清单文本，不包含您的设备信息、位置信息、浏览记录或任何其他本地数据；收藏清单始终保存在您自己的设备上，本网站不存储、不备份、不上传除上述 AI 分析请求以外的任何内容。第三方服务商将按其自身隐私政策处理该内容，生成的分析报告仅用于本次即时展示，本网站不保存任何报告记录。</p>
-      <p>10. <strong>反馈与建议（GitHub Issues）</strong>：页面底部的「反馈与建议」入口用于收集访客对网站功能、内容、体验等方面的意见。您填写的反馈类型、反馈内容及选填的联系方式，将在您点击「提交反馈」后，以公开 Issue 的形式提交至本项目托管于 GitHub 的开源仓库（GitHub Issues 页面），任何访问该仓库的人均可查看，便于维护者公开跟进、分类统计与答复。该提交行为由您主动发起并跳转至 GitHub 完成，本网站自身不存储、不上传您的反馈内容；若您不希望公开，可通过页面提供的「复制内容」功能自行私信维护者，或直接添加页面下方公布的联系方式。GitHub 平台将按其自身隐私政策处理提交内容，建议您不要在反馈中填写身份证号、银行账号、密码等敏感个人信息，联系方式建议使用公开微信或邮箱。</p>
+      <p>10. <strong>反馈与建议（站内自营后台）</strong>：页面底部的「反馈与建议」入口用于收集访客对网站功能、内容、体验等方面的意见。您填写的反馈类型、反馈内容及选填的姓名与联系方式，将在您点击「提交反馈」后，通过本站自有的后端接口（部署于 Cloudflare Pages / Workers）直接提交并保存至本站自营后台数据库，仅网站维护者可见，不再经由任何第三方平台。同时，您的反馈内容会保存在您本机浏览器本地存储中，便于您在页面底部「我的反馈记录」中随时查看；联网时该入口会使用本机随机生成的匿名标识向站内后台查询您本人反馈的当前处理进度与站长回复（不包含姓名、电话、邮箱等联系方式）。若您填写了邮箱，受理与处理结果将通过邮件通知您。建议您不要在反馈中填写身份证号、银行账号、密码等敏感个人信息。</p>
       <p>11. <strong>AI 机型故事（智谱 AI 文本模型）</strong>：当您在机型详情页点击「AI 机型故事」时，本网站会将所查看机型的名称、型号、类别、国家及页面内置的该机型百科资料（研发历史、技术特点、趣闻）发送至智谱 AI（BigModel）的文本生成接口（GLM-4-flash），用于生成一段拟人化叙事故事。传输内容仅包含上述机型信息文本，不包含您的设备信息、位置信息、浏览记录、收藏清单或任何其他本地数据；生成的故事仅用于本次即时展示，本网站不保存任何记录。</p>
       <p>12. <strong>机型投稿与推荐后端（Cloudflare）</strong>：当您使用「添加机型」并选择推荐时，相关机型资料会通过本网站自有的后端接口（部署于 Cloudflare Pages / Workers）提交并存储，用于站长审核与首页展示，不经由任何第三方商业平台。</p>
       <p><strong>四、信息收集声明</strong></p>
@@ -13669,7 +13849,7 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
       <p><strong>八、说明变更</strong></p>
       <p>本说明可能随网站功能调整而更新，更新后将在页面中展示最新版本，更新日期以页面标注为准。若您对隐私保护有任何疑问，可通过下方联系方式与网站维护者沟通。</p>
       <p><strong>九、意见反馈与联系方式</strong></p>
-      <p>欢迎各界朋友对本网站提出功能、内容或安全等方面的宝贵意见与建议，您的每一条反馈都是我们进步的动力。您可点击页面底部「反馈与建议」按钮在线提交（提交后将公开记录于项目 GitHub Issues，便于维护者集中跟进与统计），也可直接联系维护者。网站维护者微信号：<strong>15652760512</strong>。添加好友时请备注来意，以便我们及时、高效地为您服务。</p>
+      <p>欢迎各界朋友对本网站提出功能、内容或安全等方面的宝贵意见与建议，您的每一条反馈都是我们进步的动力。您可点击页面底部「反馈与建议」按钮在线提交（提交后内容直接进入本站自营后台，仅站长可见；您可在页面底部「我的反馈记录」中查看处理进度与站长回复），也可直接联系维护者。网站维护者微信号：<strong>15652760512</strong>。添加好友时请备注来意，以便我们及时、高效地为您服务。</p>
       <p><strong>十、免责声明</strong></p>
       <p>本网站展示的机型信息、历史资料及图片均来源于公开资料，仅供航空爱好者交流学习使用，不用于任何商业用途。如涉及版权问题，请联系维护者处理。</p>
     </div>
@@ -13680,7 +13860,7 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
   <div class="feedback-card">
     <button class="privacy-close" onclick="closeFeedback()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="feedback-title" id="feedbackTitleText">反馈与建议</div>
-    <div class="feedback-desc" id="feedbackDescText">你的每一条建议，都会帮助我们做得更好。提交后内容将公开记录在项目的 GitHub Issues 中，便于维护者集中跟进与统计。</div>
+    <div class="feedback-desc" id="feedbackDescText">你的每一条建议，都会帮助我们做得更好。提交后内容将直接提交至本站自营后台（仅站长可见，不再经过任何第三方平台），可在页面底部「我的反馈记录」查看处理进度与站长回复；如填写了邮箱，受理与处理结果会邮件通知你。</div>
     <div class="fb-label" id="fbTypeLabel">反馈类型</div>
     <div class="fb-chips" id="fbChips">
       <button class="fb-chip on" data-fb="功能建议" onclick="fbPickType(this)">功能建议</button>
