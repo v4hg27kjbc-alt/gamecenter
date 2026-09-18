@@ -4801,7 +4801,7 @@ body.light-mode .rec-ask-aircraft { background: rgba(21,101,192,0.08); color: #1
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 </head>
-<body data-version="20260913-v63">
+<body data-version="20260918-v64">
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -6335,16 +6335,37 @@ const airlines = {
 function p3SpecFallback() {
   return { cruise_speed: '--', range: '--', capacity: '--', wingspan: '--' };
 }
+/* 用户提交 / 智能填写可能使用中文键，统一归一化为标准英文键，
+   否则卡片摘要、排序、对比等按下标取值的位置会取不到值（显示 --） */
+var p3SpecKeyAlias = {
+  '巡航速度': 'cruise_speed', '速度': 'cruise_speed', '最大速度': 'max_speed',
+  '最大航程': 'max_range', '航程': 'range', '作战半径': 'combat_radius',
+  '载客量': 'capacity', '载重': 'load', '有效载荷': 'load', '翼展': 'wingspan',
+  '升限': 'ceiling', '旋翼直径': 'rotor_diameter', '发动机': 'engine',
+  '座位数': 'seats', '最大起飞重量': 'mtow', '机身长度': 'length', '机身高度': 'height'
+};
+function p3NormSpecObj(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  var out = {};
+  for (var k in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
+    var v = obj[k];
+    if (v === null || v === undefined || v === '') continue;
+    var key = p3SpecKeyAlias[String(k).trim()] || String(k).trim();
+    if (out[key] === undefined) out[key] = v;
+  }
+  return out;
+}
 function p3NormSpecs(raw) {
   var fb = p3SpecFallback();
   if (!raw) return fb;
-  if (typeof raw === 'object') return Array.isArray(raw) ? fb : raw;
+  if (typeof raw === 'object') return Array.isArray(raw) ? fb : p3NormSpecObj(raw);
   if (typeof raw === 'string') {
     var str = raw.trim();
     if (str) {
       try {
         var obj = JSON.parse(str);
-        if (obj && typeof obj === 'object' && !Array.isArray(obj)) return obj;
+        if (obj && typeof obj === 'object' && !Array.isArray(obj)) return p3NormSpecObj(obj);
         if (typeof obj === 'string' && obj.trim().charAt(0) === '{') return p3NormSpecs(obj);
       } catch (e) {}
     }
