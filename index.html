@@ -4939,6 +4939,15 @@ body.light-mode .rec-ask-aircraft { background: rgba(21,101,192,0.08); color: #1
   </div>
   <div class="search-results-hint" id="searchHint"></div>
 
+  <!-- ===== AI 找飞机：自然语言 → 结构化条件 ===== -->
+  <div class="ai-find-bar">
+    <input type="text" class="ai-find-input" id="aiFindInput" maxlength="120" autocomplete="off"
+      placeholder="用一句话找飞机，例如：能飞 12000 公里的双发宽体"
+      onkeydown="if(event.key==='Enter')aiFindAircraft()">
+    <button class="ai-find-btn" id="aiFindBtn" onclick="aiFindAircraft()">AI 找飞机</button>
+  </div>
+  <div class="ai-find-conds" id="aiFindConds"></div>
+
   <div class="filter-bar">
     <div class="filter-chip" data-filter="civil"><span class="filter-label" id="filterCivil">民航客机</span></div>
     <div class="filter-chip" data-filter="fighter"><span class="filter-label" id="filterFighter">战斗机</span></div>
@@ -5150,7 +5159,7 @@ body.light-mode .rec-ask-aircraft { background: rgba(21,101,192,0.08); color: #1
   </div>
   <div class="quiz-progress-wrap">
     <div class="quiz-progress-text">
-      <span id="quizProgressText">第 1 / 10 题</span>
+      <span id="quizProgressText">第 1 / 15 题</span>
       <span class="quiz-progress-score" id="quizScoreText">答对 0 题</span>
     </div>
     <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
@@ -7378,6 +7387,11 @@ function renderCards() {
     filtered = filtered.filter(a => a.country === currentMapCountry);
   }
 
+  // ===== AI 找飞机：结构化条件过滤 =====
+  if (typeof aiFindState !== 'undefined' && aiFindState && aiFindState.active && aiFindState.conds) {
+    filtered = filtered.filter(function (a) { return aiFindMatch(a, aiFindState.conds); });
+  }
+
   // Airline filter (clicked from detail modal)
   if (currentAirline) {
     filtered = filtered.filter(a => (a.airlineIds || []).includes(currentAirline));
@@ -9280,11 +9294,13 @@ function formatTime() {
   return hh + ':' + mm;
 }
 
-function addMessage(content, role) {
+function addMessage(content, role, cardsHtml) {
   const container = document.getElementById('aiChatMessages');
   const div = document.createElement('div');
   div.className = 'ai-msg ai-msg-' + role;
-  div.innerHTML = '<div class="ai-msg-text">' + (role === 'ai' ? renderMarkdown(content) : escapeHtml(content)) + '</div><div class="ai-msg-time">' + formatTime() + '</div>';
+  div.innerHTML = '<div class="ai-msg-text">' + (role === 'ai' ? renderMarkdown(content) : escapeHtml(content)) + '</div>'
+    + (role === 'ai' && cardsHtml ? cardsHtml : '')
+    + '<div class="ai-msg-time">' + formatTime() + '</div>';
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
@@ -9339,6 +9355,411 @@ function renderMarkdown(text) {
   return '<p>' + html + '</p>';
 }
 
+/* ==================================================================
+   AI 找飞机：自然语言 → 结构化条件（category / range / engines / airlineIds）
+   ================================================================== */
+var aiFindState = { active: false, conds: null, raw: '', hits: 0 };
+
+function aiParseKm(v) {
+  if (v === null || v === undefined) return 0;
+  var raw = String(v);
+  var s = raw.replace(/,/g, '').trim();
+  if (!s) return 0;
+  var wan = s.indexOf('万') !== -1;
+  var m = s.match(/([0-9]+(?:\.[0-9]+)?)/);
+  if (!m) return 0;
+  var n = parseFloat(m[1]);
+  if (wan) n = n * 10000;
+  // 仅出现「米」而无公里/千米/万 时按米换算
+  if (!wan && /米/.test(s) && !/公里|千米|km|KM/i.test(s)) n = n / 1000;
+  return Math.round(n);
+}
+
+function aiSpecRange(a) {
+  var sp = {};
+  try { sp = p3NormSpecs(a && a.specs); } catch (e) { sp = (a && a.specs) || {}; }
+  var keys = ['max_range', 'range', 'combat_radius', '最大航程', '航程', '作战半径'];
+  for (var i = 0; i < keys.length; i++) {
+    if (sp[keys[i]]) {
+      var km = aiParseKm(sp[keys[i]]);
+      if (km > 0) return km;
+    }
+  }
+  return 0;
+}
+
+function aiEnginesOf(a) {
+  var sp = {};
+  try { sp = p3NormSpecs(a && a.specs); } catch (e) { sp = (a && a.specs) || {}; }
+  var eng = String(sp['engine'] || sp['engines'] || '');
+  var m = eng.match(/([0-9])\s*[×xX]/);
+  if (m) return parseInt(m[1], 10);
+  if (typeof PA_ENGINES !== 'undefined' && PA_ENGINES[a.id] !== undefined) return PA_ENGINES[a.id];
+  return 0;
+}
+
+function aiIsWideBody(a) {
+  var tt = (a && a.tags ? a.tags.join(' ') : '').toLowerCase();
+  return tt.indexOf('wide_body') !== -1;
+}
+
+/* 单机是否符合 AI 条件 */
+function aiFindMatch(a, c) {
+  if (!c) return true;
+  if (c.category && a.category !== c.category) return false;
+  if (c.engines) { var e = aiEnginesOf(a); if (!e || e !== c.engines) return false; }
+  var r = aiSpecRange(a);
+  if (c.minRange) { if (!r || r < c.minRange) return false; }
+  if (c.maxRange) { if (!r || r > c.maxRange) return false; }
+  if (c.wideBody === true) { if (!aiIsWideBody(a)) return false; }
+  if (c.country) { if (String(a.country || '') !== c.country) return false; }
+  if (c.airlineIds && c.airlineIds.length) {
+    var ok = false;
+    for (var i = 0; i < c.airlineIds.length; i++) {
+      if ((a.airlineIds || []).indexOf(c.airlineIds[i]) !== -1) { ok = true; break; }
+    }
+    if (!ok) return false;
+  }
+  if (c.keywords) {
+    var kw = String(c.keywords).toLowerCase();
+    var hay = (String(t(a.name)) + ' ' + (a.code || '') + ' ' + String(t(a.desc)) + ' ' + (a.country || '')).toLowerCase();
+    if (hay.indexOf(kw) === -1) return false;
+  }
+  return true;
+}
+
+/* 航司名称 → 航司 id */
+function aiResolveAirlines(names) {
+  var out = [];
+  if (!names || !names.length) return out;
+  var list = [];
+  try {
+    Object.keys(airlines).forEach(function (k) {
+      var v = airlines[k];
+      if (v && typeof v === 'object') list.push({ id: v.id || k, name: String(v.name || ''), nameEn: String(v.nameEn || '') });
+      else list.push({ id: k, name: String(v || ''), nameEn: '' });
+    });
+  } catch (e) { return out; }
+  names.forEach(function (raw) {
+    var q = String(raw || '').toLowerCase().replace(/\s/g, '');
+    if (!q) return;
+    var hitId = '';
+    list.forEach(function (x) {
+      if (hitId) return;
+      var cands = [String(x.id).toLowerCase(), x.name.toLowerCase().replace(/\s/g, ''), x.nameEn.toLowerCase().replace(/\s/g, '')];
+      for (var i = 0; i < cands.length; i++) {
+        if (cands[i] && (cands[i].indexOf(q) !== -1 || q.indexOf(cands[i]) !== -1)) { hitId = x.id; return; }
+      }
+    });
+    if (hitId && out.indexOf(hitId) === -1) out.push(hitId);
+  });
+  return out;
+}
+
+/* 本地兜底解析（AI 不可用时） */
+function aiLocalParse(text) {
+  var s = String(text || '');
+  var c = { category: '', minRange: 0, maxRange: 0, engines: 0, wideBody: null, airlines: [], keywords: '', __local: true };
+  if (/宽体/.test(s)) c.wideBody = true;
+  else if (/窄体/.test(s)) c.wideBody = false;
+  if (/客机|民航/.test(s)) c.category = 'civil';
+  else if (/战斗机|战机/.test(s)) c.category = 'fighter';
+  else if (/轰炸机/.test(s)) c.category = 'bomber';
+  else if (/运输机/.test(s)) c.category = 'transport';
+  else if (/直升机/.test(s)) c.category = 'helicopter';
+  if (/双发|两台发动机|两个发动机|2\s*发/.test(s)) c.engines = 2;
+  else if (/三发|三台发动机|3\s*发/.test(s)) c.engines = 3;
+  else if (/四发|四台发动机|4\s*发/.test(s)) c.engines = 4;
+  var rm = s.match(/([0-9][0-9,\.]*)\s*(万)?\s*(公里|千米|km)/i);
+  if (rm) {
+    var n = parseFloat(rm[1].replace(/,/g, ''));
+    if (rm[2]) n = n * 10000;
+    if (/超过|以上|至少|大于|不低于|能飞|不低于/.test(s)) c.minRange = Math.round(n);
+    else if (/以下|以内|小于|不超过|最多/.test(s)) c.maxRange = Math.round(n);
+    else { c.minRange = Math.round(n * 0.95); c.maxRange = Math.round(n * 1.05); }
+  }
+  return c;
+}
+
+function aiNormalizeConds(j) {
+  var c = { category: '', minRange: 0, maxRange: 0, engines: 0, wideBody: null, airlineIds: [], keywords: '' };
+  if (!j || typeof j !== 'object') return c;
+  var CATS = ['civil', 'fighter', 'bomber', 'transport', 'helicopter'];
+  var cat = String(j.category || '').trim().toLowerCase();
+  if (CATS.indexOf(cat) !== -1) c.category = cat;
+  c.minRange = parseInt(j.minRange, 10) || 0;
+  c.maxRange = parseInt(j.maxRange, 10) || 0;
+  c.engines = parseInt(j.engines, 10) || 0;
+  if (j.wideBody === true) c.wideBody = true;
+  else if (j.wideBody === false) c.wideBody = false;
+  c.airlineIds = aiResolveAirlines(j.airlines || j.airlineIds || []);
+  c.keywords = String(j.keywords || '').trim().slice(0, 40);
+  if (j.__local) c.__local = true;
+  return c;
+}
+
+function aiFindPrompt(text) {
+  return '你是航空数据检索助手。请把用户的口语化找飞机需求转换成 JSON 检索条件，只输出 JSON，不要输出任何解释或代码块标记。\n'
+    + '输出格式：{"category":"","minRange":0,"maxRange":0,"engines":0,"wideBody":null,"airlines":[],"keywords":""}\n'
+    + '规则：\n'
+    + '1) category 只能取 civil（民航客机）/ fighter（战斗机）/ bomber（轰炸机）/ transport（运输机）/ helicopter（直升机），未提及则填空字符串；\n'
+    + '2) minRange / maxRange 单位为公里：表达航程下限（如「能飞 12000 公里」「不低于」「超过」「以上」）填 minRange；表达上限（如「以内」「不超过」「以下」）填 maxRange；「1.2 万公里」换算为 12000；无法判断时都填 0；\n'
+    + '3) engines 为发动机数量（2、3、4），未提及填 0；\n'
+    + '4) wideBody 为 true / false，未提及填 null；\n'
+    + '5) airlines 为用户提到的航空公司名称数组（中文名或英文原名），未提及填空数组；\n'
+    + '6) keywords 为其余机型关键词（如具体型号名、国家），没有填空字符串。\n'
+    + '用户需求：' + text;
+}
+
+function aiFindChat(text) {
+  return fetch(AI_CONFIG.endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
+    body: JSON.stringify({
+      model: AI_CONFIG.model,
+      messages: [
+        { role: 'system', content: '你是航空数据检索助手，只输出 JSON。' },
+        { role: 'user', content: aiFindPrompt(text) }
+      ],
+      temperature: 0.2,
+      max_tokens: 400
+    }),
+    signal: AbortSignal.timeout(AI_CONFIG.timeout)
+  }).then(function (r) { return r.json(); }).then(function (d) {
+    var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+    var m = txt.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('bad json');
+    return JSON.parse(m[0]);
+  });
+}
+
+function aiFindCount(conds) {
+  return aircrafts.filter(function (a) { return aiFindMatch(a, conds); }).length;
+}
+
+function aiFindRenderConds(conds, raw, hits) {
+  var el = document.getElementById('aiFindConds');
+  if (!el) return;
+  if (conds && conds.loading) {
+    el.innerHTML = '<span class="ai-find-loading">AI 正在解析「' + escapeHtml(raw) + '」…</span>';
+    return;
+  }
+  if (!conds) { el.innerHTML = ''; return; }
+  var chips = [];
+  if (conds.category) chips.push('类别：' + ((typeof PA_CAT_ZH !== 'undefined' && PA_CAT_ZH[conds.category]) || conds.category));
+  if (conds.engines) chips.push(conds.engines + ' 发');
+  if (conds.wideBody === true) chips.push('宽体');
+  if (conds.wideBody === false) chips.push('窄体');
+  if (conds.minRange && conds.maxRange && conds.minRange === conds.maxRange) chips.push('航程 ≈ ' + conds.minRange + ' km');
+  else {
+    if (conds.minRange) chips.push('航程 ≥ ' + conds.minRange + ' km');
+    if (conds.maxRange) chips.push('航程 ≤ ' + conds.maxRange + ' km');
+  }
+  if (conds.airlineIds && conds.airlineIds.length) {
+    chips.push('航司：' + conds.airlineIds.map(function (id) {
+      var x = (typeof airlines !== 'undefined') ? airlines[id] : null;
+      return (x && x.name) ? t(x.name) : id;
+    }).join('、'));
+  }
+  if (conds.keywords) chips.push('关键词：' + conds.keywords);
+  var html = chips.map(function (c) { return '<span class="ai-find-chip">' + escapeHtml(c) + '</span>'; }).join('');
+  html += '<span class="ai-find-count">' + (hits > 0 ? ('命中 ' + hits + ' 款') : '无命中') + '</span>';
+  html += '<button class="ai-find-clear-btn" onclick="aiFindClear()">清除条件</button>';
+  el.innerHTML = html;
+}
+
+async function aiFindAircraft() {
+  var input = document.getElementById('aiFindInput');
+  var btn = document.getElementById('aiFindBtn');
+  if (!input) return;
+  var text = (input.value || '').trim();
+  if (!text) { aiFindClear(); return; }
+  if (btn) { btn.disabled = true; btn.textContent = '解析中…'; }
+  aiFindRenderConds({ loading: true }, text);
+  var conds = null;
+  try {
+    conds = aiNormalizeConds(await aiFindChat(text));
+  } catch (e) {
+    conds = aiNormalizeConds(aiLocalParse(text));
+  }
+  aiFindState.active = true;
+  aiFindState.conds = conds;
+  aiFindState.raw = text;
+  renderCards();
+  var hits = aiFindCount(conds);
+  aiFindState.hits = hits;
+  aiFindRenderConds(conds, text, hits);
+  reportSearchLog(text, conds, hits);
+  var hint = document.getElementById('searchHint');
+  if (hint) hint.textContent = hits > 0 ? ('AI 找到 ' + hits + ' 款符合条件的机型') : '没有找到符合条件的机型，需求已记录给运营团队';
+  if (btn) { btn.disabled = false; btn.textContent = 'AI 找飞机'; }
+  var grid = document.getElementById('grid');
+  if (grid && grid.scrollIntoView) { try { grid.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+}
+
+function aiFindClear() {
+  aiFindState.active = false;
+  aiFindState.conds = null;
+  aiFindState.raw = '';
+  aiFindState.hits = 0;
+  var el = document.getElementById('aiFindConds');
+  if (el) el.innerHTML = '';
+  var inp = document.getElementById('aiFindInput');
+  if (inp) inp.value = '';
+  var hint = document.getElementById('searchHint');
+  if (hint) hint.textContent = '';
+  renderCards();
+}
+
+/* ---------- 运营日志上报（后台「用户想找但库里没有的机型」选题榜） ---------- */
+function reportSearchLog(q, parsed, matched) {
+  try {
+    p3Post('/api/search-logs', {
+      q: String(q || '').slice(0, 200),
+      parsed: parsed ? {
+        category: parsed.category || '',
+        minRange: parsed.minRange || 0,
+        maxRange: parsed.maxRange || 0,
+        engines: parsed.engines || 0,
+        wideBody: parsed.wideBody === true ? true : (parsed.wideBody === false ? false : null),
+        airlineIds: parsed.airlineIds || [],
+        keywords: parsed.keywords || ''
+      } : {},
+      matched: matched || 0,
+      uid: p3GetAnonUid()
+    }).catch(function () {});
+  } catch (e) {}
+}
+
+/* ---------- 运营日志上报（后台「AI 答不上来的问题 Top 榜」） ---------- */
+function reportQaLog(q, hits, answer) {
+  try {
+    p3Post('/api/qa-logs', {
+      q: String(q || '').slice(0, 200),
+      reason: (hits && hits.length) ? 'insufficient-context' : 'retrieval-empty',
+      hits: (hits || []).length,
+      answered: !!answer,
+      uid: p3GetAnonUid()
+    }).catch(function () {});
+  } catch (e) {}
+}
+
+/* ==================================================================
+   问 AI 升级为 RAG：先检索站内机型库（内置 + 后台已采纳）+ 附机型卡
+   ================================================================== */
+var RAG_RULES = '\n【站内资料优先】若下面提供了「站内机型资料」，请优先依据这些资料作答；回答中每提到一款资料里的机型，必须在该句后用 [机型:编号] 标注它的编号（例如 [机型:12]），界面会据此渲染机型卡片。'
+  + '若资料与问题无关、或资料中没有能回答该问题的机型，请以 [NO_MATCH] 开头作答，简要说明站内暂未收录相关信息，再依据你的通用航空知识谨慎回答，不要编造站内不存在的机型数据。';
+
+function ragTerms(q) {
+  var out = [];
+  var latin = String(q).toLowerCase().match(/[a-z0-9\-]{2,}/g) || [];
+  for (var i = 0; i < latin.length; i++) out.push(latin[i]);
+  var cjk = String(q).replace(/[^\u4e00-\u9fa5]/g, ' ').split(/\s+/);
+  for (var r = 0; r < cjk.length; r++) {
+    var seg = cjk[r];
+    if (!seg) continue;
+    if (seg.length <= 3) { out.push(seg); continue; }
+    for (var j = 0; j + 1 < seg.length; j++) out.push(seg.substr(j, 2));
+  }
+  var uniq = [];
+  for (var m = 0; m < out.length; m++) { if (out[m] && uniq.indexOf(out[m]) === -1) uniq.push(out[m]); }
+  return uniq.slice(0, 24);
+}
+
+function ragRetrieveAircraft(query, topN) {
+  var q = String(query || '').trim().toLowerCase();
+  if (!q || typeof aircrafts === 'undefined') return [];
+  var terms = ragTerms(q);
+  var scored = [];
+  for (var i = 0; i < aircrafts.length; i++) {
+    var a = aircrafts[i];
+    var name = String(t(a.name) || '').toLowerCase();
+    var code = String(a.code || '').toLowerCase();
+    var desc = String(t(a.desc) || '').toLowerCase();
+    var country = String(a.country || '').toLowerCase();
+    var specText = '';
+    try { specText = JSON.stringify(a.specs || {}).toLowerCase(); } catch (e) {}
+    if (!name && !code) continue;
+    var score = 0;
+    if (name.length >= 3 && q.indexOf(name) !== -1) score += 14;
+    if (code.length >= 3 && q.indexOf(code) !== -1) score += 12;
+    for (var k = 0; k < terms.length; k++) {
+      var term = terms[k];
+      if (!term) continue;
+      if (name.indexOf(term) !== -1) score += 5;
+      if (code.indexOf(term) !== -1) score += 3;
+      if (desc.indexOf(term) !== -1) score += 1;
+      if (country.indexOf(term) !== -1) score += 1;
+      if (specText.indexOf(term) !== -1) score += 1;
+    }
+    if (score > 0) scored.push({ a: a, score: score });
+  }
+  scored.sort(function (x, y) { return y.score - x.score; });
+  return scored.slice(0, topN || 5).map(function (item) { return item.a; });
+}
+
+function p3SpecsBrief(a) {
+  var labels = { max_range: '最大航程', range: '航程', combat_radius: '作战半径', cruise_speed: '巡航速度', max_speed: '最大速度', seats: '座位数', capacity: '载客量', wingspan: '翼展', length: '机长', mtow: '最大起飞重量', engine: '发动机' };
+  var sp = {};
+  try { sp = p3NormSpecs(a && a.specs); } catch (e) { sp = (a && a.specs) || {}; }
+  var parts = [];
+  Object.keys(labels).forEach(function (k) {
+    if (sp[k] && parts.length < 4) parts.push(labels[k] + ' ' + String(sp[k]));
+  });
+  return parts.join(' · ');
+}
+
+function buildRagContext(hits) {
+  if (!hits || !hits.length) return '';
+  var lines = ['以下是本站机型库检索到的资料（含站内已收录机型与后台审核通过的投稿机型），可作为回答依据：'];
+  for (var i = 0; i < hits.length; i++) {
+    var a = hits[i];
+    lines.push('[' + (i + 1) + '] 编号 ' + a.id + ' ｜ 机型：' + t(a.name) + '（' + (a.code || '--') + '，' + ((typeof PA_CAT_ZH !== 'undefined' && PA_CAT_ZH[a.category]) || a.category || '--') + '，' + (a.country || '--') + '）');
+    var brief = p3SpecsBrief(a);
+    if (brief) lines.push('    规格：' + brief);
+    var d = String(t(a.desc) || '').slice(0, 200);
+    if (d) lines.push('    简介：' + d);
+    lines.push('    引用标记：[机型:' + a.id + ']');
+  }
+  return lines.join('\n');
+}
+
+function aiAircraftCardHtml(a) {
+  var spec = p3SpecsBrief(a);
+  return '<div class="ai-aircraft-card" onclick="openDetail(' + a.id + ')">'
+    + '<img class="ai-aircraft-img" src="' + proxyUrl(a.image) + '" alt="' + escapeHtml(t(a.name)) + '" loading="lazy" onerror="this.style.display=\'none\'">'
+    + '<div class="ai-aircraft-info"><div class="ai-aircraft-name">' + escapeHtml(t(a.name)) + '</div>'
+    + '<div class="ai-aircraft-code">' + escapeHtml(a.code || '--') + '</div>'
+    + (spec ? '<div class="ai-aircraft-spec">' + escapeHtml(spec) + '</div>' : '')
+    + '</div></div>';
+}
+
+function renderAiReplyWithCards(reply, hits) {
+  var text = String(reply || '');
+  var noMatch = text.indexOf('[NO_MATCH]') !== -1;
+  text = text.replace(/\[NO_MATCH\]/g, '').trim();
+  var used = [];
+  text = text.replace(/\[机型[:：]\s*([0-9]+)\s*\]/g, function (m, idStr) {
+    var id = parseInt(idStr, 10);
+    if (used.indexOf(id) === -1) used.push(id);
+    return '';
+  });
+  text = text.replace(/\n{3,}/g, '\n\n').trim();
+  if (!used.length && hits && hits.length) {
+    used = hits.slice(0, 3).map(function (a) { return a.id; });
+  }
+  var cards = '';
+  var shown = 0;
+  used.forEach(function (id) {
+    if (shown >= 4) return;
+    var a = null;
+    for (var i = 0; i < aircrafts.length; i++) { if (aircrafts[i].id === id) { a = aircrafts[i]; break; } }
+    if (a) { cards += aiAircraftCardHtml(a); shown++; }
+  });
+  if (cards) cards = '<div class="ai-aircraft-cards">' + cards + '</div>';
+  return { text: text, cards: cards, noMatch: noMatch };
+}
+
 async function sendAiMessage() {
   const input = document.getElementById('aiChatInput');
   const sendBtn = document.getElementById('aiChatSendBtn');
@@ -9354,6 +9775,11 @@ async function sendAiMessage() {
   // 显示 loading
   addLoadingIndicator();
 
+  // ===== RAG：先检索站内机型库（内置机型 + 后台已采纳投稿机型） =====
+  var ragHits = [];
+  try { ragHits = ragRetrieveAircraft(text, 5); } catch (e) { ragHits = []; }
+  var ragBlock = buildRagContext(ragHits);
+
   const controller = new AbortController();
   const timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
 
@@ -9368,11 +9794,12 @@ async function sendAiMessage() {
       body: JSON.stringify({
         model: AI_CONFIG.model,
         messages: [
-          { role: 'system', content: AI_SYSTEM_PROMPTS[lang] || AI_SYSTEM_PROMPTS.zh },
+          { role: 'system', content: (AI_SYSTEM_PROMPTS[lang] || AI_SYSTEM_PROMPTS.zh) + RAG_RULES },
+          ...(ragBlock ? [{ role: 'system', content: ragBlock }] : []),
           ...aiConversationHistory.slice(-20),
           { role: 'user', content: text }
         ],
-        max_tokens: 500,
+        max_tokens: 900,
         temperature: 0.7
       }),
       signal: controller.signal
@@ -9389,10 +9816,14 @@ async function sendAiMessage() {
     const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
     if (reply) {
       aiConversationHistory.push({ role: 'user', content: text });
-      if (reply) aiConversationHistory.push({ role: 'assistant', content: reply });
-      addMessage(reply, 'ai');
+      aiConversationHistory.push({ role: 'assistant', content: reply });
+      var rres = renderAiReplyWithCards(reply, ragHits);
+      addMessage(rres.text, 'ai', rres.cards);
+      // 未命中（无检索结果或模型判定站内资料不足）→ 记入后台「答不上来的问题 Top 榜」
+      if (rres.noMatch || !ragHits.length) reportQaLog(text, ragHits, '');
     } else {
       addMessage(t('aiError'), 'ai');
+      reportQaLog(text, ragHits, '');
     }
   } catch (err) {
     clearTimeout(timeoutId);
@@ -11117,7 +11548,7 @@ function quizRandomPick(arr, n, exclude) {
 }
 function generateQuizQuestions() {
   var pool = aircrafts.filter(function(a) { return QUIZ_YEARS[a.code] !== undefined; });
-  var picked = quizShuffle(pool).slice(0, 10);
+  var picked = quizShuffle(pool).slice(0, 15);
   var qs = picked.map(function(a, i) {
     var isName = (i % 2 === 0) ? true : false;
     if (isName) {
@@ -11168,9 +11599,9 @@ function closeQuiz() {
 function renderQuizQuestion() {
   var content = document.getElementById('quizContent');
   var q = quizQuestions[quizIndex];
-  document.getElementById('quizProgressText').textContent = '第 ' + (quizIndex + 1) + ' / 10 题';
+  document.getElementById('quizProgressText').textContent = '第 ' + (quizIndex + 1) + ' / 15 题';
   document.getElementById('quizScoreText').textContent = '答对 ' + quizScore + ' 题';
-  document.getElementById('quizProgressFill').style.width = ((quizIndex) / 10 * 100) + '%';
+  document.getElementById('quizProgressFill').style.width = ((quizIndex) / 15 * 100) + '%';
   var typeLabel = q.type === 'name'
     ? '<div class="quiz-question-type">猜机型</div>'
     : '<div class="quiz-question-type type-year">猜年份</div>';
@@ -11207,9 +11638,9 @@ function selectQuizAnswer(idx) {
     ? '回答正确！这是 ' + q.aircraft.code + '，太棒了！'
     : '回答错误。正确答案是：' + correctLabel;
   document.getElementById('quizScoreText').textContent = '答对 ' + quizScore + ' 题';
-  document.getElementById('quizProgressFill').style.width = ((quizIndex + 1) / 10 * 100) + '%';
+  document.getElementById('quizProgressFill').style.width = ((quizIndex + 1) / 15 * 100) + '%';
   setTimeout(function() {
-    if (quizIndex + 1 >= 10) { showQuizResult(); }
+    if (quizIndex + 1 >= 15) { showQuizResult(); }
     else { quizIndex++; renderQuizQuestion(); }
   }, correct ? 1100 : 1700);
 }
@@ -11219,14 +11650,14 @@ function showQuizResult() {
   document.getElementById('quizProgressFill').style.width = '100%';
   playQuizSound('finish');
   var title, desc;
-  if (quizScore >= 10) { unlockBadge('quiz-master'); title = '航空专家！'; desc = '对机型和首飞年份如数家珍，太强了！'; }
-  else if (quizScore >= 7) { title = '资深航空迷'; desc = '眼光相当准，离专家就差一点点啦！'; }
-  else if (quizScore >= 5) { title = '入门航迷'; desc = '有潜力！多逛逛收藏馆，下次就是满分！'; }
+  if (quizScore >= 15) { unlockBadge('quiz-master'); title = '航空专家！'; desc = '对机型和首飞年份如数家珍，太强了！'; }
+  else if (quizScore >= 11) { title = '资深航空迷'; desc = '眼光相当准，离专家就差一点点啦！'; }
+  else if (quizScore >= 8) { title = '入门航迷'; desc = '有潜力！多逛逛收藏馆，下次就是满分！'; }
   else { title = '新手上路'; desc = '别灰心，多看几次机型卡片，很快就能认出它们！'; }
   content.innerHTML =
     '<div class="quiz-result">' +
       '<div class="quiz-result-label">本次得分</div>' +
-      '<div class="quiz-result-score">' + quizScore + ' / 10</div>' +
+      '<div class="quiz-result-score">' + quizScore + ' / 15</div>' +
       '<div class="quiz-result-title">' + title + '</div>' +
       '<div class="quiz-result-desc">' + desc + '</div>' +
       v56QuizFactHtml() +
@@ -11242,7 +11673,7 @@ var BADGES = [
   { id: 'first-flight', name: '首航纪念', icon: '✈️', color: 'linear-gradient(135deg,#f59e0b,#fbbf24)', desc: '首次打开收藏馆', intro: '第一次踏上收藏馆的跑道，属于你的航空之旅就此启航。' },
   { id: 'collector',    name: '收藏新秀', icon: '⭐', color: 'linear-gradient(135deg,#10b981,#34d399)', desc: '收藏 5 款机型', intro: '机库渐丰，眼光独到。收藏 5 款心仪机型，你就是收藏新秀。' },
   { id: 'checkin-3',    name: '晨航打卡', icon: '📅', color: 'linear-gradient(135deg,#fb923c,#f97316)', desc: '连续 3 天打开打卡', intro: '连续 3 天如约而至，像准时起飞的晨间航班一样可靠。' },
-  { id: 'quiz-master',  name: '满分飞行员', icon: '🏆', color: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', desc: 'Quiz 10 题全对', intro: '机型、年代、细节全掌握。满分飞行员，专业级航空通！' },
+  { id: 'quiz-master',  name: '满分飞行员', icon: '🏆', color: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', desc: 'Quiz 15 题全对', intro: '机型、年代、细节全掌握。满分飞行员，专业级航空通！' },
   { id: 'checkin-7',    name: '云端常客', icon: '👑', color: 'linear-gradient(135deg,#ef4444,#f59e0b)', desc: '累计打卡满 7 天', intro: '累计 7 天登机打卡，云层之上早已认得你的身影。' }
 ];
 var badgeNewThisSession = [];
@@ -11845,16 +12276,16 @@ async function tryFetchRSSAndUpdate(content, today, shownTitles, shownUrls) {
     var freshPool = pool.filter(function(item) { return shownUrls.indexOf(item.link) === -1; });
     var rssSelected = [];
     var fpCopy = freshPool.slice();
-    while (rssSelected.length < 5 && fpCopy.length > 0) {
+    while (rssSelected.length < 15 && fpCopy.length > 0) {
       var idx = Math.floor(Math.random() * fpCopy.length);
       rssSelected.push(fpCopy.splice(idx, 1)[0]);
     }
-    if (rssSelected.length < 5) {
+    if (rssSelected.length < 15) {
       var remaining = pool.filter(function(item) {
         return !rssSelected.some(function(s) { return s.link === item.link; });
       });
       var rCopy = remaining.slice();
-      while (rssSelected.length < 5 && rCopy.length > 0) {
+      while (rssSelected.length < 15 && rCopy.length > 0) {
         var ri = Math.floor(Math.random() * rCopy.length);
         rssSelected.push(rCopy.splice(ri, 1)[0]);
       }
@@ -11865,13 +12296,13 @@ async function tryFetchRSSAndUpdate(content, today, shownTitles, shownUrls) {
     var translated = null;
     for (var tAttempt = 0; tAttempt < 3 && !translated; tAttempt++) {
       try {
-        var translatePrompt = '你是专业航空新闻翻译。将以下5条英文航空新闻的标题和摘要翻译成简体中文，返回严格JSON数组：[{"title":"中文标题","snippet":"中文摘要"}]。要求：1.只输出JSON数组，不要markdown代码块、不要任何解释；2.title保持简洁准确；3.snippet完整通顺；4.专有名词保留英文缩写（如C919、A380、EASA）；5.严禁输出英文原文。\n' + JSON.stringify(rssSelected.map(function(item) { return { title: item.title, snippet: item.snippet }; }));
+        var translatePrompt = '你是专业航空新闻翻译。将以下' + rssSelected.length + '条英文航空新闻的标题和摘要翻译成简体中文，返回严格JSON数组：[{"title":"中文标题","snippet":"中文摘要"}]。要求：1.只输出JSON数组，不要markdown代码块、不要任何解释；2.title保持简洁准确；3.snippet完整通顺；4.专有名词保留英文缩写（如C919、A380、EASA）；5.严禁输出英文原文。\n' + JSON.stringify(rssSelected.map(function(item) { return { title: item.title, snippet: item.snippet }; }));
         var tCtrl = new AbortController();
         var tTimeout = setTimeout(function() { tCtrl.abort(); }, 20000);
         var tResp = await fetch(AI_CONFIG.endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AI_CONFIG.apiKey },
-          body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'user', content: translatePrompt }], max_tokens: 2000, temperature: 0.3 }),
+          body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'user', content: translatePrompt }], max_tokens: 3600, temperature: 0.3 }),
           signal: tCtrl.signal
         });
         clearTimeout(tTimeout);
@@ -11967,17 +12398,17 @@ async function loadNewsPanel() {
   var available = staticPool.filter(function(item) { return shownTitles.indexOf(item.title) === -1; });
   var selected = [];
   var availCopy = available.slice();
-  while (selected.length < 5 && availCopy.length > 0) {
+  while (selected.length < 15 && availCopy.length > 0) {
     var idx = Math.floor(Math.random() * availCopy.length);
     selected.push(availCopy.splice(idx, 1)[0]);
   }
   // 不够时从全池补
-  if (selected.length < 5) {
+  if (selected.length < 15) {
     var remaining = staticPool.filter(function(item) {
       return !selected.some(function(s) { return s.title === item.title; });
     });
     var remCopy = remaining.slice();
-    while (selected.length < 5 && remCopy.length > 0) {
+    while (selected.length < 15 && remCopy.length > 0) {
       var ri = Math.floor(Math.random() * remCopy.length);
       selected.push(remCopy.splice(ri, 1)[0]);
     }
@@ -13317,6 +13748,28 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
   padding: 18px; animation: overlayIn .18s ease;
 }
 #coldfactOverlay.visible { display: flex; }
+/* ===== AI 找飞机（自然语言筛选） + 问 AI 机型卡 ===== */
+.ai-find-bar { display: flex; align-items: center; gap: 8px; max-width: 760px; margin: 10px auto 2px; padding: 0 12px; }
+.ai-find-bar .ai-find-input { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--card-bg); color: var(--text); font-size: 13px; outline: none; }
+.ai-find-bar .ai-find-input:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px var(--accent-bg); }
+.ai-find-bar .ai-find-btn { flex: 0 0 auto; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--accent-border); background: var(--accent-bg); color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.ai-find-bar .ai-find-btn:hover { background: var(--btn-ghost-hover); }
+.ai-find-bar .ai-find-btn:disabled { opacity: .6; cursor: default; }
+.ai-find-conds { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-width: 760px; margin: 6px auto 0; padding: 0 12px; }
+.ai-find-chip { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--text); }
+.ai-find-count { font-size: 11.5px; color: var(--text-dim); }
+.ai-find-clear-btn { font-size: 11.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--glass-border); background: transparent; color: var(--text-dim); cursor: pointer; }
+.ai-find-loading { font-size: 12px; color: var(--text-dim); }
+.ai-aircraft-cards { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ai-aircraft-card { display: flex; gap: 8px; width: 100%; max-width: 268px; padding: 7px 8px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--glass-border); cursor: pointer; text-align: left; }
+.ai-aircraft-card:hover { background: var(--card-bg-hover); }
+.ai-aircraft-img { width: 64px; height: 45px; object-fit: cover; border-radius: 8px; flex: 0 0 auto; background: #1a1f3a; }
+.ai-aircraft-info { min-width: 0; overflow: hidden; }
+.ai-aircraft-name { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.ai-aircraft-code { font-size: 11px; color: var(--text-dim); }
+.ai-aircraft-spec { font-size: 10.5px; color: var(--text-dim); margin-top: 2px; line-height: 1.35; }
+@media (max-width: 640px) { .ai-find-bar { flex-wrap: wrap; } .ai-find-bar .ai-find-input { flex: 1 1 100%; } .ai-find-bar .ai-find-btn { flex: 1 1 100%; } }
+
 .cf-panel {
   width: min(1040px, 100%); max-height: 88vh;
   display: flex; flex-direction: column;
@@ -13526,6 +13979,11 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
 .cf-detail-ext { font-size: 14.5px; line-height: 1.8; color: #eef1ff; }
 .cf-detail-meta { font-size: 12.5px; color: rgba(170,182,235,.85); }
 .cf-detail-note { font-size: 11.5px; color: rgba(150,158,200,.6); }
+.cf-detail-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
+.cf-nav-btn { flex: 1 1 0; padding: 9px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #e8ecff; font-size: 13px; cursor: pointer; }
+.cf-nav-btn:hover { background: rgba(255,255,255,.13); }
+.cf-nav-pos { flex: 0 0 auto; min-width: 58px; text-align: center; font-size: 12px; color: rgba(170,182,235,.85); }
+
 @keyframes v57FadeIn { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width:480px){ #cfDetailOverlay { padding: 10px; } .cf-detail-panel { padding: 16px 14px 18px; border-radius: 16px; max-height: 90vh; } .cf-detail-title { font-size: 16px; } .cf-detail-ext { font-size: 14px; line-height: 1.7; } }
 </style>
@@ -13542,6 +14000,11 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
     </div>
     <div class="cf-detail-block"><div class="bd-label" id="cfDetailQuoteLabel">原卡片速览</div><div class="cf-detail-quote" id="cfDetailQuote"></div></div>
     <div class="cf-detail-block"><div class="bd-label" id="cfDetailExtLabel">延伸阅读</div><div class="cf-detail-ext" id="cfDetailExt"></div></div>
+    <div class="cf-detail-nav">
+      <button class="cf-nav-btn" id="cfDetailPrevBtn" type="button">‹ 上一条</button>
+      <span class="cf-nav-pos" id="cfDetailPos">1 / 15</span>
+      <button class="cf-nav-btn" id="cfDetailNextBtn" type="button">下一条 ›</button>
+    </div>
     <div class="cf-detail-meta" id="cfDetailMeta"></div>
     <div class="cf-detail-note" id="cfDetailNoteText">延伸内容基于公开民航工程与运营资料归纳整理，仅供学习交流。</div>
   </div>
@@ -13581,6 +14044,9 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
     if (!ov || !facts || !facts[idx] || !V57_EXT[idx]) return;
     var f = facts[idx], e = V57_EXT[idx], l = v57Lang();
     var byId = function (id) { return document.getElementById(id); };
+    window.__v57DetailIdx = idx;
+    var posEl = byId('cfDetailPos');
+    if (posEl) posEl.textContent = (idx + 1) + ' / ' + facts.length;
     byId('cfDetailIcon').textContent = f.ic;
     byId('cfDetailTitleText').textContent = f.t[l];
     byId('cfDetailSubText').textContent = e.tag[l];
@@ -13594,6 +14060,15 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
     ov.classList.add('visible');
     ov.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+  };
+  window.v57StepFact = function (delta) {
+    var facts = window.__V56_FACTS || [];
+    if (!facts.length) return;
+    var cur = (typeof window.__v57DetailIdx === 'number') ? window.__v57DetailIdx : 0;
+    var next = (cur + delta + facts.length) % facts.length;
+    v57OpenFactDetail(next);
+    var panel = document.querySelector('.cf-detail-panel');
+    if (panel) panel.scrollTop = 0;
   };
   window.v57CloseFactDetail = function () {
     var ov = document.getElementById('cfDetailOverlay');
@@ -13610,6 +14085,16 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
     });
     var closeBtn = document.getElementById('cfDetailCloseBtn');
     if (closeBtn) closeBtn.addEventListener('click', v57CloseFactDetail);
+    var prevBtn = document.getElementById('cfDetailPrevBtn');
+    var nextBtn = document.getElementById('cfDetailNextBtn');
+    if (prevBtn) prevBtn.addEventListener('click', function (ev) { ev.stopPropagation(); v57StepFact(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function (ev) { ev.stopPropagation(); v57StepFact(1); });
+    document.addEventListener('keydown', function (ev) {
+      var ov2 = document.getElementById('cfDetailOverlay');
+      if (!ov2 || !ov2.classList.contains('visible')) return;
+      if (ev.key === 'ArrowLeft') v57StepFact(-1);
+      else if (ev.key === 'ArrowRight') v57StepFact(1);
+    });
   }
   var grid = document.getElementById('cfGrid');
   if (grid) {
