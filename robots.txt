@@ -1,0 +1,37 @@
+# 民航客机收藏馆 robots.txt
+User-agent: *
+Allow: /
+Disallow: /aviation-collection.html
+Disallow: /production.html
+Disallow: /*.json$
+
+# 国内主流搜索引擎
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Sogou web spider
+Allow: /
+
+User-agent: 360Spider
+Allow: /
+
+User-agent: YisouSpider
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# 海外引擎
+User-agent: Googlebot
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
+# 屏蔽纯抓取型爬虫
+User-agent: SemrushBot
+Disallow: /
+User-agent: AhrefsBot
+Disallow: /
+
+Sitemap: https://henry126923.pages.dev/sitemap.xml
