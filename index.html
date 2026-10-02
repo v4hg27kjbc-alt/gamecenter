@@ -6421,10 +6421,20 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
 <!-- ===== AI 航空问答 Overlay ===== -->
 <div id="aiChatOverlay">
   <div class="ai-chat-header">
+    <div class="av-ai-brand">
+      <button type="button" class="av-ai-model-btn" id="avAiModelBtn" aria-expanded="false" aria-haspopup="menu" onclick="avAiTogglePicker(event)" title="选择 AI 模型"></button>
+      <div class="av-ai-picker" id="avAiPicker" role="menu" aria-label="AI 模型选择"></div>
+    </div>
     <span class="ai-chat-title">AI 航空问答</span>
     <button class="ai-chat-close" onclick="closeAiChat()" title="关闭">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
+  </div>
+  <div class="av-ai-badges" id="avAiBadges">
+    <span class="av-ai-badge" id="avAiBadgeModel">模型：GLM-4.7-Flash</span>
+    <span class="av-ai-badge mode-fast" id="avAiBadgeMode">快速问答</span>
+    <span class="av-ai-badge" id="avAiBadgeQuota">今日剩余深度思考 5/5</span>
+    <button type="button" class="av-ai-badge mode-text" id="avAiImageModeBtn" aria-pressed="false" title="当前：纯文字问答 · 点击切换到识图问答" onclick="avAiToggleImageMode(event)"></button>
   </div>
   <div class="ai-chat-messages" id="aiChatMessages"></div>
   <div class="ai-chat-input-area">
@@ -10714,7 +10724,26 @@ window.AIBridge = (function () {
       stream: false
     };
     if (o.tier) body.tier = o.tier;
-    if (o.model && !o.tier) body.model = o.model;
+    /* >>> av-stage1 route >>> */
+    /* 双模型路由：仅主问答（未指定 tier）走左上角模型选择器；tier 调用（测评/新闻等）行为不变 */
+    var _avRoute = null;
+    if (!o.tier) {
+      if (o.provider || o.model || o.mode) {
+        _avRoute = { provider: o.provider, model: o.model, mode: o.mode };
+      } else if (typeof window.__avAiRoute === 'function') {
+        _avRoute = window.__avAiRoute();
+      }
+    }
+    if (_avRoute) {
+      _avRoute.mode = _avRoute.mode || ((_avRoute.provider === 'kimi') ? 'deep' : 'fast');
+      _avRoute.provider = _avRoute.provider || ((_avRoute.mode === 'deep') ? 'kimi' : 'zhipu');
+      body.provider = _avRoute.provider;
+      body.mode = _avRoute.mode;
+      body.model = _avRoute.model || ((_avRoute.provider === 'kimi') ? 'kimi-k2.6' : 'glm-4.7-flash');
+    } else if (o.model && !o.tier) {
+      body.model = o.model;
+    }
+    /* <<< av-stage1 route <<< */
     if (o.feature) body.feature = o.feature;
     if (typeof o.temperature === 'number') body.temperature = o.temperature;
     if (typeof o.max_tokens === 'number') body.maxTokens = o.max_tokens;
@@ -11678,6 +11707,7 @@ async function sendAiMessage() {
       addMessage(rres.text, 'ai', rres.cards);
       // 未命中（无检索结果或模型判定站内资料不足）→ 记入后台「答不上来的问题 Top 榜」
       if (rres.noMatch || !ragHits.length) reportQaLog(text, ragHits, '');
+      if (typeof window.__avAiDifficultyGuide === 'function') { window.__avAiDifficultyGuide(text, !!rres.noMatch); }
     } else {
       addMessage(t('aiError'), 'ai');
       reportQaLog(text, ragHits, '');
@@ -17140,6 +17170,154 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   .rln-card[data-rln-sheet]::after { transition: none; }
   .rln-card.rln-pressing { transform: none; filter: none; }
 }
+
+/* >>> av-stage1 css >>> */
+/* ===== v70 阶段1 · 问 AI 双模型路由层（模型选择器 / 徽标 / 每日额度） =====
+   纯增量：仅新增样式，不覆盖站点既有 AI 浮层样式 */
+.av-ai-brand { display: flex; align-items: center; gap: 10px; min-width: 0; position: relative; }
+.av-ai-model-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 10px; border-radius: 999px;
+  border: 1px solid var(--glass-border); background: var(--card-bg-hover);
+  color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer;
+  max-width: 210px; overflow: hidden; white-space: nowrap;
+  transition: all var(--dur-250) ease;
+}
+.av-ai-model-btn:hover { border-color: var(--accent-border); color: var(--accent); }
+.av-ai-model-btn[aria-expanded="true"] { border-color: var(--accent-border); color: var(--accent); }
+.av-ai-model-btn .av-ai-caret { width: 12px; height: 12px; flex-shrink: 0; transition: transform var(--dur-250) ease; }
+.av-ai-model-btn[aria-expanded="true"] .av-ai-caret { transform: rotate(180deg); }
+.av-ai-model-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.av-ai-model-dot.deep { background: #b07bff; }
+.av-ai-picker {
+  display: none; position: absolute; top: 38px; left: 0; z-index: 10040;
+  width: 268px; max-height: 60vh; overflow-y: auto;
+  padding: 8px; border-radius: 14px;
+  background: var(--card-bg); border: 1px solid var(--glass-border);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+}
+.av-ai-picker.open { display: block; }
+.av-ai-group-h {
+  padding: 8px 10px 4px; font-size: 11px; font-weight: 700;
+  color: var(--text-dim); letter-spacing: 0.04em;
+}
+.av-ai-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 9px 10px; border: none; border-radius: 10px;
+  background: transparent; color: var(--text); font-size: 13px; text-align: left;
+  cursor: pointer; transition: background var(--dur-250) ease;
+}
+.av-ai-item:hover { background: var(--card-bg-hover); }
+.av-ai-item.active { background: var(--card-bg-hover); color: var(--accent); font-weight: 600; }
+.av-ai-item-sub { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+.av-ai-item.active .av-ai-item-sub { color: var(--accent); }
+.av-ai-quota {
+  margin: 8px 6px 4px; padding: 8px 10px; border-radius: 10px;
+  background: var(--card-bg-hover); font-size: 11.5px; color: var(--text-dim); line-height: 1.5;
+}
+.av-ai-quota b { color: var(--text); }
+.av-ai-badges {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 0 var(--space-24) 10px; flex-shrink: 0;
+}
+.av-ai-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--glass-border); background: var(--card-bg-hover);
+  font-size: 11px; color: var(--text-dim); white-space: nowrap;
+}
+.av-ai-badge.mode-fast { border-color: var(--accent-border); color: var(--accent); }
+.av-ai-badge.mode-deep { border-color: rgba(176, 123, 255, 0.45); color: #b07bff; }
+/* 降级提示：置于回答气泡上方（第 6 次深度思考自动降级智谱时显示） */
+.av-ai-degrade-note {
+  max-width: 82%; margin: 8px 0; padding: 9px 12px; border-radius: 12px;
+  font-size: 12px; line-height: 1.6;
+  border: 1px solid rgba(255, 180, 80, 0.45); background: rgba(255, 180, 80, 0.10);
+  color: var(--text);
+}
+@media (max-width: 640px) {
+  .av-ai-model-btn { max-width: 132px; font-size: 11px; }
+  .av-ai-picker { width: 246px; }
+  .av-ai-badges { padding: 0 var(--space-16) 10px; }
+}
+/* <<< av-stage1 css <<< */
+/* ==================== v70 阶段2 样式 ==================== */
+/* >>> av-stage2 css >>> */
+/* ① 收敛模型入口：隐藏基线 AiMultimodal 注入的第二套模型条（含其内嵌的"支持图片输入"提示） */
+#aiChatOverlay #aiMmBar { display: none !important; }
+
+/* ② 图片按钮按场景显隐：纯文字问答隐藏，进入识图问答才出现 */
+#aiChatOverlay #aiMmAttach,
+#aiChatOverlay .ai-mm-attach { display: none !important; }
+#aiChatOverlay.av-ai-imaging #aiMmAttach,
+#aiChatOverlay.av-ai-imaging .ai-mm-attach { display: inline-flex !important; }
+
+/* 浮层顶部：问答类型切换 chip（纯文字 / 识图） */
+#avAiImageModeBtn {
+  cursor: pointer;
+  border: none;
+  font: inherit;
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+#avAiImageModeBtn.mode-text { background: rgba(148, 163, 184, .18); color: #cbd5e1; }
+#avAiImageModeBtn.mode-image {
+  background: rgba(56, 189, 248, .22);
+  color: #7dd3fc;
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .45);
+}
+#avAiImageModeBtn:focus-visible { outline: 2px solid rgba(56, 189, 248, .6); outline-offset: 2px; }
+#avAiImageModeBtn::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .8;
+}
+
+/* ③ 快速问答"答不上来"时的深度思考引导块 */
+.av-ai-guide {
+  margin: 8px 0 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .06);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .28);
+  font-size: 13px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+.av-ai-guide-note { display: block; margin-bottom: 8px; color: #fbbf24; }
+.av-ai-guide-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  transition: filter .18s ease, background .18s ease;
+}
+.av-ai-guide-btn:hover:not(:disabled) { filter: brightness(1.08); }
+.av-ai-guide-btn:disabled {
+  cursor: not-allowed;
+  background: rgba(148, 163, 184, .28);
+  color: rgba(226, 232, 240, .6);
+}
+@media (max-width: 640px) {
+  .av-ai-guide { font-size: 12.5px; padding: 9px 10px; }
+  .av-ai-guide-btn { width: 100%; padding: 9px 12px; }
+  #avAiImageModeBtn { font-size: 11px; }
+}
+/* <<< av-stage2 css <<< */
 </style>
 
 <div id="cfDetailOverlay" aria-hidden="true">
@@ -18874,6 +19052,468 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   // 关闭：按钮 / 遮罩 / Esc
   if (closeBtn) { closeBtn.addEventListener("click", closeSheet); }
   mask.addEventListener("click", function (e) { if (e.target === mask) { closeSheet(); } });
+})();
+</script>
+<script>
+/* ============================================================================
+ * v70 阶段1 · 问 AI 双模型路由层
+ *   1) 左上角模型选择器：智谱 GLM（6 版） / Kimi（3 版）
+ *   2) 快慢分流：快速问答 → 智谱；深度思考 → Kimi（选中 Kimi 任意版本自动进深度）
+ *   3) 每日额度：深度思考每自然日 5 次，localStorage 计数，第 6 次自动降级智谱并提示
+ *   4) 纯增量：不覆盖任何站点既有函数；通过 window.__avAiRoute() 钩子向
+ *      AIBridge.chat 提供 provider / model / mode（仅作用于未指定 tier 的主问答）
+ *   零密钥：本模块不接触任何 API Key，请求统一由 AIBridge 走同源 /api/chat
+ * ========================================================================== */
+(function () {
+  'use strict';
+
+  var DEEP_LIMIT = 5;
+  var LS_QUOTA_PREFIX = 'av_ai_deep_quota_';
+  var LS_PREF = 'av_ai_model_pref';
+  var FAST_MODEL = { provider: 'zhipu', model: 'glm-4.7-flash' };
+  var DEEP_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
+  var DEGRADE_TEXT = '今日 Kimi 深度思考次数已用完，已自动切换智谱继续回答';
+
+  /* ---------------- 模型目录（阶段1：智谱 6 版 + Kimi 3 版） ---------------- */
+  var CATALOG = [
+    {
+      provider: 'zhipu', name: '智谱 GLM', mode: 'fast',
+      items: [
+        { id: 'glm-4.7-flash', label: 'GLM-4.7-Flash', sub: '免费 · 默认快速' },
+        { id: 'glm-4.5-flash', label: 'GLM-4.5-Flash', sub: '免费' },
+        { id: 'glm-4.6', label: 'GLM-4.6', sub: '快速' },
+        { id: 'glm-4.7', label: 'GLM-4.7', sub: '快速' },
+        { id: 'glm-5', label: 'GLM-5', sub: '快速' },
+        { id: 'glm-5.3', label: 'GLM-5.3', sub: '快速' }
+      ]
+    },
+    {
+      provider: 'kimi', name: 'Kimi', mode: 'deep',
+      items: [
+        { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '默认深度' },
+        { id: 'kimi-k3', label: 'Kimi K3', sub: '深度' },
+        { id: 'kimi-k2.7-code', label: 'Kimi K2.7-Code', sub: '深度 · 代码' }
+      ]
+    }
+  ];
+
+  var state = {
+    provider: FAST_MODEL.provider,
+    model: FAST_MODEL.model,
+    pendingDegrade: false
+  };
+
+  /* ---------------- 基础工具 ---------------- */
+  function el(id) { return document.getElementById(id); }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  function quotaKey() { return LS_QUOTA_PREFIX + todayKey(); }
+  function safeGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function safeSet(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* 隐私模式忽略 */ } }
+  function findItem(modelId) {
+    for (var i = 0; i < CATALOG.length; i++) {
+      for (var j = 0; j < CATALOG[i].items.length; j++) {
+        if (CATALOG[i].items[j].id === modelId) {
+          return { provider: CATALOG[i].provider, group: CATALOG[i].name, item: CATALOG[i].items[j] };
+        }
+      }
+    }
+    return null;
+  }
+  function modelLabel(modelId) {
+    var f = findItem(modelId);
+    return f ? f.item.label : modelId;
+  }
+  function modeOf(provider) { return provider === 'kimi' ? 'deep' : 'fast'; }
+
+  /* ---------------- 每日深度额度（localStorage 按自然日计数） ---------------- */
+  function getUsed() {
+    var v = parseInt(safeGet(quotaKey()) || '0', 10);
+    return isNaN(v) || v < 0 ? 0 : v;
+  }
+  function setUsed(n) { safeSet(quotaKey(), String(n)); }
+  function remaining() { return Math.max(0, DEEP_LIMIT - getUsed()); }
+  /* 返回 true 表示本次可用深度（已扣减）；false 表示额度已用完需降级 */
+  function consumeDeep() {
+    var used = getUsed();
+    if (used >= DEEP_LIMIT) return false;
+    setUsed(used + 1);
+    return true;
+  }
+
+  /* ---------------- 偏好持久化 ---------------- */
+  function loadPref() {
+    var raw = safeGet(LS_PREF);
+    if (!raw) return;
+    try {
+      var p = JSON.parse(raw);
+      var f = p && p.model ? findItem(p.model) : null;
+      if (f) { state.provider = f.provider; state.model = f.item.id; }
+    } catch (e) { /* 忽略非法缓存 */ }
+  }
+  function savePref() {
+    safeSet(LS_PREF, JSON.stringify({ provider: state.provider, model: state.model }));
+  }
+
+  /* ---------------- 渲染：模型选择器 ---------------- */
+  function renderPicker(force) {
+    var box = el('avAiPicker');
+    if (!box) return;
+    if (!force && !box.classList.contains('open')) return;
+    var html = '';
+    for (var i = 0; i < CATALOG.length; i++) {
+      var g = CATALOG[i];
+      html += '<div class="av-ai-group-h">' + g.name + '</div>';
+      for (var j = 0; j < g.items.length; j++) {
+        var it = g.items[j];
+        var active = (it.id === state.model) ? ' active' : '';
+        html += '<button type="button" class="av-ai-item' + active + '" role="menuitemradio" ' +
+          'aria-checked="' + (active ? 'true' : 'false') + '" ' +
+          'onclick="avAiSelectModel(\'' + it.id + '\')">' +
+          '<span>' + it.label + '</span>' +
+          '<span class="av-ai-item-sub">' + it.sub + '</span>' +
+          '</button>';
+      }
+    }
+    html += '<div class="av-ai-quota">今日剩余深度思考 <b>' + remaining() + '/' + DEEP_LIMIT + '</b>' +
+      '（深度思考由 Kimi 提供，每天 ' + DEEP_LIMIT + ' 次，用完自动切换智谱）</div>';
+    box.innerHTML = html;
+  }
+
+  /* ---------------- 渲染：左上角按钮 + 顶部徽标 ---------------- */
+  function renderHeader() {
+    var btn = el('avAiModelBtn');
+    var mode = modeOf(state.provider);
+    if (btn) {
+      btn.innerHTML =
+        '<span class="av-ai-model-dot ' + (mode === 'deep' ? 'deep' : 'fast') + '"></span>' +
+        '<span class="av-ai-model-btn-label">' + modelLabel(state.model) + '</span>' +
+        '<svg class="av-ai-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      btn.setAttribute('title', '当前模型：' + modelLabel(state.model) + '（' + (mode === 'deep' ? '深度思考' : '快速问答') + '）');
+      btn.setAttribute('aria-label', '选择 AI 模型，当前 ' + modelLabel(state.model));
+    }
+    var bModel = el('avAiBadgeModel');
+    if (bModel) {
+      bModel.textContent = '模型：' + modelLabel(state.model);
+      bModel.setAttribute('data-provider', state.provider);
+    }
+    var bMode = el('avAiBadgeMode');
+    if (bMode) {
+      bMode.textContent = mode === 'deep' ? '深度思考' : '快速问答';
+      bMode.className = 'av-ai-badge ' + (mode === 'deep' ? 'mode-deep' : 'mode-fast');
+      bMode.setAttribute('data-mode', mode);
+    }
+    var bQuota = el('avAiBadgeQuota');
+    if (bQuota) {
+      bQuota.textContent = '今日剩余深度思考 ' + remaining() + '/' + DEEP_LIMIT;
+    }
+  }
+
+  function renderAll() { renderPicker(false); renderHeader(); }
+
+  /* ---------------- 对外交互：选择器开合 / 选模型 ---------------- */
+  window.avAiTogglePicker = function (ev) {
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    var box = el('avAiPicker');
+    var btn = el('avAiModelBtn');
+    if (!box) return;
+    var open = box.classList.toggle('open');
+    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) renderPicker(true);
+  };
+  window.avAiClosePicker = function () {
+    var box = el('avAiPicker');
+    var btn = el('avAiModelBtn');
+    if (box) box.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  };
+  window.avAiSelectModel = function (modelId) {
+    var f = findItem(modelId);
+    if (!f) return;
+    state.provider = f.provider;
+    state.model = f.item.id;
+    savePref();
+    renderHeader();
+    renderPicker(true);
+    window.avAiClosePicker();
+  };
+  window.avAiCurrentRoute = function () {
+    return { provider: state.provider, model: state.model, mode: modeOf(state.provider), remaining: remaining() };
+  };
+
+  /* ---------------- 路由钩子：供 AIBridge.chat 在主问答（无 tier）时调用 ---------------- */
+  window.__avAiRoute = function () {
+    var provider = state.provider;
+    var model = state.model;
+    var mode = modeOf(provider);
+    var degraded = false;
+    if (mode === 'deep') {
+      if (!consumeDeep()) {
+        /* 第 6 次起：自动降级智谱，并预约一条提示（插入到本次回答气泡上方） */
+        degraded = true;
+        state.pendingDegrade = true;
+        provider = FAST_MODEL.provider;
+        model = FAST_MODEL.model;
+        mode = 'fast';
+      }
+    }
+    renderAll();
+    return {
+      provider: provider,
+      model: model,
+      mode: mode,
+      degraded: degraded,
+      requestedProvider: state.provider,
+      requestedModel: state.model
+    };
+  };
+
+  /* ---------------- 降级提示：插入到回答气泡上方 ---------------- */
+  function insertDegradeNote(msgEl) {
+    var box = el('aiChatMessages');
+    if (!box || !msgEl || !msgEl.parentNode) return;
+    var note = document.createElement('div');
+    note.className = 'av-ai-degrade-note';
+    note.textContent = DEGRADE_TEXT;
+    msgEl.parentNode.insertBefore(note, msgEl);
+  }
+  function watchMessages() {
+    var box = el('aiChatMessages');
+    if (!box || box.__avWatched) return;
+    box.__avWatched = true;
+    if (typeof window.MutationObserver !== 'function') return;
+    var mo = new window.MutationObserver(function (muts) {
+      if (!state.pendingDegrade) return;
+      for (var i = 0; i < muts.length; i++) {
+        var added = muts[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var n = added[j];
+          if (n && n.nodeType === 1 && n.classList && n.classList.contains('ai-msg-ai')) {
+            insertDegradeNote(n);
+            state.pendingDegrade = false;
+            return;
+          }
+        }
+      }
+    });
+    mo.observe(box, { childList: true });
+  }
+
+  /* ---------------- 事件绑定与初始化 ---------------- */
+  function bindDismiss() {
+    document.addEventListener('click', function (e) {
+      var box = el('avAiPicker');
+      if (!box || !box.classList.contains('open')) return;
+      var t = e.target;
+      if (t && t.closest && (t.closest('#avAiPicker') || t.closest('#avAiModelBtn'))) return;
+      window.avAiClosePicker();
+    }, true);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') window.avAiClosePicker();
+    });
+  }
+
+  function init() {
+    loadPref();
+    renderAll();
+    bindDismiss();
+    watchMessages();
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) renderAll();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+<!-- ===== v70 阶段2 · 模型入口单点收敛 / 识图场景图片按钮 / 快速问答难题引导 ===== -->
+<script>
+/* ===== v70 阶段2 · 模型入口单点收敛 · 识图场景图片按钮 · 快速问答难题引导 ===== */
+(function () {
+  'use strict';
+  if (window.__avStage2) { return; }
+  window.__avStage2 = '1.0';
+
+  var PHOTO_INTENT_WINDOW = 3 * 60 * 1000;   /* 3 分钟内使用过「照片识机」→ 视为识图意图 */
+  var DEEP_LIMIT_HINT = 5;
+
+  var state = { imageMode: false, photoIntentAt: 0 };
+  var pendingQuestion = '';
+
+  function el(id) { return document.getElementById(id); }
+  function mm() { return window.AiMultimodal; }
+  function route() {
+    try { return (typeof window.avAiCurrentRoute === 'function') ? window.avAiCurrentRoute() : null; }
+    catch (e) { return null; }
+  }
+  function isDeepMode() { var r = route(); return !!(r && r.mode === 'deep'); }
+  function remainingDeep() { var r = route(); return (r && typeof r.remaining === 'number') ? r.remaining : 0; }
+
+  /* ---------------- ① 模型入口单点收敛：内部多模态模型跟随左上角选择器 ---------------- */
+  function syncMmModel() {
+    var m = mm();
+    if (!m || typeof m.setModel !== 'function') { return; }
+    try { m.setModel(state.imageMode ? 'vision' : (isDeepMode() ? 'reason' : 'fast'), true); } catch (e) { }
+  }
+
+  /* ---------------- ② 识图场景：图片按钮随场景显隐 + 问答类型 chip ---------------- */
+  function renderScene() {
+    var ov = el('aiChatOverlay');
+    var btn = el('avAiImageModeBtn');
+    if (ov) { ov.classList.toggle('av-ai-imaging', state.imageMode === true); }
+    if (btn) {
+      btn.textContent = state.imageMode ? '识图问答' : '纯文字问答';
+      btn.className = 'av-ai-badge ' + (state.imageMode ? 'mode-image' : 'mode-text');
+      btn.setAttribute('aria-pressed', state.imageMode ? 'true' : 'false');
+      btn.setAttribute('title', state.imageMode
+        ? '当前：识图问答（可上传照片识别）· 点击切回纯文字'
+        : '当前：纯文字问答 · 点击切换到识图问答');
+    }
+    syncMmModel();
+  }
+  function setImageMode(on) {
+    state.imageMode = on === true;
+    renderScene();
+  }
+  window.avAiToggleImageMode = function (ev) {
+    if (ev && ev.preventDefault) { ev.preventDefault(); }
+    if (ev && ev.stopPropagation) { ev.stopPropagation(); }
+    setImageMode(!state.imageMode);
+  };
+  window.avAiImageMode = function () { return state.imageMode === true; };
+
+  /* ---------------- 浮层入口包装：默认场景 + 内部模型复位覆盖 ---------------- */
+  function wrapOpenAiChat() {
+    if (typeof window.openAiChat !== 'function' || window.openAiChat.__avStage2) { return; }
+    var orig = window.openAiChat;
+    var wrapped = function () {
+      var photoIntent = state.photoIntentAt > 0 && (Date.now() - state.photoIntentAt) < PHOTO_INTENT_WINDOW;
+      var r = orig.apply(this, arguments);
+      setImageMode(photoIntent);
+      /* 基线 AiMultimodal 约 60ms 后按 localStorage 复位其内部模型，这里延后覆盖为当前场景模型 */
+      setTimeout(syncMmModel, 150);
+      return r;
+    };
+    wrapped.__avStage2 = true;
+    window.openAiChat = wrapped;
+  }
+  function wrapOpenPhotoAi() {
+    if (typeof window.openPhotoAi !== 'function' || window.openPhotoAi.__avStage2) { return; }
+    var orig = window.openPhotoAi;
+    var wrapped = function () {
+      state.photoIntentAt = Date.now();
+      return orig.apply(this, arguments);
+    };
+    wrapped.__avStage2 = true;
+    window.openPhotoAi = wrapped;
+  }
+  function wrapSelectModel() {
+    if (typeof window.avAiSelectModel !== 'function' || window.avAiSelectModel.__avStage2) { return; }
+    var orig = window.avAiSelectModel;
+    var wrapped = function () {
+      var r = orig.apply(this, arguments);
+      renderScene();
+      return r;
+    };
+    wrapped.__avStage2 = true;
+    window.avAiSelectModel = wrapped;
+  }
+
+  /* ---------------- ③ 快速问答答不上来 → 深度思考引导 ---------------- */
+  var GUIDE_NOTE = '这个问题有点难，要不要切到深度思考模式？';
+  var GUIDE_BTN = '切换深度思考（Kimi）';
+  var GUIDE_EMPTY_TEXT = '今日深度思考次数已用完，明天恢复';
+
+  function clearGuides() {
+    var box = el('aiChatMessages');
+    if (!box) { return; }
+    var olds = box.querySelectorAll('.av-ai-guide');
+    for (var i = 0; i < olds.length; i++) {
+      if (olds[i].parentNode) { olds[i].parentNode.removeChild(olds[i]); }
+    }
+  }
+
+  function buildGuide() {
+    var wrap = document.createElement('div');
+    wrap.className = 'av-ai-guide';
+
+    var note = document.createElement('div');
+    note.className = 'av-ai-guide-note';
+    note.textContent = GUIDE_NOTE;
+    wrap.appendChild(note);
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'av-ai-guide-btn';
+    var left = remainingDeep();
+    if (left > 0) {
+      btn.textContent = GUIDE_BTN + '（今日剩余 ' + left + '/' + DEEP_LIMIT_HINT + '）';
+      btn.addEventListener('click', function (e) {
+        if (e && e.preventDefault) { e.preventDefault(); }
+        if (e && e.stopPropagation) { e.stopPropagation(); }
+        goDeep();
+      });
+    } else {
+      btn.textContent = GUIDE_EMPTY_TEXT;
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+    }
+    wrap.appendChild(btn);
+    return wrap;
+  }
+
+  function goDeep() {
+    if (remainingDeep() <= 0) { return; }
+    var q = pendingQuestion;
+    clearGuides();
+    if (!q) { return; }
+    /* 复用左上角选择器切到 Kimi 默认深度模型（自动持久化偏好） */
+    if (typeof window.avAiSelectModel === 'function') { window.avAiSelectModel('kimi-k2.6'); }
+    var input = el('aiChatInput');
+    if (input) {
+      input.value = q;
+      if (typeof window.updateAiCharCount === 'function') { window.updateAiCharCount(); }
+    }
+    /* 走站内既有发送链：RAG 检索 / 额度扣减 / 降级提示 / 问答日志全部沿用 */
+    if (typeof window.sendAiMessage === 'function') { window.sendAiMessage(); }
+  }
+
+  /* 由 sendAiMessage 在主问答判定「答不上来」时调用 */
+  window.__avAiDifficultyGuide = function (question, noMatch) {
+    if (!noMatch) { return; }
+    if (state.imageMode) { return; }
+    if (isDeepMode()) { return; }
+    var box = el('aiChatMessages');
+    if (!box) { return; }
+    var nodes = box.querySelectorAll('.ai-msg-ai');
+    if (!nodes.length) { return; }
+    var last = nodes[nodes.length - 1];
+    if (!last || !last.parentNode) { return; }
+    clearGuides();
+    pendingQuestion = String(question == null ? '' : question);
+    last.parentNode.insertBefore(buildGuide(), last.nextSibling);
+  };
+
+  /* ---------------- 初始化 ---------------- */
+  function init() {
+    wrapSelectModel();
+    wrapOpenAiChat();
+    wrapOpenPhotoAi();
+    renderScene();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
 </body>
