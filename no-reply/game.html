@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>无应答 NO REPLY</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#06080c;--bg2:#0b1017;--panel:#0e131c;--panel2:#141b26;--panel3:#1a2331;
+--line:#1e2736;--line2:#2c3849;--line3:#3d4c62;
+--text:#c9d2de;--dim:#8492a4;--dimmer:#5b6779;
+--amber:#e3ab54;--amber-d:#7d5a22;--amber-g:rgba(227,171,84,.16);
+--green:#6fd39a;--green-g:rgba(111,211,154,.14);
+--red:#e0695f;--red-g:rgba(224,105,95,.16);
+--blue:#6fa8dc;--blue-g:rgba(111,168,220,.14);
+--yellow:#e3c95c;--yellow-g:rgba(227,201,92,.14);
+--mono:"SF Mono",Menlo,Consolas,"Courier New",monospace;
+--serif:"Songti SC","STSong",Georgia,serif;
+--kai:"Kaiti SC",KaiTi,"STKaiti",serif;
+--r:10px;--r2:14px;--r3:20px;
+}
+html,body{height:100%}
+body{
+background:radial-gradient(1300px 760px at 50% -12%,#101720 0%,#06080c 58%,#030508 100%);
+color:var(--text);font-size:15px;line-height:1.65;overflow:hidden;
+font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.hidden{display:none!important}
+.mono{font-family:var(--mono)}
+.kai{font-family:var(--kai)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+.btn{
+display:inline-flex;align-items:center;justify-content:center;gap:8px;
+padding:11px 22px;border-radius:var(--r2);border:1px solid var(--line2);
+background:var(--panel2);color:var(--text);font-size:14px;letter-spacing:.06em;
+transition:all .22s ease;
+}
+.btn:hover{background:var(--panel3);border-color:var(--line3);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.primary{background:linear-gradient(180deg,#2a3346,#1b2333);border-color:#3d4a60;color:#e6ecf5}
+.btn.primary:hover{border-color:var(--amber);color:#fff;box-shadow:0 0 22px rgba(227,171,84,.18)}
+.btn.ghost{background:transparent;border-color:var(--line)}
+.btn.sm{padding:7px 14px;font-size:13px;border-radius:9px}
+.btn[disabled]{opacity:.35;cursor:not-allowed;transform:none}
+/* ===== 标题画面 ===== */
+#titleScreen{align-items:center;justify-content:center;text-align:center;padding:30px}
+#rainCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
+.title-wrap{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center}
+.t-overline{font-size:11px;letter-spacing:.5em;color:var(--dimmer);margin-bottom:20px;font-family:var(--mono)}
+.t-title{font-size:clamp(42px,10vw,78px);font-weight:700;letter-spacing:.16em;line-height:1.05;
+color:#e8eef7;text-shadow:0 0 42px rgba(227,171,84,.22)}
+.t-en{font-family:var(--mono);font-size:clamp(13px,3.4vw,17px);letter-spacing:.62em;color:var(--amber);
+margin-top:14px;opacity:.92}
+.t-sub{margin-top:22px;font-size:13px;color:var(--dim);line-height:2.1;letter-spacing:.1em}
+.t-line{width:min(420px,74vw);height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent);margin:30px 0 26px}
+.t-menu{display:flex;flex-direction:column;gap:11px;width:min(300px,78vw)}
+.t-menu .btn{justify-content:center;letter-spacing:.2em;padding:13px 20px}
+.t-foot{position:absolute;bottom:20px;left:0;right:0;text-align:center;font-size:11px;color:var(--dimmer);letter-spacing:.14em;z-index:2}
+</style>
+
+<style>
+/* ===== 主界面 ===== */
+#gameScreen{background:transparent}
+.topbar{
+display:flex;align-items:center;gap:14px;padding:10px 16px;
+border-bottom:1px solid var(--line);background:rgba(8,11,16,.86);
+backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex:0 0 auto;z-index:20;
+}
+.tb-title{font-family:var(--mono);font-size:12px;letter-spacing:.24em;color:var(--amber);white-space:nowrap}
+.tb-sep{width:1px;height:16px;background:var(--line2)}
+.tb-chapter{font-size:13px;color:var(--dim);letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb-btn{
+padding:6px 13px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);
+font-size:12.5px;color:var(--dim);letter-spacing:.06em;transition:all .2s;white-space:nowrap;
+}
+.tb-btn:hover{border-color:var(--line3);color:var(--text)}
+.tb-btn .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:1px}
+.tb-btn.pulse{animation:bp 2.2s infinite}
+@keyframes bp{0%,100%{box-shadow:0 0 0 0 rgba(227,171,84,0)}50%{box-shadow:0 0 0 4px rgba(227,171,84,.12)}}
+.stage{flex:1 1 auto;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:18px}
+.desk{
+position:relative;width:min(1180px,100%);height:100%;max-height:720px;
+border:1px solid var(--line);border-radius:var(--r3);
+background:
+radial-gradient(700px 380px at 24% 12%,rgba(227,171,84,.05),transparent 66%),
+radial-gradient(600px 380px at 82% 88%,rgba(111,168,220,.05),transparent 68%),
+linear-gradient(165deg,#0c1119,#080b11);
+overflow:hidden;
+display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(8,1fr);
+gap:0;
+}
+.desk::after{
+content:"";position:absolute;inset:0;pointer-events:none;z-index:9;
+background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px);
+}
+.obj{
+position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+gap:8px;cursor:pointer;border-radius:var(--r2);margin:4px;
+border:1px solid transparent;transition:all .24s ease;text-align:center;
+}
+.obj:hover{background:rgba(255,255,255,.026);border-color:var(--line);transform:translateY(-2px)}
+.obj .ic{font-size:clamp(24px,4.4vw,40px);line-height:1;filter:grayscale(.25) brightness(1.15)}
+.obj .nm{font-size:12.5px;color:var(--dim);letter-spacing:.08em}
+.obj .tag{
+font-size:10px;font-family:var(--mono);letter-spacing:.1em;color:var(--dimmer);
+border:1px solid var(--line);border-radius:20px;padding:1px 8px;
+}
+.obj .tag.on{color:var(--green);border-color:rgba(111,211,154,.4);background:var(--green-g)}
+.obj .tag.dead{color:var(--dimmer);border-color:var(--line);text-decoration:line-through}
+.obj.hot{animation:hot 2.6s infinite}
+@keyframes hot{0%,100%{box-shadow:0 0 0 0 rgba(227,171,84,0)}50%{box-shadow:0 0 26px 3px rgba(227,171,84,.13)}}
+.obj.done .nm{color:var(--green)}
+/* 桌面网格定位 */
+#objLamp{grid-column:1/3;grid-row:3/7}
+#objRecorder{grid-column:3/5;grid-row:1/4}
+#objTowerLog{grid-column:5/7;grid-row:1/4}
+#objArchive{grid-column:7/9;grid-row:1/4}
+#objMap{grid-column:9/12;grid-row:1/5}
+#objPhone{grid-column:9/12;grid-row:5/9}
+#objCase{grid-column:3/6;grid-row:5/9}
+.center-plate{
+grid-column:6/9;grid-row:5/9;display:flex;align-items:center;justify-content:center;
+pointer-events:none;opacity:.5;
+}
+.center-plate .txt{font-family:var(--mono);font-size:11px;letter-spacing:.36em;color:var(--dimmer);text-align:center;line-height:2.4}
+/* ===== 面板 ===== */
+.overlay{
+position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+background:rgba(3,5,8,.76);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:20px;
+}
+.overlay.open{display:flex;animation:fade .26s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.panel{
+width:min(760px,100%);max-height:min(86vh,880px);display:flex;flex-direction:column;
+border:1px solid var(--line2);border-radius:var(--r3);background:linear-gradient(175deg,#0e141d,#0a0e15);
+box-shadow:0 32px 90px rgba(0,0,0,.66);overflow:hidden;animation:rise .3s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes rise{from{transform:translateY(14px) scale(.985);opacity:0}to{transform:none;opacity:1}}
+.panel.wide{width:min(1020px,100%)}
+.p-head{
+display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);
+flex:0 0 auto;background:rgba(255,255,255,.014);
+}
+.p-head .ttl{font-size:15px;letter-spacing:.12em;color:#e2e9f3}
+.p-head .sub{font-size:11.5px;font-family:var(--mono);color:var(--dimmer);letter-spacing:.1em}
+.p-head .x{margin-left:auto;width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);
+display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:17px;transition:all .2s}
+.p-head .x:hover{border-color:var(--red);color:var(--red);background:var(--red-g)}
+.p-body{padding:18px;overflow:auto;flex:1 1 auto}
+.p-foot{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex:0 0 auto;flex-wrap:wrap}
+.p-foot .sp{margin-left:auto}
+</style>
+
+<style>
+/* ===== 谜题通用 ===== */
+.q-head{margin-bottom:14px}
+.q-title{font-size:14px;color:#dfe7f1;letter-spacing:.1em;margin-bottom:6px}
+.q-desc{font-size:13px;color:var(--dim);line-height:1.9}
+.q-hint{
+margin-top:12px;padding:11px 14px;border-left:2px solid var(--amber);border-radius:0 8px 8px 0;
+background:var(--amber-g);font-size:12.5px;color:#e0cfa8;line-height:1.8;
+}
+.q-hint.lv2{border-color:var(--blue);background:var(--blue-g);color:#bcd6ee}
+.q-hint.lv3{border-color:var(--green);background:var(--green-g);color:#bfe8d2}
+.q-fb{margin-top:12px;font-size:13px;min-height:20px;letter-spacing:.04em}
+.q-fb.ok{color:var(--green)}
+.q-fb.no{color:var(--red)}
+.q-fb.warn{color:var(--amber)}
+.counter{font-family:var(--mono);font-size:11.5px;color:var(--dimmer);letter-spacing:.12em}
+/* 排序谜题 */
+.sortlist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.sortitem{
+display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line2);
+border-radius:var(--r2);background:var(--panel2);cursor:grab;transition:all .2s;user-select:none;
+}
+.sortitem:hover{border-color:var(--line3);background:var(--panel3)}
+.sortitem.dragging{opacity:.42;border-style:dashed}
+.sortitem.over{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber-g)}
+.sortitem .idx{font-family:var(--mono);font-size:12px;color:var(--amber);width:22px;flex:0 0 auto}
+.sortitem .lab{font-size:13.5px;color:#dbe3ee}
+.sortitem .time{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--dim)}
+.sortitem .grip{color:var(--dimmer);font-size:14px;letter-spacing:-2px}
+.sort-item-btns{display:flex;gap:4px;margin-left:6px}
+.sort-item-btns button{
+width:26px;height:26px;border-radius:7px;border:1px solid var(--line2);background:var(--panel);
+color:var(--dim);font-size:12px;display:flex;align-items:center;justify-content:center;
+}
+.sort-item-btns button:hover{border-color:var(--amber);color:var(--amber)}
+/* 点选谜题 */
+.pickgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(214px,1fr));gap:10px}
+.pickcard{
+padding:13px 14px;border:1px solid var(--line2);border-radius:var(--r2);background:var(--panel2);
+text-align:left;transition:all .2s;cursor:pointer;
+}
+.pickcard:hover{border-color:var(--line3);transform:translateY(-2px)}
+.pickcard.sel{border-color:var(--amber);background:rgba(227,171,84,.09);box-shadow:0 0 0 1px var(--amber) inset}
+.pickcard .pc-id{font-family:var(--mono);font-size:11px;color:var(--dimmer);letter-spacing:.12em}
+.pickcard .pc-nm{font-size:13.5px;color:#dfe7f1;margin:5px 0 4px}
+.pickcard .pc-ds{font-size:12px;color:var(--dim);line-height:1.7}
+/* 侧光 */
+.lightwrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.light-stage{
+position:relative;width:min(560px,100%);height:330px;border-radius:var(--r2);
+border:1px solid var(--line2);overflow:hidden;cursor:crosshair;
+background:linear-gradient(155deg,#141a24,#0a0e14);
+}
+.light-stage canvas{position:absolute;inset:0;width:100%;height:100%}
+.light-gauge{display:flex;align-items:center;gap:10px;width:min(560px,100%);font-size:11.5px;
+font-family:var(--mono);color:var(--dimmer);letter-spacing:.1em}
+.gauge-bar{flex:1;height:6px;border-radius:4px;background:var(--panel3);overflow:hidden}
+.gauge-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--amber));transition:width .12s linear}
+/* 气象 */
+.wx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.wx-card{padding:12px;border:1px solid var(--line);border-radius:var(--r2);background:var(--panel2)}
+.wx-card .wk{font-size:11px;font-family:var(--mono);color:var(--dimmer);letter-spacing:.14em;margin-bottom:6px}
+.wx-card .wv{font-size:14px;color:#dfe7f1;font-family:var(--mono)}
+.wx-notes{display:flex;flex-direction:column;gap:8px}
+.wx-note{
+display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);
+border-radius:var(--r2);background:var(--panel2);cursor:pointer;transition:all .2s;
+}
+.wx-note:hover{border-color:var(--line3)}
+.wx-note.sel{border-color:var(--amber);background:rgba(227,171,84,.08)}
+.wx-note .wn-id{font-family:var(--mono);font-size:11px;color:var(--amber);flex:0 0 auto;padding-top:2px}
+.wx-note .wn-tx{font-size:13px;color:#d5dde8;line-height:1.8}
+/* 找描改 */
+.find-wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}
+@media(max-width:720px){.find-wrap{grid-template-columns:1fr}}
+.find-doc{
+position:relative;border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;
+background:#0f1319;min-height:300px;
+}
+.find-doc canvas{display:block;width:100%;height:auto}
+.find-side{display:flex;flex-direction:column;gap:10px}
+.find-clue{padding:11px 13px;border:1px solid var(--line);border-radius:var(--r2);background:var(--panel2);
+font-size:12.5px;color:var(--dim);line-height:1.8}
+.find-clue b{color:var(--amber);font-weight:600}
+/* 摩尔斯 */
+.morse-wrap{display:flex;flex-direction:column;gap:12px}
+.wave-box{border:1px solid var(--line2);border-radius:var(--r2);background:#080b10;overflow:hidden}
+.wave-box canvas{display:block;width:100%;height:140px}
+.morse-read{display:flex;gap:8px;flex-wrap:wrap;align-items:center;min-height:34px;
+padding:9px 12px;border:1px dashed var(--line2);border-radius:var(--r2);background:var(--panel2);font-family:var(--mono)}
+.morse-read .mch{font-size:16px;color:var(--amber);letter-spacing:.16em}
+.morse-read .empty{font-size:12px;color:var(--dimmer);letter-spacing:.1em}
+.morse-pad{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.morse-boxes{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.mbox{width:40px;height:44px;border:1px solid var(--line2);border-radius:9px;background:var(--panel2);
+display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;color:var(--amber)}
+.mbox.cur{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber-g)}
+/* 拖点 */
+.drag-wrap{position:relative;border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;background:#0a0e14}
+.drag-wrap canvas{display:block;width:100%;height:auto;touch-action:none}
+.drag-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.drag-read{font-family:var(--mono);font-size:12.5px;color:var(--dim);letter-spacing:.1em}
+.drag-read b{color:var(--green)}
+</style>
+
+<style>
+/* 证据板 */
+.ev-wrap{display:grid;grid-template-columns:190px 1fr;gap:14px;min-height:340px}
+@media(max-width:760px){.ev-wrap{grid-template-columns:1fr}.ev-chains{display:flex;flex-direction:row;gap:8px;overflow:auto}}
+.ev-chains{display:flex;flex-direction:column;gap:8px}
+.ev-chain{
+padding:11px 13px;border:1px solid var(--line);border-radius:var(--r2);background:var(--panel2);
+text-align:left;transition:all .2s;cursor:pointer;
+}
+.ev-chain:hover{border-color:var(--line3)}
+.ev-chain.on{border-color:var(--amber);background:rgba(227,171,84,.08)}
+.ev-chain .ec-nm{font-size:13px;color:#dfe7f1;letter-spacing:.06em}
+.ev-chain .ec-ct{font-family:var(--mono);font-size:11px;color:var(--dimmer);margin-top:4px}
+.ev-chain.done .ec-nm{color:var(--green)}
+.ev-list{display:flex;flex-direction:column;gap:9px}
+.ev-item{
+display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r2);
+background:var(--panel2);transition:all .2s;
+}
+.ev-item:hover{border-color:var(--line3)}
+.ev-item.locked{opacity:.44}
+.ev-item .ei-id{font-family:var(--mono);font-size:11.5px;color:var(--amber);flex:0 0 auto;padding-top:2px;letter-spacing:.08em}
+.ev-item .ei-tx{font-size:13px;color:#d8e0ea;line-height:1.8}
+.ev-item.locked .ei-id,.ev-item.locked .ei-tx{color:var(--dimmer)}
+.ev-item .ei-meta{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);margin-top:5px;letter-spacing:.08em}
+.ev-empty{padding:26px;text-align:center;color:var(--dimmer);font-size:12.5px;letter-spacing:.1em}
+/* 徽章 */
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.badge-card{
+padding:16px 12px;border:1px solid var(--line);border-radius:var(--r2);background:var(--panel2);
+text-align:center;transition:all .3s;
+}
+.badge-card.on{border-color:var(--amber);background:rgba(227,171,84,.07);box-shadow:0 0 24px rgba(227,171,84,.1)}
+.badge-card .bd-ic{font-size:30px;line-height:1;margin-bottom:9px;filter:grayscale(1) brightness(.55)}
+.badge-card.on .bd-ic{filter:none}
+.badge-card .bd-nm{font-size:12.5px;color:var(--dim);letter-spacing:.08em}
+.badge-card.on .bd-nm{color:#e8eef7}
+.badge-card .bd-ds{font-size:11px;color:var(--dimmer);margin-top:6px;line-height:1.6;min-height:30px}
+/* 彩蛋 */
+.egg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px}
+.egg-card{
+padding:13px 14px;border:1px solid var(--line);border-radius:var(--r2);background:var(--panel2);
+text-align:left;transition:all .2s;cursor:pointer;
+}
+.egg-card:hover{border-color:var(--line3);transform:translateY(-2px)}
+.egg-card.got{border-color:rgba(111,211,154,.4);background:rgba(111,211,154,.06)}
+.egg-card .eg-tp{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);letter-spacing:.16em}
+.egg-card.got .eg-tp{color:var(--green)}
+.egg-card .eg-hd{font-size:13px;color:#dfe7f1;margin:6px 0 5px;line-height:1.6}
+.egg-card .eg-bd{font-size:11.5px;color:var(--dim);line-height:1.75;
+display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.egg-card.got .eg-bd{-webkit-line-clamp:99}
+/* 字幕 */
+#subtitle{
+position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:80;
+max-width:min(860px,92vw);padding:13px 22px;border-radius:var(--r2);
+background:rgba(6,9,13,.9);border:1px solid var(--line2);backdrop-filter:blur(10px);
+font-size:15px;line-height:1.9;color:#e6edf7;text-align:center;letter-spacing:.04em;
+display:none;
+}
+#subtitle.show{display:block;animation:subin .22s ease}
+@keyframes subin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%)}}
+#subtitle .sp{color:var(--amber);font-family:var(--mono);font-size:9px;vertical-align:super;margin-right:6px}
+/* 提示条 / 系统条 */
+#banner{
+position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:90;
+padding:10px 20px;border-radius:30px;background:rgba(10,14,20,.94);border:1px solid var(--line2);
+font-size:12.5px;color:#dbe3ee;letter-spacing:.06em;display:none;max-width:90vw;text-align:center;
+}
+#banner.show{display:block;animation:fade .24s ease}
+#banner.ach{border-color:rgba(227,171,84,.5);color:var(--amber);background:rgba(30,22,8,.94)}
+/* 档案纸 */
+.docpaper{
+padding:22px 26px;border-radius:var(--r);background:#0f1319;border:1px solid var(--line);
+font-family:var(--mono);font-size:12.5px;line-height:2.05;color:#b9c4d2;white-space:pre-wrap;word-break:break-word;
+}
+.docpaper .stamp{color:var(--red);letter-spacing:.3em}
+.docpaper .hl{color:var(--amber)}
+.docpaper .dim{color:var(--dimmer)}
+.docpaper .grn{color:var(--green)}
+.docpaper hr{border:none;border-top:1px dashed var(--line2);margin:12px 0}
+/* 对白盒 */
+.dlg{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.dline{border-left:2px solid var(--line2);padding:2px 0 2px 14px}
+.dline.me{border-color:var(--amber)}
+.dline .who{font-size:11.5px;font-family:var(--mono);color:var(--amber);letter-spacing:.16em;margin-bottom:4px}
+.dline .say{font-size:13.5px;color:#cfd8e4;line-height:1.95}
+.dline.me .say{color:#e2eaf5}
+/* 音频条 */
+.audiobar{display:flex;align-items:center;gap:10px;padding:10px 13px;border:1px solid var(--line2);
+border-radius:var(--r2);background:var(--panel2);flex-wrap:wrap}
+.audiobar .ab-t{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.1em}
+.audiobar .ab-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line2);
+background:var(--panel3);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--amber);transition:all .2s}
+.audiobar .ab-btn:hover{border-color:var(--amber)}
+</style>
+
+<style>
+/* 结局 */
+.ending-wrap{width:min(880px,100%);max-height:90vh;overflow:auto;padding:34px 30px;
+border:1px solid var(--line2);border-radius:var(--r3);background:linear-gradient(180deg,#0d121a,#080b10);
+text-align:center;animation:rise .5s cubic-bezier(.2,.9,.3,1)}
+.en-tag{font-family:var(--mono);font-size:11px;letter-spacing:.44em;color:var(--dimmer)}
+.en-name{font-size:clamp(26px,6vw,40px);letter-spacing:.2em;margin:16px 0 6px;color:#e9eff8}
+.en-code{font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;color:var(--amber);margin-bottom:22px}
+.en-body{max-width:640px;margin:0 auto;text-align:left;font-size:13.8px;line-height:2.15;color:#c6d0dc}
+.en-body p{margin-bottom:16px}
+.en-body .em{color:var(--amber)}
+.en-body .qt{border-left:2px solid var(--line2);padding-left:14px;color:var(--dim);font-family:var(--mono);font-size:12.5px;line-height:2}
+.en-foot{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);font-size:11.5px;color:var(--dimmer);letter-spacing:.12em;line-height:2}
+/* 通关卡 */
+.card-stage{display:flex;flex-direction:column;align-items:center;gap:16px}
+#cardCanvas{max-width:100%;height:auto;border-radius:var(--r2);border:1px solid var(--line2);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+/* 统计 */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
+.stat-cell{padding:12px;border:1px solid var(--line);border-radius:var(--r2);background:var(--panel2);text-align:center}
+.stat-cell .sc-v{font-family:var(--mono);font-size:19px;color:var(--amber)}
+.stat-cell .sc-k{font-size:11px;color:var(--dimmer);letter-spacing:.12em;margin-top:5px}
+/* 移动端 */
+@media(max-width:880px){
+body{font-size:14.5px}
+.stage{padding:8px}
+.desk{grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(12,1fr);max-height:none;height:100%}
+#objRecorder{grid-column:1/3;grid-row:1/3}
+#objTowerLog{grid-column:3/5;grid-row:1/3}
+#objArchive{grid-column:5/7;grid-row:1/3}
+#objLamp{grid-column:1/3;grid-row:3/5}
+#objMap{grid-column:3/5;grid-row:3/5}
+#objPhone{grid-column:5/7;grid-row:3/5}
+#objCase{grid-column:1/7;grid-row:5/7}
+.center-plate{grid-column:1/7;grid-row:7/13;opacity:.4}
+.obj .ic{font-size:26px}
+.obj .nm{font-size:11.5px}
+.tb-chapter{max-width:34vw}
+.panel{max-height:92vh}
+.p-body{padding:14px}
+#subtitle{bottom:20px;font-size:14px;padding:11px 16px}
+}
+@media(max-width:560px){
+.tb-btn{padding:6px 10px;font-size:11.5px}
+.tb-btn .lbl{display:none}
+.topbar{gap:8px;padding:8px 10px}
+.pickgrid{grid-template-columns:1fr}
+}
+/* 工牌 */
+.mono{font-family:var(--mono)}
+.idcard{width:min(340px,80vw);margin:6px auto;padding:22px 20px;border-radius:14px;text-align:center;
+background:linear-gradient(160deg,#161c26,#0c1016);border:1px solid var(--line3);box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.id-top{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);letter-spacing:.22em}
+.id-mid{font-family:var(--mono);font-size:34px;color:var(--amber);letter-spacing:.16em;margin:16px 0 6px}
+.id-sub{font-size:12px;color:var(--dim);letter-spacing:.2em}
+.id-line{height:1px;background:var(--line2);margin:16px 0}
+.id-foot{font-size:11px;color:var(--dimmer);letter-spacing:.12em}
+/* 台灯 */
+.lamp-stage{position:relative;height:190px;border:1px solid var(--line2);border-radius:var(--r2);
+background:linear-gradient(180deg,#0c1016,#080b10);overflow:hidden}
+.lamp-bulb{position:absolute;left:14px;top:14px;font-size:26px;z-index:2;filter:drop-shadow(0 0 14px rgba(227,171,84,.5))}
+.lamp-cone{position:absolute;left:0;top:-40px;width:340px;height:300px;transform-origin:44px 56px;
+background:linear-gradient(100deg,rgba(255,226,160,.30),rgba(255,226,160,0) 72%);pointer-events:none;
+transition:transform .12s linear,opacity .2s}
+/* 移动端 Tab 栏 */
+#tabbar{display:none}
+@media(max-width:880px){
+#tabbar{display:flex;gap:6px;justify-content:space-around;padding:7px 8px;border-top:1px solid var(--line);
+background:rgba(8,11,16,.96);position:fixed;left:0;right:0;bottom:0;z-index:60}
+#tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;
+border:1px solid transparent;border-radius:10px;background:none;color:var(--dim);font-size:16px}
+#tabbar button .tb-nm{font-size:9.5px;letter-spacing:.04em}
+#tabbar button.hot{border-color:var(--amber);color:var(--amber)}
+.stage{padding-bottom:64px}
+}
+@media(prefers-reduced-motion:reduce){
+*{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+/* ===== 补充：航线图 / 摩尔斯译码 / 章节选择 / 日志 / 菜单 ===== */
+.map-wrap{border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;background:#0b1016}
+.map-wrap canvas{display:block;width:100%;height:auto;touch-action:none}
+.map-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.morse-stage{padding:12px;border:1px solid var(--line2);border-radius:var(--r2);background:var(--panel2)}
+.morse-rows{display:flex;flex-direction:column;gap:7px}
+.morse-row{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);
+border-radius:9px;background:var(--panel)}
+.morse-row.ok{border-color:rgba(111,211,154,.5);background:rgba(111,211,154,.06)}
+.morse-row.cur{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber-g)}
+.morse-row .mr-n{font-family:var(--mono);font-size:11px;color:var(--dimmer);width:26px;flex:0 0 auto}
+.morse-row .mr-code{font-family:var(--mono);font-size:13px;color:var(--amber);letter-spacing:.24em;flex:1}
+.morse-row .mr-tx{font-family:var(--mono);font-size:15px;color:#dfe7f1;width:22px;text-align:center}
+.morse-row.ok .mr-tx{color:var(--green)}
+.morse-row .m-d{display:inline-block;width:15px;height:3px;border-radius:2px;background:currentColor;margin-right:6px;vertical-align:middle}
+.morse-row .m-e{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:middle}
+.morse-row .morse-gap{display:inline-block;width:14px}
+.morse-slot{font-family:var(--mono);font-size:14px;color:var(--dim);letter-spacing:.3em}
+.mc-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.mc-op{width:42px;height:42px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);
+font-family:var(--mono);font-size:15px;color:#cfd8e4;transition:all .18s}
+.mc-op:hover{border-color:var(--amber);color:var(--amber)}
+.mc-op.on{border-color:var(--amber);background:var(--amber-g);color:var(--amber)}
+.chap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px}
+.chap-card{padding:12px;border:1px solid var(--line);border-radius:var(--r2);background:var(--panel2);text-align:left;transition:all .2s}
+.chap-card:hover{border-color:var(--line3)}
+.chap-card.lock{opacity:.42}
+.chap-card .cc-n{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);letter-spacing:.16em}
+.chap-card .cc-t{font-size:13px;color:#dfe7f1;margin:5px 0 3px}
+.chap-card .cc-d{font-size:11.5px;color:var(--dim);line-height:1.7}
+.loglist{display:flex;flex-direction:column;gap:8px;max-height:56vh;overflow:auto}
+.logrow{padding:9px 12px;border-left:2px solid var(--line2);background:var(--panel2);border-radius:0 8px 8px 0}
+.logrow .lt{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);letter-spacing:.1em}
+.logrow .lx{font-size:12.5px;color:#cfd8e4;line-height:1.8;margin-top:3px}
+.menulist{display:flex;flex-direction:column;gap:9px}
+</style>
+</head>
+<body>
+
+<!-- ===== 标题画面 ===== -->
+<div class="screen active" id="titleScreen">
+  <canvas id="rainCanvas"></canvas>
+  <div class="title-wrap">
+    <div class="t-overline">ARCHIVE / NIGHT SHIFT</div>
+    <div class="t-title">无&nbsp;应&nbsp;答</div>
+    <div class="t-en">NO REPLY</div>
+    <div class="t-sub">
+      一九九八年冬，一架航班在东南沿海的夜里失联。<br>
+      二十五年后，你在档案馆值夜班，接手一箱没有归类的旧档案。
+    </div>
+    <div class="t-line"></div>
+    <div class="t-menu">
+      <button class="btn primary" id="btnNew">开 始 值 班</button>
+      <button class="btn hidden" id="btnContinue">继 续 值 班</button>
+      <button class="btn ghost hidden" id="btnChapters">章 节 选 择</button>
+      <button class="btn ghost" id="btnAbout">档 案 说 明</button>
+      <button class="btn ghost" id="btnReset">重 置 存 档</button>
+    </div>
+  </div>
+  <div class="t-foot">单文件离线游戏 · 键盘与鼠标均可操作 · 进度自动保存在本机</div>
+</div>
+
+<!-- ===== 主界面 ===== -->
+<div class="screen" id="gameScreen">
+  <div class="topbar">
+    <div class="tb-title">无应答 NO REPLY</div>
+    <div class="tb-sep"></div>
+    <div class="tb-chapter" id="tbChapter">序章 · 值夜班</div>
+    <div class="tb-right">
+      <button class="tb-btn" id="tbBoard">证据板<span id="tbBoardDot" class="dot hidden"></span></button>
+      <button class="tb-btn" id="tbBadge"><span class="lbl">徽章 </span><span id="tbBadgeN">0/5</span></button>
+      <button class="tb-btn" id="tbEgg"><span class="lbl">剪报 </span><span id="tbEggN">0/12</span></button>
+      <button class="tb-btn" id="tbLog">日志</button>
+      <button class="tb-btn" id="tbMenu">菜单</button>
+    </div>
+  </div>
+  <div class="stage">
+    <div class="desk" id="desk">
+      <div class="center-plate"><div class="txt" id="plateTxt">档 案 馆 · 地 下 二 层<br>室 温 十 六 度</div></div>
+      <div class="obj" id="objLamp" data-obj="lamp">
+        <div class="ic">💡</div><div class="nm">台灯</div><div class="tag" id="tagLamp">待调整</div>
+      </div>
+      <div class="obj" id="objRecorder" data-obj="recorder">
+        <div class="ic">📼</div><div class="nm">录音机</div><div class="tag" id="tagRecorder">待播放</div>
+      </div>
+      <div class="obj" id="objTowerLog" data-obj="towerlog">
+        <div class="ic">🗂</div><div class="nm">塔台日志</div><div class="tag" id="tagTowerLog">待翻查</div>
+      </div>
+      <div class="obj" id="objArchive" data-obj="archive">
+        <div class="ic">📄</div><div class="nm">纸面档案</div><div class="tag" id="tagArchive">待核对</div>
+      </div>
+      <div class="obj" id="objMap" data-obj="map">
+        <div class="ic">🗺</div><div class="nm">航线图</div><div class="tag" id="tagMap">待校订</div>
+      </div>
+      <div class="obj" id="objPhone" data-obj="phone">
+        <div class="ic">☎</div><div class="nm">内线电话</div><div class="tag" id="tagPhone">沉默</div>
+      </div>
+      <div class="obj hidden" id="objCase" data-obj="case">
+        <div class="ic">📦</div><div class="nm">封存箱</div><div class="tag" id="tagCase">未开启</div>
+      </div>
+    </div>
+  </div>
+  <div id="tabbar"></div>
+</div>
+
+
+<!-- ===== 通用面板容器 ===== -->
+<div class="overlay" id="puzzleOverlay">
+  <div class="panel" id="puzzlePanel">
+    <div class="p-head">
+      <div><div class="ttl" id="pzTitle">—</div><div class="sub" id="pzSub">—</div></div>
+      <button class="x" data-close="puzzleOverlay">✕</button>
+    </div>
+    <div class="p-body" id="pzBody"></div>
+    <div class="p-foot" id="pzFoot"></div>
+  </div>
+</div>
+
+<div class="overlay" id="boardOverlay">
+  <div class="panel wide">
+    <div class="p-head">
+      <div><div class="ttl">证据板</div><div class="sub" id="boardSub">三条线索链</div></div>
+      <button class="x" data-close="boardOverlay">✕</button>
+    </div>
+    <div class="p-body">
+      <div class="ev-wrap">
+        <div class="ev-chains" id="evChains"></div>
+        <div class="ev-list" id="evList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="badgeOverlay">
+  <div class="panel">
+    <div class="p-head">
+      <div><div class="ttl">徽章陈列</div><div class="sub" id="badgeSub">0 / 5</div></div>
+      <button class="x" data-close="badgeOverlay">✕</button>
+    </div>
+    <div class="p-body"><div class="badge-grid" id="badgeGrid"></div></div>
+  </div>
+</div>
+
+<div class="overlay" id="eggOverlay">
+  <div class="panel wide">
+    <div class="p-head">
+      <div><div class="ttl">剪报册</div><div class="sub" id="eggSub">0 / 12 则剪报</div></div>
+      <button class="x" data-close="eggOverlay">✕</button>
+    </div>
+    <div class="p-body"><div class="egg-grid" id="eggGrid"></div></div>
+  </div>
+</div>
+
+<div class="overlay" id="logOverlay">
+  <div class="panel">
+    <div class="p-head">
+      <div><div class="ttl">值班日志</div><div class="sub">夜班记录</div></div>
+      <button class="x" data-close="logOverlay">✕</button>
+    </div>
+    <div class="p-body" id="logBody"></div>
+  </div>
+</div>
+
+<div class="overlay" id="aboutOverlay">
+  <div class="panel">
+    <div class="p-head">
+      <div><div class="ttl">档案说明</div><div class="sub">操作与规则</div></div>
+      <button class="x" data-close="aboutOverlay">✕</button>
+    </div>
+    <div class="p-body" id="aboutBody"></div>
+    <div class="p-foot"><button class="btn sm" data-close="aboutOverlay">关闭</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="menuOverlay">
+  <div class="panel">
+    <div class="p-head">
+      <div><div class="ttl">菜单</div><div class="sub">暂停</div></div>
+      <button class="x" data-close="menuOverlay">✕</button>
+    </div>
+    <div class="p-body" id="menuBody"></div>
+  </div>
+</div>
+
+<div class="overlay" id="endingOverlay"></div>
+<div class="overlay" id="cardOverlay"></div>
+
+<div id="subtitle"></div>
+<div id="banner"></div>
+
+<script>
+(function(){
+'use strict';
+/* ============================================================
+   无应答 NO REPLY — 单文件离线剧情解谜
+   ============================================================ */
+var $=function(s,r){return (r||document).querySelector(s);};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+function mkEl(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function rint(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pad2(n){return (n<10?'0':'')+n;}
+function nowStr(){var d=new Date();return d.getFullYear()+'年'+pad2(d.getMonth()+1)+'月'+pad2(d.getDate())+'日 '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());}
+function dateStr(){var d=new Date();return d.getFullYear()+'年'+pad2(d.getMonth()+1)+'月'+pad2(d.getDate())+'日';}
+
+/* ============================================================
+   1. 存档
+   ============================================================ */
+var Store={
+  key:'no-reply-save', ok:true, mem:null,
+  init:function(){
+    try{ localStorage.setItem('__nr_test','1'); localStorage.removeItem('__nr_test'); this.ok=true; }
+    catch(e){ this.ok=false; }
+  },
+  read:function(){
+    if(!this.ok) return this.mem;
+    try{ var s=localStorage.getItem(this.key); return s?JSON.parse(s):null; }catch(e){ return null; }
+  },
+  write:function(d){
+    if(!this.ok){ this.mem=d; return; }
+    try{ localStorage.setItem(this.key,JSON.stringify(d)); }
+    catch(e){ this.ok=false; this.mem=d; }
+  },
+  clear:function(){
+    if(!this.ok){ this.mem=null; return; }
+    try{ localStorage.removeItem(this.key); }catch(e){}
+  }
+};
+
+var G={
+  version:1, playerId:'', chapter:0, done:[], evidence:[], badges:[], eggs:[],
+  alterations:[], ending:null, flags:{},
+  stats:{ replay:0, fails:{}, hint:{}, sideA:false, sideB:false, started:0, seconds:0 }
+};
+function newGame(){
+  G.playerId='Y-'+String(rint(1000,9999));
+  G.done=[];G.evidence=[];G.badges=[];G.eggs=[];G.alterations=[];G.ending=null;G.flags={};
+  G.stats={ replay:0,fails:{},hint:{},sideA:false,sideB:false,started:Date.now(),seconds:0 };
+  G.chapter=0;
+}
+function saveGame(){ G.version=1; Store.write(G); }
+function loadGame(){
+  var d=Store.read();
+  if(!d||typeof d!=='object') return false;
+  var f=['playerId','chapter','done','evidence','badges','eggs','alterations','ending','flags','stats'];
+  for(var i=0;i<f.length;i++){ if(d[f[i]]!==undefined&&d[f[i]]!==null) G[f[i]]=d[f[i]]; }
+  if(!G.stats||typeof G.stats!=='object') G.stats={replay:0,fails:{},hint:{},sideA:false,sideB:false,started:Date.now(),seconds:0};
+  if(!G.stats.fails)G.stats.fails={}; if(!G.stats.hint)G.stats.hint={};
+  if(!G.playerId) G.playerId='Y-'+String(rint(1000,9999));
+  G.chapter=G.chapter||0;
+  return true;
+}
+
+/* ============================================================
+   2. 音频引擎（Web Audio 实时合成，零音频文件）
+   ============================================================ */
+var A={
+  ctx:null,master:null,an:null,ready:false,on:true,noiseBuf:null,
+  rainSrc:null,rainGain:null,hissSrc:null,hissGain:null,droneOsc:null,droneGain:null,
+  init:function(){
+    if(this.ctx) return this.ctx;
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC){ this.on=false; return null; }
+    try{ this.ctx=new AC(); }catch(e){ this.on=false; return null; }
+    this.master=this.ctx.createGain(); this.master.gain.value=.5;
+    this.an=this.ctx.createAnalyser(); this.an.fftSize=2048; this.an.smoothingTimeConstant=.68;
+    this.master.connect(this.an); this.an.connect(this.ctx.destination);
+    this.noiseBuf=this._noise(3);
+    this.ready=true; return this.ctx;
+  },
+  resume:function(){ if(this.ctx&&this.ctx.state==='suspended'){ try{this.ctx.resume();}catch(e){} } },
+  _noise:function(sec){
+    var c=this.ctx,n=Math.floor(c.sampleRate*sec),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);
+    for(var i=0;i<n;i++) d[i]=Math.random()*2-1;
+    return b;
+  },
+  _loop:function(buf){
+    var s=this.ctx.createBufferSource(); s.buffer=buf; s.loop=true; return s;
+  },
+  /* 环境雨声 */
+  rain:function(on,vol){
+    if(!this.ready) return;
+    if(on){
+      if(this.rainSrc){ if(vol!=null)this.rainGain.gain.value=vol; return; }
+      var s=this._loop(this.noiseBuf),f=this.ctx.createBiquadFilter(),g=this.ctx.createGain();
+      f.type='lowpass'; f.frequency.value=1000; f.Q.value=.4;
+      g.gain.value=(vol==null?.14:vol);
+      s.connect(f); f.connect(g); g.connect(this.master); s.start();
+      this.rainSrc=s; this.rainGain=g;
+    }else if(this.rainSrc){ try{this.rainSrc.stop();}catch(e){} this.rainSrc=null; this.rainGain=null; }
+  },
+  /* 磁带底噪 */
+  hiss:function(on,vol){
+    if(!this.ready) return;
+    if(on){
+      if(this.hissSrc){ if(vol!=null)this.hissGain.gain.value=vol; return; }
+      var s=this._loop(this.noiseBuf),f=this.ctx.createBiquadFilter(),g=this.ctx.createGain();
+      f.type='highpass'; f.frequency.value=1700;
+      g.gain.value=(vol==null?.05:vol);
+      s.connect(f); f.connect(g); g.connect(this.master); s.start();
+      this.hissSrc=s; this.hissGain=g;
+    }else if(this.hissSrc){ try{this.hissSrc.stop();}catch(e){} this.hissSrc=null; this.hissGain=null; }
+  },
+  /* 低频底噪 hum */
+  hum:function(on){
+    if(!this.ready) return;
+    if(on){
+      if(this.droneOsc) return;
+      var o=this.ctx.createOscillator(),g=this.ctx.createGain();
+      o.type='sine'; o.frequency.value=58; g.gain.value=.014;
+      o.connect(g); g.connect(this.master); o.start();
+      this.droneOsc=o; this.droneGain=g;
+    }else if(this.droneOsc){ try{this.droneOsc.stop();}catch(e){} this.droneOsc=null; this.droneGain=null; }
+  },
+  beep:function(freq,dur,vol,type){
+    if(!this.ready) return;
+    var c=this.ctx,t0=c.currentTime+0.005,o=c.createOscillator(),g=c.createGain();
+    o.type=type||'sine'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(vol==null?.13:vol,t0+.008);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+(dur||.12));
+    o.connect(g); g.connect(this.master); o.start(t0); o.stop(t0+(dur||.12)+.03);
+  },
+  click:function(){ this.beep(1500,.05,.05,'triangle'); },
+  thunk:function(){ this.beep(140,.16,.16,'sine'); },
+  radar:function(){
+    if(!this.ready) return;
+    var c=this.ctx,t0=c.currentTime+0.01,o=c.createOscillator(),g=c.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(1040,t0);
+    g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.11,t0+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+.3);
+    o.connect(g); g.connect(this.master); o.start(t0); o.stop(t0+.35);
+  },
+  /* 电话铃：两声一组的机械铃 */
+  ring:function(times,cb){
+    if(!this.ready){ if(cb)cb(); return; }
+    var self=this,n=times||2,i=0;
+    function one(){
+      if(i>=n){ if(cb)cb(); return; }
+      i++;
+      var c=self.ctx,t0=c.currentTime+.02,g=c.createGain();
+      g.gain.setValueAtTime(0,t0);
+      [0,.22,1.0,1.22].forEach(function(off){
+        var o1=c.createOscillator(),o2=c.createOscillator(),og=c.createGain();
+        o1.frequency.value=440; o2.frequency.value=480;
+        og.gain.setValueAtTime(0,t0+off);
+        og.gain.linearRampToValueAtTime(.12,t0+off+.02);
+        og.gain.setValueAtTime(.12,t0+off+.16);
+        og.gain.linearRampToValueAtTime(0,t0+off+.19);
+        o1.connect(og); o2.connect(og); og.connect(g);
+        o1.start(t0+off); o1.stop(t0+off+.2);
+        o2.start(t0+off); o2.stop(t0+off+.2);
+      });
+      g.connect(self.master);
+      setTimeout(one,2600);
+    }
+    one();
+  },
+  /* 摩尔斯 / 敲击音 */
+  knock:function(dur,vol){
+    if(!this.ready) return;
+    var c=this.ctx,t0=c.currentTime+.005;
+    var s=this._loop(this.noiseBuf),f=c.createBiquadFilter(),g=c.createGain();
+    f.type='bandpass'; f.frequency.value=780; f.Q.value=2.2;
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(vol==null?.24:vol,t0+.006);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+(dur||.1));
+    s.connect(f); f.connect(g); g.connect(this.master);
+    s.start(t0); s.stop(t0+(dur||.1)+.06);
+  },
+  /* 合成无线电人声（语音模型轨） */
+  voice:function(dur,opt){
+    if(!this.ready) return;
+    opt=opt||{};
+    var c=this.ctx,t0=c.currentTime+.01,d=Math.max(.8,Math.min(dur||3,9));
+    var src=this._loop(this.noiseBuf);
+    var osc=c.createOscillator(); osc.type='sawtooth'; osc.frequency.value=opt.pitch||126;
+    var og=c.createGain(); og.gain.value=.42;
+    var bp=c.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=opt.band||880; bp.Q.value=1.0;
+    var bp2=c.createBiquadFilter(); bp2.type='bandpass'; bp2.frequency.value=(opt.band||880)*2.3; bp2.Q.value=1.5;
+    var g=c.createGain(); g.gain.value=0;
+    src.connect(bp); osc.connect(og); og.connect(bp);
+    bp.connect(bp2); bp2.connect(g); g.connect(this.master);
+    src.start(t0); osc.start(t0);
+    var t=t0+.05, end=t0+d-.08;
+    g.gain.setValueAtTime(0,t0);
+    while(t<end){
+      var syl=.085+Math.random()*.1, gap=.035+Math.random()*.075;
+      g.gain.setValueAtTime(.012,t);
+      g.gain.linearRampToValueAtTime((opt.vol||.15)+Math.random()*.07,t+.028);
+      g.gain.linearRampToValueAtTime(.01,t+syl);
+      t+=syl+gap;
+    }
+    g.gain.setValueAtTime(0,t0+d);
+    src.stop(t0+d+.06); osc.stop(t0+d+.06);
+  },
+  /* 电流声 */
+  staticBurst:function(dur,vol){
+    if(!this.ready) return;
+    var c=this.ctx,t0=c.currentTime+.01,d=dur||1;
+    var s=this._loop(this.noiseBuf),f=c.createBiquadFilter(),g=c.createGain();
+    f.type='bandpass'; f.frequency.value=1400; f.Q.value=.6;
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(vol==null?.09:vol,t0+.03);
+    g.gain.setValueAtTime(vol==null?.09:vol,t0+d-.1);
+    g.gain.linearRampToValueAtTime(0,t0+d);
+    s.connect(f); f.connect(g); g.connect(this.master);
+    s.start(t0); s.stop(t0+d+.05);
+  },
+  /* 磁带播放底噪 + 呼呼声 */
+  tape:function(dur,opt){
+    if(!this.ready) return;
+    opt=opt||{};
+    var c=this.ctx,t0=c.currentTime+.01,d=dur||2;
+    var s=this._loop(this.noiseBuf),f=c.createBiquadFilter(),g=c.createGain();
+    f.type='lowpass'; f.frequency.value=2600;
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(opt.vol||.055,t0+.06);
+    g.gain.setValueAtTime(opt.vol||.055,t0+d-.08);
+    g.gain.linearRampToValueAtTime(0,t0+d);
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(t0); s.stop(t0+d+.05);
+    var o=c.createOscillator(),og=c.createGain();
+    o.type='sine'; o.frequency.value=52; og.gain.value=.012;
+    o.connect(og); og.connect(this.master); o.start(t0); o.stop(t0+d+.05);
+  },
+  wave:function(){
+    if(!this.an) return null;
+    var n=this.an.fftSize,arr=new Uint8Array(n);
+    this.an.getByteTimeDomainData(arr);
+    return arr;
+  },
+  quiet:function(sec){
+    if(!this.ready) return;
+    this.master.gain.cancelScheduledValues(this.ctx.currentTime);
+    this.master.gain.setValueAtTime(this.master.gain.value,this.ctx.currentTime);
+    this.master.gain.linearRampToValueAtTime(.16,this.ctx.currentTime+.5);
+    var self=this;
+    setTimeout(function(){
+      self.master.gain.linearRampToValueAtTime(.5,self.ctx.currentTime+.6);
+    },(sec||6)*1000);
+  }
+};
+
+/* 波形绘制器 */
+function WaveBox(canvas,opt){
+  opt=opt||{};
+  this.cv=canvas; this.ctx2=canvas.getContext('2d');
+  this.raf=null; this.data=new Uint8Array(1024); this.mode=opt.mode||'live';
+  this.fallback=opt.fallback||null;
+}
+WaveBox.prototype.start=function(){
+  var self=this; this.stopped=false;
+  function draw(){
+    if(self.stopped) return;
+    self.paint(); self.raf=requestAnimationFrame(draw);
+  }
+  draw();
+};
+WaveBox.prototype.stop=function(){
+  this.stopped=true;
+  if(this.raf) cancelAnimationFrame(this.raf);
+  this.raf=null;
+};
+WaveBox.prototype.paint=function(){
+  var cv=this.cv,w=cv.width,h=cv.height,c=this.ctx2;
+  c.clearRect(0,0,w,h);
+  c.fillStyle='#06090e'; c.fillRect(0,0,w,h);
+  c.strokeStyle='rgba(227,171,84,.10)'; c.lineWidth=1;
+  for(var i=1;i<6;i++){ var x=w*i/6; c.beginPath(); c.moveTo(x,0); c.lineTo(x,h); c.stroke(); }
+  c.strokeStyle='rgba(227,171,84,.16)';
+  c.beginPath(); c.moveTo(0,h/2); c.lineTo(w,h/2); c.stroke();
+  var d=A.wave();
+  c.strokeStyle='#e3ab54'; c.lineWidth=1.6; c.beginPath();
+  if(d){
+    var n=d.length, step=Math.max(1,Math.floor(n/w));
+    for(var x2=0;x2<w;x2++){
+      var v=d[Math.floor(x2*step)]; var y=(v/255-.5)*h*.86+h/2;
+      if(x2===0) c.moveTo(x2,y); else c.lineTo(x2,y);
+    }
+  }else{
+    for(var x3=0;x3<w;x3++){
+      var y3=h/2+Math.sin(x3*.16)*h*.045+ (Math.random()-.5)*2.4;
+      if(x3===0) c.moveTo(x3,y3); else c.lineTo(x3,y3);
+    }
+  }
+  c.stroke();
+};
+
+
+/* ============================================================
+   3. 数据：证据 / 链 / 徽章 / 剪报 / 章节
+   ============================================================ */
+var EVIDENCE=[
+  {id:'E1', chain:'A', title:'时序表', text:'21:07 起飞 · 21:12 雷达接触 · 21:23 机组最后回话 · 21:38 塔台呼叫无应答 · 21:46 最后呼叫 · 此后二十四分钟沉默。'},
+  {id:'E2', chain:'B', title:'第三个人声', text:'第 4 段录音（21:3×）里有一段捂话筒的轻人声，既不是机长，也不是塔台。'},
+  {id:'E3', chain:'B', title:'名单第 17 行', text:'乘客名单第 17 行：姓名空白，无身份证、无性别、无年龄，备注只有一个字——押。'},
+  {id:'E4', chain:'B', title:'配载单', text:'行李 1240kg／邮件 320kg／货物 890kg／押 87kg。87 公斤，登记在货舱。'},
+  {id:'E5', chain:'A', title:'涂黑下的压痕', text:'塔台日志 21:36–21:47 被涂黑。侧光 12°–18° 时显影：21:41「东北方向出现不明回波」。'},
+  {id:'E6', chain:'B', title:'三处涂改', text:'①不明回波行 ②天气栏「晴」改「雷阵雨」③签名被描粗。同一支笔，全部在那一夜之后。'},
+  {id:'E7', chain:'C', title:'METAR 报文', text:'METAR ZSHW 271300Z 12003KT CAVOK 08/02 Q1023 NOSIG。Z 时 13:00，即本地 21:00。'},
+  {id:'E8', chain:'C', title:'晴夜与「强对流」', text:'CAVOK 意为能见度 ≥10km、无显著云、无天气现象。官方结论里的「强对流」，报文里不存在。'},
+  {id:'E9', chain:'C', title:'更换单第 8 行', text:'「704」三字字重更粗，笔下有下层残影——这一行被人重写过。'},
+  {id:'E10', chain:'C', title:'被涂黑的机号', text:'反查零件装机记录，机号被涂黑，边缘残影只留下「7」和「1」。'},
+  {id:'E11', chain:'A', title:'偏离 27°', text:'11 个残点连成一条平滑弧线，偏离原定航线 27°。这不是失控的轨迹。'},
+  {id:'E12', chain:'A', title:'两条航迹', text:'第二航迹的编号是 X-71。21:47，两条航迹在同一个点重叠，然后一起消失。'}
+];
+var CHAINS=[
+  {key:'A', name:'链 A · 时序', ids:['E1','E5','E11','E12']},
+  {key:'B', name:'链 B · 载荷', ids:['E2','E3','E4','E6']},
+  {key:'C', name:'链 C · 文件', ids:['E7','E8','E9','E10']}
+];
+function evById(id){ for(var i=0;i<EVIDENCE.length;i++) if(EVIDENCE[i].id===id) return EVIDENCE[i]; return null; }
+
+var BADGES=[
+  {id:'listen', ic:'🎧', name:'听全了', desc:'A 面与 B 面各完整听过一遍'},
+  {id:'rewind', ic:'⏪', name:'倒带一百次', desc:'累计重播满一百次'},
+  {id:'morse', ic:'📡', name:'电报员', desc:'第 6 章译码全程未用提示'},
+  {id:'ledger', ic:'🖊', name:'两本账', desc:'三处涂改全部登记在案'},
+  {id:'archive', ic:'🗞', name:'老档案', desc:'12 张剪报中找到 8 张'}
+];
+function badgeById(id){ for(var i=0;i<BADGES.length;i++) if(BADGES[i].id===id) return BADGES[i]; return null; }
+
+var EGGS=[
+  {t:'1983 · 加航 143',h:'一次没有燃油的飞行',b:'一架波音 767 在飞行途中燃油耗尽，两台发动机先后停转。机组把客机当成滑翔机，落在曼尼托巴一座废弃的空军跑道上。没人受伤。这架飞机后来被叫作「吉姆利滑翔机」。'},
+  {t:'1989 · 苏城 232',h:'液压全部失效之后',b:'DC-10 的三号发动机风扇盘在空中解体，碎片切断了全部三套液压系统。机组靠两台发动机的推力差，把飞机拖到苏城机场。'},
+  {t:'1972 · 东方 401',h:'一个灯泡引发的坠毁',b:'一趟夜间航班进近时，前起落架指示灯不亮。机组在黑暗中反复排查，谁也没注意到自动驾驶正在缓慢下降。'},
+  {t:'1977 · 特内里费',h:'跑道上的一场雾',b:'大雾压住机场，两架 747 在跑道上相撞起火。那一天的无线电里，有太多人同时说话。'},
+  {t:'1985 · 日航 123',h:'最后的四十分钟',b:'一次维修留下的一处损伤，让飞机在巡航中失去尾翼。机组与地面搏斗了四十分钟，最后消失在山脊线上。'},
+  {t:'1988 · 阿罗哈 243',h:'屋顶飞走了',b:'一架 737 在爬升中客舱前段顶盖脱落。一名机组人员被抛出舱外。飞机最终在本岛落地。'},
+  {t:'1974 · 土航 981',h:'货舱门',b:'DC-10 的货舱门在空中打开，客舱地板塌陷，控制系统失效。法国境内的一片森林里，三百余人罹难。'},
+  {t:'1979 · 纽航 901',h:'南极洲上的白天',b:'一趟观光航班在低空掠过南极。白茫茫的雪原上，极低反差的景象让机组没能及时看见前方的山。'},
+  {t:'1982 · 英航 9',h:'穿过火山灰',b:'一架 747 飞进火山灰云，四台发动机先后熄火。机组反复尝试重启，在最后一刻重新点火成功。'},
+  {t:'1990 · 哥航 052',h:'纽约上空断油',b:'一趟航班在降近纽约时燃油耗尽，发动机停转。飞机滑翔到长岛一片林地，落地后车身折断。'},
+  {t:'1973 · 不明货机',h:'档案遗失',b:'一架货机在本片空域记录失踪，残骸未找到。卷宗里的关键页——被标注为「档案遗失」。'},
+  {t:'1996 · 塔台记录',h:'不予置评',b:'一份关于该空域雷达异常的记录被要求调阅。主管部门的答复只有四个字。'}
+];
+var SPECIAL_EGG_CHAIN=['1973 · 不明货机'];
+
+var CHAPTERS=[
+  {id:0, name:'序章 · 值夜班'},
+  {id:1, name:'第 1 章 · 21:47'},
+  {id:2, name:'第 2 章 · 乘客名单'},
+  {id:3, name:'第 3 章 · 两本日志'},
+  {id:4, name:'第 4 章 · 气象报文'},
+  {id:5, name:'第 5 章 · 维修记录'},
+  {id:6, name:'第 6 章 · 内线电话'},
+  {id:7, name:'第 7 章 · 消失的航线'},
+  {id:8, name:'终章 · 无应答'}
+];
+function chapterName(id){
+  for(var i=0;i<CHAPTERS.length;i++) if(CHAPTERS[i].id===id) return CHAPTERS[i].name;
+  return '序章 · 值夜班';
+}
+
+
+/* ============================================================
+   4. 剧本（对白定稿，一字不改）
+   ============================================================ */
+var SCRIPT={
+  prologue:[
+    {who:'主任', text:'（放下磁带）"这盒带子明天要还回去。你今晚听完，写个摘要，两页纸。"'},
+    {who:'你', text:'"哪年的？"'},
+    {who:'主任', text:'"九八年的。别写太长。"'},
+    {note:'（主任离开。只剩雨声。）'}
+  ],
+  prologueEnd:[
+    {who:'你', solo:true, text:'"……这不是杂音。"'}
+  ],
+  ch1:[
+    {who:'你', solo:true, text:'"二十一点二十三分，他们说了最后一句话。然后是二十四分钟的沉默。"'},
+    {who:'你', solo:true, text:'"第 4 段……这个声音不是机长，也不是塔台。是第三个人。"'}
+  ],
+  ch2:[
+    {who:'你', solo:true, text:'"第 17 位。姓名空白。备注：押。"'},
+    {who:'你', solo:true, text:'"没有身份证，没有性别，没有年龄。只有一个重量——87 公斤。登记在货舱配载单上。"'},
+    {who:'你', solo:true, text:'"一个人。装在货舱里。还是，一个\u2018人\u2019的代号。"'}
+  ],
+  ch3:[
+    {who:'你', solo:true, text:'"两本账。塔台一本，公司一本。白纸黑字，应该一模一样。"'},
+    {who:'你', solo:true, text:'"写字的这笔，压力很轻。他在抖。"'}
+  ],
+  ch4:[
+    {who:'你', solo:true, text:'"晴夜。没有风。没有云。"'},
+    {who:'你', solo:true, text:'"官方结论写的\u2018强对流\u2019——报文里不存在。结论是编的。"'}
+  ],
+  ch5:[
+    {who:'你', solo:true, text:'"两架飞机，共用一套维修记录。另一架的名字，被人从纸上抹掉了。只留下 7 和 1。"'}
+  ],
+  ch6a:[
+    {who:'电话', text:'（电流声 4 秒，规律敲击：嗒、嗒嗒、嗒……）'},
+    {who:'你', solo:true, text:'"……你是谁？"'},
+    {who:'电话', text:'（沉默 4 秒，挂断）'}
+  ],
+  ch6b:[
+    {who:'你', solo:true, text:'"他知道这盒带子。他知道我在听。他让我别听 B 面——为什么？"'}
+  ],
+  ch6c:[
+    {who:'电话', voice:true, text:'（老人声音，很远）"那天晚上，我坐在雷达前面。我看见了。"'},
+    {who:'你', solo:true, text:'"你是谁？！"'},
+    {who:'电话', voice:true, text:'"别听 B 面。——不是怕你听见。是怕你听懂。"'},
+    {who:'电话', text:'（挂断，此后只有忙音）'},
+    {who:'你', solo:true, text:'"这部内线电话三十年没响过。电话那头的人——是 1998 年那晚，坐在塔台里的人。他一直在等，等有人翻这盒带子。"'}
+  ],
+  ch7a:[
+    {who:'你', solo:true, text:'"这个弧度不是失控。失控的线不会这么干净。是有人在驾驶。"'}
+  ],
+  ch7b:[
+    {who:'你', solo:true, text:'"同一时刻，同一片空域，还有一架飞机。它没有呼号，只有一个编号：X-71。"'},
+    {who:'你', solo:true, text:'"1973 年，一架货机在这片空域失踪，残骸从未找到。它的编号，就叫 X-71。"'},
+    {who:'你', solo:true, text:'"两架飞机。同一分钟，同一个点。然后，一起消失了。"'},
+    {who:'你', solo:true, text:'"NB704 偏离航线——是为了追上它。"'}
+  ],
+  finale:[
+    {who:'主任', text:'"摘要写好了吗？……两页纸，别多写。天亮之前，放我桌上。"'},
+    {note:'（挂断）'},
+    {who:'你', solo:true, text:'"这串编号，是我的工号。"'},
+    {who:'你', solo:true, text:'"这盒带子在档案室里躺了二十五年。它在等一个值夜班的人。"'},
+    {who:'你', solo:true, text:'"那个人是我。"'}
+  ],
+  badEndingSilent:[
+    {note:'（你留下了磁带，但没有发现第 3 面。）'},
+    {note:'（磁带被回收。）'}
+  ]
+};
+
+/* A 面六段（顺序为正确顺序；谜题中打乱） */
+var TAPE_A=[
+  {n:1, time:'21:07', who:'塔台', text:'"北辰七零四，海隈塔台，跑道两四，可以起飞，风向幺两洞，风速三节。"',
+   who2:'陈默', text2:'"可以起飞，北辰七零四。"'},
+  {n:2, time:'21:12', who:'塔台', text:'"北辰七零四，雷达接触，上升到两千四保持。"',
+   who2:'陈默', text2:'"两千四保持，北辰七零四。"'},
+  {n:3, time:'21:23', who:'塔台', text:'"北辰七零四，上升至一万二。"',
+   who2:'陈默', text2:'"收到，稍等。"'},
+  {n:4, time:'21:3×', who:'录音', text:'（底噪，捂话筒的轻人声）"……雷达上那个……不是我们的回波……它还在那儿……"', worn:true},
+  {n:5, time:'21:38', who:'塔台', text:'"北辰七零四，请回答。"', female:true, urgent:true},
+  {n:6, time:'21:46', who:'塔台', text:'"北辰七零四，海隈塔台呼叫。……北辰七零四，海隈塔台呼叫。"', tail:8}
+];
+
+/* 气象报文 */
+var METAR_RAW='METAR ZSHW 271300Z 12003KT CAVOK 08/02 Q1023 NOSIG';
+var METAR_TOKENS=[
+  {t:'METAR', d:'例行天气报告（例行观测报文）。'},
+  {t:'ZSHW', d:'海隈机场四字代码。虚构机场。'},
+  {t:'271300Z', d:'日期 27 日，时间 13:00 UTC。Z 即祖鲁时间，UTC。本地时为 UTC+8，13:00Z = 本地 21:00。'},
+  {t:'12003KT', d:'风：风向 120°，风速 3 节。三节风，几乎等于无风。'},
+  {t:'CAVOK', d:'Ceiling And Visibility OK：能见度 ≥10km，无显著云，无重要天气现象。'},
+  {t:'08/02', d:'气温 8℃，露点 2℃。'},
+  {t:'Q1023', d:'修正海压 1023 百帕。'},
+  {t:'NOSIG', d:'未来两小时无显著变化。'}
+];
+var METAR_Q=[
+  {q:'12003KT 说的是什么？',
+   opts:['风向 120°、风速 3 节','风向 3°、风速 120 节','能见度 12 公里、气温 3 度'], a:0},
+  {q:'CAVOK 代表什么？',
+   opts:['有雷暴与强对流','能见度 ≥10km、无显著云、无天气现象','跑道结冰，禁止起飞'], a:1},
+  {q:'把 13:00Z 换成当地时间，再看这份报文——那一夜的海隈是什么天气？',
+   opts:['强对流，雷雨大风','晴夜，几乎没有风','大雾，能见度不足一公里'], a:1}
+];
+
+/* 维修更换单 12 行（第 8 行为描改行） */
+var MROWS=[
+  {n:1,  part:'主起落架密封件', no:'MLG-2210', dt:'98-06-11'},
+  {n:2,  part:'左侧襟翼滑轨衬套', no:'FLP-0876', dt:'98-06-19'},
+  {n:3,  part:'空压机皮带', no:'PNE-1121', dt:'98-07-02'},
+  {n:4,  part:'副驾静压孔加热', no:'PIT-3348', dt:'98-07-15'},
+  {n:5,  part:'2 号发动机点火激励器', no:'IGN-6602', dt:'98-08-03'},
+  {n:6,  part:'客舱压力控制器', no:'CAB-4409', dt:'98-08-22'},
+  {n:7,  part:'应急照明电池组', no:'EMG-0093', dt:'98-09-09'},
+  {n:8,  part:'机身前段蒙皮修理', no:'STR-7040', dt:'98-09-27'},
+  {n:9,  part:'1 号发动机燃油泵', no:'FUEL-2317', dt:'98-10-05'},
+  {n:10, part:'升降舵配平马达', no:'TRM-7754', dt:'98-10-18'},
+  {n:11, part:'雷达高度表收发机', no:'RAD-8860', dt:'98-11-02'},
+  {n:12, part:'右主起落架刹车盘', no:'BRK-5521', dt:'98-11-14'}
+];
+
+
+/* ============================================================
+   5. UI 基元：面板 / 字幕 / 提示 / 日志 / 进度
+   ============================================================ */
+function esc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+var Panel={
+  cur:null,
+  open:function(id){
+    var el=$('#'+id); if(!el) return;
+    this.closeAll(); el.classList.add('open'); this.cur=id; A.click();
+  },
+  close:function(id){
+    var el=$('#'+(id||this.cur)); if(!el) return;
+    el.classList.remove('open'); if(this.cur===(id||this.cur)) this.cur=null; A.click();
+  },
+  closeAll:function(){
+    $$('.overlay').forEach(function(o){ o.classList.remove('open'); }); this.cur=null;
+  },
+  isOpen:function(id){ var el=$('#'+id); return !!(el&&el.classList.contains('open')); }
+};
+document.addEventListener('click',function(e){
+  var t=e.target.closest?e.target.closest('[data-close]'):null;
+  if(t){ Panel.close(t.getAttribute('data-close')); e.stopPropagation(); return; }
+  var ov=e.target.classList&&e.target.classList.contains('overlay')?e.target:null;
+  if(ov&&ov.id!=='puzzleOverlay'&&ov.id!=='endingOverlay'){ Panel.close(ov.id); }
+});
+
+var Sub={
+  box:null, queue:[], busy:false, waiting:false, res:null, timer:null,
+  init:function(){ this.box=$('#subtitle'); },
+  show:function(L){
+    var self=this;
+    var raw = L.text||L.note||'';
+    var dur = Math.max(1500, Math.min(7200, raw.length*175));
+    return new Promise(function(res){
+      self.waiting=true; self.res=res;
+      var html='';
+      if(L.note){
+        html='<span style="color:#8492a4;font-size:13.5px;letter-spacing:.06em">'+esc(L.note)+'</span>';
+        dur=Math.max(1500, Math.min(4200, raw.length*140));
+      }else{
+        var who=(L.who==='你')?(L.solo?'你（独白）':'你'):(L.who||'');
+        html='<b style="color:#e3ab54;letter-spacing:.08em">'+esc(who)+'</b><span style="color:#5b6779">：</span>'+
+             '<span'+(L.solo?' style="font-family:var(--kai);color:#eaf0f8"':'')+'>'+esc(L.text)+'</span>';
+      }
+      self.box.innerHTML=html;
+      self.box.classList.add('show');
+      if(L.who==='电话'){ A.voice(Math.min(dur/1000,5),{pitch:92,band:760,vol:.13}); }
+      else if(L.who==='主任'){ A.voice(Math.min(dur/1000,5),{pitch:116,band:900,vol:.15}); }
+      else if(L.who==='塔台'){ A.voice(Math.min(dur/1000,5),{pitch:132,band:980,vol:.13}); }
+      else if(L.who==='陈默'){ A.voice(Math.min(dur/1000,5),{pitch:104,band:840,vol:.13}); }
+      else if(L.who==='录音'){ A.voice(Math.min(dur/1000,5),{pitch:150,band:1100,vol:.09}); }
+      self.timer=setTimeout(function(){ self._done(); }, dur);
+    });
+  },
+  _done:function(){
+    if(this.timer){ clearTimeout(this.timer); this.timer=null; }
+    if(this.box) this.box.classList.remove('show');
+    this.waiting=false;
+    var r=this.res; this.res=null; if(r) r();
+  },
+  fast:function(){ if(this.waiting&&this.res) this._done(); },
+  play:function(lines){
+    var self=this;
+    if(!lines||!lines.length) return Promise.resolve();
+    this.queue=this.queue.concat(lines);
+    if(this.busy) return Promise.resolve();
+    this.busy=true;
+    function step(){
+      if(!self.queue.length){ self.busy=false; return Promise.resolve(); }
+      var L=self.queue.shift();
+      return self.show(L).then(step);
+    }
+    return step();
+  },
+  clear:function(){ this.queue=[]; this._done(); }
+};
+
+var Toast={
+  timer:null,
+  show:function(text,kind){
+    var b=$('#banner'); if(!b) return;
+    b.textContent=text;
+    b.className='show'+(kind==='ach'?' ach':'');
+    if(this.timer) clearTimeout(this.timer);
+    this.timer=setTimeout(function(){ b.className=''; },2600);
+  }
+};
+
+/* ---------- 进度辅助 ---------- */
+function hasEv(id){ return G.evidence.indexOf(id)>=0; }
+function evCount(){ return G.evidence.length; }
+function hasBadge(id){ return G.badges.indexOf(id)>=0; }
+function hasEgg(i){ return G.eggs.indexOf(i)>=0; }
+function chDone(id){ return G.done.indexOf(id)>=0; }
+
+function addEvidence(id){
+  if(hasEv(id)) return false;
+  G.evidence.push(id);
+  var e=evById(id);
+  Toast.show('登记新证据 · '+id+' '+(e?e.title:''),'ach');
+  A.thunk();
+  saveGame(); refreshTop(); refreshDesk();
+  return true;
+}
+function addBadge(id){
+  if(hasBadge(id)) return false;
+  G.badges.push(id);
+  var b=badgeById(id);
+  Toast.show('获得徽章 · '+(b?b.name:id),'ach');
+  A.beep(880,.16,.13,'triangle'); setTimeout(function(){A.beep(1320,.22,.11,'triangle');},150);
+  saveGame(); refreshTop(); renderBadges();
+  return true;
+}
+function addEgg(i){
+  if(hasEgg(i)) return false;
+  G.eggs.push(i);
+  Toast.show('收到剪报 · '+EGGS[i].t,'ach');
+  A.beep(660,.12,.1,'triangle');
+  saveGame(); refreshTop(); renderEggs();
+  return true;
+}
+function addAlteration(k){
+  if(G.alterations.indexOf(k)>=0) return false;
+  G.alterations.push(k);
+  saveGame();
+  if(G.alterations.length>=3) addBadge('ledger');
+  return true;
+}
+function markFail(key){
+  G.stats.fails[key]=(G.stats.fails[key]||0)+1;
+  saveGame();
+  return G.stats.fails[key];
+}
+function markHint(key){
+  G.stats.hint[key]=(G.stats.hint[key]||0)+1;
+  saveGame();
+}
+function replay(delta){
+  G.stats.replay+=delta;
+  if(G.stats.replay>=100) addBadge('rewind');
+  saveGame();
+}
+function finishChapter(id){
+  if(chDone(id)) return;
+  G.done.push(id);
+  if(id>G.chapter) G.chapter=id;
+  saveGame();
+  refreshTop(); refreshDesk();
+  grantEggs(id);
+}
+function logAdd(text){
+  if(!G.flags.log) G.flags.log=[];
+  G.flags.log.unshift({t:nowStr(),x:text});
+  if(G.flags.log.length>120) G.flags.log.length=120;
+  saveGame();
+}
+function chapterProgressText(){
+  var need=['E1','E2','E3','E4','E5','E6','E7','E8','E9','E10'];
+  var got=0; for(var i=0;i<need.length;i++) if(hasEv(need[i])) got++;
+  return got+'/10';
+}
+function allFirstTen(){ return chapterProgressText()==='10/10'; }
+
+
+/* ============================================================
+   6. 桌面 / 顶栏 / 物件路由 / 序章
+   ============================================================ */
+function setTag(id,txt){ var e=$('#'+id); if(e) e.textContent=txt; }
+function litObj(k,on){ var el=$('.obj[data-obj="'+k+'"]'); if(el) el.classList.toggle('hot',!!on); }
+
+function refreshTop(){
+  var c=$('#tbChapter'); if(c) c.textContent=chapterName(G.chapter);
+  var bn=$('#tbBadgeN'); if(bn) bn.textContent=G.badges.length+'/5';
+  var en=$('#tbEggN'); if(en) en.textContent=G.eggs.length+'/12';
+  var tt=$('#tbTitle2'); if(tt) tt.textContent=G.playerId||'';
+  var dot=$('#tbBoardDot');
+  if(dot) dot.classList.toggle('hidden', G.evidence.length===(G.flags.seenEv||0));
+}
+function refreshDesk(){
+  var sa=G.stats.sideA, sb=G.stats.sideB;
+  setTag('tagRecorder', sb?'A/B 面已听':(sa?'A 面已听':'待播放'));
+  setTag('tagTowerLog', chDone(3)?'已显影':'待翻查');
+  setTag('tagArchive', (chDone(2)&&chDone(4)&&chDone(5))?'已核对':'待核对');
+  setTag('tagMap', chDone(7)?'已校订':(chDone(6)?'待校订':'卷宗未到'));
+  setTag('tagPhone', chDone(6)?'忙音':(G.flags.phoneRang?'来电未接':'沉默'));
+  setTag('tagLamp', G.flags.lampMoved?'已调整':'待调整');
+  var oc=$('#objCase'); if(oc) oc.classList.toggle('hidden', !G.flags.finalReady);
+  var plate=$('#plateTxt');
+  if(plate) plate.innerHTML='档 案 馆 · 地 下 二 层<br>'+(G.playerId?('工 号 '+G.playerId):'室 温 十 六 度');
+}
+function refreshAll(){ refreshTop(); refreshDesk(); }
+
+function openObj(k){
+  A.resume(); A.click();
+  if(k==='lamp') return openLamp();
+  if(k==='recorder') return openRecorder();
+  if(k==='towerlog') return openTowerLog();
+  if(k==='archive') return openArchive();
+  if(k==='map') return openMap();
+  if(k==='phone') return openPhone();
+  if(k==='case') return openFinal();
+}
+
+/* ---------- 台灯 ---------- */
+function openLamp(){
+  openPuzzle('台灯','铜制灯罩 · 可拖转 0°–45°');
+  var v=G.flags.lampAngle==null?8:G.flags.lampAngle;
+  $('#pzBody').innerHTML=
+    '<div style="text-align:center">'+
+    '<div class="lamp-stage"><div class="lamp-cone" id="lampCone"></div><div class="lamp-bulb">💡</div></div>'+
+    '<div style="margin-top:18px;display:flex;align-items:center;gap:12px;justify-content:center">'+
+    '<span class="mono" style="color:#8492a4;font-size:12px">0°</span>'+
+    '<input type="range" id="lampRange" min="0" max="45" value="'+v+'" style="width:min(320px,60vw)">'+
+    '<span class="mono" style="color:#8492a4;font-size:12px">45°</span></div>'+
+    '<div class="mono" id="lampVal" style="color:#e3ab54;font-size:13px;margin-top:10px"></div>'+
+    '<div style="color:#7d8899;font-size:12.5px;line-height:2;margin-top:14px">台灯的角度会改变纸面的受光。老档案的压痕，只有在特定的角度才会显形。</div>'+
+    '</div>';
+  function paint(){
+    var a=+$('#lampRange').value;
+    $('#lampVal').textContent='光照角 '+a+'°'+(a>=12&&a<=18?' · 侧光区间':'');
+    var cone=$('#lampCone');
+    cone.style.transform='rotate('+(-a)+'deg)';
+    cone.style.opacity=(a>=12&&a<=18)?'.95':'.55';
+    G.flags.lampAngle=a;
+  }
+  $('#lampRange').addEventListener('input',function(){
+    paint(); if(!G.flags.lampMoved){ G.flags.lampMoved=true; saveGame(); refreshDesk(); }
+  });
+  paint();
+  puzzleFoot('<span class="mono" style="color:#6f7b8c;font-size:12px">第 3 章需要 12°–18° 的侧光</span>');
+}
+
+/* ---------- 序章 ---------- */
+function runPrologue(){
+  refreshAll();
+  A.rain(true,.05);
+  return Sub.play(SCRIPT.prologue).then(function(){
+    Toast.show('主任把带子留在了桌上。','');
+    return teachSequence();
+  }).then(function(){
+    return showBadgeCard();
+  }).then(function(){
+    return Sub.play([{note:'（磁带标签：98.11.27　后跟一串手写编号，一晃而过。）'},
+                     {note:'（字迹太淡，回头再看。）'}]);
+  }).then(function(){
+    G.flags.prologueDone=true; saveGame();
+    return Sub.play(SCRIPT.prologueEnd);
+  }).then(function(){
+    finishChapter(0);
+    Toast.show('档案索引解锁：第 1–5 章可自由查证','ach');
+    logAdd('值班开始。工号 '+G.playerId+'。把磁带、塔台日志、纸面档案都过了一遍。');
+    refreshAll();
+  });
+}
+
+function teachSequence(){
+  var order=[
+    ['lamp','台灯——桌面受光的角度。点它，试着拖一下。'],
+    ['recorder','录音机——播放、倒带、翻面。先听听 A 面。'],
+    ['towerlog','塔台日志——1998 年那一夜的记录。'],
+    ['archive','纸面档案——名单、报文、维修单都在这儿。']
+  ];
+  var p=Promise.resolve();
+  order.forEach(function(it){
+    p=p.then(function(){
+      litObj(it[0],true);
+      Toast.show(it[1],'');
+      A.beep(1040,.09,.07,'triangle');
+      return sleep(2100);
+    });
+  });
+  return p.then(function(){
+    order.forEach(function(it){ litObj(it[0],false); });
+  });
+}
+
+function showBadgeCard(){
+  return new Promise(function(res){
+    var pid=G.playerId||('Y-'+String(rint(1000,9999)));
+    G.playerId=pid; saveGame();
+    openPuzzle('值 班 工 牌','仅序章可更换');
+    $('#pzBody').innerHTML=
+      '<div class="idcard">'+
+      '<div class="id-top">MARVIS 地方档案馆 · 夜班</div>'+
+      '<div class="id-mid" id="idNo">'+esc(pid)+'</div>'+
+      '<div class="id-sub">整理员 · 临时</div>'+
+      '<div class="id-line"></div>'+
+      '<div class="id-foot">签发：'+dateStr()+' · 有效期：今晚</div>'+
+      '</div>'+
+      '<div style="text-align:center;color:#7d8899;font-size:12.5px;margin-top:16px;line-height:2">把它挂在胸前。这串编号，今晚会一直在你眼前。</div>';
+    puzzleFoot('<button class="btn sm" id="idReroll">换 一 张</button><button class="btn sm primary" id="idOk">收 进 抽 屉</button>');
+    $('#idReroll').addEventListener('click',function(){
+      G.playerId='Y-'+String(rint(1000,9999)); saveGame();
+      $('#idNo').textContent=G.playerId; refreshDesk(); A.click();
+    });
+    $('#idOk').addEventListener('click',function(){ Panel.close('puzzleOverlay'); A.click(); res(); });
+  });
+}
+
+
+/* ============================================================
+   7. 谜题框架：通用容器 / 三级提示 / 反馈 / 结算
+   ============================================================ */
+function openPuzzle(title,sub){
+  $('#pzTitle').textContent=title||'';
+  $('#pzSub').textContent=sub||'';
+  $('#pzBody').innerHTML='';
+  $('#pzFoot').innerHTML='<div class="q-fb" id="pzFb"></div>'+
+    '<div id="pzAct" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>'+
+    '<div class="counter" id="hintNote" style="margin-top:8px"></div>';
+  Hints.reset();
+  Panel.open('puzzleOverlay');
+}
+function fb(msg,cls){
+  var e=$('#pzFb'); if(!e) return;
+  e.textContent=msg||''; e.className='q-fb '+(cls||'');
+}
+function btn(label,fn,cls,id){
+  var b=document.createElement('button');
+  b.className='btn sm'+(cls?(' '+cls):''); if(id) b.id=id;
+  b.textContent=label;
+  b.addEventListener('click',function(){ A.click(); fn(b); });
+  return b;
+}
+function act(){ var a=$('#pzAct'); for(var i=0;i<arguments.length;i++) if(arguments[i]) a.appendChild(arguments[i]); return a; }
+
+var Hints={
+  key:'',levels:[],level:0,noBadge:false,btn:null,lost:false,
+  reset:function(){ this.key='';this.levels=[];this.level=0;this.noBadge=false;this.btn=null;this.lost=false; },
+  setup:function(key,levels,noBadge,extra){
+    this.key=key; this.levels=levels||[]; this.level=0; this.noBadge=!!noBadge; this.lost=false;
+    var b=btn('提 示',function(){ Hints.tap(); },'ghost','hintBtn');
+    this.btn=b; act(b);
+    if(extra) for(var i=0;i<extra.length;i++) act(extra[i]);
+    if(noBadge) $('#hintNote').textContent='本章使用提示，将失去徽章「电报员」。';
+    this.sync();
+  },
+  tap:function(){
+    if(this.level>=this.levels.length) return;
+    this.level++;
+    markHint(this.key);
+    if(this.noBadge&&!this.lost){ this.lost=true; G.flags.morseHinted=true; saveGame(); Toast.show('已使用提示 · 徽章「电报员」不可得',''); }
+    this.show(this.levels[this.level-1],this.level);
+    this.sync();
+  },
+  sync:function(){
+    if(!this.btn) return;
+    var n=(G.stats.fails[this.key]||0);
+    var show=(n>=3)||this.level>0;
+    this.btn.style.display=show?'':'none';
+    this.btn.textContent=this.level>0?('提 示 '+this.level+'/'+this.levels.length):'提 示';
+    var note=$('#hintNote');
+    if(note) note.textContent=(this.level===0&&!this.noBadge)?'（连续错三次，这里会出现提示）':(this.noBadge?'本章使用提示，将失去徽章「电报员」。':'');
+  },
+  show:function(text,lv){
+    var box=$('#pzHintBox');
+    if(!box){
+      box=mkEl('div','q-hint'); box.id='pzHintBox';
+      var b=$('#pzBody'); if(b) b.appendChild(box);
+    }
+    box.className='q-hint'+(lv===2?' lv2':(lv===3?' lv3':''));
+    box.textContent=text;
+    box.style.display='block';
+  }
+};
+function wrong(msg){
+  var n=markFail(Hints.key);
+  fb(msg||'不对。再看一遍。','no');
+  A.beep(190,.14,.09,'sawtooth');
+  Hints.sync();
+  if(n===3) Toast.show('连错三次 · 提示已就绪（右下角）','');
+  return n;
+}
+function right(msg){
+  fb(msg||'对上了。','ok');
+  A.beep(760,.12,.1,'triangle'); setTimeout(function(){ A.beep(1140,.18,.09,'triangle'); },130);
+}
+function solvedCh(lines,chId){
+  return Sub.play(lines||[]).then(function(){
+    if(chId!=null) finishChapter(chId);
+    Panel.close('puzzleOverlay');
+    refreshAll();
+    onChapterDone(chId);
+  });
+}
+/* 章节完成后的全局推进（解锁下一阶段） */
+function onChapterDone(chId){
+  if(chId>=1&&chId<=5){
+    if(allFirstTen()){
+      G.flags.phoneRang=true; saveGame(); refreshDesk();
+      Toast.show('内线电话响了。','ach'); A.ring(3);
+      logAdd('第 1–5 章查完了。桌上的内线电话响了。');
+    }
+  }else if(chId===6){
+    Toast.show('航线图调取下来了。','ach'); refreshDesk();
+  }else if(chId===7){
+    G.flags.finalReady=true; saveGame(); refreshAll();
+    Toast.show('桌面角落多了一只封存箱。','ach');
+  }
+  refreshAll();
+}
+
+
+/* ============================================================
+   8. 录音机：A 面播放 / 第 1 章 时序
+   ============================================================ */
+function puzzleFoot(html){ var a=$('#pzAct'); if(a&&html) a.insertAdjacentHTML('beforeend',html); return a; }
+
+var Rec={ view:'tape', playing:false, abort:false, wb:null, order:null, bSideDone:false };
+
+function recHeard(n){ return ((G.flags.tapeHeard)||[]).indexOf(n)>=0; }
+function markHeard(n){
+  if(!G.flags.tapeHeard) G.flags.tapeHeard=[];
+  if(G.flags.tapeHeard.indexOf(n)<0){ G.flags.tapeHeard.push(n); saveGame(); }
+}
+function tapeAllHeard(){ for(var i=1;i<=6;i++) if(!recHeard(i)) return false; return true; }
+
+function recWait(ms){
+  return new Promise(function(res){
+    var t=0,step=120;
+    var iv=setInterval(function(){
+      if(Rec.abort||!Panel.isOpen('puzzleOverlay')){ clearInterval(iv); res('abort'); return; }
+      t+=step; if(t>=ms){ clearInterval(iv); res('ok'); }
+    },step);
+  });
+}
+function recShow(seg){
+  var e=$('#recRead'); if(!e) return;
+  var html='<div class="rp-t">'+seg.time+'　·　A 面 第 '+seg.n+' 段</div>';
+  html+='<div class="rp-l"><b>塔台</b>：'+esc(seg.text)+'</div>';
+  if(seg.text2) html+='<div class="rp-l me"><b>陈默</b>：'+esc(seg.text2)+'</div>';
+  if(seg.worn) html+='<div class="rp-n">（这一段底噪不干净，像有人捂住了话筒。）</div>';
+  e.innerHTML=html;
+}
+function recSpeak(seg){
+  return new Promise(function(res){
+    var len=((seg.text||'')+(seg.text2||'')).length;
+    var dur=Math.max(1700,Math.min(6200,len*165));
+    recShow(seg);
+    A.tape(dur/1000,{vol:.05});
+    if(seg.who==='录音') A.voice(dur/1000,{pitch:150,band:1100,vol:.085});
+    else if(seg.who==='陈默') A.voice(dur/1000,{pitch:104,band:840,vol:.12});
+    else A.voice(dur/1000,{pitch:132,band:980,vol:.12});
+    setTimeout(function(){ res('ok'); },dur+380);
+  });
+}
+function segListHTML(){
+  var h='';
+  for(var i=0;i<TAPE_A.length;i++){
+    var s=TAPE_A[i];
+    var who=(s.who2?'塔台 / 陈默':s.who);
+    h+='<div class="seg'+(recHeard(s.n)?' on':'')+'" data-n="'+s.n+'">'+
+       '<span class="sg-t">'+esc(s.time)+'</span>'+
+       '<span class="sg-w">'+esc(who)+'</span>'+
+       '<span class="sg-s">'+(recHeard(s.n)?esc((s.text||'').slice(0,22)+'…'):'未播放')+'</span>'+
+       '<span class="sg-b">重听</span></div>';
+  }
+  return h;
+}
+function recSyncSegs(){
+  var list=$('#segList'); if(list) list.innerHTML=segListHTML();
+  var p=$('#recPos'); if(p) p.textContent='A 面 · 已听 '+((G.flags.tapeHeard||[]).length)+'/6 段';
+}
+function recEnd(){
+  Rec.playing=false;
+  if(Rec.wb){ Rec.wb.stop(); Rec.wb=null; }
+  A.hiss(false);
+  recSyncSegs();
+  if(tapeAllHeard()){
+    if(!G.stats.sideA){ G.stats.sideA=true; saveGame(); refreshDesk(); }
+    if(G.stats.sideB) addBadge('listen');
+    if(!G.flags.tapeA11){ G.flags.tapeA11=true; saveGame();
+      var e=$('#recRead');
+      if(e) e.insertAdjacentHTML('beforeend','<div class="rp-n">（第 4 段和第 6 段不对劲。点列表里的「重听」，再放一遍。）</div>');
+    }
+  }
+}
+function recPlayOne(n){
+  if(Rec.playing) return;
+  var seg=null;
+  for(var i=0;i<TAPE_A.length;i++) if(TAPE_A[i].n===n) seg=TAPE_A[i];
+  if(!seg) return;
+  var first=!recHeard(n)||G.flags.tapeA11;
+  Rec.playing=true; Rec.abort=false;
+  Rec.wb=new WaveBox($('#recWave')); Rec.wb.start();
+  A.hiss(true,.045);
+  recSpeak(seg).then(function(){
+    Rec.playing=false;
+    if(Rec.wb){ Rec.wb.stop(); Rec.wb=null; }
+    A.hiss(false);
+    markHeard(n); recSyncSegs();
+    if(n===4){
+      var e=$('#recRead');
+      if(e) e.innerHTML+='<div class="rp-n">（倒着放一遍，轻人声更清楚了：<b>「雷达上那个……不是我们的回波……」</b>）</div>';
+      if(addEvidence('E2')) right('第 4 段的第三个人声，记下来了。');
+    }else if(n===6){
+      var e2=$('#recRead');
+      if(e2) e2.innerHTML+='<div class="rp-n">（这一段的末尾，是 <?>8 秒的空白。没有说话，没有电流。）</div>';
+    }
+    if(tapeAllHeard()){
+      if(!G.stats.sideA){ G.stats.sideA=true; saveGame(); refreshDesk(); }
+      if(G.stats.sideB) addBadge('listen');
+    }
+  });
+}
+function recPlayAll(){
+  if(Rec.playing){ Rec.abort=true; return; }
+  Rec.playing=true; Rec.abort=false;
+  Rec.wb=new WaveBox($('#recWave')); Rec.wb.start();
+  A.hiss(true,.045);
+  var i=0;
+  function step(){
+    if(Rec.abort||!Panel.isOpen('puzzleOverlay')){ recEnd(); return; }
+    if(i>=TAPE_A.length){ recEnd(); return; }
+    var seg=TAPE_A[i]; i++;
+    recSpeak(seg).then(function(r){
+      if(r==='abort'){ recEnd(); return; }
+      markHeard(seg.n); recSyncSegs();
+      if(seg.tail){
+        var e=$('#recRead');
+        if(e) e.insertAdjacentHTML('beforeend','<div class="rp-n">（此后二十四分钟，只有底噪。没有说话，没有求救。）</div>');
+        return recWait(8000);
+      }
+      return recWait(520);
+    }).then(step);
+  }
+  step();
+}
+function openRecorder(){
+  Rec.view='tape';
+  openPuzzle('录 音 机','磁带 A 面 · 标签 98.11.27');
+  var b=$('#pzBody');
+  b.innerHTML=
+    '<div class="wave-box"><canvas id="recWave" width="820" height="130"></canvas></div>'+
+    '<div class="rec-read" id="recRead"><span class="empty">磁带停止。按 ▶ 播放 A 面。</span></div>'+
+    '<div class="audiobar" style="margin-top:12px">'+
+      '<button class="ab-btn" id="recPlay" title="播放 / 停止">▶</button>'+
+      '<button class="ab-btn" id="recRw" title="倒带重听">⏪</button>'+
+      '<button class="ab-btn" id="recSide" title="翻面">⇋</button>'+
+      '<span class="ab-t" id="recPos">A 面 · 已听 '+((G.flags.tapeHeard||[]).length)+'/6 段</span>'+
+      '<span class="ab-t" style="margin-left:auto">88.2 分钟磁带 · 高偏磁</span>'+
+    '</div>'+
+    '<div class="seg-list" id="segList">'+segListHTML()+'</div>'+
+    '<div class="rec-foot">磁带是原始的。塔台和机组的每一句话都在上面。听完全部六段，才能做摘要。</div>';
+  $('#recPlay').addEventListener('click',recPlayAll);
+  $('#recSide').addEventListener('click',function(){
+    if(!G.flags.sideBUnlock){ Toast.show('B 面被一张褪色的贴纸封着。',''); A.thunk(); return; }
+    recPlayB();
+  });
+  $('#recRw').addEventListener('click',function(){
+    replay(1); A.thunk();
+    Toast.show('倒带重听 · 累计 '+G.stats.replay+' 次','');
+    if(!G.flags.rwHint&&G.stats.replay>=6){ G.flags.rwHint=true; saveGame();
+      var e=$('#recRead'); if(e) e.innerHTML='<div class="rp-n">（倒带键已经磨白了。上一个人也这样反复听。）</div>'; }
+  });
+  $('#segList').addEventListener('click',function(ev){
+    var it=ev.target.closest?ev.target.closest('.seg'):null;
+    if(!it) return; A.click(); recPlayOne(+(it.getAttribute('data-n')));
+  });
+  puzzleFoot('<button class="btn sm primary" id="toCh1">按 时 间 排 一 排</button>');
+  $('#toCh1').addEventListener('click',function(){
+    if(!tapeAllHeard()){ Toast.show('先把 A 面六段听完。',''); return; }
+    openCh1();
+  });
+}
+
+/* ---------- 第 1 章 · 时序 ---------- */
+function openCh1(){
+  openPuzzle('第 1 章 · 21:47','录音 A 面 · 把六段按时间先后排好');
+  if(!Rec.order||Rec.order.length!==6){
+    var a=[1,2,3,4,5,6];
+    for(var i=5;i>0;i--){ var j=rint(0,i),t=a[i]; a[i]=a[j]; a[j]=t; }
+    if(a.join()==='1,2,3,4,5,6') a=[3,1,6,4,2,5];
+    Rec.order=a;
+  }
+  $('#pzBody').onclick=sortClick;
+  paintSort();
+  Hints.setup('ch1',[
+    '第一段一定是「可以起飞，北辰七零四」。',
+    '「雷达接触」紧跟着起飞；「请回答」之前，只有三段。',
+    '正确顺序：起飞 → 雷达接触 → 上升一万二 → 轻人声 → 请回答 → 海隈塔台呼叫。'
+  ]);
+  puzzleFoot('<button class="btn sm primary" id="sortChk">对 照 时 序</button>');
+  $('#sortChk').addEventListener('click',checkSort);
+}
+function paintSort(){
+  var h='<div class="q-desc" style="margin-bottom:10px">六段录音，从起飞到最后的呼叫。排在正确的位置上。</div><div class="sortlist">';
+  for(var i=0;i<Rec.order.length;i++){
+    var seg=null,n=Rec.order[i];
+    for(var k=0;k<TAPE_A.length;k++) if(TAPE_A[k].n===n) seg=TAPE_A[k];
+    var lab=(seg.who==='录音')?'（底噪中的轻人声）':((seg.text||'').slice(1,21)+'…');
+    h+='<div class="sortitem" data-i="'+i+'">'+
+       '<span class="idx">'+pad2(i+1)+'</span>'+
+       '<span class="lab">'+esc(lab)+'</span>'+
+       '<span class="sort-item-btns">'+
+         '<button data-up="'+i+'">▲</button><button data-dn="'+i+'">▼</button>'+
+       '</span>'+
+       '<span class="grip">⋮⋮</span></div>';
+  }
+  h+='</div>';
+  var b=$('#pzBody'); b.innerHTML=h;
+}
+function sortClick(ev){
+  var t=ev.target;
+  if(!t.getAttribute) return;
+  var up=t.getAttribute('data-up'), dn=t.getAttribute('data-dn');
+  if(up!=null){ var i=+up; if(i>0){ var a=Rec.order; var x=a[i-1]; a[i-1]=a[i]; a[i]=x; A.click(); paintSort(); } }
+  else if(dn!=null){ var j=+dn; if(j<Rec.order.length-1){ var a2=Rec.order; var y=a2[j+1]; a2[j+1]=a2[j]; a2[j]=y; A.click(); paintSort(); } }
+}
+function checkSort(){
+  for(var i=0;i<6;i++) if(Rec.order[i]!==i+1){ wrong('顺序不对。回去听一遍，从起飞开始。'); return; }
+  right('时序对上了。');
+  addEvidence('E1');
+  var btn=$('#sortChk'); if(btn) btn.disabled=true;
+  setTimeout(function(){ solvedCh(SCRIPT.ch1,1); },760);
+}
+
+
+/* ============================================================
+   9. 纸面档案：第 2 / 4 / 5 章
+   ============================================================ */
+function panelView(title,sub){
+  var t=$('#pzTitle'); if(t) t.textContent=title;
+  var s=$('#pzSub'); if(s) s.textContent=sub||'';
+  var f=$('#pzFoot');
+  if(f) f.innerHTML='<div class="q-fb" id="pzFb"></div>'+
+    '<div id="pzAct" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>'+
+    '<div class="counter" id="hintNote" style="margin-top:8px"></div>';
+  var b=$('#pzBody'); if(b) b.innerHTML='';
+  Hints.reset();
+}
+var ROSTER_NAMES=['周建国','李秀兰','王海生','陈立','吴淑芬','郑文彬','何桂英','徐志明',
+  '孙丽娟','马国庆','朱秀珍','胡跃进','林国栋','高玉兰','罗建平','梁小梅',null,
+  '谢文华','许丽华','邓兴国','曹玉梅','傅建国'];
+
+function openArchive(){
+  openPuzzle('纸 面 档 案','1998 · 卷宗 704');
+  arcHome();
+}
+function arcHome(){
+  panelView('纸 面 档 案','三份材料，都被翻过');
+  var cards=[
+    ['roster','乘客名单','22 行。其中一行，姓名栏是空的。'],
+    ['metar','气象报文','起飞前二十三分钟的例行观测。'],
+    ['mr','维修更换单','十二行零件，有一行的字压得比别人重。']
+  ];
+  var h='<div class="q-desc" style="margin-bottom:12px">四份纸面材料。有人在这里面动过手脚。</div><div class="pickgrid">';
+  for(var i=0;i<cards.length;i++){
+    h+='<div class="pickcard" data-arc="'+cards[i][0]+'">'+
+       '<div class="pc-id">DOC / '+pad2(i+1)+'</div>'+
+       '<div class="pc-nm">'+cards[i][1]+'</div>'+
+       '<div class="pc-ds">'+cards[i][2]+'</div></div>';
+  }
+  h+='</div><div class="q-desc" style="margin-top:14px;color:#6f7b8c">材料的完整副本已归入证据板的检索范围。</div>';
+  $('#pzBody').innerHTML=h;
+  $('#pzBody').onclick=arcClick;
+  act(btn('关 上 卷 宗',function(){ Panel.close('puzzleOverlay'); },'ghost'));
+}
+function arcClick(ev){
+  var c=ev.target.closest?ev.target.closest('[data-arc]'):null;
+  if(!c) return; A.click();
+  var k=c.getAttribute('data-arc');
+  if(k==='roster') arcRoster();
+  else if(k==='metar') arcMetar();
+  else if(k==='mr') arcMr();
+}
+
+/* ---------- 第 2 章 · 乘客名单 ---------- */
+function arcRoster(){
+  panelView('乘客名单 · NB704','1998-11-27 · 22 行');
+  var h='<div class="q-head"><div class="q-desc">配载单上写着一件 87 公斤的「押」。名单上有哪一行，是填不出来的？</div></div>';
+  h+='<div class="name-list">';
+  for(var i=0;i<ROSTER_NAMES.length;i++){
+    var nm=ROSTER_NAMES[i];
+    var blank=(nm===null);
+    h+='<div class="name-row'+(blank?'':'')+'" data-n="'+(i+1)+'">'+
+        '<span class="nm-i">'+pad2(i+1)+'</span>'+
+        '<span class="nm-n">'+(blank?'&nbsp;':'')+'</span>'+
+        '<span class="nm-d">'+(blank?'&nbsp;':'3301'+String(10000000000+i*7919).slice(0,10))+'</span>'+
+        '<span class="nm-b">'+(blank?'&nbsp;':'—')+'</span></div>';
+  }
+  h+='</div>';
+  $('#pzBody').innerHTML=h;
+  $('#pzBody').onclick=rosterClick;
+  act(btn('返 回',arcHome,'ghost'));
+  Hints.setup('ch2',[
+    '不要看名字。看那几列里，哪一列是空白的。',
+    '有一个人没有姓名、没有证件、没有座位。',
+    '第 17 行。姓名栏空白，备注只有两个字的位置——「押」。'
+  ]);
+}
+function rosterClick(ev){
+  var r=ev.target.closest?ev.target.closest('.name-row'):null;
+  if(!r) return;
+  var n=+r.getAttribute('data-n'); A.click(); A.beep(520,.05,.05,'triangle');
+  if(n!==17){ wrong('第 '+n+' 行填得清清楚楚。找那一行空白的。'); return; }
+  right('第 17 行。姓名栏空白，备注：押。');
+  addEvidence('E3');
+  setTimeout(function(){
+    addEvidence('E4');
+    solvedCh([{note:'（配载单：行李 1240kg／邮件 320kg／货物 890kg／押 87kg。）'}].concat(SCRIPT.ch2),2);
+  },900);
+}
+
+/* ---------- 第 4 章 · 气象报文 ---------- */
+var WX_DONE=[false,false,false];
+function arcMetar(){
+  panelView('气象报文 · METAR','1998-11-27 13:00Z ＝ 本地 21:00');
+  WX_DONE=[false,false,false];
+  var h='<div class="docpaper">'+esc(METAR_RAW)+'</div>'+
+        '<div class="wx-grid" style="margin-top:14px">';
+  for(var i=0;i<METAR_TOKENS.length;i++){
+    var t=METAR_TOKENS[i];
+    h+='<div class="wx-card"><div class="wk">'+esc(t.t)+'</div>'+
+       '<div style="font-size:11.5px;line-height:1.75;color:#9fb0c4">'+esc(t.d)+'</div></div>';
+  }
+  h+='</div><div class="q-desc" style="margin:6px 0 12px">把报文读懂，再回答三个问题。</div>';
+  for(var q=0;q<METAR_Q.length;q++){
+    h+='<div style="margin-bottom:12px" data-wxq="'+q+'"><div class="q-title">问 '+pad2(q+1)+'　'+esc(METAR_Q[q].q)+'</div><div class="wx-notes">';
+    for(var o=0;o<METAR_Q[q].opts.length;o++){
+      h+='<div class="wx-note" data-q="'+q+'" data-o="'+o+'"><span class="wn-id">'+String.fromCharCode(65+o)+'</span><span class="wn-tx">'+esc(METAR_Q[q].opts[o])+'</span></div>';
+    }
+    h+='</div></div>';
+  }
+  $('#pzBody').innerHTML=h;
+  $('#pzBody').onclick=wxClick;
+  act(btn('返 回',arcHome,'ghost'));
+  Hints.setup('ch4',[
+    '先看数字后面的单位：KT 是节，不是公里。',
+    'CAVOK 是一个整体缩写，读作「Ceiling And Visibility OK」。',
+    '12003KT = 风向 120°、风速 3 节；CAVOK = 能见度 ≥10km、无显著云；13:00Z = 本地 21:00。'
+  ]);
+}
+function wxClick(ev){
+  var it=ev.target.closest?ev.target.closest('.wx-note'):null;
+  if(!it) return;
+  var q=+it.getAttribute('data-q'), o=+it.getAttribute('data-o');
+  A.click();
+  if(WX_DONE[q]) return;
+  if(o!==METAR_Q[q].a){
+    it.classList.add('bad');
+    wrong('这一条读错了。回去看字母后面的数字。');
+    return;
+  }
+  WX_DONE[q]=true;
+  it.classList.add('sel');
+  $$('.wx-note[data-q="'+q+'"]').forEach(function(x){ x.style.pointerEvents='none'; });
+  right('对。');
+  A.beep(1180,.1,.07,'triangle');
+  for(var i=0;i<WX_DONE.length;i++) if(!WX_DONE[i]) return;
+  addEvidence('E7');
+  setTimeout(function(){
+    addEvidence('E8');
+    solvedCh([{note:'（报文里写的是晴夜。结论里写的是强对流。）'}].concat(SCRIPT.ch4),4);
+  },900);
+}
+
+/* ---------- 第 5 章 · 维修更换单 ---------- */
+function arcMr(){
+  panelView('维修更换单','NB704 · 1998 年');
+  var h='<div class="q-desc" style="margin-bottom:12px">十二行更换记录。有一行的字，压得比别的重——它被人重写过。</div>';
+  h+='<div class="mr-list">';
+  for(var i=0;i<MROWS.length;i++){
+    var r=MROWS[i];
+    h+='<div class="mr-row" data-n="'+r.n+'">'+
+       '<span class="mr-i">'+pad2(r.n)+'</span>'+
+       '<span class="mr-p">'+esc(r.part)+'</span>'+
+       '<span class="mr-c">'+esc(r.no)+'</span>'+
+       '<span class="mr-d">'+esc(r.dt)+'</span></div>';
+  }
+  h+='</div><div class="q-desc" style="margin-top:12px;color:#6f7b8c">对照日志里的笔迹：起笔更重，收笔有回勾。</div>';
+  $('#pzBody').innerHTML=h;
+  $('#pzBody').onclick=mrClick;
+  act(btn('返 回',arcHome,'ghost'));
+  Hints.setup('ch5',[
+    '看编号。被改写的那一行，编号里藏着另一个机号。',
+    '「704」这三个数字，笔迹比前后的字母都重。',
+    '第 8 行：STR-7040。这一行的编号被人重新描过。'
+  ]);
+}
+function mrClick(ev){
+  var r=ev.target.closest?ev.target.closest('.mr-row'):null;
+  if(!r) return;
+  var n=+r.getAttribute('data-n'); A.click(); A.beep(520,.05,.05,'triangle');
+  if(n!==8){ wrong('第 '+n+' 行的笔迹很轻，一次写成。再看看别的。'); return; }
+  right('第 8 行。「704」被单独描过一遍。');
+  addEvidence('E9');
+  setTimeout(mrSecond,700);
+}
+function mrSecond(){
+  panelView('维修记录 · 反查','零件 STR-7040 的装机记录');
+  var h='<div class="q-desc" style="margin-bottom:12px">用更换单上的零件编号反查装机记录，就能找到它装在谁身上。</div>'+
+    '<div class="docpaper">'+
+    '<span class="dim">零件编号　</span><span class="hl">STR-7040</span>\n'+
+    '<span class="dim">装机日期　</span>1998-10-02\n'+
+    '<span class="dim">装机机号　</span><span class="stamp" style="letter-spacing:0">██</span>-<span class="stamp" style="letter-spacing:0">██</span><span class="dim">（整段涂黑）</span>\n'+
+    '<hr>'+
+    '<span class="dim">复印件边缘有一道压痕。反光的角度合适时，会显出两个字。</span>'+
+    '</div>';
+  $('#pzBody').innerHTML=h;
+  puzzleFoot('<button class="btn sm primary" id="mrTrace">用 侧 光 看 残 影</button>');
+  $('#mrTrace').addEventListener('click',function(){
+    A.beep(880,.12,.08,'triangle');
+    var d=$('.docpaper');
+    d.innerHTML=d.innerHTML.replace('（整段涂黑）','<span class="dim">（整段涂黑）</span>')+
+      '\n<span class="grn">残影：　　_ 7 _ _ 1 _</span>\n<span class="dim">只有一个 7，一个 1。其余全部被压掉了。</span>';
+    right('机号只留下两个字：7 和 1。');
+    addEvidence('E10');
+    setTimeout(function(){
+      solvedCh([{note:'（两架飞机，共用一套维修记录。）'}].concat(SCRIPT.ch5),5);
+    },900);
+  });
+  act(btn('返 回',arcMr,'ghost'));
+}
+
+
+/* ============================================================
+   10. 塔台日志 / 台灯侧光：第 3 章
+   ============================================================ */
+function lightOK(){ var a=G.flags.lampAngle; return a!=null&&a>=12&&a<=18; }
+function openTowerLog(){
+  openPuzzle('塔 台 日 志','1998-11-27 · 夜班');
+  towerLogView();
+}
+function towerLogView(){
+  panelView('塔台日志 · 1998-11-27','值班员：周维新');
+  var ok=lightOK();
+  var h='<div class="docpaper">';
+  h+='值班记录　1998-11-27\n值班员　周维新\n────────────────────────\n';
+  h+='18:00　交班。能见度良好。\n';
+  h+='21:00　例行观测：CAVOK，风 12003KT。\n';
+  h+='21:07　NB<span class="hl">704</span> 起飞，跑道两四。\n';
+  h+='21:12　雷达接触，上升至两千四。\n';
+  h+='21:23　机组最后回话，上升至一万二。\n';
+  h+='<span class="altc" data-alt="t1">21:47</span>　NB704 失联，天气<span class="altc" data-alt="t2">转为强对流</span>。\n';
+  h+='22:10　报告上级。搜索<span class="altc" data-alt="t3">待命</span>。\n';
+  h+='04:00　本班结束。</div>';
+  if(!ok){
+    h+='<div class="q-hint">纸面是平的，笔迹压得很实。这个受光角度，什么也看不出来——把台灯掰到侧光的位置（12°–18°）再回来。</div>';
+  }else{
+    h+='<div class="docpaper relit" style="margin-top:12px">复写纸的背面，压痕显出来了：\n'+
+       '<span class="grn">21:46　东北方向　有一个回波。\n'+
+       '　　　　叫了三遍。没有应答。</span>\n'+
+       '<span class="dim">（写下这三行的人，后来把这一页翻了过去。）</span></div>';
+    h+='<div class="q-desc" style="margin-top:12px">日志上有三处被人刮改过。一个一个点开看。</div>';
+  }
+  var b=$('#pzBody'); b.innerHTML=h;
+  if(ok){
+    b.onclick=towerLogClick;
+    addEvidence('E5');
+    if(!G.flags.altHint){
+      G.flags.altHint=true; saveGame();
+    }
+    Hints.setup('ch3',[
+      '三处涂改：一行涂黑、一处天气、一个签名。',
+      '把每处刮痕下面的原文想清楚，再想它们为什么必须被改写。',
+      '① 21:41 不明回波那一行被涂黑 ②天气栏「晴」改成「雷阵雨」 ③签名被描粗。'
+    ]);
+    if(G.alterations.indexOf('t1')>=0&&G.alterations.indexOf('t2')>=0&&G.alterations.indexOf('t3')>=0){
+      act(btn('合 上 日 志',function(){ Panel.close('puzzleOverlay'); },'ghost'));
+    }
+  }else{
+    puzzleFoot('<button class="btn sm primary" id="goLamp">去 调 台 灯</button>');
+    $('#goLamp').addEventListener('click',function(){
+      Panel.close('puzzleOverlay');
+      setTimeout(openLamp,240);
+    });
+  }
+}
+function towerLogClick(ev){
+  var t=ev.target.closest?ev.target.closest('.altc'):null;
+  if(!t) return;
+  if(t.classList.contains('on')) return;
+  var k=t.getAttribute('data-alt');
+  A.beep(700,.08,.07,'triangle');
+  t.classList.add('on');
+  addAlteration(k);
+  var notes={
+    t1:'（整行被马克笔涂掉。侧光下能看见底下的字：21:41　东北方向，出现不明回波。）',
+    t2:'（原来的字是「晴」。同一支笔压在上面，改写成了「雷阵雨」。）',
+    t3:'（签名被反复描粗，比全篇任何一处都用力。）'
+  };
+  t.insertAdjacentHTML('afterend','<div class="alt-n">'+esc(notes[k]||'')+'</div>');
+  var all=G.alterations.indexOf('t1')>=0&&G.alterations.indexOf('t2')>=0&&G.alterations.indexOf('t3')>=0;
+  if(all){
+    addEvidence('E6');
+    setTimeout(function(){ solvedCh(SCRIPT.ch3,3); },900);
+  }
+}
+
+
+/* ============================================================
+   11. 内线电话 / 摩尔斯译码：第 6 章
+   ============================================================ */
+var MORSE_SEQ=[
+  {code:'-...', ans:'B', opts:['B','V','D','A']},
+  {code:'..',   ans:'I', opts:['I','E','S','U']},
+  {code:'.',    ans:'E', opts:['E','T','I','S']},
+  {code:'-',    ans:'T', opts:['T','E','M','N']},
+  {code:'..',   ans:'I', opts:['I','S','U','E']},
+  {code:'-.',   ans:'N', opts:['N','K','D','A']},
+  {code:'--.',  ans:'G', opts:['G','Q','Z','M']},
+  {code:'-...', ans:'B', opts:['B','C','Y','X']}
+];
+function morseGlyph(code){
+  var h='';
+  for(var i=0;i<code.length;i++){
+    h+= code.charAt(i)==='-' ? '<i class="m-d"></i>' : '<i class="m-e"></i>';
+  }
+  return h;
+}
+function openPhone(){
+  A.click();
+  if(!chDone(6)&&!G.flags.phoneRang){
+    openPuzzle('内 线 电 话','拨号盘 · 线路 07');
+    panelView('内线电话','线路 07 · 没有来电');
+    $('#pzBody').innerHTML='<div class="q-desc">话筒是凉的。把它贴到耳边，只有线路本身的底噪。</div>'+
+      '<div class="q-hint">这部电话三十年没响过。今晚，它要先响——先把第 1 到第 5 章查完。</div>';
+    act(btn('放 下 听 筒',function(){ Panel.close('puzzleOverlay'); },'ghost'));
+    return;
+  }
+  if(!chDone(6)){ ch6Run(); return; }
+  openPuzzle('内 线 电 话','此后只有忙音');
+  panelView('内线电话','已挂断');
+  $('#pzBody').innerHTML='<div class="q-desc">线路是空的。从那一夜之后，这条线一直响着忙音。</div>';
+  act(btn('放 下 听 筒',function(){ Panel.close('puzzleOverlay'); },'ghost'));
+}
+function ch6Run(){
+  openPuzzle('第 6 章 · 内线电话','线路 07 · 来电');
+  panelView('内线电话 · 来电','敲击 / 停顿 / 敲击');
+  $('#pzBody').innerHTML='<div class="q-desc">话筒里全是电流声。然后是一串有节奏的敲击。</div>'+
+    '<div class="morse-stage" id="morseStage"><div class="q-hint">（译码：把每一组敲击翻成字母。）</div></div>';
+  Sub.play(SCRIPT.ch6a).then(function(){ return Sub.play(SCRIPT.ch6b); }).then(function(){ morseView(); });
+}
+function morseView(){
+  for(var i=0;i<MORSE_SEQ.length;i++) MORSE_SEQ[i].done=false;
+  var h='<div class="morse-rows">';
+  for(var g=0;g<MORSE_SEQ.length;g++){
+    h+='<div class="morse-row"><span class="mr-n">'+pad2(g+1)+'</span>'+
+       '<span class="morse-code">'+morseGlyph(MORSE_SEQ[g].code)+'</span>'+
+       '<span class="morse-slot" id="mslot'+g+'">?</span><span class="mc-opts">';
+    for(var o=0;o<MORSE_SEQ[g].opts.length;o++){
+      h+='<span class="mc-op" data-g="'+g+'" data-o="'+o+'">'+MORSE_SEQ[g].opts[o]+'</span>';
+    }
+    h+='</span></div>';
+    if(g===2||g===6) h+='<div class="morse-gap">（长停顿）</div>';
+  }
+  h+='</div><div class="morse-tab"><b>摩尔斯对照</b>：A ·—　B —···　D —··　E ·　G ——·　I ··　K —·—　M ——　N —·　Q ——·—　S ···　T —　U ··—　V ···—　X —··—　Y —·——　Z ——··</div>';
+  var st=$('#morseStage');
+  if(st){ st.innerHTML=h+'<div class="q-hint">（敲击一共八组。翻成字母，拼起来。）</div>'; }
+  st.onclick=morsePick;
+  Hints.setup('ch6',[
+    '敲得短的是一点，长的一划。数一数每组有几下。',
+    '先在对照表里找到形状相同的字母：—··· 是 B，·· 是 I。',
+    '八组依次是 B I E / T I N G / B——拼音：别听 B 面。'
+  ],true);
+}
+function morsePick(ev){
+  var t=ev.target.closest?ev.target.closest('.mc-op'):null;
+  if(!t) return;
+  var g=+t.getAttribute('data-g'), o=+t.getAttribute('data-o');
+  if(MORSE_SEQ[g].done) return;
+  A.click();
+  if(MORSE_SEQ[g].opts[o]!==MORSE_SEQ[g].ans){
+    wrong('不是这个字母。再数一遍点划的数量和顺序。');
+    return;
+  }
+  MORSE_SEQ[g].done=true;
+  t.classList.add('sel');
+  var slot=$('#mslot'+g); if(slot){ slot.textContent=MORSE_SEQ[g].ans; slot.classList.add('on'); }
+  $$('.mc-op[data-g="'+g+'"]').forEach(function(b){ b.style.pointerEvents='none'; });
+  A.beep(1000,.08,.07,'triangle');
+  var all=true;
+  for(var i=0;i<MORSE_SEQ.length;i++) if(!MORSE_SEQ[i].done) all=false;
+  if(all) morseSolved();
+}
+function morseSolved(){
+  right('八组敲击，全部翻出来了。');
+  var st=$('#morseStage');
+  if(st) st.insertAdjacentHTML('afterbegin','<div class="q-hint lv2" style="display:block">译出：B I E ／ T I N G ／ B　——　拼音：别听 B 面。</div>');
+  G.flags.sideBUnlock=true; saveGame();
+  if(!G.flags.morseHinted) addBadge('morse');
+  setTimeout(function(){ solvedCh(SCRIPT.ch6c,6); },1100);
+}
+
+
+/* ============================================================
+   12. B 面播放 / 航线图：第 7 章
+   ============================================================ */
+function morseSlow(){
+  var seq=['T','A','H','A','I','Z','A','I',null,'F','E','I'];
+  var e=$('#recRead');
+  if(e) e.insertAdjacentHTML('beforeend','<div class="rp-n">（敲击译码：<b id="morseOut"></b>）</div>');
+  var i=0;
+  function step(){
+    if(i>=seq.length) return Promise.resolve();
+    var ch=seq[i]; i++;
+    if(ch===null) return sleep(700).then(step);
+    A.beep(1500,.085,.075,'square');
+    var out=$('#morseOut');
+    if(out) out.textContent += (out.textContent?' ':'')+ch;
+    return sleep(340).then(step);
+  }
+  return step().then(function(){
+    var out=$('#morseOut');
+    if(out) out.parentNode.insertAdjacentHTML('afterend','<div class="rp-n">（T A H A I Z A I　F E I　——　他还在飞。）</div>');
+  });
+}
+function recPlayB(){
+  if(Rec.playing) return;
+  Rec.playing=true;
+  if(Rec.wb) Rec.wb.stop();
+  Rec.wb=new WaveBox($('#recWave')); Rec.wb.start();
+  A.hiss(true,.04); A.tape(3.2,{vol:.055});
+  var e=$('#recRead'); if(e) e.innerHTML='<div class="rp-n">B 面 · 倒着放。</div>';
+  Sub.play([
+    {note:'（B 面。倒着放：六段通话被剪开、打乱，重新粘在一起。）'},
+    {note:'（剪接点全是杂音。有人在这盘带子上动过刀。）'},
+    {note:'（末尾有八秒的静默。静默里，有一段极轻的敲击。）'}
+  ]).then(morseSlow).then(function(){
+    Rec.playing=false;
+    if(Rec.wb){ Rec.wb.stop(); Rec.wb=null; }
+    A.hiss(false);
+    if(!G.stats.sideB){ G.stats.sideB=true; saveGame(); refreshDesk(); }
+    if(!G.flags.heardStillFlying){ G.flags.heardStillFlying=true; saveGame(); }
+    if(G.stats.sideA) addBadge('listen');
+    var e2=$('#recRead');
+    if(e2) e2.insertAdjacentHTML('beforeend','<div class="rp-n">（B 面放完了。带子那头的敲击，一共十一个字母。）</div>');
+  });
+}
+
+/* ---------- 第 7 章 · 航线图 ---------- */
+var MAP_O=[70,370], MAP_PLAN=42;
+function mapPts(){
+  var d=(MAP_PLAN-27)*Math.PI/180;
+  var noise=[[0,-6],[4,4],[-3,7],[6,-3],[-5,-4],[2,8],[-6,2],[5,5],[-2,-8],[7,1],[-4,-2]];
+  var a=[];
+  for(var i=0;i<11;i++){
+    var t=80+i*52;
+    a.push([MAP_O[0]+Math.cos(d)*t+noise[i][0], MAP_O[1]-Math.sin(d)*t+noise[i][1]]);
+  }
+  return a;
+}
+function openMap(){
+  A.click();
+  if(!chDone(6)){
+    openPuzzle('航 线 图','卷宗未到');
+    panelView('航线图','调阅需要授权');
+    $('#pzBody').innerHTML='<div class="q-desc">这一件还压在档案室深处。先把桌上那条线路的事情办完。</div>';
+    act(btn('关 上 抽 屉',function(){ Panel.close('puzzleOverlay'); },'ghost'));
+    return;
+  }
+  openPuzzle('第 7 章 · 消失的航线','雷达回波 · 11 个残点');
+  mapView();
+}
+function mapView(){
+  panelView('航线图 · NB704','1998-11-27 · 21:23 — 21:47');
+  $('#pzBody').innerHTML=
+    '<div class="map-wrap"><canvas id="mapCv" width="800" height="450"></canvas></div>'+
+    '<div class="map-bar"><span class="mono" style="color:#8492a4;font-size:12px">航向修正</span>'+
+      '<input type="range" id="mapAng" min="0" max="45" value="14" style="width:min(300px,50vw)">'+
+      '<span class="mono" id="mapVal" style="color:#e3ab54;font-size:12.5px">偏离 14°</span>'+
+      '<button class="btn sm primary" id="mapOk">确 认 航 向</button></div>'+
+    '<div class="q-desc" id="mapNote" style="margin-top:10px">十一个残点，连起来是一条很干净的弧线。拖动滑块，让航线正好穿过它们。</div>';
+  $('#mapAng').addEventListener('input',function(){ mapDraw(+this.value); });
+  $('#mapOk').addEventListener('click',function(){ mapCheck(+$('#mapAng').value); });
+  G.flags.mapTraced=false;
+  mapDraw(14);
+  Hints.setup('ch7',[
+    '先看点连成的方向，再看那条虚线（计划航路）的方向，两个方向差多少度。',
+    '计划航路是 42°，残点的方向大约 15°。差值就是偏离角。',
+    '把滑块调到 27°。修正线会正好穿过全部十一个残点。'
+  ]);
+}
+function mapDraw(ang){
+  var c=$('#mapCv'); if(!c) return;
+  var x=c.getContext('2d');
+  x.clearRect(0,0,800,450);
+  x.fillStyle='#0b1016'; x.fillRect(0,0,800,450);
+  x.strokeStyle='rgba(90,120,150,.14)'; x.lineWidth=1;
+  for(var gx=0;gx<=800;gx+=40){ x.beginPath(); x.moveTo(gx,0); x.lineTo(gx,450); x.stroke(); }
+  for(var gy=0;gy<=450;gy+=40){ x.beginPath(); x.moveTo(0,gy); x.lineTo(800,gy); x.stroke(); }
+  var pr=MAP_PLAN*Math.PI/180;
+  x.strokeStyle='rgba(140,170,200,.5)'; x.setLineDash([6,6]); x.lineWidth=1.5;
+  x.beginPath(); x.moveTo(MAP_O[0],MAP_O[1]); x.lineTo(MAP_O[0]+Math.cos(pr)*470, MAP_O[1]-Math.sin(pr)*470); x.stroke();
+  x.setLineDash([]);
+  x.font='11px monospace'; x.fillStyle='rgba(140,170,200,.65)';
+  x.fillText('计划航路', MAP_O[0]+Math.cos(pr)*470+8, MAP_O[1]-Math.sin(pr)*470+4);
+  var pts=mapPts();
+  x.fillStyle='#e3ab54';
+  for(var i=0;i<pts.length;i++){ x.beginPath(); x.arc(pts[i][0],pts[i][1],3.2,0,6.3); x.fill(); }
+  var fit=Math.abs(ang-27)<=1;
+  var cur=(MAP_PLAN-ang)*Math.PI/180;
+  x.strokeStyle=fit?'#7fe3a1':'rgba(227,171,84,.85)'; x.lineWidth=2;
+  x.beginPath(); x.moveTo(MAP_O[0],MAP_O[1]); x.lineTo(MAP_O[0]+Math.cos(cur)*640, MAP_O[1]-Math.sin(cur)*640); x.stroke();
+  x.fillStyle='#e3ab54'; x.beginPath(); x.arc(MAP_O[0],MAP_O[1],4.5,0,6.3); x.fill();
+  if(G.flags.mapTraced&&hasEv('E11')){
+    var p=pts[10];
+    x.strokeStyle='rgba(127,227,161,.85)'; x.setLineDash([4,5]); x.lineWidth=1.6;
+    x.beginPath(); x.moveTo(770,50); x.lineTo(p[0],p[1]); x.stroke();
+    x.setLineDash([]);
+    x.fillStyle='#7fe3a1'; x.beginPath(); x.arc(p[0],p[1],6.5,0,6.3); x.fill();
+    x.font='12px monospace'; x.fillStyle='#7fe3a1'; x.fillText('X-71', 700, 82);
+  }
+  var v=$('#mapVal'); if(v) v.textContent='偏离 '+ang+'°'+(fit?' · 贴合':'');
+}
+function mapCheck(ang){
+  if(Math.abs(ang-27)>1){ wrong('这条线穿不过那些点。差得还远。'); return; }
+  right('27°。这一条弧线，十一个残点全在线上。');
+  addEvidence('E11');
+  G.flags.mapTraced=true; saveGame();
+  mapDraw(ang);
+  var n=$('#mapNote');
+  if(n) n.innerHTML='弧线尽头，东北方向，浮出第二个回波。<b>点它。</b>';
+  var c=$('#mapCv'); if(c) c.onclick=mapTap;
+  setTimeout(function(){ Sub.play(SCRIPT.ch7a); },700);
+}
+function mapTap(ev){
+  var c=$('#mapCv'); if(!c) return;
+  var rect=c.getBoundingClientRect();
+  var mx=(ev.clientX-rect.left)*(800/rect.width), my=(ev.clientY-rect.top)*(450/rect.height);
+  var p=mapPts()[10];
+  if(Math.abs(mx-p[0])>30||Math.abs(my-p[1])>30){ A.thunk(); return; }
+  c.onclick=null;
+  A.beep(880,.12,.09,'triangle');
+  addEvidence('E12');
+  setTimeout(function(){ solvedCh(SCRIPT.ch7b,7); },800);
+}
+
+
+/* ============================================================
+   7. 证据板 / 徽章 / 剪报 / 日志
+   ============================================================ */
+function markSeenEv(){ G.flags.seenEv=G.evidence.length; saveGame(); refreshTop(); }
+
+var Board={chain:'A'};
+function openEvidence(){ markSeenEv(); renderBoard(); Panel.open('boardOverlay'); }
+function renderBoard(){
+  var cs=$('#evChains'), ls=$('#evList');
+  if(!cs||!ls) return;
+  var h='', i, k, j;
+  for(i=0;i<CHAINS.length;i++){
+    var c=CHAINS[i], got=0;
+    for(k=0;k<c.ids.length;k++) if(hasEv(c.ids[k])) got++;
+    h+='<button class="ev-chain'+(Board.chain===c.key?' on':'')+(got===c.ids.length?' done':'')+'" data-c="'+c.key+'">'+
+       '<div class="ec-nm">'+esc(c.name)+'</div>'+
+       '<div class="ec-ct">'+got+' / '+c.ids.length+'　'+c.ids.join(' · ')+'</div></button>';
+  }
+  cs.innerHTML=h;
+  cs.onclick=function(e){
+    var b=e.target.closest?e.target.closest('[data-c]'):null;
+    if(!b) return; Board.chain=b.getAttribute('data-c'); A.click(); renderBoard();
+  };
+  var cur=null;
+  for(j=0;j<CHAINS.length;j++) if(CHAINS[j].key===Board.chain) cur=CHAINS[j];
+  var lh='', doneN=0;
+  for(j=0;j<cur.ids.length;j++){
+    var ev=evById(cur.ids[j]);
+    var ok=hasEv(ev.id); if(ok) doneN++;
+    lh+='<div class="ev-item'+(ok?'':' locked')+'">'+
+        '<span class="ei-id">'+ev.id+'</span>'+
+        '<span style="flex:1;min-width:0">'+
+        '<div class="ei-tx">'+(ok?(esc(ev.title)+'　'+esc(ev.text)):'未登记')+'</div>'+
+        '<div class="ei-meta">'+esc(cur.name)+'　'+(ok?'已登记':'待查证')+'</div>'+
+        '</span></div>';
+  }
+  if(!doneN) lh+='<div class="ev-empty">这一条链上还没有任何登记。</div>';
+  ls.innerHTML=lh;
+  var s=$('#boardSub');
+  if(s) s.textContent='已登记 '+G.evidence.length+' / 12　·　'+cur.name.replace('链 ','链 ');
+}
+function openBadges(){ renderBadges(); Panel.open('badgeOverlay'); }
+function renderBadges(){
+  var g=$('#badgeGrid'); if(!g) return;
+  var h='', i;
+  for(i=0;i<BADGES.length;i++){
+    var b=BADGES[i], on=hasBadge(b.id);
+    h+='<div class="badge-card'+(on?' on':'')+'">'+
+       '<div class="bd-ic">'+b.ic+'</div>'+
+       '<div class="bd-nm">'+(on?esc(b.name):'未获得')+'</div>'+
+       '<div class="bd-ds">'+esc(b.desc)+'</div></div>';
+  }
+  g.innerHTML=h;
+  var s=$('#badgeSub'); if(s) s.textContent=G.badges.length+' / '+BADGES.length;
+}
+function openEggs(){ renderEggs(); Panel.open('eggOverlay'); }
+function renderEggs(){
+  var g=$('#eggGrid'); if(!g) return;
+  var h='', i;
+  for(i=0;i<EGGS.length;i++){
+    var e=EGGS[i], on=hasEgg(i);
+    h+='<button class="egg-card'+(on?' got':'')+'" data-egg="'+i+'">'+
+       '<div class="eg-tp">'+(on?esc(e.t):'剪 报 · 未 收 录')+'</div>'+
+       '<div class="eg-hd">'+(on?esc(e.h):'— — —')+'</div>'+
+       '<div class="eg-bd">'+(on?esc(e.b):'旧报纸的一角，压在这一箱档案的底下。还没找到这一张。')+'</div>'+
+       '</button>';
+  }
+  g.innerHTML=h;
+  g.onclick=function(e){
+    var b=e.target.closest?e.target.closest('[data-egg]'):null;
+    if(!b) return;
+    var i2=+b.getAttribute('data-egg');
+    if(!hasEgg(i2)){ A.thunk(); Toast.show('这一张剪报还没找到。',''); return; }
+    eggView(i2);
+  };
+  var s=$('#eggSub'); if(s) s.textContent=G.eggs.length+' / '+EGGS.length+' 则剪报';
+}
+function eggView(i){
+  var e=EGGS[i];
+  openPuzzle(e.t, e.h);
+  $('#pzBody').innerHTML='<div class="docpaper">'+esc(e.b)+'</div>'+
+    '<div style="margin-top:12px;font-size:11.5px;color:var(--dimmer);line-height:1.9">剪报存于档案箱底层。与本案无关，只是一些同类事件的记录。</div>';
+  puzzleFoot('<button class="btn sm" data-close="puzzleOverlay">收 起</button>');
+}
+function openLog(){
+  var b=$('#logBody'); if(!b) return;
+  var L=(G.flags.log||[]);
+  if(!L.length){ b.innerHTML='<div class="ev-empty">还没有记录。</div>'; }
+  else{
+    var h='<div class="loglist">', i;
+    for(i=0;i<L.length;i++){
+      h+='<div class="logrow"><div class="lt">'+esc(L[i].t)+'</div><div class="lx">'+esc(L[i].x)+'</div></div>';
+    }
+    b.innerHTML=h+'</div>';
+  }
+  Panel.open('logOverlay');
+}
+
+/* ---------- 剪报发放 ---------- */
+var EGG_BY_CH={0:[0,1],1:[2,3],2:[4,5],3:[6,7],4:[8,9],5:[10],6:[11]};
+function grantEggs(id){
+  var a=EGG_BY_CH[id];
+  if(!a) return;
+  for(var i=0;i<a.length;i++) addEgg(a[i]);
+}
+
+
+/* ============================================================
+   8. 菜单 / 章节选择 / 说明 / 标题与存档
+   ============================================================ */
+function chapDesc(id){
+  var d={
+    0:'档案箱搬进地下二层的那一晚。',
+    1:'磁带里六段通话，时间全乱了。',
+    2:'名单第 17 行，有一个人没有名字。',
+    3:'同一夜，两本日志，其中一本被改过。',
+    4:'那一夜的天气，报文和法律文件说的不一样。',
+    5:'更换单第 8 行，704 三个字被重写过。',
+    6:'内线电话响了。对面在敲一段节奏。',
+    7:'十一个残点，一条不属于它的航线。'
+  };
+  return d[id]||'档案室深处。';
+}
+function openMenu(){
+  var b=$('#menuBody'); if(!b) return;
+  Panel.open('menuOverlay');
+  b.innerHTML=
+    '<div class="menulist">'+
+    '<button class="btn primary" id="mnBack">继 续 值 班</button>'+
+    '<button class="btn ghost" id="mnChap">章 节 选 择</button>'+
+    '<button class="btn ghost" id="mnAbout">档 案 说 明</button>'+
+    '<button class="btn ghost" id="mnTitle">回 到 标 题</button>'+
+    '<button class="btn ghost" id="mnReset">重 置 存 档</button>'+
+    '</div>'+
+    '<div style="margin-top:14px;font-size:11.5px;color:var(--dimmer);line-height:1.9">'+
+    '工号 '+(G.playerId||'—')+'　·　证据 '+G.evidence.length+' / 12　·　徽章 '+G.badges.length+' / 5<br>'+
+    '进度自动保存在本机，关掉页面不会丢失。</div>';
+  $('#mnBack').onclick=function(){ Panel.close('menuOverlay'); };
+  $('#mnChap').onclick=function(){ Panel.close('menuOverlay'); openChapters(); };
+  $('#mnAbout').onclick=function(){ Panel.close('menuOverlay'); openAbout(); };
+  $('#mnTitle').onclick=function(){ Panel.close('menuOverlay'); backToTitle(); };
+  $('#mnReset').onclick=function(){ Panel.close('menuOverlay'); confirmReset(); };
+}
+function openChapters(){
+  var h='<div class="chap-grid">', i;
+  for(i=0;i<CHAPTERS.length;i++){
+    var c=CHAPTERS[i], un=(chDone(c.id)||c.id<=G.chapter);
+    h+='<button class="chap-card'+(un?'':' lock')+'" data-ch="'+c.id+'">'+
+       '<div class="cc-n">'+(un?'已解锁':'未解锁')+'</div>'+
+       '<div class="cc-t">'+esc(c.name)+'</div>'+
+       '<div class="cc-d">'+esc(chapDesc(c.id))+'</div></button>';
+  }
+  h+='</div>';
+  openPuzzle('章 节 选 择','回到已经查证过的那一夜');
+  var body=$('#pzBody');
+  body.innerHTML=h;
+  puzzleFoot('<button class="btn sm" data-close="puzzleOverlay">关 闭</button>');
+  body.onclick=function(e){
+    var b=e.target.closest?e.target.closest('[data-ch]'):null;
+    if(!b) return;
+    var id=+b.getAttribute('data-ch');
+    if(!(chDone(id)||id<=G.chapter)){ A.thunk(); Toast.show('这一章还没有解锁。',''); return; }
+    Panel.close('puzzleOverlay');
+    A.click();
+    chapJump(id);
+  };
+}
+function chapJump(id){
+  if(id<=0){ Toast.show('序章没有单独的谜题。',''); return; }
+  if(id===1) return openRecorder();
+  if(id===2||id===4||id===5) return openArchive();
+  if(id===3) return openTowerLog();
+  if(id===6) return openPhone();
+  if(id===7) return openMap();
+  if(id===8) return openFinal();
+}
+function openAbout(){
+  var b=$('#aboutBody'); if(!b) return;
+  b.innerHTML=
+    '<div class="docpaper">'+
+    '<span class="hl">操作</span>\n'+
+    '· 桌面上有七件东西。点它们。\n'+
+    '· 台灯的角度会改变纸面的受光，压痕只在特定角度显形。\n'+
+    '· 录音机可以播放、倒带、翻面。翻面需要先知道带子上写着什么。\n'+
+    '· 谜题连错三次，会出现三级提示。提示不扣分，也不影响结局。\n\n'+
+    '<span class="hl">存档</span>\n'+
+    '· 每完成一章自动保存一次，键名 no-reply-save。\n'+
+    '· 保存在本机浏览器里，不上传任何数据。\n'+
+    '· 本机不允许写入时，进度只留在内存，关掉页面即消失。\n\n'+
+    '<span class="hl">结局</span>\n'+
+    '· 终章有三个出口。证据越全，能走的路越多。\n'+
+    '· 其中一条路，需要把五枚徽章全部收齐，并且在最后保持沉默。\n\n'+
+    '<span class="dim">本作全部音效由浏览器实时合成，不含任何外部音频文件。</span>'+
+    '</div>';
+  Panel.open('aboutOverlay');
+}
+function confirmReset(){
+  openPuzzle('重 置 存 档','此操作不可恢复');
+  $('#pzBody').innerHTML=
+    '<div class="q-desc">重置会清空本机保存的全部进度：工号、已登记的证据、徽章、剪报、章节与结局记录。<br>'+
+    '清空之后，一切回到第一个夜班。</div>';
+  puzzleFoot('<button class="btn sm" data-close="puzzleOverlay">取 消</button>'+
+             '<button class="btn sm primary" id="rsOk">确 认 重 置</button>');
+  $('#rsOk').onclick=function(){
+    Store.clear();
+    location.reload();
+  };
+}
+
+/* ---------- 画面切换 ---------- */
+function showScreen(id){
+  $$('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var e=$('#'+id); if(e) e.classList.add('active');
+}
+function refreshTitleButtons(){
+  var has=!!Store.read();
+  var bc=$('#btnContinue'), bch=$('#btnChapters');
+  if(bc) bc.classList.toggle('hidden', !has);
+  if(bch) bch.classList.toggle('hidden', !has);
+}
+function enterGame(){
+  ensureSession();
+  A.init(); A.resume(); A.rain(true,.05);
+  showScreen('gameScreen');
+  refreshAll();
+}
+function startNew(){
+  newGame(); saveGame();
+  enterGame();
+  A.click();
+  Sub.play([{note:'（一九九八年十一月二十七日，夜里十点。你把外套挂在门后的钩子上。）'}]).then(function(){
+    return runPrologue();
+  });
+}
+function continueGame(){
+  if(!loadGame()){ startNew(); return; }
+  enterGame();
+  Sub.play([{note:'（你接着上一个夜班。桌上还是那一箱没归类的旧档案。）'}]).then(function(){
+    refreshAll();
+    if(!G.flags.prologueDone) return runPrologue();
+    Toast.show('进度已读取 · '+chapterName(G.chapter),'ach');
+  });
+}
+function backToTitle(){
+  Sub.clear();
+  A.hiss(false);
+  A.rain(true,.05);
+  refreshTitleButtons();
+  showScreen('titleScreen');
+}
+
+/* ---------- 标题雨 / 顶栏 / tabbar ---------- */
+function startTitleRain(){
+  var c=$('#rainCanvas'); if(!c) return;
+  var x=c.getContext('2d'), drops=[], i;
+  function size(){ c.width=c.clientWidth||window.innerWidth; c.height=c.clientHeight||window.innerHeight; }
+  size();
+  window.addEventListener('resize',size);
+  for(i=0;i<140;i++){
+    drops.push({x:Math.random()*c.width,y:Math.random()*c.height,l:8+Math.random()*18,v:3.4+Math.random()*6});
+  }
+  (function loop(){
+    x.clearRect(0,0,c.width,c.height);
+    x.strokeStyle='rgba(160,190,220,.22)'; x.lineWidth=1;
+    for(var k=0;k<drops.length;k++){
+      var d=drops[k];
+      x.beginPath(); x.moveTo(d.x,d.y); x.lineTo(d.x-1.4,d.y+d.l); x.stroke();
+      d.y+=d.v; d.x-=.5;
+      if(d.y>c.height){ d.y=-24; d.x=Math.random()*c.width; }
+    }
+    requestAnimationFrame(loop);
+  })();
+}
+function initTabbar(){
+  var t=$('#tabbar'); if(!t) return;
+  t.innerHTML='';
+  var items=[['🗂','证据板',openEvidence],['🏅','徽章',openBadges],['🗞','剪报',openEggs],['📓','日志',openLog],['☰','菜单',openMenu]];
+  items.forEach(function(it){
+    var b=document.createElement('button');
+    b.innerHTML='<span>'+it[0]+'</span><span class="tb-nm">'+it[1]+'</span>';
+    b.onclick=function(){ it[2](); };
+    t.appendChild(b);
+  });
+}
+function initUI(){
+  function bind(id,fn){ var e=$('#'+id); if(e) e.onclick=fn; }
+  bind('tbBoard',openEvidence); bind('tbBadge',openBadges); bind('tbEgg',openEggs);
+  bind('tbLog',openLog); bind('tbMenu',openMenu);
+  bind('btnNew',startNew); bind('btnContinue',continueGame);
+  bind('btnChapters',openChapters); bind('btnAbout',openAbout); bind('btnReset',confirmReset);
+  $$('.obj').forEach(function(o){
+    o.onclick=function(){ openObj(o.getAttribute('data-obj')); };
+  });
+  initTabbar();
+  refreshTitleButtons();
+  window.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      if(Panel.isOpen('puzzleOverlay')) Panel.close('puzzleOverlay');
+      else if(Panel.isOpen('boardOverlay')) Panel.close('boardOverlay');
+      else if(Panel.isOpen('badgeOverlay')) Panel.close('badgeOverlay');
+      else if(Panel.isOpen('eggOverlay')) Panel.close('eggOverlay');
+      else if(Panel.isOpen('logOverlay')) Panel.close('logOverlay');
+      else if(Panel.isOpen('aboutOverlay')) Panel.close('aboutOverlay');
+      else if(Panel.isOpen('menuOverlay')) Panel.close('menuOverlay');
+      else Sub.fast();
+      e.preventDefault();
+    }
+    if(e.code==='Space'&&!Panel.cur){ Sub.fast(); e.preventDefault(); }
+  });
+}
+
+/* ============================================================
+   13. 终章：三个出口
+   ============================================================ */
+var ENDINGS={
+  A:{
+    code:'ENDING A', name:'归 档', tag:'官方结论 · 维持原判',
+    lines:[
+      '（你按要求写了两页纸。不多，不少。）',
+      '（摘要归入卷宗。编号 X-71 的那一页，仍然写着：档案遗失。）',
+      '（那盒带子第二天被回收，放进库房最深的一排。）',
+      '（没有人再问起九八年那一夜。你也没有再提起。）'
+    ],
+    body:['你是唯一一个把全部证据都看过的人。','看完，然后闭嘴。也是一种归档。']
+  },
+  B:{
+    code:'ENDING B', name:'举 旗', tag:'原件上交 · 记录公开',
+    lines:[
+      '（你把原件全部抽了出来，逐页编号、抄录，做成两份。）',
+      '（一份放进摘要，一份投进信访箱。你没有留副本。）',
+      '（三个月后，一纸通告：对 1998 年 11 月 27 日 NB704 事件「重新核查」。）',
+      '（通告只有一页。没有道歉，没有解释。但「强对流」三个字不见了。）'
+    ],
+    body:['档案室第三十七号灯管闪了一下，然后稳定下来。','你终于把那盒带子，从二十五年里拿了出来。']
+  },
+  C:{
+    code:'ENDING C', name:'无 应 答', tag:'第三面 · 仍在飞',
+    lines:[
+      '（你没有写摘要。你把带子翻到了第三面。）',
+      '（没有声音。没有底噪。没有八秒静默之后的敲击。）',
+      '（只有一条极弱的信号，像有人在很远的地方敲墙。）',
+      '（敲的不是摩尔斯电码。是你的工号。）',
+      '（你按下录音键，回了一段：同样的节奏。）',
+      '（第二天早上，主任来取带子。桌上只有两页空白纸。）',
+      '（你不在。）',
+      '（雷达屏幕上一个新的回波，正朝东北方向，缓慢移动。）'
+    ],
+    body:['无应答。不是沉默，是不回答。','这一次，它在等的人，是你。']
+  }
+};
+function endingById(k){ return ENDINGS[k]||ENDINGS.A; }
+var END_ORDER=['A','B','C'];
+function endSeen(k){ return !!(G.flags.endings&&G.flags.endings[k]); }
+function endUnlock(k){
+  if(k==='B') return G.evidence.length>=10;
+  if(k==='C') return G.badges.length>=BADGES.length&&!!G.flags.heardStillFlying;
+  return true;
+}
+function footOf(k){
+  if(k==='A') return '通关卡 · 已生成　·　归档结局　·　证据 '+G.evidence.length+' / 12';
+  if(k==='B') return '通关卡 · 已生成　·　举旗结局（成就「举旗者」）　·　证据 '+G.evidence.length+' / 12';
+  return '通关卡 · 已生成　·　无应答结局（隐藏）　·　徽章 '+G.badges.length+' / '+BADGES.length;
+}
+function openFinal(){
+  A.click();
+  if(!chDone(7)){
+    openPuzzle('终 章 · 无 应 答','封存箱还锁着');
+    $('#pzBody').innerHTML='<div class="q-desc">箱盖纹丝不动。第 7 章那条航线，先校订完。</div>';
+    act(btn('关 上 抽 屉',function(){ Panel.close('puzzleOverlay'); },'ghost'));
+    return;
+  }
+  openPuzzle('终 章 · 无 应 答','天快亮了 · 摘要还没写');
+  var okB=endUnlock('B'), okC=endUnlock('C');
+  $('#pzBody').innerHTML=
+    '<div class="dlg">'+
+    '<div class="dline me"><div class="who">你（独白）</div><div class="say">"桌上摊着两页空白纸。天亮之前，主任要一份摘要。"</div></div>'+
+    '<div class="dline"><div class="who">你（独白）</div><div class="say">"写什么，怎么写，由我。"</div></div>'+
+    '</div>'+
+    '<div class="q-desc">'+
+    '<b class="mono" style="color:#e3ab54">归档</b>　按官方结论写两页，把箱子还回去。<br>'+
+    '<b class="mono" style="color:#e3ab54">上交</b>　抽走全部原件，编号抄录，一并交上去。'+(okB?'':'<span style="color:#5b6779">（证据未满 10 条）</span>')+'<br>'+
+    '<b class="mono" style="color:#e3ab54">无应答</b>　不写摘要，把带子翻到第三面。'+(okC?'':'<span style="color:#5b6779">（需 5 枚徽章，且已听过 B 面）</span>')+
+    '</div>';
+  act(
+    btn('归 档 · 写 两 页 纸',function(){ pickEnding('A'); },'primary'),
+    btn('上 交 · 抽 走 原 件',function(){ pickEnding('B'); },'ghost'),
+    btn('无 应 答 · 翻 到 第 三 面',function(){ pickEnding('C'); },'ghost')
+  );
+}
+function pickEnding(k){
+  if(!endUnlock(k)){
+    if(k==='B'){ wrong('证据摊不满一页纸。先把该看的看完。'); return; }
+    wrong('这盒带子的第三面，你还没有资格翻。'); return;
+  }
+  playEnding(k);
+}
+function playEnding(k){
+  var E=endingById(k);
+  Panel.close('puzzleOverlay');
+  if(!G.flags.endings) G.flags.endings={};
+  var first=!G.flags.endings[k];
+  G.flags.endings[k]=true; G.ending=k;
+  if(k==='B') G.flags.flag=true;
+  if(k==='C') G.flags.noReply=true;
+  saveGame();
+  var note=(k==='A')?'（你拿起笔。）':((k==='B')?'（你把原件从箱底抽出来。）':'（你把带子翻到第三面。）');
+  Sub.play([{note:note}]).then(function(){
+    if(k==='A'){ A.tape(3.4,{vol:.05}); A.hum(true); setTimeout(function(){ A.hum(false); },5200); }
+    else if(k==='B'){ A.beep(760,.18,.11,'triangle'); setTimeout(function(){ A.knock(.14,.2); },420); }
+    else { A.staticBurst(3.6,.05); setTimeout(function(){ A.knock(.09,.12); },900); }
+    if(first) logAdd('终章 · 走的是「'+E.name.replace(/\s/g,'')+'」这条路。');
+    renderEnding(k);
+  });
+}
+function renderEnding(k){
+  var E=endingById(k), host=$('#endingOverlay'); if(!host) return;
+  var i,h='';
+  for(i=0;i<E.lines.length;i++) h+='<p class="qt">'+esc(E.lines[i])+'</p>';
+  host.innerHTML=
+    '<div class="ending-wrap">'+
+    '<div class="en-tag">'+esc(E.code)+'</div>'+
+    '<div class="en-name">'+esc(E.name)+'</div>'+
+    '<div class="en-code">'+esc(E.tag)+'</div>'+
+    '<div class="en-body">'+h+
+      '<p class="em">'+esc(E.body[0])+'</p>'+
+      '<p class="em">'+esc(E.body[1])+'</p>'+
+    '</div>'+
+    '<div class="en-foot">'+esc(footOf(k))+'</div>'+
+    '<div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+
+      '<button class="btn sm primary" id="enCard">查 看 通 关 卡</button>'+
+      '<button class="btn sm ghost" id="enAgain">再 看 一 遍</button>'+
+      '<button class="btn sm ghost" id="enTitle">回 到 标 题</button>'+
+    '</div></div>';
+  host.classList.add('open'); Panel.cur='endingOverlay';
+  $('#enCard').onclick=function(){ showCard(k); };
+  $('#enAgain').onclick=function(){ host.classList.remove('open'); Panel.cur=null; playEnding(k); };
+  $('#enTitle').onclick=function(){ Panel.close('endingOverlay'); backToTitle(); };
+  A.click();
+}
+function openEndings(){
+  openPuzzle('结 局 档 案','三个出口 · 走到哪儿算哪儿');
+  var h='<div class="egg-grid">', i;
+  for(i=0;i<END_ORDER.length;i++){
+    var k=END_ORDER[i], E=endingById(k), on=endSeen(k);
+    h+='<button class="egg-card'+(on?' got':'')+'" data-end="'+k+'">'+
+       '<div class="eg-tp">'+(on?esc(E.code):'ENDING ?')+'</div>'+
+       '<div class="eg-hd">'+(on?esc(E.name):'— — —')+'</div>'+
+       '<div class="eg-bd">'+(on?(esc(E.body[0])+'　'+esc(E.body[1])):'还没有走到这个出口。')+'</div>'+
+       '</button>';
+  }
+  h+='</div>';
+  $('#pzBody').innerHTML=h;
+  act(btn('关 上',function(){ Panel.close('puzzleOverlay'); },'ghost'));
+  $('#pzBody').onclick=function(e){
+    var b=e.target.closest?e.target.closest('[data-end]'):null;
+    if(!b) return;
+    var k2=b.getAttribute('data-end');
+    if(!endSeen(k2)){ A.thunk(); Toast.show('这个出口还没有走到。',''); return; }
+    Panel.close('puzzleOverlay'); renderEnding(k2);
+  };
+}
+
+/* ============================================================
+   14. 通关卡（Canvas 800×450）/ 入口绑定 / 收口
+   ============================================================ */
+function durMin(){
+  var st=G.stats.started;
+  if(!st) return '—';
+  return Math.max(1, Math.round((Date.now()-st)/60000));
+}
+function ensureSession(){
+  if(!G.stats.started){ G.stats.started=Date.now(); saveGame(); }
+}
+function drawCard(k){
+  var c=$('#cardCanvas'); if(!c) return;
+  var x=c.getContext('2d'), W=800, H=450, E=endingById(k), i;
+  var g=x.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#0c1119'); g.addColorStop(1,'#070a0f');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.strokeStyle='rgba(90,120,150,.08)'; x.lineWidth=1;
+  for(i=0;i<=W;i+=25){ x.beginPath(); x.moveTo(i,0); x.lineTo(i,H); x.stroke(); }
+  for(i=0;i<=H;i+=25){ x.beginPath(); x.moveTo(0,i); x.lineTo(W,i); x.stroke(); }
+  x.strokeStyle='rgba(120,150,180,.2)'; x.strokeRect(14.5,14.5,W-29,H-29);
+  x.fillStyle='#e3ab54'; x.font='700 40px "PingFang SC","Hiragino Sans GB",sans-serif';
+  x.fillText('无 应 答', 48, 96);
+  x.fillStyle='#8492a4'; x.font='13px monospace';
+  x.fillText('NO REPLY · MARVIS ARCHIVE · NIGHT SHIFT', 50, 122);
+  x.strokeStyle='rgba(120,150,180,.25)';
+  x.beginPath(); x.moveTo(48,142); x.lineTo(W-48,142); x.stroke();
+  x.fillStyle='#6fd39a'; x.font='13px monospace'; x.fillText(E.code+'　'+E.tag, 50, 172);
+  x.fillStyle='#e8eef7'; x.font='700 30px "PingFang SC","Hiragino Sans GB",sans-serif';
+  x.fillText(E.name, 48, 214);
+  var rows=[
+    ['值 班 工 号', G.playerId||'—'],
+    ['证 据', G.evidence.length+' / 12'],
+    ['徽 章', G.badges.length+' / '+BADGES.length],
+    ['剪 报', G.eggs.length+' / 12'],
+    ['章 节', G.done.length+' / 9'],
+    ['用 时', durMin()+' 分钟']
+  ];
+  for(i=0;i<rows.length;i++){
+    var col=i%2, row=Math.floor(i/2), bx=50+col*350, by=256+row*34;
+    x.fillStyle='#5b6779'; x.font='12px monospace'; x.fillText(rows[i][0], bx, by);
+    x.fillStyle='#c9d2de'; x.font='13px monospace'; x.fillText(rows[i][1], bx+94, by);
+  }
+  var extra='';
+  if(G.flags.flag) extra+='成就 · 举旗者　';
+  if(k==='C') extra+='隐藏出口　';
+  x.fillStyle='#e3ab54'; x.font='12px monospace';
+  if(extra) x.fillText(extra.replace(/\s+$/,''), 50, 372);
+  x.save(); x.translate(W-120,370); x.rotate(-0.13);
+  x.strokeStyle='rgba(224,105,95,.6)'; x.lineWidth=3;
+  x.beginPath(); x.arc(0,0,52,0,6.3); x.stroke();
+  x.fillStyle='rgba(224,105,95,.72)'; x.textAlign='center';
+  x.font='700 20px "Songti SC","STSong",serif'; x.fillText('存 档', 0, -4);
+  x.font='12px monospace'; x.fillText(esc(k)+' · '+dateStr(), 0, 22);
+  x.restore(); x.textAlign='left';
+  x.fillStyle='#5b6779'; x.font='11px monospace';
+  x.fillText('离线单文件 · 无网络 · 无上传 · 存档仅保存在本机', 50, 412);
+}
+function showCard(k){
+  k=k||G.ending||'A';
+  var host=$('#cardOverlay'); if(!host) return;
+  host.innerHTML=
+    '<div class="ending-wrap" style="text-align:center">'+
+    '<div class="en-tag">NIGHT SHIFT CARD</div>'+
+    '<div class="en-name" style="font-size:20px">通 关 卡</div>'+
+    '<div style="margin:16px 0"><canvas id="cardCanvas" width="800" height="450" style="width:100%;max-width:760px;border-radius:12px;border:1px solid #1e2736"></canvas></div>'+
+    '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+
+      '<button class="btn sm primary" id="cardDl">下 载 通 关 卡</button>'+
+      '<button class="btn sm ghost" id="cardClose">关 闭</button>'+
+    '</div></div>';
+  host.classList.add('open'); Panel.cur='cardOverlay';
+  drawCard(k);
+  $('#cardDl').onclick=function(){ downloadCard(k); };
+  $('#cardClose').onclick=function(){ Panel.close('cardOverlay'); };
+}
+function downloadCard(k){
+  var c=$('#cardCanvas'); if(!c) return;
+  try{
+    var url=c.toDataURL('image/png');
+    var a=document.createElement('a');
+    a.href=url; a.download='无应答_通关卡_'+k+'.png';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    Toast.show('通关卡已存到下载目录','ach');
+  }catch(e){
+    Toast.show('这张卡只能看，存不下来。','');
+  }
+}
+function bindEndingsEntry(){
+  if($('#btnEndings')) return;
+  var about=$('#btnAbout');
+  if(!about||!about.parentNode) return;
+  var b=document.createElement('button');
+  b.className='btn ghost'; b.id='btnEndings'; b.textContent='结 局 档 案';
+  about.parentNode.insertBefore(b,about);
+  b.addEventListener('click',function(){
+    A.resume(); A.click();
+    if(!G.playerId&&!G.ending){ Toast.show('还没有值过班。',''); return; }
+    openEndings();
+  });
+}
+function boot(){
+  Store.init();
+  Sub.init();
+  initUI();
+  startTitleRain();
+  refreshAll();
+  refreshTitleButtons();
+  bindEndingsEntry();
+  if(!Store.ok) Toast.show('本机不允许写入 · 进度只留在内存','');
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',boot);
+}else{
+  boot();
+}
+})();
+</script>
+</body>
+</html>
