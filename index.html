@@ -10379,7 +10379,7 @@ function runCollectAnalysis() {
       { role: 'system', content: lang === 'en' ? 'You are a witty aviation collection analyst. Always reply in Markdown, lively and fun.' : '你是一位风趣的航空收藏品鉴专家，始终用活泼有趣的 Markdown 输出。' },
       { role: 'user', content: prompt }
     ],
-    max_tokens: 900,
+    max_tokens: 700,
     temperature: 0.8,
     signal: controller.signal
   }).then(function(d) {
@@ -10390,6 +10390,7 @@ function runCollectAnalysis() {
     caShow('result');
   }).catch(function() {
     clearTimeout(timeoutId);
+    if (retryLeft > 0) { setTimeout(function() { runCollectAnalysis(retryLeft - 1); }, 1500); return; }
     document.getElementById('caErrText').textContent = t('collectAnalysisErr');
     caShow('err');
   });
