@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Alpha Beta 测试版未命名测试 · 民航客机收藏馆</title>
+<style>
+  :root{
+    --bg:#0a1220;
+    --bg2:#0e1a2e;
+    --card:rgba(255,255,255,.07);
+    --card-hover:rgba(255,255,255,.11);
+    --border:rgba(255,255,255,.13);
+    --border-hover:rgba(255,255,255,.28);
+    --accent:#4fc3f7;
+    --accent-2:#42a5f5;
+    --accent-bg:rgba(79,195,247,.12);
+    --text:#e0e0e0;
+    --dim:#9e9e9e;
+    --head:#f0f0f0;
+    --ok:#4ade80;
+    --warn:#fbbf24;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#0a1220 0%,#0e1a2e 35%,#162840 65%,#0c1628 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    line-height:1.6;
+    padding:28px 18px 64px;
+  }
+  .wrap{max-width:940px;margin:0 auto}
+
+  /* 顶部徽标 */
+  .badge-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+  .badge{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12px;letter-spacing:.12em;font-weight:600;
+    padding:6px 13px;border-radius:999px;
+    border:1px solid rgba(79,195,247,.4);
+    background:var(--accent-bg);color:var(--accent);
+    text-transform:uppercase;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(74,222,128,.7);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.6)}70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+  .build{font-size:12px;color:var(--dim);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+  /* 标题区 */
+  h1{
+    font-size:clamp(26px,5.2vw,42px);line-height:1.22;font-weight:700;color:var(--head);
+    background:linear-gradient(100deg,#fff 10%,#4fc3f7 55%,#42a5f5 90%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    margin-bottom:12px;
+  }
+  .sub{font-size:15px;color:var(--dim);max-width:640px}
+  .sub b{color:var(--accent);font-weight:600}
+
+  /* 通用卡片 */
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius);padding:20px 22px;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 8px 32px rgba(0,0,0,.35);
+    transition:background .2s,border-color .2s,transform .2s;
+  }
+  .sec{margin-top:34px}
+  .sec-title{
+    display:flex;align-items:center;gap:9px;
+    font-size:13px;letter-spacing:.1em;font-weight:600;
+    color:var(--accent);text-transform:uppercase;margin-bottom:14px;
+  }
+  .sec-title .line{flex:1;height:1px;background:linear-gradient(90deg,rgba(79,195,247,.35),transparent)}
+
+  /* 状态清单 */
+  .fix-list{display:grid;gap:10px}
+  .fix{
+    display:flex;gap:12px;align-items:flex-start;
+    padding:12px 14px;border-radius:12px;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  }
+  .fix .tag{
+    flex:none;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;margin-top:2px;
+    background:rgba(74,222,128,.14);color:var(--ok);border:1px solid rgba(74,222,128,.35);
+  }
+  .fix .tag.new{background:rgba(79,195,247,.14);color:var(--accent);border-color:rgba(79,195,247,.35)}
+  .fix .tag.warn{background:rgba(251,191,36,.14);color:var(--warn);border-color:rgba(251,191,36,.35)}
+  .fix-t{font-weight:600;color:var(--head);font-size:14.5px}
+  .fix-d{font-size:13px;color:var(--dim);margin-top:2px}
+
+  /* 入口网格 */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:14px}
+  a.entry{
+    display:block;text-decoration:none;color:inherit;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px 17px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:background .2s,border-color .2s,transform .2s;
+  }
+  a.entry:hover{background:var(--card-hover);border-color:var(--border-hover);transform:translateY(-2px)}
+  a.entry .ico{
+    width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    background:var(--accent-bg);border:1px solid rgba(79,195,247,.3);color:var(--accent);margin-bottom:11px;
+  }
+  a.entry .nm{font-weight:600;color:var(--head);font-size:15px;display:flex;align-items:center;gap:7px}
+  a.entry .ds{font-size:12.5px;color:var(--dim);margin-top:5px}
+  .pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(79,195,247,.16);color:var(--accent);border:1px solid rgba(79,195,247,.32)}
+  .pill.gold{background:rgba(251,191,36,.14);color:var(--warn);border-color:rgba(251,191,36,.32)}
+
+  /* 验收清单 */
+  .check{display:grid;gap:4px}
+  .check label{
+    display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border-radius:11px;
+    cursor:pointer;transition:background .15s;font-size:14px;
+  }
+  .check label:hover{background:rgba(255,255,255,.05)}
+  .check input{
+    appearance:none;-webkit-appearance:none;flex:none;
+    width:19px;height:19px;margin-top:1px;border-radius:6px;cursor:pointer;
+    border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.05);
+    position:relative;transition:border-color .15s,background .15s;
+  }
+  .check input:checked{background:var(--accent-2);border-color:var(--accent-2)}
+  .check input:checked::after{
+    content:"";position:absolute;left:5px;top:1.5px;width:5px;height:10px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+  }
+  .check input:checked + span{color:var(--dim);text-decoration:line-through}
+  .check span b{color:var(--head);font-weight:600}
+  .prog{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:12.5px;color:var(--dim)}
+  .bar{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#42a5f5,#4fc3f7);transition:width .3s}
+
+  /* 提示条 */
+  .note{
+    display:flex;gap:11px;align-items:flex-start;
+    padding:14px 16px;border-radius:13px;font-size:13.5px;color:var(--dim);
+    background:rgba(79,195,247,.07);border:1px solid rgba(79,195,247,.22);
+  }
+  .note b{color:var(--accent)}
+
+  footer{
+    margin-top:44px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);
+    font-size:12.5px;color:var(--dim);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  }
+  footer a{color:var(--accent);text-decoration:none}
+  @media (max-width:520px){
+    body{padding:20px 14px 52px}
+    .card{padding:17px 16px}
+    .grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="badge-row">
+    <span class="badge"><span class="dot"></span>Internal Preview · Alpha Beta</span>
+    <span class="build">build 2026-10-05 · v0.1.0-alpha.beta</span>
+  </div>
+
+  <h1>Alpha Beta 测试版未命名测试</h1>
+  <p class="sub">名字还没想好，先让它飞起来 —— 这是民航客机收藏馆的<b>内部体验页</b>，用于验证本轮修复与即将上线的新体验。请随心点点看，有问题直接丢给主理人。</p>
+
+  <section class="sec">
+    <div class="sec-title">本轮更新 <span class="line"></span></div>
+    <div class="card fix-list">
+      <div class="fix">
+        <span class="tag">已修复</span>
+        <div>
+          <div class="fix-t">AI 分析机库 · 恢复在线</div>
+          <div class="fix-d">机库收藏洞察报告重新可用：450 字精炼输出、90 秒长等待、失败自动重试，并会从全集中推荐你尚未收藏的机型。</div>
+        </div>
+      </div>
+      <div class="fix">
+        <span class="tag">已修复</span>
+        <div>
+          <div class="fix-t">全站 AI 中台 · 服务恢复</div>
+          <div class="fix-d">主上游切至 Kimi，队列保活、跨上游自动兜底重新开启，AI 功能不再"连接失败"。</div>
+        </div>
+      </div>
+      <div class="fix">
+        <span class="tag">已恢复</span>
+        <div>
+          <div class="fix-t">航空快讯 · AI 翻译与总结</div>
+          <div class="fix-d">快讯正文的分批翻译与摘要链路回归正常，长文不再卡死等待。</div>
+        </div>
+      </div>
+      <div class="fix">
+        <span class="tag new">体验中</span>
+        <div>
+          <div class="fix-t">照片识机 · 视觉识别</div>
+          <div class="fix-d">拍照或选图即可识别机型，识别结果可直接写入收藏。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-title">体验入口 <span class="line"></span></div>
+    <div class="grid">
+      <a class="entry" href="/">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20h18"/><path d="M5 20V9l7-5 7 5v11"/><path d="M9 20v-6h6v6"/></svg></div>
+        <div class="nm">AI 分析机库 <span class="pill">本次重点</span></div>
+        <div class="ds">进入首页 → 打开收藏 → 点击「AI 分析机库」，生成你的机库洞察报告。</div>
+      </a>
+      <a class="entry" href="/">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M4 12h16"/><path d="M12 4v16"/></svg></div>
+        <div class="nm">航空快讯 <span class="pill gold">AI 翻译</span></div>
+        <div class="ds">浏览实时航讯，点开任一条即可查看 AI 总结与中文翻译。</div>
+      </a>
+      <a class="entry" href="/">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg></div>
+        <div class="nm">照片识机</div>
+        <div class="ds">上传一张飞机照片，看看 AI 能不能认出它。</div>
+      </a>
+      <a class="entry" href="/">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+        <div class="nm">机型图鉴 & 收藏</div>
+        <div class="ds">检索机型、打理收藏清单，收藏越完整分析越准。</div>
+      </a>
+      <a class="entry" href="/">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a8 8 0 1 1-3.2-6.4"/><path d="M21 4v5h-5"/></svg></div>
+        <div class="nm">问 AI</div>
+        <div class="ds">航空知识随便问，回答由服务端 AI 中台统一调度。</div>
+      </a>
+      <a class="entry" href="/">
+        <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l2.6 5.6 6.1.8-4.5 4.2 1.2 6L12 16.8 6.6 19.6l1.2-6L3.3 9.4l6.1-.8z"/></svg></div>
+        <div class="nm">主站首页</div>
+        <div class="ds">回到完整版界面，所有功能都在这里。</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-title">内测验收清单 <span class="line"></span></div>
+    <div class="card">
+      <div class="check" id="checklist">
+        <label><input type="checkbox" data-k="c1"><span><b>AI 分析机库</b>能出报告，450 字左右、带趣味标签与未收藏推荐</span></label>
+        <label><input type="checkbox" data-k="c2"><span><b>航空快讯</b>可正常翻译 / 总结，长文不报错</span></label>
+        <label><input type="checkbox" data-k="c3"><span><b>照片识机</b>能识别机型并可写入收藏</span></label>
+        <label><input type="checkbox" data-k="c4"><span><b>问 AI</b>提问秒回，不再出现「AI 服务连接失败」</span></label>
+        <label><input type="checkbox" data-k="c5"><span>移动端布局正常，面板开合顺畅</span></label>
+      </div>
+      <div class="prog">
+        <span id="progText">0 / 5 已完成</span>
+        <span class="bar"><i id="progBar"></i></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="note">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px;color:var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+      <div><b>这是内部测试页</b>（已设 noindex，不会被搜索引擎收录）。勾选状态只存在你自己的浏览器里，用于逐项验收；发现问题请在主站「反馈与建议」里留个言。</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>民航客机收藏馆 · 内部体验版 · build 2026-10-05</span>
+    <span><a href="/">进入主站 →</a></span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var KEY = 'aby_test_checklist_v1';
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('#checklist input'));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e) { saved = {}; }
+
+  function render(){
+    var done = 0;
+    boxes.forEach(function(b){
+      var on = !!saved[b.getAttribute('data-k')];
+      b.checked = on;
+      if (on) done++;
+    });
+    document.getElementById('progText').textContent = done + ' / ' + boxes.length + ' 已完成';
+    document.getElementById('progBar').style.width = (boxes.length ? (done / boxes.length * 100) : 0) + '%';
+  }
+
+  boxes.forEach(function(b){
+    b.addEventListener('change', function(){
+      saved[b.getAttribute('data-k')] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(e) {}
+      render();
+    });
+  });
+  render();
+})();
+</script>
+</body>
+</html>
