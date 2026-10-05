@@ -10352,7 +10352,8 @@ function caShow(which) {
   document.getElementById('caResultWrap').style.display = which === 'result' ? 'block' : 'none';
   document.getElementById('caErr').style.display = which === 'err' ? 'block' : 'none';
 }
-function runCollectAnalysis() {
+function runCollectAnalysis(retryLeft) {
+  if (typeof retryLeft !== 'number') retryLeft = 1;
   var ids = collection ? Array.from(collection) : [];
   if (!ids.length) { caShow('empty'); return; }
   caShow('loading');
@@ -10365,14 +10366,18 @@ function runCollectAnalysis() {
     var a = aircrafts.find(function(x) { return x.id === id; });
     return a ? fmt(a) : null;
   }).filter(Boolean);
-  var allList = aircrafts.map(fmt).join('\n');
+  var ownedSet = {};
+  ids.forEach(function(id) { ownedSet[id] = true; });
+  var unownedList = aircrafts.filter(function(a) { return !ownedSet[a.id]; });
+  var allList = (unownedList.length ? unownedList : aircrafts).map(fmt).join('\n');
   var prompt = '你是航空收藏品鉴专家。用户收藏了以下机型：\n' + list.join('\n') +
     '\n\n可选机型全集（用于最后推荐尚未收藏的机型）：\n' + allList +
     '\n\n请为用户生成一份生动有趣的「机库收藏洞察报告」，用' + (lang === 'en' ? 'English' : '中文') +
-    '输出，必须包含：1）一句话整体评价（如"你的机库偏爱宽体机""你是波音铁粉"）；2）分类偏好：宽体/窄体/支线/军用等倾向；3）制造商偏好：波音/空客/商飞/巴西等；4）时代偏好：经典复古还是现代前沿；5）趣味标签 2-3 个（如"宽体收藏家""波音铁粉""复古情怀党"）；6）收藏建议：从可选机型全集中推荐 1-2 款用户尚未收藏且符合其偏好的机型并说明理由。风格活泼有趣，适度使用 emoji，用 Markdown 格式（标题、列表、加粗）输出。';
+    '输出，必须包含：1）一句话整体评价（如"你的机库偏爱宽体机""你是波音铁粉"）；2）分类偏好：宽体/窄体/支线/军用等倾向；3）制造商偏好：波音/空客/商飞/巴西等；4）时代偏好：经典复古还是现代前沿；5）趣味标签 2-3 个（如"宽体收藏家""波音铁粉""复古情怀党"）；6）收藏建议：从可选机型全集中推荐 1-2 款用户尚未收藏且符合其偏好的机型并说明理由。风格活泼有趣，适度使用 emoji，用 Markdown 格式（标题、列表、加粗）输出。整篇报告控制在 450 字以内，务必精炼，不要冗长铺陈。';
   var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
+  var timeoutId = setTimeout(function() { controller.abort(); }, 90000);
   AIBridge.chat({
+    timeout: 90000,
     tier: 'flagship',
     feature: 'collect_analysis',
     messages: [
@@ -10785,6 +10790,13 @@ window.AIBridge = (function () {
       clearTimeout(timeoutId);
     }
 
+    /* 服务端降级体可能以 OpenAI 形态返回（无 ok 字段），兼容解析避免被误判为失败 */
+    if (json && json.ok !== true) {
+      var _c0 = (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content);
+      if (_c0) {
+        json = { ok: true, answer: _c0, model: json.model, degraded: true, finishReason: (json.choices[0].finish_reason || 'stop') };
+      }
+    }
     if (!json || json.ok !== true) {
       var err = new Error('AI_FAILED: ' + ((json && json.error) || res.status));
       err.code = (json && json.error) || 'http_' + res.status;
