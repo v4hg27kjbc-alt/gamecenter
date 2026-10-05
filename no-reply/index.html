@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>无应答 NO REPLY · Alpha Beta 体验版</title>
+<meta name="description" content="《无应答 NO REPLY》Alpha Beta 内测体验页：在线试玩，游玩中随时留下你的体验建议，反馈直达自营后台。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#06080c;--bg2:#0b1017;--panel:#0e131c;--panel2:#141b26;--panel3:#1a2331;
+--line:#1e2736;--line2:#2c3849;--line3:#3d4c62;
+--text:#c9d2de;--dim:#8492a4;--dimmer:#5b6779;
+--amber:#e3ab54;--amber-d:#7d5a22;--amber-g:rgba(227,171,84,.16);
+--green:#6fd39a;--green-g:rgba(111,211,154,.14);
+--red:#e0695f;--blue:#6fa8dc;
+--mono:"SF Mono",Menlo,Consolas,"Courier New",monospace;
+--serif:"Songti SC","STSong",Georgia,serif;
+--kai:"Kaiti SC",KaiTi,"STKaiti",serif;
+--r:10px;--r2:14px;--r3:20px;
+}
+html{scroll-behavior:smooth}
+body{
+background:radial-gradient(1300px 760px at 50% -12%,#101720 0%,#06080c 58%,#030508 100%);
+color:var(--text);font-size:15px;line-height:1.65;overflow-x:hidden;
+font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+}
+a{color:var(--amber);text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.mono{font-family:var(--mono)}
+.kai{font-family:var(--kai)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+.btn{
+display:inline-flex;align-items:center;justify-content:center;gap:8px;
+padding:11px 22px;border-radius:var(--r2);border:1px solid var(--line2);
+background:var(--panel2);color:var(--text);font-size:14px;letter-spacing:.06em;
+transition:all .22s ease;
+}
+.btn:hover{background:var(--panel3);border-color:var(--line3);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(180deg,#2a3346,#1b2333);border-color:#3d4a60;color:#e6ecf5}
+.btn.primary:hover{border-color:var(--amber);color:#fff;box-shadow:0 0 22px rgba(227,171,84,.18)}
+.btn.amber{background:linear-gradient(180deg,rgba(227,171,84,.18),rgba(227,171,84,.06));border-color:rgba(227,171,84,.45);color:#f0d7a6}
+.btn.amber:hover{border-color:var(--amber);box-shadow:0 0 26px rgba(227,171,84,.22)}
+.btn.ghost{background:transparent;border-color:var(--line)}
+.btn.sm{padding:7px 14px;font-size:13px;border-radius:9px}
+
+/* ============ 首屏 ============ */
+#hero{
+position:relative;min-height:100svh;display:flex;flex-direction:column;
+align-items:center;justify-content:center;text-align:center;padding:76px 22px 56px;overflow:hidden;
+}
+#heroBg{
+position:absolute;inset:0;background:#03050a center/cover no-repeat;
+filter:brightness(.42) saturate(.82) contrast(1.06);transform:scale(1.04);
+animation:heroDrift 42s ease-in-out infinite alternate;
+}
+@keyframes heroDrift{from{transform:scale(1.04) translate3d(0,0,0)}to{transform:scale(1.1) translate3d(0,-14px,0)}}
+#heroVeil{
+position:absolute;inset:0;
+background:
+radial-gradient(900px 620px at 50% 46%,rgba(6,8,12,.18) 0%,rgba(6,8,12,.72) 62%,#04060a 100%),
+linear-gradient(180deg,rgba(4,6,10,.72) 0%,rgba(4,6,10,.28) 34%,rgba(4,6,10,.9) 100%);
+}
+#rainCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
+.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;max-width:840px}
+.t-overline{font-family:var(--mono);font-size:11px;letter-spacing:.5em;color:var(--dimmer);margin-bottom:20px}
+.t-title{
+font-size:clamp(44px,11vw,84px);font-weight:700;letter-spacing:.16em;line-height:1.05;
+color:#e8eef7;text-shadow:0 0 42px rgba(227,171,84,.22);
+}
+.t-title .glitch{animation:glitch 6.5s steps(1) infinite}
+@keyframes glitch{
+0%,96%,100%{text-shadow:0 0 42px rgba(227,171,84,.22)}
+97%{text-shadow:-2px 0 rgba(224,105,95,.55),2px 0 rgba(111,168,220,.5)}
+98%{text-shadow:2px 0 rgba(224,105,95,.5),-2px 0 rgba(111,168,220,.45)}
+}
+.t-en{font-family:var(--mono);font-size:clamp(13px,3.4vw,17px);letter-spacing:.62em;color:var(--amber);margin-top:14px;opacity:.92}
+.badge{
+display:inline-flex;align-items:center;gap:8px;margin-top:26px;
+padding:6px 14px;border-radius:999px;border:1px solid rgba(227,171,84,.34);
+background:rgba(227,171,84,.08);color:#ecc98d;font-size:12px;letter-spacing:.18em;font-family:var(--mono);
+}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.28}}
+.hero-tagline{
+margin-top:22px;max-width:620px;color:var(--dim);font-size:15.5px;line-height:1.9;
+}
+.hero-tagline em{color:var(--text);font-style:normal}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:34px}
+.hero-meta{margin-top:30px;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--dimmer)}
+.scroll-hint{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2;font-family:var(--mono);font-size:10.5px;letter-spacing:.32em;color:var(--dimmer);animation:pulse 3s ease-in-out infinite}
+
+/* ============ 通用区块 ============ */
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+section.blk{padding:78px 0}
+.sec-label{font-family:var(--mono);font-size:11px;letter-spacing:.42em;color:var(--dimmer);margin-bottom:14px}
+.sec-title{font-size:clamp(23px,4.4vw,31px);letter-spacing:.1em;color:#e4eaf3;margin-bottom:14px}
+.sec-desc{color:var(--dim);max-width:660px;font-size:14.5px;line-height:1.95}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--line2) 18%,var(--line2) 82%,transparent);margin:0}
+
+/* 剧情五宫格 */
+.boards{display:grid;gap:14px;margin-top:28px;grid-template-columns:repeat(3,1fr)}
+.board{
+position:relative;border-radius:var(--r2);overflow:hidden;border:1px solid var(--line);
+background:var(--panel);aspect-ratio:16/11;
+}
+.board img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.9)}
+.board span{
+position:absolute;left:10px;bottom:8px;font-family:var(--mono);font-size:10.5px;
+letter-spacing:.18em;color:#dfe6f0;text-shadow:0 1px 8px #000;background:rgba(4,6,10,.45);
+padding:3px 8px;border-radius:6px;backdrop-filter:blur(6px);
+}
+.board.wide{grid-column:span 3;aspect-ratio:23/9}
+.board.wide img{object-fit:cover}
+
+/* 特性 */
+.feat{display:grid;gap:14px;grid-template-columns:repeat(3,1fr);margin-top:26px}
+.card{
+padding:20px;border-radius:var(--r2);border:1px solid var(--line);
+background:linear-gradient(180deg,rgba(20,27,38,.72),rgba(14,19,28,.72));
+backdrop-filter:blur(10px);
+}
+.card h4{font-size:15px;color:#e2e9f2;letter-spacing:.06em;margin-bottom:8px}
+.card p{font-size:13.5px;color:var(--dim);line-height:1.85}
+.card .ic{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.2em;margin-bottom:10px;display:block}
+
+/* ============ 体验区 ============ */
+#play{scroll-margin-top:20px}
+.play-shell{
+margin-top:26px;border:1px solid var(--line2);border-radius:var(--r3);overflow:hidden;
+background:#04060a;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(227,171,84,.06) inset;
+}
+.play-bar{
+display:flex;align-items:center;gap:12px;padding:11px 14px;
+background:linear-gradient(180deg,#101724,#0b1017);border-bottom:1px solid var(--line);
+}
+.play-bar .dots{display:flex;gap:6px}
+.play-bar .dots i{width:9px;height:9px;border-radius:50%;background:#2a3346;display:block}
+.play-bar .url{
+flex:1;font-family:var(--mono);font-size:11.5px;color:var(--dimmer);letter-spacing:.06em;
+background:rgba(4,6,10,.5);border:1px solid var(--line);border-radius:8px;padding:5px 12px;
+overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.play-bar .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--amber);border:1px solid rgba(227,171,84,.3);border-radius:6px;padding:3px 9px;background:rgba(227,171,84,.07)}
+.player{position:relative;height:min(78svh,760px);background:#04060a}
+.player iframe{width:100%;height:100%;border:0;display:block;background:#06080c}
+.player-cover{
+position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+gap:18px;text-align:center;padding:26px;z-index:3;
+background:
+radial-gradient(760px 460px at 50% 40%,rgba(11,16,23,.72),rgba(3,5,9,.96)),
+url("poster.png") center/cover no-repeat;
+}
+.player-cover .pc-title{font-size:clamp(21px,4.6vw,30px);letter-spacing:.2em;color:#e9eff8;text-shadow:0 0 30px rgba(0,0,0,.9)}
+.player-cover .pc-sub{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:#cbb083;max-width:520px;line-height:1.9}
+.player-cover .pc-note{font-size:12.5px;color:var(--dim);max-width:520px;line-height:1.9}
+.play-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:13px 16px;border-top:1px solid var(--line);background:#0a0e15}
+.play-foot .hint{font-size:12.5px;color:var(--dimmer);line-height:1.8}
+.play-foot .hint b{color:var(--amber);font-weight:500}
+
+/* ============ 留言抽屉 ============ */
+#fab{
+position:fixed;right:20px;bottom:22px;z-index:60;display:inline-flex;align-items:center;gap:9px;
+padding:13px 20px;border-radius:999px;border:1px solid rgba(227,171,84,.45);
+background:linear-gradient(180deg,rgba(32,40,56,.94),rgba(16,22,32,.94));
+backdrop-filter:blur(14px);color:#f1dcb0;font-size:13.5px;letter-spacing:.08em;
+box-shadow:0 16px 44px rgba(0,0,0,.55),0 0 26px rgba(227,171,84,.14);
+transition:all .22s ease;
+}
+#fab:hover{transform:translateY(-2px);border-color:var(--amber);box-shadow:0 20px 54px rgba(0,0,0,.6),0 0 34px rgba(227,171,84,.24)}
+#fab .fb-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.scrim{
+position:fixed;inset:0;z-index:70;background:rgba(3,5,9,.62);backdrop-filter:blur(4px);
+opacity:0;pointer-events:none;transition:opacity .26s ease;
+}
+.scrim.open{opacity:1;pointer-events:auto}
+#drawer{
+position:fixed;top:0;right:0;bottom:0;z-index:80;width:min(440px,100vw);
+display:flex;flex-direction:column;
+background:linear-gradient(180deg,#0d131c,#080b11);border-left:1px solid var(--line2);
+box-shadow:-30px 0 80px rgba(0,0,0,.6);
+transform:translateX(102%);transition:transform .3s cubic-bezier(.22,.8,.24,1);
+}
+#drawer.open{transform:translateX(0)}
+.dw-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.dw-head .dw-t{flex:1}
+.dw-head h3{font-size:15px;letter-spacing:.1em;color:#e6ecf5}
+.dw-head p{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--dimmer);margin-top:3px}
+.dw-x{width:32px;height:32px;border-radius:9px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:16px}
+.dw-x:hover{border-color:var(--line3);color:var(--text)}
+.dw-tabs{display:flex;gap:6px;padding:12px 18px 0}
+.dw-tab{
+padding:7px 14px;border-radius:9px;border:1px solid var(--line);font-size:13px;color:var(--dim);
+}
+.dw-tab.on{background:rgba(227,171,84,.1);border-color:rgba(227,171,84,.4);color:#eed6a8}
+.dw-body{flex:1;overflow-y:auto;padding:16px 18px 22px}
+.pane{display:none}
+.pane.on{display:block}
+.field{margin-bottom:15px}
+.field label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--dimmer);margin-bottom:8px}
+.field .opt{color:var(--dimmer);letter-spacing:.06em;font-family:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+padding:7px 13px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);
+font-size:12.5px;color:var(--dim);transition:all .18s ease;
+}
+.chip:hover{border-color:var(--line3);color:var(--text)}
+.chip.on{background:rgba(227,171,84,.12);border-color:rgba(227,171,84,.5);color:#f0d9ab}
+textarea,input[type=text],input[type=email]{
+width:100%;padding:11px 13px;border-radius:var(--r2);border:1px solid var(--line2);
+background:rgba(4,6,10,.6);color:var(--text);font:inherit;font-size:14px;line-height:1.7;outline:none;
+transition:border-color .2s ease;
+}
+textarea{min-height:132px;resize:vertical}
+textarea:focus,input:focus{border-color:rgba(227,171,84,.55);box-shadow:0 0 0 3px rgba(227,171,84,.08)}
+.counter{font-family:var(--mono);font-size:10.5px;color:var(--dimmer);text-align:right;margin-top:6px;letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dw-actions{display:flex;gap:10px;align-items:center;margin-top:4px}
+.dw-note{font-size:12px;color:var(--dimmer);line-height:1.85;margin-top:12px}
+.msg{margin-top:14px;padding:12px 14px;border-radius:var(--r2);font-size:13px;line-height:1.8;display:none}
+.msg.show{display:block}
+.msg.ok{background:rgba(111,211,154,.09);border:1px solid rgba(111,211,154,.36);color:#b8ecd1}
+.msg.err{background:rgba(224,105,95,.09);border:1px solid rgba(224,105,95,.36);color:#f0bdb6}
+.msg .mono{font-size:11px;color:inherit;opacity:.82}
+.fb-item{
+padding:13px 14px;border-radius:var(--r2);border:1px solid var(--line);background:var(--panel);
+margin-bottom:11px;
+}
+.fb-item .fb-top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.fb-item .fb-type{font-size:11.5px;color:#e9d3a6;border:1px solid rgba(227,171,84,.3);background:rgba(227,171,84,.08);border-radius:6px;padding:2px 8px}
+.fb-item .fb-st{font-family:var(--mono);font-size:10px;letter-spacing:.12em;padding:2px 8px;border-radius:6px}
+.fb-st.new{color:#cbb083;border:1px solid rgba(227,171,84,.28);background:rgba(227,171,84,.06)}
+.fb-st.done{color:#a9e6c6;border:1px solid rgba(111,211,154,.3);background:rgba(111,211,154,.08)}
+.fb-item .fb-time{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dimmer)}
+.fb-item .fb-c{font-size:13.5px;color:var(--text);line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.fb-item .fb-r{
+margin-top:9px;padding:9px 11px;border-radius:9px;border:1px solid rgba(111,211,154,.26);
+background:rgba(111,211,154,.06);font-size:12.5px;color:#bfe9d5;line-height:1.75;
+}
+.fb-item .fb-r b{color:#8fe0b8;font-weight:500}
+.empty{text-align:center;color:var(--dimmer);font-size:13px;padding:34px 10px;line-height:1.9}
+
+/* ============ 页脚 ============ */
+footer{padding:44px 0 96px;border-top:1px solid var(--line);margin-top:20px}
+.foot-inner{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end}
+.foot-inner .f-l{font-size:12.5px;color:var(--dimmer);line-height:2}
+.foot-inner .f-l b{color:var(--dim);font-weight:500}
+.foot-inner .f-r{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--dimmer);text-align:right;line-height:2}
+
+@media (max-width:820px){
+.boards{grid-template-columns:repeat(2,1fr)}
+.board.wide{grid-column:span 2;aspect-ratio:16/10}
+.feat{grid-template-columns:1fr}
+.player{height:min(74svh,640px)}
+.two{grid-template-columns:1fr}
+#fab{right:14px;bottom:16px;padding:12px 16px;font-size:13px}
+section.blk{padding:58px 0}
+}
+@media (max-width:520px){
+.boards{grid-template-columns:1fr}
+.board.wide{grid-column:span 1;aspect-ratio:16/11}
+.t-en{letter-spacing:.42em}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== 首屏 ========== -->
+<header id="hero">
+  <div id="heroBg" style="background-image:url('poster.png')"></div>
+  <div id="heroVeil"></div>
+  <canvas id="rainCanvas"></canvas>
+  <div class="hero-inner">
+    <div class="t-overline">ALPHA BETA · 内测体验版</div>
+    <h1 class="t-title"><span class="glitch">无应答</span></h1>
+    <div class="t-en">NO REPLY</div>
+    <div class="badge"><span class="dot"></span>内测进行中 · 欢迎在游玩中留下建议</div>
+    <p class="hero-tagline">
+      有些消息发出去，就再也没有回音。<em>《无应答》</em>是一部关于等待与沉默的互动叙事——
+      你在雨夜醒来，试着向外界拨号，而线路另一端，只余忙音。
+    </p>
+    <div class="hero-actions">
+      <a class="btn amber" href="#play" id="ctaStart">开始体验</a>
+      <button class="btn ghost" id="ctaSuggest">写下我的建议</button>
+      <a class="btn ghost" href="#about">了解内测说明</a>
+    </div>
+    <div class="hero-meta">BUILD 2026-10-05 · 建议直达自营后台 · 作者逐条查看</div>
+  </div>
+  <div class="scroll-hint">向下滑动 · 进入体验</div>
+</header>
+
+<div class="rule"></div>
+
+<!-- ========== 体验区 ========== -->
+<section class="blk" id="play">
+  <div class="wrap">
+    <div class="sec-label">PLAY ONLINE</div>
+    <h2 class="sec-title">在线试玩</h2>
+    <p class="sec-desc">
+      点「启动游戏」即可在页面内直接游玩，进度自动保存在本机。游玩过程中，右下角的
+      <b style="color:var(--amber);font-weight:500">提建议</b> 按钮始终可用——任何时候想说什么，随时写下来。
+    </p>
+
+    <div class="play-shell">
+      <div class="play-bar">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="url">henry126923.pages.dev/no-reply/game.html</div>
+        <div class="tag" id="barTag">未启动</div>
+      </div>
+      <div class="player">
+        <div class="player-cover" id="playerCover">
+          <div class="pc-title">无应答 · NO REPLY</div>
+          <div class="pc-sub">ALPHA BETA BUILD 2026-10-05</div>
+          <p class="pc-note">
+            本次为内测版本，剧情、数值与表现仍在调整中，可能出现卡顿或未完成的内容。<br>
+            你的每一条建议都会提交到自营后台，作者会逐条阅读并回复。
+          </p>
+          <div class="hero-actions" style="margin-top:6px">
+            <button class="btn amber" id="btnLaunch">启动游戏</button>
+            <button class="btn ghost" id="btnSuggest2">先说两句建议</button>
+          </div>
+        </div>
+        <iframe id="gameFrame" title="无应答 NO REPLY 游戏" allow="autoplay; fullscreen" style="display:none"></iframe>
+      </div>
+      <div class="play-foot">
+        <div class="hint">游玩中随手留下 <b>体验建议</b>：卡点、节奏、剧情、文案、Bug，都算数。</div>
+        <div class="hero-actions" style="margin:0">
+          <button class="btn sm ghost" id="btnReload">重新加载</button>
+          <button class="btn sm amber" id="btnSuggest3">写建议</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ========== 情节 ========== -->
+<section class="blk" id="story">
+  <div class="wrap">
+    <div class="sec-label">STORYBOARD</div>
+    <h2 class="sec-title">情节一瞥</h2>
+    <p class="sec-desc">五幕剪影，拼出一个雨夜里没能接通的故事。轻微的剧透，但不影响你亲自走一遍。</p>
+    <div class="boards">
+      <div class="board wide"><img src="storyboard.png" alt="无应答 · 情节五宫格"></div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ========== 特性 ========== -->
+<section class="blk" id="about">
+  <div class="wrap">
+    <div class="sec-label">ALPHA BETA NOTES</div>
+    <h2 class="sec-title">内测说明</h2>
+    <p class="sec-desc">这一版的重点，是把故事跑通，并把你的意见收回来。</p>
+    <div class="feat">
+      <div class="card">
+        <span class="ic">01 / 版本状态</span>
+        <h4>Alpha Beta</h4>
+        <p>主线可完整体验，部分分支与演出仍在打磨，存档保存在本机浏览器，清缓存会丢失。</p>
+      </div>
+      <div class="card">
+        <span class="ic">02 / 反馈去向</span>
+        <h4>直达自营后台</h4>
+        <p>提交的建议不经过任何第三方平台，直接进入自营后台的反馈列表，可在本页随时回看处理状态。</p>
+      </div>
+      <div class="card">
+        <span class="ic">03 / 提交时机</span>
+        <h4>游玩中随时可提</h4>
+        <p>不必等通关。遇到卡点、觉得节奏不对、看到错字，右下角随时打开面板写下即可。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="f-l">
+      <b>《无应答》NO REPLY</b> · Alpha Beta 体验版<br>
+      内测页面由民航客机收藏馆自营后端提供反馈通道（aviation-admin）
+    </div>
+    <div class="f-r">
+      BUILD 2026-10-05<br>
+      NOINDEX · INTERNAL BETA
+    </div>
+  </div>
+</footer>
+
+<!-- ========== 悬浮入口 + 抽屉 ========== -->
+<button id="fab" aria-label="提出体验建议"><span class="fb-dot"></span>提建议</button>
+<div class="scrim" id="scrim"></div>
+
+<aside id="drawer" aria-label="体验建议面板">
+  <div class="dw-head">
+    <div class="dw-t">
+      <h3>体验建议</h3>
+      <p>SUBMIT TO SELF-HOSTED BACKEND</p>
+    </div>
+    <button class="dw-x" id="dwClose" aria-label="关闭">✕</button>
+  </div>
+
+  <div class="dw-tabs">
+    <button class="dw-tab on" data-pane="write">写建议</button>
+    <button class="dw-tab" data-pane="mine">我的留言</button>
+  </div>
+
+  <div class="dw-body">
+    <!-- 写建议 -->
+    <div class="pane on" id="pane-write">
+      <div class="field">
+        <label>建议类型</label>
+        <div class="chips" id="typeChips"></div>
+      </div>
+      <div class="field">
+        <label>具体内容 <span class="opt">· 必填</span></label>
+        <textarea id="fbContent" maxlength="2000" placeholder="例如：第二幕翻找抽屉时，我不知道要点什么；如果加一点提示或高亮会更顺。"></textarea>
+        <div class="counter"><span id="fbCount">0</span> / 2000</div>
+      </div>
+      <div class="field">
+        <label>怎么称呼你 <span class="opt">· 选填</span></label>
+        <input type="text" id="fbName" maxlength="60" placeholder="留个名字，方便作者在后台认出你">
+      </div>
+      <div class="field">
+        <label>邮箱 <span class="opt">· 选填，用于回复通知</span></label>
+        <input type="email" id="fbEmail" maxlength="120" placeholder="填写后，建议被回复时会收到邮件提醒">
+      </div>
+      <div class="dw-actions">
+        <button class="btn amber" id="fbSubmit">提交建议</button>
+        <button class="btn ghost sm" id="fbClear">清空</button>
+      </div>
+      <div class="msg" id="fbMsg"></div>
+      <div class="dw-note">
+        提交即写入自营后台反馈列表；同一浏览器的留言可在「我的留言」中回看，包括作者的回复。
+      </div>
+    </div>
+
+    <!-- 我的留言 -->
+    <div class="pane" id="pane-mine">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button class="btn sm ghost" id="mineRefresh">刷新</button>
+        <span class="mono" style="font-size:10.5px;color:var(--dimmer)" id="mineUid"></span>
+      </div>
+      <div id="mineList"><div class="empty">还没有留言记录</div></div>
+    </div>
+  </div>
+</aside>
+
+<script>
+/* ========== 配置 ========== */
+var FEEDBACK_API = 'https://henry126923-admincenter.pages.dev';   /* 自营后台（Cloudflare Pages） */
+var TYPES = ['功能建议', 'Bug 反馈', '内容纠错', '体验优化', '其他'];
+var UID_KEY = 'nr_alpha_uid';
+
+/* ========== 匿名标识（仅用于找回自己的留言） ========== */
+function getUid(){
+  try{
+    var u = localStorage.getItem(UID_KEY);
+    if(!u || !/^nr-[a-z0-9]{8,}$/.test(u)){
+      u = 'nr-' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+      localStorage.setItem(UID_KEY, u);
+    }
+    return u;
+  }catch(e){
+    return 'nr-' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+}
+var UID = getUid();
+
+/* ========== 雨丝背景（呼应游戏画面） ========== */
+(function rain(){
+  var cv = document.getElementById('rainCanvas');
+  if(!cv) return;
+  var ctx = cv.getContext('2d'), W = 0, H = 0, drops = [], raf = 0;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    var n = reduce ? 40 : Math.round(W / 16);
+    drops = [];
+    for(var i = 0; i < n; i++){
+      drops.push({ x: Math.random()*W, y: Math.random()*H, l: 8+Math.random()*22, v: .6+Math.random()*1.5, o: .1+Math.random()*.28 });
+    }
+  }
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    ctx.lineCap = 'round';
+    for(var i = 0; i < drops.length; i++){
+      var d = drops[i];
+      ctx.strokeStyle = 'rgba(190,210,235,' + d.o + ')';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - 1.4, d.y + d.l); ctx.stroke();
+      d.y += d.v * 2.4; d.x -= d.v * .32;
+      if(d.y > H + 30){ d.y = -30; d.x = Math.random()*W; }
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  size(); tick();
+  window.addEventListener('resize', size, {passive:true});
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ cancelAnimationFrame(raf); } else { raf = requestAnimationFrame(tick); }
+  });
+})();
+
+/* ========== 游戏框 ========== */
+var GAME_SRC = 'game.html';
+var frame = document.getElementById('gameFrame');
+var cover = document.getElementById('playerCover');
+var barTag = document.getElementById('barTag');
+var launched = false;
+
+function launchGame(){
+  if(!launched){
+    frame.src = GAME_SRC;
+    frame.style.display = 'block';
+    launched = true;
+    barTag.textContent = '运行中';
+    barTag.style.color = '#6fd39a';
+    barTag.style.borderColor = 'rgba(111,211,154,.34)';
+    barTag.style.background = 'rgba(111,211,154,.08)';
+    cover.style.display = 'none';
+  }
+  document.getElementById('play').scrollIntoView({behavior:'smooth', block:'start'});
+  try{ frame.focus(); }catch(e){}
+}
+document.getElementById('btnLaunch').addEventListener('click', launchGame);
+document.getElementById('ctaStart').addEventListener('click', function(ev){
+  ev.preventDefault();
+  document.getElementById('play').scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(launchGame, 420);
+});
+document.getElementById('btnReload').addEventListener('click', function(){
+  if(!launched){ launchGame(); return; }
+  frame.src = GAME_SRC + '?r=' + Date.now();
+});
+
+/* ========== 抽屉 ========== */
+var drawer = document.getElementById('drawer'), scrim = document.getElementById('scrim');
+function openDrawer(tab){
+  drawer.classList.add('open'); scrim.classList.add('open');
+  if(tab) switchPane(tab);
+  setTimeout(function(){ var el = document.getElementById('fbContent'); if(el && tab !== 'mine') el.focus(); }, 320);
+}
+function closeDrawer(){ drawer.classList.remove('open'); scrim.classList.remove('open'); }
+document.getElementById('fab').addEventListener('click', function(){ openDrawer('write'); });
+['ctaSuggest','btnSuggest2','btnSuggest3'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(el) el.addEventListener('click', function(){ openDrawer('write'); });
+});
+document.getElementById('dwClose').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDrawer(); });
+
+function switchPane(name){
+  document.querySelectorAll('.dw-tab').forEach(function(t){
+    t.classList.toggle('on', t.getAttribute('data-pane') === name);
+  });
+  document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('on'); });
+  var p = document.getElementById('pane-' + name);
+  if(p) p.classList.add('on');
+  if(name === 'mine') loadMine();
+}
+document.querySelectorAll('.dw-tab').forEach(function(t){
+  t.addEventListener('click', function(){ switchPane(t.getAttribute('data-pane')); });
+});
+
+/* ========== 建议类型 ========== */
+var chosenType = TYPES[0];
+(function buildChips(){
+  var box = document.getElementById('typeChips');
+  TYPES.forEach(function(tp, i){
+    var b = document.createElement('button');
+    b.className = 'chip' + (i === 0 ? ' on' : '');
+    b.type = 'button';
+    b.textContent = tp;
+    b.addEventListener('click', function(){
+      chosenType = tp;
+      box.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+      b.classList.add('on');
+    });
+    box.appendChild(b);
+  });
+})();
+
+/* ========== 内容计数 ========== */
+var ta = document.getElementById('fbContent'), cnt = document.getElementById('fbCount');
+ta.addEventListener('input', function(){ cnt.textContent = ta.value.length; });
+document.getElementById('fbClear').addEventListener('click', function(){
+  ta.value = ''; cnt.textContent = '0';
+  document.getElementById('fbName').value = '';
+  document.getElementById('fbEmail').value = '';
+  hideMsg();
+});
+
+function showMsg(kind, html){
+  var m = document.getElementById('fbMsg');
+  m.className = 'msg show ' + kind;
+  m.innerHTML = html;
+}
+function hideMsg(){ document.getElementById('fbMsg').className = 'msg'; }
+
+/* ========== 提交建议 ========== */
+document.getElementById('fbSubmit').addEventListener('click', function(){
+  var btn = this;
+  var content = (ta.value || '').trim();
+  if(!content){ showMsg('err', '请先写下具体内容～哪怕一句话也行。'); ta.focus(); return; }
+  var name = (document.getElementById('fbName').value || '').trim();
+  var email = (document.getElementById('fbEmail').value || '').trim();
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+    showMsg('err', '邮箱格式看起来不太对，可以留空，或检查一下再提交。'); return;
+  }
+  btn.disabled = true; btn.textContent = '提交中…'; hideMsg();
+
+  var payload = {
+    type: chosenType,
+    content: '【无应答 · Alpha Beta 体验版】' + content,
+    name: name,
+    email: email,
+    uid: UID,
+    submittedAt: new Date().toISOString()
+  };
+  fetch(FEEDBACK_API + '/api/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+  .then(function(res){
+    if(!res.ok || !res.j || !res.j.ok) throw new Error((res.j && (res.j.error || res.j.message)) || 'HTTP ' + (res.ok ? 'error' : 'bad'));
+    var id = res.j.id || '';
+    var notify = res.j.notify || {};
+    var extra = (email && notify.status === 'sent') ? '<br>已向你的邮箱发送「已受理」通知。' : '';
+    showMsg('ok', '建议已提交到自营后台，谢谢老板！<br><span class="mono">回执编号 ' + id + '</span>' + extra +
+      '<br>可在「我的留言」里回看处理状态与作者回复。');
+    ta.value = ''; cnt.textContent = '0';
+    loadMine();
+  })
+  .catch(function(err){
+    showMsg('err', '提交失败：' + (err && err.message ? err.message : '网络异常') +
+      '<br>内容没有丢，请稍后再点一次「提交建议」。');
+  })
+  .then(function(){ btn.disabled = false; btn.textContent = '提交建议'; });
+});
+
+/* ========== 我的留言 ========== */
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+function fmtTime(t){ return String(t || '').replace('T',' ').slice(0,16); }
+
+function loadMine(){
+  var list = document.getElementById('mineList');
+  document.getElementById('mineUid').textContent = 'UID ' + UID;
+  list.innerHTML = '<div class="empty">读取中…</div>';
+  fetch(FEEDBACK_API + '/api/my-feedback?uid=' + encodeURIComponent(UID) + '&limit=50')
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    var items = (j && j.items) || [];
+    if(!items.length){
+      list.innerHTML = '<div class="empty">还没有留言记录<br>写下第一条建议，作者会在后台看到</div>';
+      return;
+    }
+    list.innerHTML = items.map(function(it){
+      var done = it.status === 'done';
+      return '<div class="fb-item">' +
+        '<div class="fb-top">' +
+          '<span class="fb-type">' + esc(it.type) + '</span>' +
+          '<span class="fb-st ' + (done ? 'done' : 'new') + '">' + (done ? '已处理' : '待处理') + '</span>' +
+          '<span class="fb-time">' + esc(fmtTime(it.createdAt)) + '</span>' +
+        '</div>' +
+        '<div class="fb-c">' + esc(String(it.content || '').replace('【无应答 · Alpha Beta 体验版】','')) + '</div>' +
+        (it.reply ? '<div class="fb-r"><b>作者回复 · </b>' + esc(it.reply) + '</div>' : '') +
+      '</div>';
+    }).join('');
+  })
+  .catch(function(){
+    list.innerHTML = '<div class="empty">读取失败，请稍后再试</div>';
+  });
+}
+document.getElementById('mineRefresh').addEventListener('click', loadMine);
+</script>
+</body>
+</html>
