@@ -6,7 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>民航客机收藏馆 | Airliner Collection</title>
+
 <meta name="description" content="飞行器收藏馆 - 收录全球经典民航客机、战斗机、轰炸机、运输机与直升机，含详细参数与运营航司信息">
 <meta name="keywords" content="民航客机收藏馆,飞机收藏,客机图鉴,机型参数,航空公司涂装,航空摄影,A380,B787,C919,空客,波音,战斗机,Airliner Collection,aircraft collection,airliner database">
 <meta name="author" content="民航客机收藏馆">
@@ -1107,13 +1107,13 @@ body.light-mode .ai-msg-ai pre { background: var(--c-neutral-100-3); }
   border-radius: var(--radius-16) var(--radius-16) var(--radius-16) var(--radius-4);
 }
 body.light-mode .ai-loading { background: var(--c-neutral-100-10); }
-.ai-loading span {
+.ai-loading > span {
   width: 8px; height: 8px; border-radius: var(--radius-full);
   background: var(--accent);
   animation: aiDot 1.4s ease-in-out infinite;
 }
-.ai-loading span:nth-child(2) { animation-delay: 0.2s; }
-.ai-loading span:nth-child(3) { animation-delay: 0.4s; }
+.ai-loading > span:nth-child(2) { animation-delay: 0.2s; }
+.ai-loading > span:nth-child(3) { animation-delay: 0.4s; }
 .news-summary-result {
   white-space: pre-wrap; line-height: 2; padding: var(--space-10) 0; font-size: var(--fs-r100);
   animation: newsSummaryFade 0.55s cubic-bezier(0.16, 1, 0.3, 1);
@@ -5945,6 +5945,23 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
   }
   body.dlg-sys .dlg-new > .dlg-panel > .dlg-handle { display: block; }
 }
+
+/* ---------- L4 · 修复：未开启的弹窗把手不得显示 / 不得拦截点击 ----------
+   旧站存在「用 opacity:0 隐藏、渲染盒仍在」的弹窗（如 #addModalOverlay），
+   其面板内的 .dlg-handle 在移动端被 L3 规则置为 display:block 且 pointer-events:auto，
+   44×56 命中区常驻屏幕底部正中（z 与全屏浮层同级），会盖住移动端底部菜单栏，
+   造成「底栏按钮点不到、被毛玻璃浮层挡住」的点击穿透阻断。
+   现将把手的显示与命中严格绑定到运行时镜像的开启态标记 [data-dlg-open]：
+   未开启不渲染、不命中；退场动画期间只摘命中、保留视觉。 */
+body.dlg-sys [data-dlg]:not([data-dlg-open]) > .dlg-handle,
+body.dlg-sys [data-dlg]:not([data-dlg-open]) .dlg-panel > .dlg-handle {
+  display: none !important;
+  pointer-events: none !important;
+}
+body.dlg-sys [data-dlg].is-closing > .dlg-handle,
+body.dlg-sys [data-dlg].is-closing .dlg-panel > .dlg-handle {
+  pointer-events: none !important;
+}
 </style>
 </head>
 <body class="mat-on" data-version="20261001-v70">
@@ -6421,20 +6438,10 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
 <!-- ===== AI 航空问答 Overlay ===== -->
 <div id="aiChatOverlay">
   <div class="ai-chat-header">
-    <div class="av-ai-brand">
-      <button type="button" class="av-ai-model-btn" id="avAiModelBtn" aria-expanded="false" aria-haspopup="menu" onclick="avAiTogglePicker(event)" title="选择 AI 模型"></button>
-      <div class="av-ai-picker" id="avAiPicker" role="menu" aria-label="AI 模型选择"></div>
-    </div>
     <span class="ai-chat-title">AI 航空问答</span>
     <button class="ai-chat-close" onclick="closeAiChat()" title="关闭">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-  </div>
-  <div class="av-ai-badges" id="avAiBadges">
-    <span class="av-ai-badge" id="avAiBadgeModel">模型：GLM-4.7-Flash</span>
-    <span class="av-ai-badge mode-fast" id="avAiBadgeMode">快速问答</span>
-    <span class="av-ai-badge" id="avAiBadgeQuota">今日剩余深度思考 5/5</span>
-    <button type="button" class="av-ai-badge mode-text" id="avAiImageModeBtn" aria-pressed="false" title="当前：纯文字问答 · 点击切换到识图问答" onclick="avAiToggleImageMode(event)"></button>
   </div>
   <div class="ai-chat-messages" id="aiChatMessages"></div>
   <div class="ai-chat-input-area">
@@ -6523,10 +6530,7 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
       </div>
     </div>
     <div class="pa-radar" id="paRadar">
-      <div class="pa-sweep"></div>
-      <div class="pa-ping p1"></div>
-      <div class="pa-ping p2"></div>
-      <div class="pa-ping p3"></div>
+      <span class="ai-wave ai-wave-md" data-ai-wave="md"></span>
     </div>
     <div class="pa-analyzing-text" id="paAnalyzing" style="display:none">AI 识别中…</div>
     <div class="pa-result" id="paResult"></div>
@@ -6639,7 +6643,7 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
         </div>
       </div>
       <div id="caLoading" style="display:none">
-        <div class="ca-radar"><div class="ca-sweep"></div><div class="ca-ping p1"></div><div class="ca-ping p2"></div><div class="ca-ping p3"></div></div>
+        <div class="ca-radar"><span class="ai-wave ai-wave-md" data-ai-wave="md"></span></div>
         <div class="ca-loading-text" id="caLoadingText">AI 正在分析你的机库…</div>
       </div>
       <div id="caResultWrap" style="display:none">
@@ -10052,7 +10056,7 @@ function storyShow(id, which) {
   var lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh';
   if (which === 'loading') {
     card.style.display = 'block';
-    card.innerHTML = '<div class="story-loading"><div class="ca-radar"><div class="ca-sweep"></div><div class="ca-ping p1"></div><div class="ca-ping p2"></div><div class="ca-ping p3"></div></div><div class="story-loading-text">' + (lang === 'en' ? 'AI is writing a story…' : 'AI 正在讲述这架飞机的故事…') + '</div></div>';
+    card.innerHTML = '<div class="story-loading"><div class="ca-radar">' + aiWaveHTML('md') + '</div><div class="story-loading-text">' + (lang === 'en' ? 'AI is writing a story…' : 'AI 正在讲述这架飞机的故事…') + '</div></div>';
   } else if (which === 'err') {
     card.style.display = 'block';
     card.innerHTML = '<div class="story-err">' + (lang === 'en' ? 'Story service unreachable, please retry later.' : '故事生成服务连接失败，请稍后重试。') + '</div>';
@@ -10074,30 +10078,31 @@ function generateAircraftStory(id, btn) {
     if (pick(bk.trivia)) info += '\n趣闻：' + pick(bk.trivia);
   }
   var prompt = '请以这架飞机的第一人称视角，为它写一段拟人化的「人生故事」，用' + (lang === 'en' ? 'English' : '中文') + '。\n\n' + info + '\n\n要求：1）语气温暖有故事感，像老朋友在讲述自己的一生；2）包含「出生」（首飞年份与背景）、「成长」（服役/使用中的高光经历）、「性格」（技术特点拟人化）、「人生感悟」四个部分；3）全文严格控制在 150~200 字，超出部分必须压缩；4）不要编造超出上述资料范围的虚构事实，可以基于机型常识合理演绎；5）直接输出正文，不要标题。';
-  var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
   AIBridge.chat({
-    tier: 'light',
+    provider: 'kimi',
+    model: 'kimi-k2.6',
     feature: 'story',
     messages: [
       { role: 'system', content: lang === 'en' ? 'You are a warm storyteller for aircraft. Always reply with an emotional, first-person life story in plain text.' : '你是会讲故事的航空文化人，擅长用拟人化第一人称讲述飞机的「人生故事」，文字温暖有画面感。' },
       { role: 'user', content: prompt }
     ],
     max_tokens: 500,
-    temperature: 0.9,
-    signal: controller.signal
+    temperature: 0.9
   }).then(function(data) {
-    clearTimeout(timeoutId);
     var text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+    var degraded = !!(window.AIDegraded && window.AIDegraded.is(data));
     if (!text) throw new Error('empty');
     var card = document.getElementById('storyCard_' + id);
     if (card) {
       card.style.display = 'block';
       card.innerHTML = '<div class="story-body">' + renderMarkdown(text) + '</div><div class="story-actions"><button class="story-btn" onclick="event.stopPropagation();generateAircraftStory(' + id + ', this)">' + (lang === 'en' ? 'Another story' : '换一个故事') + '</button></div>';
+      if (degraded) {
+        window.AIDegraded.attach(data, function () { generateAircraftStory(id, btn); }, card);
+      }
     }
+    if (degraded) window.AIDegraded.toast(data);
     if (btn) btn.disabled = false;
   }).catch(function(err) {
-    clearTimeout(timeoutId);
     storyShow(id, 'err');
     var card = document.getElementById('storyCard_' + id);
     if (card) {
@@ -10365,31 +10370,38 @@ function runCollectAnalysis() {
     var a = aircrafts.find(function(x) { return x.id === id; });
     return a ? fmt(a) : null;
   }).filter(Boolean);
-  var allList = aircrafts.map(fmt).join('\n');
+  var ownedSet = {};
+  ids.forEach(function(id) { ownedSet[id] = true; });
+  var unownedList = aircrafts.filter(function(a) { return !ownedSet[a.id]; });
+  var allList = (unownedList.length ? unownedList : aircrafts).map(fmt).join('\n');
   var prompt = '你是航空收藏品鉴专家。用户收藏了以下机型：\n' + list.join('\n') +
     '\n\n可选机型全集（用于最后推荐尚未收藏的机型）：\n' + allList +
     '\n\n请为用户生成一份生动有趣的「机库收藏洞察报告」，用' + (lang === 'en' ? 'English' : '中文') +
-    '输出，必须包含：1）一句话整体评价（如"你的机库偏爱宽体机""你是波音铁粉"）；2）分类偏好：宽体/窄体/支线/军用等倾向；3）制造商偏好：波音/空客/商飞/巴西等；4）时代偏好：经典复古还是现代前沿；5）趣味标签 2-3 个（如"宽体收藏家""波音铁粉""复古情怀党"）；6）收藏建议：从可选机型全集中推荐 1-2 款用户尚未收藏且符合其偏好的机型并说明理由。风格活泼有趣，适度使用 emoji，用 Markdown 格式（标题、列表、加粗）输出。';
-  var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
+    '输出，必须包含：1）一句话整体评价（如"你的机库偏爱宽体机""你是波音铁粉"）；2）分类偏好：宽体/窄体/支线/军用等倾向；3）制造商偏好：波音/空客/商飞/巴西等；4）时代偏好：经典复古还是现代前沿；5）趣味标签 2-3 个（如"宽体收藏家""波音铁粉""复古情怀党"）；6）收藏建议：从可选机型全集中推荐 1-2 款用户尚未收藏且符合其偏好的机型并说明理由。风格活泼有趣，适度使用 emoji，用 Markdown 格式（标题、列表、加粗）输出。整篇报告控制在 450 字以内，务必精炼，不要冗长铺陈。';
   AIBridge.chat({
-    tier: 'flagship',
+    provider: 'kimi',
+    model: 'kimi-k2.6',
     feature: 'collect_analysis',
     messages: [
       { role: 'system', content: lang === 'en' ? 'You are a witty aviation collection analyst. Always reply in Markdown, lively and fun.' : '你是一位风趣的航空收藏品鉴专家，始终用活泼有趣的 Markdown 输出。' },
       { role: 'user', content: prompt }
     ],
     max_tokens: 900,
-    temperature: 0.8,
-    signal: controller.signal
+    temperature: 0.8
   }).then(function(d) {
-    clearTimeout(timeoutId);
     var text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
     if (!text) throw new Error('empty');
     document.getElementById('caReport').innerHTML = renderMarkdown(text);
+    if (window.AIDegraded && window.AIDegraded.is(d)) {
+      window.AIDegraded.toast(d);
+      window.AIDegraded.attach(d, function () { runCollectAnalysis(); }, document.getElementById('caReport'));
+    }
     caShow('result');
   }).catch(function() {
-    clearTimeout(timeoutId);
+    if (retryLeft > 0) {
+      setTimeout(function() { runCollectAnalysis(retryLeft - 1); }, 1500);
+      return;
+    }
     document.getElementById('caErrText').textContent = t('collectAnalysisErr');
     caShow('err');
   });
@@ -10713,61 +10725,84 @@ window.AIBridge = (function () {
     return json.token;
   }
 
+  /* 2.5) 分档自适应超时 + 网络/超时类失败自动重试一次
+   *  超时优先级：调用方显式 o.timeout > tier（light·code 60s / vision 90s / flagship 120s）> 由 model 推断
+   *  重试规则：仅 AbortError（超时）/ TypeError（断网、DNS、连接中断）重试 1 次；
+   *            429、额度类、402/4xx 业务错误一律不重试，避免放大限流与无效等待。 */
+  var AI_TIER_TIMEOUT = { light: 90000, code: 90000, vision: 110000, flagship: 130000 };
+  var AI_MODEL_TIER = {
+    'glm-4.5': 'flagship', 'glm-4.5v': 'vision', 'glm-4.5-air': 'light',
+    'glm-4.6': 'code', 'glm-4.7': 'flagship', 'glm-5': 'flagship',
+    'kimi-k3': 'flagship', 'kimi-k2.6': 'light',
+    'kimi-k2.7-code': 'code', 'kimi-k2.7-code-highspeed': 'code'
+  };
+  function resolveTierOf(o) {
+    var t = String(o.tier || '').toLowerCase();
+    if (AI_TIER_TIMEOUT[t]) { return t; }
+    var m = String(o.model || '');
+    if (AI_MODEL_TIER[m]) { return AI_MODEL_TIER[m]; }
+    if (/code/i.test(m)) { return 'code'; }
+    if (/vision|visual|-vl|v$/i.test(m)) { return 'vision'; }
+    if (/k3|glm-5|glm-4\.[6-9]/i.test(m)) { return 'flagship'; }
+    return 'light';
+  }
+  function resolveTimeoutOf(o) {
+    if (typeof o.timeout === 'number' && o.timeout > 0) { return o.timeout; }
+    return AI_TIER_TIMEOUT[resolveTierOf(o)] || 90000;
+  }
+  function isRetryableFailure(err) {
+    if (!err) { return false; }
+    var code = String(err.code || '').toUpperCase();
+    if (code === 'ABORTED' || code === 'QUOTA') { return false; }
+    if (code === 'TIMEOUT' || code === 'NETWORK') { return true; }
+    if (err.name === 'AbortError') { return !code || code === 'TIMEOUT'; }
+    if (err.name === 'TypeError') { return true; }
+    var st = typeof err.status === 'number' ? err.status : 0;
+    if (st > 0) { return st >= 500; }
+    return /network|timeout|fetch|abort/i.test(String(err.message || ''));
+  }
+  function sleepMs(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
   /* 3) 统一请求：入参沿用 OpenAI 风格（messages / temperature / max_tokens），
    *    返回值也伪装成 OpenAI 风格，旧代码的 data.choices[0].message.content 无需改动。 */
-  async function chat(opts) {
+  async function chatOnce(opts) {
     var o = opts || {};
-    var token = await getToken(false);
 
     var body = {
       messages: o.messages || [],
       stream: false
     };
-    if (o.tier) body.tier = o.tier;
-    /* >>> av-stage1 route >>> */
-    /* 双模型路由：仅主问答（未指定 tier）走左上角模型选择器；tier 调用（测评/新闻等）行为不变 */
-    var _avRoute = null;
-    if (!o.tier) {
-      if (o.provider || o.model || o.mode) {
-        _avRoute = { provider: o.provider, model: o.model, mode: o.mode };
-      } else if (typeof window.__avAiRoute === 'function') {
-        _avRoute = window.__avAiRoute();
-      }
-    }
-    if (_avRoute) {
-      _avRoute.mode = _avRoute.mode || ((_avRoute.provider === 'kimi') ? 'deep' : 'fast');
-      _avRoute.provider = _avRoute.provider || ((_avRoute.mode === 'deep') ? 'kimi' : 'zhipu');
-      body.provider = _avRoute.provider;
-      body.mode = _avRoute.mode;
-      body.model = _avRoute.model || ((_avRoute.provider === 'kimi') ? 'kimi-k2.6' : 'glm-4.7-flash');
-    } else if (o.model && !o.tier) {
-      body.model = o.model;
-    }
-    /* <<< av-stage1 route <<< */
+    if (o.provider) body.provider = o.provider;
+    /* model 与 tier 同传时以 model 优先：服务端对显式 tier 的优先级高于 model，
+       故此处只透传 model，确保调用方指定的模型真正生效 */
+    if (o.model) body.model = o.model;
+    else if (o.tier) body.tier = o.tier;
     if (o.feature) body.feature = o.feature;
     if (typeof o.temperature === 'number') body.temperature = o.temperature;
     if (typeof o.max_tokens === 'number') body.maxTokens = o.max_tokens;
 
-    var controller = new AbortController();
-    var timeoutId = setTimeout(function () { controller.abort(); }, o.timeout || 45000);
+    var timeoutMs = resolveTimeoutOf(o);
+    var maxAttempts = (o.retry === false) ? 1 : 2;   /* 网络/超时类失败自动重试 1 次 */
+    var ext = o.signal || null;
+    var res = null, json = null, lastErr = null, attempts = 0;
 
-    var res, json;
-    try {
-      res = await fetch('/api/chat', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-AI-Token': token
-        },
-        body: JSON.stringify(body),
-        signal: o.signal || controller.signal
-      });
-      clearTimeout(timeoutId);
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      attempts = attempt + 1;
+      if (ext && ext.aborted) { break; }
 
-      /* 令牌过期 → 强制刷新后重试一次（不多次重试） */
-      if (res.status === 401) {
-        token = await getToken(true);
+      var controller = new AbortController();
+      var timedOut = false;
+      var extAborted = false;
+      var onExtAbort = function () { extAborted = true; try { controller.abort(); } catch (e0) { } };
+      if (ext && typeof ext.addEventListener === 'function') { ext.addEventListener('abort', onExtAbort); }
+      var timeoutId = setTimeout(function () { timedOut = true; try { controller.abort(); } catch (e0) { } }, timeoutMs);
+
+      res = null;
+      json = null;
+      lastErr = null;
+      try {
+        var token = await getToken(attempt > 0);
+
         res = await fetch('/api/chat', {
           method: 'POST',
           credentials: 'include',
@@ -10776,32 +10811,179 @@ window.AIBridge = (function () {
             'X-AI-Token': token
           },
           body: JSON.stringify(body),
-          signal: o.signal || controller.signal
+          signal: controller.signal
         });
+
+        /* 令牌过期 → 强制刷新后重试一次（同一次尝试内，不计入网络重试） */
+        if (res.status === 401) {
+          token = await getToken(true);
+          res = await fetch('/api/chat', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-AI-Token': token
+            },
+            body: JSON.stringify(body),
+            signal: controller.signal
+          });
+        }
+
+        json = await res.json().catch(function () { return null; });
+        /* 服务端「已降级的 200」同样带有兜底正文（OpenAI 形态 _degraded / 主站形态 degraded）：
+           必须放行并交给上层 chat() 触发跨上游兜底，绝不能当成接口失败直接抛错，
+           否则智谱额度耗尽时所有 AI 入口都会误报「连接失败」 */
+        var respDegraded = !!(json && (json._degraded || json.degraded));
+        if (!json || (json.ok !== true && !respDegraded)) {
+          /* 429 / 402 / 额度类：标记为 QUOTA，绝不重试 */
+          var rawCode = String((json && (json.error || json.degradeKind || json._degrade_kind)) || '');
+          var failErr = new Error('AI_FAILED: ' + ((json && json.error) || ('http_' + res.status)));
+          failErr.status = res.status;
+          failErr.code = (json && json.error) || ('http_' + res.status);
+          if (res.status === 429 || res.status === 402 || /quota|exceed|insufficient|balance|limit_?reached/i.test(rawCode)) {
+            failErr.code = 'QUOTA';
+          }
+          lastErr = failErr;
+        }
+      } catch (e) {
+        lastErr = e || new Error('AI_FAILED');
+        if (extAborted) { lastErr.code = 'ABORTED'; }
+        else if (timedOut) { lastErr.code = 'TIMEOUT'; lastErr.status = 0; }
+        else if (lastErr.name === 'TypeError') { lastErr.code = lastErr.code || 'NETWORK'; }
+      } finally {
+        if (timeoutId) { clearTimeout(timeoutId); }
+        if (ext && typeof ext.removeEventListener === 'function') { ext.removeEventListener('abort', onExtAbort); }
       }
-      json = await res.json().catch(function () { return null; });
-    } finally {
-      clearTimeout(timeoutId);
+
+      if (!lastErr) { break; }
+      if (extAborted || (ext && ext.aborted)) { break; }
+      if (attempt + 1 < maxAttempts && isRetryableFailure(lastErr)) {
+        await sleepMs(700);
+        continue;
+      }
+      break;
     }
 
-    if (!json || json.ok !== true) {
-      var err = new Error('AI_FAILED: ' + ((json && json.error) || res.status));
-      err.code = (json && json.error) || 'http_' + res.status;
-      err.status = res.status;
+    /* 额度反馈：服务端若返回 quota 字段（任意命名）则写入全局，前端优先采用 */
+    try {
+      if (json) {
+        var _q = json.quota || json.k3Quota || json.quotaK3 || json.flagshipQuota;
+        if (_q && typeof _q === 'object') {
+          var _lim = (typeof _q.limit === 'number' && _q.limit > 0)
+            ? _q.limit
+            : ((typeof _q.total === 'number' && _q.total > 0) ? _q.total : 5);
+          var _rem = null;
+          if (typeof _q.remaining === 'number') { _rem = _q.remaining; }
+          else if (typeof _q.left === 'number') { _rem = _q.left; }
+          else if (typeof _q.used === 'number') { _rem = _lim - _q.used; }
+          if (_rem !== null && isFinite(_rem)) {
+            window.__aiQuota = {
+              limit: _lim,
+              remaining: Math.max(0, Math.round(_rem)),
+              used: Math.max(0, _lim - Math.round(_rem)),
+              source: 'server',
+              at: Date.now()
+            };
+            window.__aiQuotaExceeded = false;
+          }
+        }
+      }
+    } catch (eQ) { /* 额度字段缺失时由前端本地兜底 */ }
+
+    if (!json || (json.ok !== true && !(json._degraded || json.degraded))) {
+      /* 额度类错误（服务端 429 / quota 语义）→ 置标记，由前端模块给出提示 */
+      var _code = String((lastErr && lastErr.code) || '');
+      var _st = (lastErr && typeof lastErr.status === 'number') ? lastErr.status : 0;
+      if (_code === 'QUOTA' || _st === 429 || _st === 402 || /quota|exceed|insufficient|limit_?reached/i.test(_code)) {
+        window.__aiQuotaExceeded = true;
+      }
+      var err = lastErr || new Error('AI_FAILED: ' + _st);
+      err.attempts = attempts;
       throw err;
     }
+    if (attempts > 1) { window.__aiLastRetryOk = attempts; }
 
-    /* 归一化为 OpenAI 风格响应，旧解析代码无需改动 */
+    /* 归一化为 OpenAI 风格响应，旧解析代码无需改动；
+       同时透传 _degraded / _degradeKind（服务端降级兜底），避免被当作正常回答静默渲染 */
+    var _answerText = '';
+    if (typeof json.answer === 'string') { _answerText = json.answer; }
+    else if (json.choices && json.choices[0] && json.choices[0].message) { _answerText = json.choices[0].message.content || ''; }
     return {
-      choices: [{ index: 0, message: { role: 'assistant', content: json.answer || '' }, finish_reason: json.finishReason || 'stop' }],
+      choices: [{ index: 0, message: { role: 'assistant', content: _answerText }, finish_reason: json.finishReason || 'stop' }],
       model: json.model,
       _tier: json.tier,
+      _provider: json.provider || body.provider || '',
       _cached: !!json.cached,
-      _degraded: !!json.degraded,
-      _degradeKind: json.degradeKind || '',
+      _degraded: !!(json.degraded || json._degraded),
+      _degradeKind: json.degradeKind || json._degrade_kind || '',
+      _noFallback: !!json.noFallback,
       _usage: json.usage,
       _requestId: json.requestId
     };
+  }
+
+  /* 3.5) 跨上游自动兜底（保证全部 AI 功能可用）
+   *  触发：上游返回降级兜底（_degraded / _degradeKind，如智谱付费档额度耗尽、上游不可用）；
+   *  动作：自动改走 kimi 同档位再试一次（识图请求走 kimi 视觉档，原生视觉）；
+   *  约束：只在降级时触发一次，不放大限流；兜底成功则对调用方完全透明。 */
+  function hasImage(messages) {
+    try {
+      return (messages || []).some(function (m) {
+        var c = m && m.content;
+        if (Array.isArray(c)) {
+          return c.some(function (p) { return p && (p.type === 'image_url' || p.type === 'image' || p.image_url); });
+        }
+        return false;
+      });
+    } catch (e) { return false; }
+  }
+  async function chat(opts) {
+    var o = opts || {};
+    var first = null, firstErr = null;
+    try {
+      first = await chatOnce(o);
+    } catch (e0) {
+      firstErr = e0 || new Error('AI_FAILED');
+      if (o.__noFallback) { throw firstErr; }
+      /* 只有「上游不可用 / 额度耗尽 / 限流」这类可兜底失败才改走另一家上游；
+         参数错误、鉴权失败等业务错误依旧如实抛出，避免无谓请求 */
+      var c0 = String(firstErr.code || '').toUpperCase();
+      var st0 = (typeof firstErr.status === 'number') ? firstErr.status : 0;
+      var canFallback = (c0 === 'QUOTA' || st0 === 429 || st0 === 402 ||
+        /quota|exceed|insufficient|balance|degrade|unavailable|local-fallback|circuit|ratelimit|upstream|502|503|504/i.test(c0 + ' ' + String(firstErr.message || '')));
+      if (!canFallback) { throw firstErr; }
+    }
+
+    var degraded = !!(first && (first._degraded || first._degradeKind));
+    if (first && !degraded) { return first; }
+    if (o.__noFallback || (first && first._noFallback)) { if (first) return first; throw firstErr; }
+
+    var fb = {};
+    for (var k in o) { if (Object.prototype.hasOwnProperty.call(o, k)) { fb[k] = o[k]; } }
+    var explicitTier = String(o.tier || '').toLowerCase();
+    /* 未显式给档位时，按被降级的模型反推同档位，避免旗舰请求被兜底成轻量档 */
+    var effTier = explicitTier || (first && first._tier ? String(first._tier).toLowerCase() : '') || resolveTierOf(o);
+    fb.provider = 'kimi';
+    fb.__noFallback = true;
+    fb.retry = false;
+    delete fb.model;
+    delete fb.timeout;
+    fb.tier = hasImage(o.messages) ? 'vision'
+      : (effTier === 'code' ? 'code' : (effTier === 'flagship' ? 'flagship' : 'light'));
+    try {
+      var second = await chatOnce(fb);
+      if (second && !(second._degraded || second._degradeKind)) {
+        second._fallbackFrom = (first && first._provider) || o.provider || '';
+        try { window.__aiFallbackUsed = (window.__aiFallbackUsed || 0) + 1; } catch (e1) { }
+        return second;
+      }
+      if (first) { return first; }
+      if (second) { return second; }
+      throw firstErr || new Error('AI_FAILED');
+    } catch (e2) {
+      if (first) { return first; }
+      throw firstErr || e2;
+    }
   }
 
   /* 4) 便捷取文本 */
@@ -10813,8 +10995,86 @@ window.AIBridge = (function () {
   return { bootstrap: bootstrap, getToken: getToken, chat: chat, text: text };
 })();
 
-/* ===== AI 全局配置（已无密钥：调用统一走同源 /api/chat） ===== */
-const AI_CONFIG = { timeout: 45000 };
+/* ===== AI 全局配置（已无密钥：调用统一走同源 /api/chat） =====
+ * 请求超时统一由 AIBridge.chat 按档位/模型自适应（light·code 60s / vision 90s / flagship 120s），
+ * 调用方显式传 timeout 时以显式值为准；此处仅保留档位映射供查询，不再作为请求超时使用。 */
+const AI_CONFIG = {
+  timeouts: { light: 90000, code: 90000, vision: 110000, flagship: 130000 },
+  timeoutFor: function (tier) { return this.timeouts[String(tier || '').toLowerCase()] || 60000; }
+};
+
+/* ===== 服务端降级兜底识别与提示（_degraded / _degradeKind） =====
+ * 服务端上游不可用时返回 HTTP 200 + 本地兜底文本；若静默当正常回答渲染，用户会误以为模型答非所问。
+ * 统一在此识别，给出「AI 繁忙，已切换兜底」提示 + 重试入口。 */
+window.AIDegraded = {
+  is: function (data) {
+    return !!(data && (data._degraded || data._degradeKind || data.degraded || data.degradeKind));
+  },
+  kind: function (data) {
+    return String((data && (data._degradeKind || data.degradeKind)) || 'unavailable');
+  },
+  isEn: function () {
+    try { return String(document.documentElement.lang || '').toLowerCase().indexOf('en') === 0; } catch (e) { return false; }
+  },
+  reason: function (data) {
+    var k = this.kind(data);
+    var map = {
+      unavailable: ['AI 服务暂时不可用', 'AI service is temporarily unavailable'],
+      maintenance: ['AI 服务正在维护', 'AI service is under maintenance'],
+      ratelimited: ['AI 调用过于频繁', 'Too many AI requests right now'],
+      notconfigured: ['AI 服务尚未完成配置', 'AI service is not configured yet'],
+      circuit: ['AI 服务已暂时熔断保护', 'AI service is temporarily paused'],
+      busy: ['AI 正在排队，请稍后再试', 'AI is queueing, please wait'],
+      quota: ['AI 额度已用尽', 'AI quota is used up']
+    };
+    var hit = map[k] || map.unavailable;
+    return this.isEn() ? hit[1] : hit[0];
+  },
+  msg: function (data) {
+    var en = this.isEn();
+    return (en ? 'AI is busy — showing fallback content. ' : 'AI 繁忙，已切换兜底内容。')
+      + '（' + this.reason(data) + '）'
+      + (en ? ' You can retry.' : ' 可点击重试。');
+  },
+  toast: function (data) {
+    try { if (typeof toast === 'function') { toast(this.msg(data)); return; } } catch (e) { }
+  },
+  /* 生成带「重试」按钮的提示条 */
+  banner: function (data, onRetry) {
+    var en = this.isEn();
+    var box = document.createElement('div');
+    box.className = 'ai-degrade-banner';
+    box.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0;padding:9px 12px;border-radius:10px;'
+      + 'border:1px solid rgba(240,175,60,.45);background:rgba(240,175,60,.12);font-size:13px;line-height:1.5;';
+    var tip = document.createElement('span');
+    tip.textContent = this.msg(data);
+    box.appendChild(tip);
+    if (typeof onRetry === 'function') {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = en ? 'Retry' : '重试';
+      btn.style.cssText = 'flex:0 0 auto;padding:4px 12px;border-radius:999px;border:1px solid rgba(240,175,60,.6);'
+        + 'background:rgba(240,175,60,.18);font-size:12px;cursor:pointer;';
+      btn.addEventListener('click', function () {
+        if (btn.parentNode) { btn.parentNode.removeChild(btn); }
+        try { onRetry(); } catch (e) { }
+      });
+      box.appendChild(btn);
+    }
+    return box;
+  },
+  /* 挂到容器（默认聊天消息区）末尾；容器缺失时退化为 toast */
+  attach: function (data, onRetry, container) {
+    try {
+      var c = container || document.getElementById('aiChatMessages');
+      if (!c) { this.toast(data); return null; }
+      var box = this.banner(data, onRetry);
+      c.appendChild(box);
+      try { if (typeof smoothToBottom === 'function') { smoothToBottom(); } } catch (e2) { }
+      return box;
+    } catch (e) { this.toast(data); return null; }
+  }
+};
 
 // ===== 照片识机 =====
 const PA_ENGINES = {1:4,2:2,3:2,4:2,5:2,6:2,7:2,8:2,9:2,10:2,20:2,21:2,22:4,23:4,24:4,25:0,26:4,27:4,28:4,29:3,30:3,31:2,32:2,33:4,34:4,35:4,36:4,37:2,38:2};
@@ -11002,16 +11262,17 @@ function paCallAI(dataUrl, cands, hintMaker, hintCat) {
   }
   var prompt = '你是飞机型号识别专家。用户上传了一张飞机照片，请从下面候选系列中选出最匹配的系列，并尽可能判断具体子型号。候选系列列表（只允许从这些里面选）:\n' + listStr + '\n' + hintLine + '请严格只输出 JSON（不要输出任何其他内容）: {"series": 系列编号, "sub": 子型号编号, "reason": "一句话识别依据", "confidence": 0-100的置信度整数}。要求：1) series 必须是候选系列中方括号里的编号；2) sub 是该系列内具体子型号的编号（即"包含:"括号里的编号，不确定就填 0）；3) reason 用中文一句话，必须引用图片中真实可见的外观特征（发动机数量与位置、机翼形状、尾翼布局、机头形状等）；4) 若照片完全无法判断，输出 {"series": 0, "sub": 0, "reason": "无法确定", "confidence": 0}。';
   return AIBridge.chat({
-    tier: 'vision',
+    provider: 'kimi',
+    model: 'kimi-k2.6',
     feature: 'photo_id',
     messages: [
       { role: 'system', content: '你是专业飞机识别助手，擅长依据外观特征（发动机数量/位置、机翼、尾翼、机头）判断机型。' },
       { role: 'user', content: [ { type: 'text', text: prompt }, { type: 'image_url', image_url: { url: dataUrl } } ] }
     ],
     temperature: 0.2,
-    max_tokens: 300,
-    timeout: (AI_CONFIG.timeout || 15000) + 10000
+    max_tokens: 300
   }).then(function(d) {
+    if (window.AIDegraded && window.AIDegraded.is(d)) { window.AIDegraded.toast(d); }
     var text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
     var m = text.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('bad response');
@@ -11211,7 +11472,7 @@ function addLoadingIndicator() {
   const div = document.createElement('div');
   div.className = 'ai-loading';
   div.id = 'aiLoadingIndicator';
-  div.innerHTML = '<span></span><span></span><span></span>';
+  div.innerHTML = aiWaveHTML('sm');
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
 }
@@ -11414,16 +11675,17 @@ function aiFindPrompt(text) {
 
 function aiFindChat(text) {
   return AIBridge.chat({
-    tier: 'light',
+    provider: 'kimi',
+    model: 'kimi-k2.6',
     feature: 'find',
     messages: [
       { role: 'system', content: '你是航空数据检索助手，只输出 JSON。' },
       { role: 'user', content: aiFindPrompt(text) }
     ],
     temperature: 0.2,
-    max_tokens: 400,
-    timeout: AI_CONFIG.timeout
+    max_tokens: 400
   }).then(function (d) {
+    if (window.AIDegraded && window.AIDegraded.is(d)) { window.AIDegraded.toast(d); }
     var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
     var m = txt.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('bad json');
@@ -11439,7 +11701,7 @@ function aiFindRenderConds(conds, raw, hits) {
   var el = document.getElementById('aiFindConds');
   if (!el) return;
   if (conds && conds.loading) {
-    el.innerHTML = '<span class="ai-find-loading">AI 正在解析「' + escapeHtml(raw) + '」…</span>';
+    el.innerHTML = '<span class="ai-find-loading">' + aiWaveHTML('sm') + 'AI 正在解析「' + escapeHtml(raw) + '」…</span>';
     return;
   }
   if (!conds) { el.innerHTML = ''; return; }
@@ -11670,21 +11932,28 @@ async function sendAiMessage() {
   updateAiCharCount();
   sendBtn.disabled = true;
 
-  // 显示 loading
-  addLoadingIndicator();
-
   // ===== RAG：先检索站内机型库（内置机型 + 后台已采纳投稿机型） =====
   var ragHits = [];
   try { ragHits = ragRetrieveAircraft(text, 5); } catch (e) { ragHits = []; }
+
+  await aiChatRequest(text, ragHits);
+  sendBtn.disabled = false;
+}
+
+/* 发起一次对话请求：内置分档自适应超时 + 网络异常自动重试（由 AIBridge.chat 负责）；
+ * 服务端降级兜底时给出明确提示与重试入口，不再静默当正常回答渲染。 */
+async function aiChatRequest(text, ragHits) {
+  addLoadingIndicator();
   var ragBlock = buildRagContext(ragHits);
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
-
   try {
     const lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh';
+    // 三档模型：由 AiModelSelect 解析本次请求应落的档位/provider（含「难题升级旗舰」的一次性覆盖）
+    var _ms = null;
+    try { _ms = (window.AiModelSelect && typeof window.AiModelSelect.resolve === 'function') ? window.AiModelSelect.resolve() : null; } catch (eMs) { _ms = null; }
     const data = await AIBridge.chat({
       feature: 'chat',
+      tier: (_ms && _ms.tier) || undefined,
+      provider: (_ms && _ms.provider) || undefined,
       messages: [
         { role: 'system', content: (AI_SYSTEM_PROMPTS[lang] || AI_SYSTEM_PROMPTS.zh) + RAG_RULES },
         ...(ragBlock ? [{ role: 'system', content: ragBlock }] : []),
@@ -11692,36 +11961,32 @@ async function sendAiMessage() {
         { role: 'user', content: text }
       ],
       max_tokens: 900,
-      temperature: 0.7,
-      signal: controller.signal
+      temperature: 0.7
     });
 
-    clearTimeout(timeoutId);
     removeLoadingIndicator();
 
     const reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    const degraded = !!(window.AIDegraded && window.AIDegraded.is(data));
     if (reply) {
       aiConversationHistory.push({ role: 'user', content: text });
       aiConversationHistory.push({ role: 'assistant', content: reply });
       var rres = renderAiReplyWithCards(reply, ragHits);
       addMessage(rres.text, 'ai', rres.cards);
+      // 服务端降级兜底：明确提示「AI 繁忙，已切换兜底」并提供重试入口
+      if (degraded) {
+        window.AIDegraded.attach(data, function () { aiChatRequest(text, ragHits); });
+      }
       // 未命中（无检索结果或模型判定站内资料不足）→ 记入后台「答不上来的问题 Top 榜」
       if (rres.noMatch || !ragHits.length) reportQaLog(text, ragHits, '');
-      if (typeof window.__avAiDifficultyGuide === 'function') { window.__avAiDifficultyGuide(text, !!rres.noMatch); }
     } else {
       addMessage(t('aiError'), 'ai');
       reportQaLog(text, ragHits, '');
     }
   } catch (err) {
-    clearTimeout(timeoutId);
     removeLoadingIndicator();
-    if (err.name === 'AbortError') {
-      addMessage(t('aiTimeout'), 'ai');
-    } else {
-      addMessage(t('aiError'), 'ai');
-    }
-  } finally {
-    sendBtn.disabled = false;
+    var _timeout = !!(err && (err.code === 'TIMEOUT' || err.name === 'AbortError'));
+    addMessage(_timeout ? t('aiTimeout') : t('aiError'), 'ai');
   }
 }
 
@@ -11777,7 +12042,7 @@ async function generateAiReview() {
 
   var contentEl = document.getElementById('aiReviewContent');
   var genBtn = document.getElementById('aiReviewGenBtn');
-  contentEl.innerHTML = '<div class="ai-loading"><span></span><span></span><span></span></div>';
+  contentEl.innerHTML = '<div class="ai-loading" style="margin:0 auto">' + aiWaveHTML('md') + '</div>';
   genBtn.disabled = true;
   genBtn.textContent = '生成中...';
 
@@ -11789,33 +12054,33 @@ async function generateAiReview() {
 
   var prompt = '请对以下机型进行专业评价，聚焦于【' + aspects.join('、') + '】方面，约150字。机型信息：名称=' + a.name + '，型号=' + a.code + '，国家=' + a.country + '，简介=' + a.desc + '，规格=' + specsText + '。请直接输出评价内容，不要前缀说明，保持专业客观的语言风格。';
 
-  var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, AI_CONFIG.timeout);
-
   try {
     var lang = (typeof currentLang !== 'undefined') ? currentLang : 'zh';
     var data = await AIBridge.chat({
-      tier: 'light',
+      provider: 'kimi',
+      model: 'kimi-k2.6',
       feature: 'review',
       messages: [
         { role: 'system', content: '你是航空领域资深评论员，擅长从多维度对民航客机进行专业、客观、简练的评价。字数严格控制在150字左右。' },
         { role: 'user', content: prompt }
       ],
       max_tokens: 400,
-      temperature: 0.8,
-      signal: controller.signal
+      temperature: 0.8
     });
 
-    clearTimeout(timeoutId);
-
     var reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    var reviewDegraded = !!(window.AIDegraded && window.AIDegraded.is(data));
     if (reply) {
-      contentEl.textContent = reply;
+      contentEl.textContent = reviewDegraded ? (window.AIDegraded.msg(data) + '\n' + reply) : reply;
     } else {
       contentEl.textContent = '评价生成失败，请重试';
     }
+    if (reviewDegraded) {
+      try {
+        window.AIDegraded.attach(data, function () { if (typeof generateAiReview === 'function') { generateAiReview(); } }, contentEl.parentNode || contentEl);
+      } catch (e3) { }
+    }
   } catch (err) {
-    clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
       contentEl.textContent = '请求超时，请重试';
     } else {
@@ -14204,30 +14469,37 @@ async function tryFetchRSSAndUpdate(content, today, shownTitles, shownUrls) {
     }
     if (rssSelected.length === 0) return;
 
-    // AI翻译
+    // AI翻译（分批：每批 5 条，缩短单次占用上游串行槽的时间，避免排队超时降级）
     var translated = null;
-    for (var tAttempt = 0; tAttempt < 1 && !translated; tAttempt++) {
-      try {
-        var translatePrompt = '你是专业航空新闻翻译。将以下' + rssSelected.length + '条英文航空新闻的标题和摘要翻译成简体中文，返回严格JSON数组：[{"title":"中文标题","snippet":"中文摘要"}]。要求：1.只输出JSON数组，不要markdown代码块、不要任何解释；2.title保持简洁准确；3.snippet完整通顺；4.专有名词保留英文缩写（如C919、A380、EASA）；5.严禁输出英文原文。\n' + JSON.stringify(rssSelected.map(function(item) { return { title: item.title, snippet: item.snippet }; }));
-        var tCtrl = new AbortController();
-        var tTimeout = setTimeout(function() { tCtrl.abort(); }, 20000);
-        var tData = await AIBridge.chat({
-          tier: 'flagship',
-          feature: 'news_translate',
-          messages: [{ role: 'user', content: translatePrompt }],
-          max_tokens: 3600,
-          temperature: 0.3,
-          signal: tCtrl.signal
-        });
-        clearTimeout(tTimeout);
-        var tReply = tData.choices && tData.choices[0] && tData.choices[0].message && tData.choices[0].message.content;
-        if (tReply) {
-          var parsed = extractTranslatedJson(tReply);
-          if (parsed) translated = parsed;
-        }
-      } catch(e) { /* 单次翻译失败，稍后重试 */ }
-      if (!translated && tAttempt < 2) await new Promise(function(r) { setTimeout(r, 500); });
+    var TR_CHUNK = 5;
+    var trParts = [];
+    for (var ci = 0; ci < rssSelected.length && trParts !== null; ci += TR_CHUNK) {
+      var chunk = rssSelected.slice(ci, ci + TR_CHUNK);
+      var trGot = null;
+      for (var tAttempt = 0; tAttempt < 2 && !trGot; tAttempt++) {
+        try {
+          var translatePrompt = '你是专业航空新闻翻译。将以下' + chunk.length + '条英文航空新闻的标题和摘要翻译成简体中文，返回严格JSON数组：[{"title":"中文标题","snippet":"中文摘要"}]。要求：1.只输出JSON数组，不要markdown代码块、不要任何解释；2.title保持简洁准确；3.snippet完整通顺；4.专有名词保留英文缩写（如C919、A380、EASA）；5.严禁输出英文原文。\n' + JSON.stringify(chunk.map(function(item) { return { title: item.title, snippet: item.snippet }; }));
+          var tData = await AIBridge.chat({
+            provider: 'kimi',
+            model: 'kimi-k2.6',
+            feature: 'news_translate',
+            messages: [{ role: 'user', content: translatePrompt }],
+            max_tokens: 1600,
+            temperature: 0.3
+          });
+          if (window.AIDegraded && window.AIDegraded.is(tData)) { window.AIDegraded.toast(tData); }
+          var tReply = tData.choices && tData.choices[0] && tData.choices[0].message && tData.choices[0].message.content;
+          if (tReply) {
+            var parsed = extractTranslatedJson(tReply);
+            if (parsed && parsed.length) trGot = parsed;
+          }
+        } catch(e) { /* 单批翻译失败，退避后重试一次 */ }
+        if (!trGot) await new Promise(function(r) { setTimeout(r, 600); });
+      }
+      if (!trGot) { trParts = null; break; }
+      trParts = trParts.concat(trGot);
     }
+    if (trParts && trParts.length) translated = trParts;
     // 翻译失败或结果仍为英文时，保留静态中文新闻，不替换展示
     if (!translated) return;
     var latinTitleCount = translated.filter(function(t) {
@@ -14357,19 +14629,22 @@ async function generateNewsSummaryInPanel() {
     content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">暂无快讯，无法生成总结</div>';
     return;
   }
-  content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;"><div class="ai-loading" style="display:inline-flex"><span></span><span></span><span></span></div></div>';
+  content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;"><div class="ai-loading" style="display:inline-flex;background:none;padding:0">' + aiWaveHTML('lg') + '</div></div>';
   var titles = newsPanelItems.map(function(item) { return item.title; }).join('\n');
   var prompt = '以下是今日民航航空新闻标题，请写一篇约' + wordCount + '字的航空新闻综合摘要，按主题归类，直接陈述事实不要开场白和结束语，不要称呼观众，单纯输出内容，自然段落不要列点序号。\n\n' + titles;
   var systemPrompt = '你是资深航空编辑。用中文输出约' + wordCount + '字的航空新闻综合摘要，直接讲内容，不要任何寒暄或情感表达，段落形式流畅自然，不列点。';
-  var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, 45000);
   try {
-    var data = await AIBridge.chat({ tier: 'light', feature: 'news_summary', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }], max_tokens: Math.max(wordCount * 3, 800), temperature: 0.6, signal: controller.signal });
-    clearTimeout(timeoutId);
+    var data = await AIBridge.chat({ provider: 'kimi', model: 'kimi-k2.6', feature: 'news_summary', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }], max_tokens: Math.max(wordCount * 3, 800), temperature: 0.6 });
     var reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-    content.innerHTML = reply ? '<div class="news-summary-result">' + escapeHtml(reply) + '</div>' : '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">生成失败，请重试</div>';
+    if (reply) {
+      content.innerHTML = '<div class="news-summary-result">' + escapeHtml(reply) + '</div>';
+      if (window.AIDegraded && window.AIDegraded.is(data)) {
+        window.AIDegraded.attach(data, function () { generateNewsSummaryInPanel(); }, content);
+      }
+    } else {
+      content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">生成失败，请重试</div>';
+    }
   } catch (err) {
-    clearTimeout(timeoutId);
     content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">' + (err.name === 'AbortError' ? '请求超时' : '生成失败') + '，请重试</div>';
   }
 }
@@ -14916,13 +15191,14 @@ function afGenDesc(a, reason, maker, cat) {
     ((maker || cat) ? '；用户已确认线索：制造商 ' + (maker || '未确认') + '、类别 ' + (cat || '未确认') : '') +
     '。要求：只输出简介正文，不要标题、不要分点、不要换行、不要引号。';
   return AIBridge.chat({
-    tier: 'light',
+    provider: 'kimi',
+    model: 'kimi-k2.6',
     feature: 'aircraft_desc',
     messages: [{ role: 'user', content: p }],
     temperature: 0.6,
-    max_tokens: 240,
-    timeout: (AI_CONFIG.timeout || 45000) + 10000
+    max_tokens: 240
   }).then(function(d) {
+    if (window.AIDegraded && window.AIDegraded.is(d)) { window.AIDegraded.toast(d); }
     var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
     txt = String(txt).replace(/\s+/g, ' ').trim().replace(/^["「']|["」']$/g, '');
     var el = document.getElementById('af_descZh');
@@ -15111,16 +15387,17 @@ function afAiFillByName() {
     '{"nameZh":"中文名称，含制造商，如 波音 777-300ER","nameEn":"英文名称，如 Boeing 777-300ER","maker":"制造商，如 波音 / 空客 / 中国商飞 / 巴西航空工业","category":"类别，只能是 窄体、宽体、支线、货机、公务机 之一","country":"研制国家或地区，如 美国","firstFlight":"首飞年份，4 位数字，如 1994","capacity":"典型座位数，如 300-368 人","range":"航程，如 15,200 km","desc":"中文简介 60-90 字，只写正文"}\n' +
     '要求：1) 名称指向具体子型号时，给出该子型号的资料；2) 无法确认或机型不存在时，只输出 {"error":"unknown"}；3) 数字与单位要专业准确。';
   AIBridge.chat({
-    tier: 'light',
+    provider: 'kimi',
+    model: 'kimi-k2.6',
     feature: 'aircraft_fill',
     messages: [
       { role: 'system', content: '你是民航机型资料专家，只输出严格合法的 JSON。' },
       { role: 'user', content: prompt }
     ],
     temperature: 0.2,
-    max_tokens: 600,
-    timeout: (AI_CONFIG.timeout || 45000) + 10000
+    max_tokens: 600
   }).then(function(d) {
+    if (window.AIDegraded && window.AIDegraded.is(d)) { window.AIDegraded.toast(d); }
     var text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
     var m = text.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('bad response');
@@ -15583,8 +15860,8 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="letter-head">一封信 · 致每一位浏览者</div>
-    <p>展信安好。</p>
+    <div class="letter-head"></div>
+    <p></p>
     <p>写下这封信的时候，是八月末一个安静的夜晚。窗外的暑气还没完全散去，而我的屏幕上，那个陪伴了我整个夏天的项目文件，刚刚停在了第135个版本号。</p>
     <p class="letter-highlight">135个版本。</p>
     <p>这个数字，我反复看了好几遍。每一个版本号的背后，都是一次修改、一次调试、一次推翻重来又咬牙坚持的深夜。它们不是冰冷的数字，而是这个夏天，我留给你们的一封封无声的信。</p>
@@ -15765,7 +16042,7 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
 @media (max-width: 640px) { .cf-grid { grid-template-columns: 1fr; } #coldfactOverlay { padding: var(--space-10); } .cf-panel { max-height: 92vh; } }
 </style>
 
-<!-- ===== AI 冷知识面板 (v56) ===== -->
+
 <div id="coldfactOverlay">
   <div class="cf-panel">
     <div class="cf-head">
@@ -16130,6 +16407,12 @@ body.lg-perf-light.mat-on .glass-material.lg-btn {
   .mtb-item.on svg { stroke: var(--accent, #667eea); }
   .mtb-item.on span { font-weight: var(--fw-600, 600); }
 
+  /* 修复：底栏点击命中收敛到按钮本身——图标/文字不再单独承接指针事件，
+     elementFromPoint 命中项即 button.mtb-item；touch-action 去掉移动端
+     双击缩放等待，保证首点即响应。 */
+  .mtb-item { touch-action: manipulation; }
+  .mtb-item > * { pointer-events: none; touch-action: manipulation; }
+
   /* 底栏占位：内容底部留白，避免被底栏遮挡 */
   .app-container { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important; }
   .compare-bar.visible { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
@@ -16169,20 +16452,28 @@ body.lg-perf-light.mat-on .glass-material.lg-btn {
 }
 
 /* ===========================================================================
-   v70 特性③ · AI 助手「多模态 + 多模型」UI  [id: ai-multimodal]
+   v70 特性③ v2 · AI 助手「三档模型选择 + 多模态 + 移动端适配」 [id: ai-multimodal-v2]
    纯增量：只在 AI 助手浮层内插入两段 UI（模型切换条 + 图片输入区），
    既有 DOM（#aiChatOverlay / .ai-chat-input-area / #aiChatInput / #aiChatSendBtn）
-   与既有 JS 业务逻辑零改动，全部交互由独立运行时脚本接管。
+   结构零改动；档位与 provider 透传由 AIBridge.chat 与独立运行时脚本接管。
+   —— 三档：快速回答（zhipu/light）· 深度思考（kimi/light）· 旗舰模式（kimi/flagship，每日 5 次）
+   —— 移动端：点击区 ≥44px、选中态高对比、指示点更亮 + 呼吸动画、切换带过渡
+   —— 图片按钮常显（v71）：≥44px 触控区，点击弹出「相册选择 / 拍照」；
+      电脑端可把图片直接拖入面板（拖拽时显示「松开鼠标即可添加图片」浮层）
+   —— 档位按钮显示「档位名 + 具体模型名」，输入区上方常驻当前模型，
+      长按档位约 500ms 弹出模型介绍卡（模型名 / 厂商 / 能力 / 上下文 / 视觉 / 额度）
    =========================================================================== */
 
 .ai-mm-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, .11));
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   flex-shrink: 0;
 }
 .ai-mm-bar::-webkit-scrollbar { display: none; }
@@ -16194,45 +16485,122 @@ body.lg-perf-light.mat-on .glass-material.lg-btn {
   margin-right: 2px;
 }
 .ai-mm-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 6px;
+  padding: 7px 13px;
+  min-height: 34px;
   border-radius: var(--radius-pill, 999px);
   border: 1px solid var(--glass-border, rgba(255, 255, 255, .14));
   background-color: rgba(255, 255, 255, .06);
   color: var(--text-secondary, rgba(255, 255, 255, .78));
   font-family: inherit;
   font-size: var(--fs-r075, 12px);
-  line-height: 1.6;
+  font-weight: var(--fw-500, 500);
+  line-height: 1.35;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .28s ease, color .28s ease, border-color .28s ease,
+              transform .3s cubic-bezier(.16, 1, .3, 1), box-shadow .28s ease, opacity .28s ease;
 }
 .ai-mm-chip:hover { background-color: rgba(255, 255, 255, .12); }
+.ai-mm-chip:active { transform: scale(.95); }
 .ai-mm-chip.on {
   color: #fff;
   border-color: transparent;
   background-image: linear-gradient(135deg, #667eea, #764ba2);
-  box-shadow: 0 4px 14px rgba(102, 126, 234, .38);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, .45), inset 0 0 0 1px rgba(255, 255, 255, .18);
 }
+.ai-mm-chip.on::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: aiMmRing 2.4s ease-out infinite;
+}
+.ai-mm-chip.ai-mm-pop { animation: aiMmPop .34s cubic-bezier(.16, 1, .3, 1); }
+.ai-mm-chip.exhausted {
+  opacity: .42;
+  cursor: not-allowed;
+  filter: grayscale(.5);
+}
+.ai-mm-chip.exhausted::after { display: none; }
+.ai-mm-chip.exhausted:hover { background-color: rgba(255, 255, 255, .06); }
+.ai-mm-chip-i {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: block;
+}
+.ai-mm-chip-i path,
+.ai-mm-chip-i circle { stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.ai-mm-chip-q {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .28);
+  font-size: 10px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ai-mm-chip.on .ai-mm-chip-q { background: rgba(255, 255, 255, .26); }
+.ai-mm-chip-q[hidden] { display: none; }
+
+/* 指示小白点：更亮 + 呼吸/脉冲动画 */
 .ai-mm-chip .ai-mm-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: currentColor;
-  opacity: .75;
+  opacity: .85;
   flex-shrink: 0;
+  transition: background-color .28s ease, box-shadow .28s ease, transform .28s ease;
 }
-.ai-mm-chip.on .ai-mm-dot { background: #fff; opacity: 1; }
+.ai-mm-chip.on .ai-mm-dot {
+  background: #fff;
+  opacity: 1;
+  animation: aiMmBreath 1.8s ease-in-out infinite;
+}
 .ai-mm-chip[data-vision="1"] .ai-mm-dot { background: #4ade80; }
+.ai-mm-chip[data-vision="1"].on .ai-mm-dot {
+  background: #bbf7d0;
+  box-shadow: 0 0 8px 3px rgba(134, 239, 172, .85), 0 0 16px 5px rgba(74, 222, 128, .45);
+}
+@keyframes aiMmBreath {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 5px 1.5px rgba(255, 255, 255, .75), 0 0 10px 2px rgba(160, 190, 255, .45); }
+  50% { transform: scale(1.3); box-shadow: 0 0 9px 3px rgba(255, 255, 255, 1), 0 0 18px 6px rgba(160, 190, 255, .78); }
+}
+@keyframes aiMmRing {
+  0% { box-shadow: 0 0 0 0 rgba(118, 75, 162, .55); }
+  70% { box-shadow: 0 0 0 9px rgba(118, 75, 162, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(118, 75, 162, 0); }
+}
+@keyframes aiMmPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.09); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-mm-chip.on .ai-mm-dot, .ai-mm-chip.on::after, .ai-mm-chip.ai-mm-pop { animation: none; }
+}
+
 .ai-mm-hint {
   margin-left: auto;
+  padding-left: 8px;
   font-size: var(--fs-r067, 11px);
   color: var(--text-tertiary, rgba(255, 255, 255, .5));
   white-space: nowrap;
   flex-shrink: 0;
+  transition: color .3s ease;
 }
+.ai-mm-hint.warn { color: #fca5a5; }
 
 /* ---- 图片预览区 ---- */
 .ai-mm-preview {
@@ -16242,7 +16610,7 @@ body.lg-perf-light.mat-on .glass-material.lg-btn {
   padding: 10px 16px 0;
   flex-shrink: 0;
 }
-.ai-mm-preview.has { display: flex; }
+.ai-mm-preview.has { display: flex; animation: aiMmFadeUp .28s cubic-bezier(.16, 1, .3, 1); }
 .ai-mm-thumb {
   position: relative;
   width: 58px;
@@ -16276,26 +16644,101 @@ body.lg-perf-light.mat-on .glass-material.lg-btn {
 }
 .ai-mm-thumb-x:hover { background: #e0546a; }
 
-/* ---- 图片按钮（插在 .ai-chat-input-area 内、发送按钮之前） ---- */
+/* ---- 图片按钮（插在 .ai-chat-input-area 内、发送按钮之前）
+        默认隐藏，仅识图场景淡入（.show） ---- */
 .ai-mm-attach {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
+  width: 0;
   height: 38px;
+  min-width: 0;
   flex-shrink: 0;
   border-radius: var(--radius-12, 12px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, .16));
+  border: 0 solid var(--glass-border, rgba(255, 255, 255, .16));
   background-color: rgba(255, 255, 255, .06);
   color: var(--text-secondary, rgba(255, 255, 255, .8));
   cursor: pointer;
   padding: 0;
-  transition: background-color .25s ease, color .25s ease, transform .25s ease;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(8px) scale(.72);
+  transition: opacity .26s ease, transform .32s cubic-bezier(.16, 1, .3, 1),
+              width .32s cubic-bezier(.16, 1, .3, 1), border-width .32s ease,
+              margin-right .32s ease, background-color .25s ease, color .25s ease;
+}
+.ai-mm-attach.show {
+  width: 38px;
+  border-width: 1px;
+  margin-right: 2px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
 }
 .ai-mm-attach:hover { background-color: rgba(255, 255, 255, .14); color: #fff; }
 .ai-mm-attach:active { transform: scale(.94); }
 .ai-mm-attach svg { width: 19px; height: 19px; stroke: currentColor; }
 .ai-mm-attach.busy { opacity: .5; pointer-events: none; }
+
+/* ---- 难题升级确认卡（追加在浮层末尾，浮层为纵向 flex，天然贴底） ---- */
+.ai-mm-ask {
+  flex-shrink: 0;
+  margin: 0 12px 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-16, 16px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, .16));
+  background: linear-gradient(135deg, rgba(102, 126, 234, .18), rgba(118, 75, 162, .22));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .28);
+  animation: aiMmAskIn .32s cubic-bezier(.16, 1, .3, 1);
+}
+.ai-mm-ask.out { animation: aiMmAskOut .22s ease forwards; }
+.ai-mm-ask-t {
+  font-size: var(--fs-r088, 14px);
+  font-weight: var(--fw-600, 600);
+  color: var(--text, #fff);
+  margin-bottom: 4px;
+}
+.ai-mm-ask-d {
+  font-size: var(--fs-r075, 12px);
+  line-height: 1.6;
+  color: var(--text-secondary, rgba(255, 255, 255, .72));
+  margin-bottom: 12px;
+}
+.ai-mm-ask-b { display: flex; gap: 10px; }
+.ai-mm-ask button {
+  flex: 1;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: var(--radius-12, 12px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, .18));
+  background: rgba(255, 255, 255, .07);
+  color: var(--text, #fff);
+  font-family: inherit;
+  font-size: var(--fs-r075, 12px);
+  font-weight: var(--fw-600, 600);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .2s ease, filter .2s ease, background-color .2s ease;
+}
+.ai-mm-ask button:active { transform: scale(.96); }
+.ai-mm-ask .ai-mm-ask-yes {
+  border-color: transparent;
+  background-image: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 4px 14px rgba(102, 126, 234, .4);
+}
+.ai-mm-ask .ai-mm-ask-yes:hover { filter: brightness(1.08); }
+@keyframes aiMmAskIn {
+  from { opacity: 0; transform: translateY(14px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes aiMmAskOut {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(10px) scale(.98); }
+}
+@keyframes aiMmFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
 
 /* ---- 已发图片在用户气泡内 —— 缩略记录 ---- */
 .ai-mm-msg-imgs {
@@ -16313,10 +16756,43 @@ body.lg-perf-light.mat-on .glass-material.lg-btn {
   display: block;
 }
 
+/* ---- 移动端适配（≤640px）：点击区 ≥44px、字更大、选中态更强 ---- */
+@media (max-width: 640px) {
+  .ai-mm-bar {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .ai-mm-chip {
+    min-height: 44px;
+    padding: 11px 16px;
+    font-size: 13.5px;
+    gap: 7px;
+    border-color: rgba(255, 255, 255, .2);
+    background-color: rgba(255, 255, 255, .09);
+  }
+  .ai-mm-chip.on {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, .55), inset 0 0 0 1px rgba(255, 255, 255, .26);
+  }
+  .ai-mm-chip .ai-mm-dot { width: 9px; height: 9px; }
+  .ai-mm-chip-i { width: 15px; height: 15px; }
+  .ai-mm-hint { display: none; }
+  .ai-mm-attach { height: 44px; }
+  .ai-mm-attach.show { width: 44px; }
+  .ai-mm-ask { margin: 0 10px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .ai-mm-ask button { min-height: 46px; font-size: 13.5px; }
+}
+
 body.light-mode .ai-mm-chip { background-color: rgba(0, 0, 0, .04); }
 body.light-mode .ai-mm-chip.on { color: #fff; }
+body.light-mode .ai-mm-chip.exhausted:hover { background-color: rgba(0, 0, 0, .04); }
+body.light-mode .ai-mm-chip-q { background: rgba(0, 0, 0, .32); color: #fff; }
 body.light-mode .ai-mm-attach { background-color: rgba(0, 0, 0, .04); }
 body.light-mode .ai-mm-hint { color: rgba(0, 0, 0, .42); }
+body.light-mode .ai-mm-ask { background: linear-gradient(135deg, rgba(102, 126, 234, .14), rgba(118, 75, 162, .18)); }
+body.light-mode .ai-mm-ask-t { color: #1a1f33; }
+body.light-mode .ai-mm-ask-d { color: rgba(0, 0, 0, .62); }
+body.light-mode .ai-mm-ask button { color: #1a1f33; background: rgba(0, 0, 0, .05); }
+body.light-mode .ai-mm-ask .ai-mm-ask-yes { color: #fff; }
 
 /* ===========================================================================
    v70 国庆发布版 · 发布公告栏（国庆主题）+ 长按详情弹层
@@ -17171,153 +17647,292 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   .rln-card.rln-pressing { transform: none; filter: none; }
 }
 
-/* >>> av-stage1 css >>> */
-/* ===== v70 阶段1 · 问 AI 双模型路由层（模型选择器 / 徽标 / 每日额度） =====
-   纯增量：仅新增样式，不覆盖站点既有 AI 浮层样式 */
-.av-ai-brand { display: flex; align-items: center; gap: 10px; min-width: 0; position: relative; }
-.av-ai-model-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  height: 30px; padding: 0 10px; border-radius: 999px;
-  border: 1px solid var(--glass-border); background: var(--card-bg-hover);
-  color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer;
-  max-width: 210px; overflow: hidden; white-space: nowrap;
-  transition: all var(--dur-250) ease;
+/* ===========================================================================
+   v71 特性① · 全站 AI 等待动画统一为「波浪」组件 [id: ai-wave-loading]
+   —— 结构：<span class="ai-wave ai-wave-{sm|md|lg}"><span class="ai-wave-box">
+        <svg class="ai-wave-svg l1|l2|l3" viewBox="0 0 96 16" preserveAspectRatio="none">
+          <g class="ai-wave-g"><path d="…"/></g></svg>
+        <span class="ai-wave-gloss"></span></span></span>
+   —— 三档尺寸：sm 对话气泡内 / md 面板·报告加载中 / lg 全屏·长报告
+   —— 多层正弦波横向流动（三层不同速度、其中一层反向）+ 呼吸光泽 + 轨道呼吸投影
+   —— 深浅主题各自配色；prefers-reduced-motion 下自动静止；
+      保留 .ai-loading / .ca-radar / .pa-radar / .story-loading 等既有类名钩子
+   =========================================================================== */
+.ai-wave {
+  --aiw-track: rgba(255, 255, 255, .05);
+  --aiw-border: rgba(255, 255, 255, .13);
+  --aiw-gloss: rgba(255, 255, 255, .30);
+  --aiw-glow: rgba(79, 195, 247, .26);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  vertical-align: middle;
 }
-.av-ai-model-btn:hover { border-color: var(--accent-border); color: var(--accent); }
-.av-ai-model-btn[aria-expanded="true"] { border-color: var(--accent-border); color: var(--accent); }
-.av-ai-model-btn .av-ai-caret { width: 12px; height: 12px; flex-shrink: 0; transition: transform var(--dur-250) ease; }
-.av-ai-model-btn[aria-expanded="true"] .av-ai-caret { transform: rotate(180deg); }
-.av-ai-model-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-.av-ai-model-dot.deep { background: #b07bff; }
-.av-ai-picker {
-  display: none; position: absolute; top: 38px; left: 0; z-index: 10040;
-  width: 268px; max-height: 60vh; overflow-y: auto;
-  padding: 8px; border-radius: 14px;
-  background: var(--card-bg); border: 1px solid var(--glass-border);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
-}
-.av-ai-picker.open { display: block; }
-.av-ai-group-h {
-  padding: 8px 10px 4px; font-size: 11px; font-weight: 700;
-  color: var(--text-dim); letter-spacing: 0.04em;
-}
-.av-ai-item {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  width: 100%; padding: 9px 10px; border: none; border-radius: 10px;
-  background: transparent; color: var(--text); font-size: 13px; text-align: left;
-  cursor: pointer; transition: background var(--dur-250) ease;
-}
-.av-ai-item:hover { background: var(--card-bg-hover); }
-.av-ai-item.active { background: var(--card-bg-hover); color: var(--accent); font-weight: 600; }
-.av-ai-item-sub { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
-.av-ai-item.active .av-ai-item-sub { color: var(--accent); }
-.av-ai-quota {
-  margin: 8px 6px 4px; padding: 8px 10px; border-radius: 10px;
-  background: var(--card-bg-hover); font-size: 11.5px; color: var(--text-dim); line-height: 1.5;
-}
-.av-ai-quota b { color: var(--text); }
-.av-ai-badges {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  padding: 0 var(--space-24) 10px; flex-shrink: 0;
-}
-.av-ai-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 9px; border-radius: 999px;
-  border: 1px solid var(--glass-border); background: var(--card-bg-hover);
-  font-size: 11px; color: var(--text-dim); white-space: nowrap;
-}
-.av-ai-badge.mode-fast { border-color: var(--accent-border); color: var(--accent); }
-.av-ai-badge.mode-deep { border-color: rgba(176, 123, 255, 0.45); color: #b07bff; }
-/* 降级提示：置于回答气泡上方（第 6 次深度思考自动降级智谱时显示） */
-.av-ai-degrade-note {
-  max-width: 82%; margin: 8px 0; padding: 9px 12px; border-radius: 12px;
-  font-size: 12px; line-height: 1.6;
-  border: 1px solid rgba(255, 180, 80, 0.45); background: rgba(255, 180, 80, 0.10);
-  color: var(--text);
-}
-@media (max-width: 640px) {
-  .av-ai-model-btn { max-width: 132px; font-size: 11px; }
-  .av-ai-picker { width: 246px; }
-  .av-ai-badges { padding: 0 var(--space-16) 10px; }
-}
-/* <<< av-stage1 css <<< */
-/* ==================== v70 阶段2 样式 ==================== */
-/* >>> av-stage2 css >>> */
-/* ① 收敛模型入口：隐藏基线 AiMultimodal 注入的第二套模型条（含其内嵌的"支持图片输入"提示） */
-#aiChatOverlay #aiMmBar { display: none !important; }
-
-/* ② 图片按钮按场景显隐：纯文字问答隐藏，进入识图问答才出现 */
-#aiChatOverlay #aiMmAttach,
-#aiChatOverlay .ai-mm-attach { display: none !important; }
-#aiChatOverlay.av-ai-imaging #aiMmAttach,
-#aiChatOverlay.av-ai-imaging .ai-mm-attach { display: inline-flex !important; }
-
-/* 浮层顶部：问答类型切换 chip（纯文字 / 识图） */
-#avAiImageModeBtn {
-  cursor: pointer;
-  border: none;
-  font: inherit;
-  transition: background .18s ease, color .18s ease, box-shadow .18s ease;
-}
-#avAiImageModeBtn.mode-text { background: rgba(148, 163, 184, .18); color: #cbd5e1; }
-#avAiImageModeBtn.mode-image {
-  background: rgba(56, 189, 248, .22);
-  color: #7dd3fc;
-  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .45);
-}
-#avAiImageModeBtn:focus-visible { outline: 2px solid rgba(56, 189, 248, .6); outline-offset: 2px; }
-#avAiImageModeBtn::after {
-  content: '';
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-left: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: .8;
-}
-
-/* ③ 快速问答"答不上来"时的深度思考引导块 */
-.av-ai-guide {
-  margin: 8px 0 4px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .06);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .28);
-  font-size: 13px;
-  line-height: 1.55;
-  color: #e2e8f0;
-}
-.av-ai-guide-note { display: block; margin-bottom: 8px; color: #fbbf24; }
-.av-ai-guide-btn {
-  appearance: none;
-  -webkit-appearance: none;
-  padding: 7px 14px;
-  border: none;
+.ai-wave-box {
+  position: relative;
+  display: block;
+  overflow: hidden;
   border-radius: 999px;
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  transition: filter .18s ease, background .18s ease;
+  background: var(--aiw-track);
+  border: 1px solid var(--aiw-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+  animation: aiWaveBreath 3.2s ease-in-out infinite;
 }
-.av-ai-guide-btn:hover:not(:disabled) { filter: brightness(1.08); }
-.av-ai-guide-btn:disabled {
-  cursor: not-allowed;
-  background: rgba(148, 163, 184, .28);
-  color: rgba(226, 232, 240, .6);
+body.light-mode .ai-wave,
+.theme-minimal .ai-wave {
+  --aiw-track: rgba(15, 32, 74, .05);
+  --aiw-border: rgba(15, 32, 74, .14);
+  --aiw-gloss: rgba(255, 255, 255, .9);
+  --aiw-glow: rgba(26, 115, 232, .22);
 }
+body.light-mode .ai-wave-svg path,
+.theme-minimal .ai-wave-svg path { filter: brightness(.86) saturate(1.2); }
+.ai-wave-sm .ai-wave-box { width: 56px; height: 22px; }
+.ai-wave-md .ai-wave-box { width: 132px; height: 44px; }
+.ai-wave-lg .ai-wave-box { width: 232px; height: 72px; }
+.ai-wave-svg {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 56%; display: block;
+}
+.ai-wave-svg.l2 { height: 80%; }
+.ai-wave-svg.l3 { height: 100%; }
+.ai-wave-svg path { fill: currentColor; }
+.ai-wave-svg.l1 { color: var(--accent); opacity: .95; }
+.ai-wave-svg.l2 { color: var(--primary-light, var(--accent)); opacity: .5; }
+.ai-wave-svg.l3 { color: var(--primary-light, var(--accent)); opacity: .26; }
+.ai-wave-g { animation: aiWaveFlow 3.4s linear infinite; will-change: transform; }
+.ai-wave-svg.l2 .ai-wave-g { animation-duration: 2.7s; animation-direction: reverse; }
+.ai-wave-svg.l3 .ai-wave-g { animation-duration: 2.15s; }
+@keyframes aiWaveFlow { from { transform: translateX(0); } to { transform: translateX(-96px); } }
+.ai-wave-gloss {
+  position: absolute; top: -25%; left: -45%; width: 42%; height: 150%;
+  background: linear-gradient(100deg, transparent, var(--aiw-gloss), transparent);
+  transform: skewX(-16deg);
+  animation: aiWaveGloss 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes aiWaveGloss {
+  0% { left: -45%; opacity: 0; }
+  16% { opacity: .85; }
+  72% { left: 108%; opacity: .85; }
+  100% { left: 108%; opacity: 0; }
+}
+@keyframes aiWaveBreath {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 0 0 0 rgba(79, 195, 247, 0); }
+  50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 0 16px 1px var(--aiw-glow); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-wave-box, .ai-wave-g, .ai-wave-gloss { animation: none; }
+}
+
+/* ---- 既有加载钩子 → 波浪宿主（保留类名/结构，视觉统一，JS 零改动） ---- */
+.ai-loading { align-items: center; justify-content: center; }
+.ca-radar, .pa-radar, .story-loading .ca-radar {
+  width: auto; height: auto; border: 0; border-radius: 0;
+  box-shadow: none; overflow: visible; background: none; text-align: center;
+}
+.pa-radar { display: none; margin: var(--space-32) auto 0; }
+.pa-radar.visible { display: block; }
+.ca-radar { display: block; margin: 0 auto; }
+.story-loading .ca-radar { display: block; margin: 0 auto; }
+.ca-radar::before, .ca-radar::after, .pa-radar::before, .pa-radar::after {
+  display: none !important; content: none !important;
+}
+.ca-radar .ca-sweep, .ca-radar .ca-ping,
+.pa-radar .pa-sweep, .pa-radar .pa-ping { display: none !important; }
+.ai-find-loading { display: inline-flex; align-items: center; gap: 8px; vertical-align: middle; }
+.ai-find-loading .ai-wave { flex-shrink: 0; }
+
+/* ===========================================================================
+   v71 特性② · 移动端 AI 对话加图入口常显（≥44px 触控 / 相册·拍照）
+   =========================================================================== */
+.ai-mm-attach {
+  width: 38px; border-width: 1px; margin-right: 2px;
+  opacity: 1; pointer-events: auto; transform: none;
+}
+.ai-mm-attach.show,
+.ai-mm-attach[aria-hidden="true"] { width: 38px; opacity: 1; pointer-events: auto; transform: none; }
 @media (max-width: 640px) {
-  .av-ai-guide { font-size: 12.5px; padding: 9px 10px; }
-  .av-ai-guide-btn { width: 100%; padding: 9px 12px; }
-  #avAiImageModeBtn { font-size: 11px; }
+  .ai-mm-attach,
+  .ai-mm-attach.show { width: 44px; height: 44px; border-radius: var(--radius-12, 12px); }
+  .ai-mm-attach svg { width: 21px; height: 21px; }
 }
-/* <<< av-stage2 css <<< */
+@media (max-width: 480px) {
+  .ai-mm-attach,
+  .ai-mm-attach.show { width: 46px; height: 46px; }
+  .ai-mm-attach svg { width: 22px; height: 22px; }
+  .ai-chat-input-row { gap: 8px; }
+  .ai-chat-input-row input { padding: 11px 14px; }
+  .ai-chat-send-btn { width: 46px; height: 46px; }
+}
+
+/* ---- 取图方式选择（相册 / 拍照） ---- */
+@keyframes aiMaskIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes aiSheetUp { from { transform: translateY(20px) scale(.97); opacity: .35; } to { transform: none; opacity: 1; } }
+@keyframes aiCardPop { from { transform: translateY(12px) scale(.94); opacity: .3; } to { transform: none; opacity: 1; } }
+.ai-mm-sheet-mask, .ai-mm-intro-mask { animation: aiMaskIn .24s ease; }
+.ai-mm-sheet { animation: aiSheetUp .3s cubic-bezier(.16, 1, .3, 1); }
+.ai-mm-intro { animation: aiCardPop .28s cubic-bezier(.16, 1, .3, 1); }
+.ai-mm-drop.on { animation: aiMaskIn .18s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .ai-mm-sheet-mask, .ai-mm-intro-mask, .ai-mm-sheet, .ai-mm-intro, .ai-mm-drop.on { animation: none; }
+}
+.ai-mm-sheet-mask {
+  position: absolute; inset: 0; z-index: 60;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(6, 10, 22, .55);
+  opacity: 0; transition: opacity .22s ease;
+}
+.ai-mm-sheet-mask.on { opacity: 1; }
+.ai-mm-sheet {
+  width: 100%; max-width: 700px; margin: 0 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--radius-18, 18px); overflow: hidden;
+  background: var(--card-bg, #141a2e);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, .14));
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, .4);
+  transform: translateY(14px);
+  transition: transform .26s cubic-bezier(.16, 1, .3, 1);
+}
+.ai-mm-sheet-mask.on .ai-mm-sheet { transform: none; }
+.ai-mm-sheet-t {
+  padding: 14px 16px 6px; text-align: center;
+  font-size: var(--fs-r086, 13px); color: var(--text-secondary, rgba(255, 255, 255, .66));
+}
+.ai-mm-sheet-b { display: flex; flex-direction: column; }
+.ai-mm-sheet button {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 50px; border: 0; border-top: 1px solid var(--glass-border, rgba(255, 255, 255, .12));
+  background: transparent; color: var(--text, #fff);
+  font-family: inherit; font-size: var(--fs-r092, 14px); font-weight: 600;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.ai-mm-sheet button:active { background: rgba(127, 127, 127, .16); }
+.ai-mm-sheet .ai-mm-sheet-cancel { color: var(--text-dim); font-weight: 500; }
+body.light-mode .ai-mm-sheet { background: #fff; }
+body.light-mode .ai-mm-sheet button { color: #16203a; }
+
+/* ===========================================================================
+   v71 特性③ · 桌面端拖拽图片入面板的提示浮层
+   =========================================================================== */
+.ai-mm-drop {
+  position: absolute; inset: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 12, 26, .72);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none; transition: opacity .2s ease;
+}
+.ai-mm-drop.on { opacity: 1; }
+.ai-mm-drop-in {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 26px 34px; border-radius: var(--radius-18, 18px);
+  border: 2px dashed rgba(79, 195, 247, .75);
+  background: rgba(12, 18, 38, .8);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .45);
+  transform: scale(.96); transition: transform .24s cubic-bezier(.16, 1, .3, 1);
+}
+.ai-mm-drop.on .ai-mm-drop-in { transform: none; }
+.ai-mm-drop-ico { width: 40px; height: 40px; color: var(--accent); }
+.ai-mm-drop-t { font-size: var(--fs-r100, 15px); font-weight: 600; color: #fff; }
+.ai-mm-drop-s { font-size: var(--fs-r075, 12px); color: rgba(255, 255, 255, .66); }
+body.light-mode .ai-mm-drop { background: rgba(240, 244, 250, .84); }
+body.light-mode .ai-mm-drop-in {
+  background: rgba(255, 255, 255, .95);
+  border-color: rgba(21, 101, 192, .7);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, .18);
+}
+body.light-mode .ai-mm-drop-t { color: #16203a; }
+body.light-mode .ai-mm-drop-s { color: rgba(0, 0, 0, .55); }
+
+/* ===========================================================================
+   v71 特性④ · 档位显示「档位名 + 模型名」/ 当前模型名 / 长按模型介绍卡
+   =========================================================================== */
+.ai-mm-chip { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.ai-mm-chip-txt { display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+.ai-mm-chip-t { font-size: inherit; font-weight: var(--fw-600, 600); }
+.ai-mm-chip-m {
+  font-size: 10px; font-weight: 400; opacity: .62;
+  font-variant-numeric: tabular-nums; letter-spacing: .01em;
+}
+.ai-mm-chip.on .ai-mm-chip-m { opacity: .88; }
+.ai-mm-current {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 0 var(--space-8, 8px);
+  font-size: var(--fs-r070, 11px);
+  color: var(--text-tertiary, rgba(255, 255, 255, .5));
+}
+.ai-mm-current .ai-mm-current-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent); box-shadow: 0 0 6px 1px rgba(79, 195, 247, .6);
+}
+.ai-mm-current b { color: var(--text-secondary, rgba(255, 255, 255, .78)); font-weight: 600; }
+.ai-mm-current code { font-size: inherit; opacity: .82; font-variant-numeric: tabular-nums; }
+.ai-mm-current-tip { margin-left: auto; opacity: .72; white-space: nowrap; }
+body.light-mode .ai-mm-current { color: rgba(0, 0, 0, .45); }
+body.light-mode .ai-mm-current b { color: rgba(0, 0, 0, .72); }
+@media (max-width: 640px) {
+  .ai-mm-bar { flex-wrap: wrap; overflow: visible; row-gap: 8px; }
+  .ai-mm-chip-t { font-size: 13px; }
+  .ai-mm-chip-m { font-size: 9.5px; }
+}
+@media (max-width: 480px) {
+  .ai-mm-chip { padding: 8px 11px; gap: 6px; }
+  .ai-mm-chip-i { width: 14px; height: 14px; }
+  .ai-mm-chip-m { font-size: 9px; }
+  .ai-mm-current-tip { display: none; }
+}
+
+/* ---- 模型介绍卡（长按档位按钮弹出） ---- */
+.ai-mm-intro-mask {
+  position: fixed; inset: 0; z-index: 10060;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  background: rgba(6, 10, 22, .6);
+  opacity: 0; transition: opacity .24s ease;
+}
+.ai-mm-intro-mask.on { opacity: 1; }
+.ai-mm-intro {
+  width: 100%; max-width: 360px; border-radius: var(--radius-18, 18px); padding: 20px;
+  background: linear-gradient(160deg, rgba(24, 32, 58, .98), rgba(15, 20, 38, .98));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, .16));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+  transform: translateY(12px) scale(.98);
+  transition: transform .28s cubic-bezier(.16, 1, .3, 1);
+}
+.ai-mm-intro-mask.on .ai-mm-intro { transform: none; }
+.ai-mm-intro-h { display: flex; align-items: center; gap: 10px; }
+.ai-mm-intro-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+}
+.ai-mm-intro-badge .ai-mm-chip-i { width: 20px; height: 20px; }
+.ai-mm-intro-name { font-size: var(--fs-r110, 16px); font-weight: 700; color: #fff; }
+.ai-mm-intro-tier { font-size: var(--fs-r070, 11px); color: rgba(255, 255, 255, .6); margin-top: 2px; }
+.ai-mm-intro-rows { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.ai-mm-intro-row { display: flex; gap: 10px; font-size: var(--fs-r080, 12px); line-height: 1.6; }
+.ai-mm-intro-k { flex: 0 0 62px; color: rgba(255, 255, 255, .52); }
+.ai-mm-intro-v { flex: 1; color: rgba(255, 255, 255, .9); word-break: break-word; }
+.ai-mm-intro-tag {
+  display: inline-block; margin: 0 4px 4px 0; padding: 2px 8px;
+  border-radius: 999px; background: rgba(255, 255, 255, .1); font-size: 11px; line-height: 1.5;
+}
+.ai-mm-intro-foot { margin-top: 16px; font-size: 11px; line-height: 1.6; color: rgba(255, 255, 255, .42); }
+.ai-mm-intro-close {
+  margin-top: 14px; width: 100%; min-height: 42px; border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .07);
+  color: #fff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.ai-mm-intro-close:active { transform: scale(.98); }
+body.light-mode .ai-mm-intro { background: linear-gradient(160deg, #ffffff, #f1f5fb); }
+body.light-mode .ai-mm-intro-name { color: #101a33; }
+body.light-mode .ai-mm-intro-tier,
+body.light-mode .ai-mm-intro-k { color: rgba(0, 0, 0, .5); }
+body.light-mode .ai-mm-intro-v { color: rgba(0, 0, 0, .85); }
+body.light-mode .ai-mm-intro-tag { background: rgba(0, 0, 0, .06); }
+body.light-mode .ai-mm-intro-foot { color: rgba(0, 0, 0, .45); }
+body.light-mode .ai-mm-intro-close {
+  color: #101a33; background: rgba(0, 0, 0, .05); border-color: rgba(0, 0, 0, .14);
+}
 </style>
 
 <div id="cfDetailOverlay" aria-hidden="true">
@@ -18330,34 +18945,133 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 
 </script>
 
-<!-- ===== v70 特性③ AI 助手多模态 + 多模型（纯文本走既有通道） ===== -->
+<!-- ===== v71 特性① · 波浪等待动画组件（全局，供各 AI 加载点复用） ===== -->
 <script>
 /* ===========================================================================
-   v70 特性③ runtime · AI 助手「多模态 + 多模型」
-   —— 零改动既有业务逻辑：不重定义 sendAiMessage / addMessage / AI_CONFIG 等，
-      而是复用站内既有全局函数（addMessage / addLoadingIndicator /
-      removeLoadingIndicator / ragRetrieveAircraft / buildRagContext /
-      renderAiReplyWithCards / reportQaLog / AI_SYSTEM_PROMPTS / RAG_RULES /
-      aiConversationHistory / AI_CONFIG）另开一条多模态发送通道。
-   —— 纯文本（未附图）时完全走既有 sendAiMessage，行为与线上一致。
+   v71 · 波浪等待动画组件 [id: ai-wave-loading-runtime]
+   —— window.aiWaveHTML(size)  生成波浪组件 HTML（size: sm | md | lg）
+   —— window.aiWaveSweep(root) 扫描并填充 [data-ai-wave] 占位宿主
+   —— 路径：4 个正弦周期共 192 单位宽，视口 96 单位，位移 -96 单位后形状重合，
+      因此 translateX 循环无缝；三层不同速度（含一层反向）形成水波干涉感。
    =========================================================================== */
 (function () {
   'use strict';
-  if (window.AiMultimodal && window.AiMultimodal.__v) { return; }
+  if (window.aiWaveHTML) { return; }
+
+  var AIW_PATH = 'M0 8'
+    + 'C6 2.6 18 2.6 24 8 C30 13.4 42 13.4 48 8'
+    + 'C54 2.6 66 2.6 72 8 C78 13.4 90 13.4 96 8'
+    + 'C102 2.6 114 2.6 120 8 C126 13.4 138 13.4 144 8'
+    + 'C150 2.6 162 2.6 168 8 C174 13.4 186 13.4 192 8'
+    + 'L192 16 L0 16 Z';
+
+  function waveSvg(cls) {
+    return '<svg class="ai-wave-svg ' + cls + '" viewBox="0 0 96 16" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
+      + '<g class="ai-wave-g"><path d="' + AIW_PATH + '"></path></g></svg>';
+  }
+
+  function aiWaveHTML(size) {
+    var s = (size === 'sm' || size === 'md' || size === 'lg') ? size : 'md';
+    return '<span class="ai-wave ai-wave-' + s + '">'
+      + '<span class="ai-wave-box">'
+      + waveSvg('l1') + waveSvg('l2') + waveSvg('l3')
+      + '<span class="ai-wave-gloss"></span>'
+      + '</span></span>';
+  }
+
+  function aiWaveSweep(root) {
+    var scope = root || document;
+    if (!scope || !scope.querySelectorAll) { return 0; }
+    var hosts = scope.querySelectorAll('[data-ai-wave]');
+    var n = 0;
+    for (var i = 0; i < hosts.length; i++) {
+      if (hosts[i].querySelector('.ai-wave-box')) { continue; }   /* 已注入，防重复 */
+      hosts[i].innerHTML = aiWaveHTML(hosts[i].getAttribute('data-ai-wave'));
+      n++;
+    }
+    /* 兜底：仍残留的旧三点结构（.ai-loading > span×3）一并转为波浪 */
+    var legacy = scope.querySelectorAll('.ai-loading');
+    for (var j = 0; j < legacy.length; j++) {
+      if (legacy[j].querySelector('.ai-wave-box')) { continue; }
+      if (legacy[j].children.length === 3 && !(legacy[j].textContent || '').trim()) {
+        legacy[j].innerHTML = aiWaveHTML('sm');
+        n++;
+      }
+    }
+    return n;
+  }
+
+  window.aiWaveHTML = aiWaveHTML;
+  window.aiWaveSweep = aiWaveSweep;
+
+  function run() { try { aiWaveSweep(document); } catch (e) { } }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+  window.addEventListener('load', run);
+  console.log('[AiWave v71] 波浪等待动画组件就绪');
+})();
+</script>
+
+<!-- ===== v70 特性③ v2 · AI 助手三档模型 + 多模态 + 移动端适配 ===== -->
+<script>
+/* ===========================================================================
+   v70 特性③ v2 runtime · AI 助手「三档模型选择 + 多模态 + 移动端适配」
+   —— 档位落点（全部经 AIBridge.chat → /api/chat）：
+        fast     快速回答 → tier=light    provider=zhipu  glm-4.5-air
+        deep     深度思考 → tier=light    provider=kimi   kimi-k2.6
+        flagship 旗舰模式 → tier=flagship provider=kimi   kimi-k3（每日 5 次）
+        vision   视觉识图 → tier=vision   provider=kimi   kimi-k2.6（检测到图片自动切换）
+   —— 纯文本发送仍走站内既有 sendAiMessage（仅包装一层：档位/额度/难题升级判断），
+      不重定义 addMessage / renderAiReplyWithCards / ragRetrieveAircraft 等既有逻辑。
+   —— 每日额度：优先采用服务端返回（window.__aiQuota，由 AIBridge 写入），
+      服务端字段未到位时用 localStorage 按自然日本地计数兜底。
+   =========================================================================== */
+(function () {
+  'use strict';
+  if (window.AiMultimodal && window.AiMultimodal.__v === '2.0') { return; }
 
   var MAX_IMAGES = 4;
   var MAX_SIDE = 1024;
   var MODEL_KEY = 'aiChatModel';
+  var QUOTA_KEY = 'aiK3QuotaV1';
+  var QUOTA_LIMIT = 5;
+
   var MODELS = {
-    reason: { id: 'flagship', vision: false, zh: '深度推理', en: 'Deep Reason' },
-    vision: { id: 'vision', vision: true, zh: '视觉识图', en: 'Vision' },
-    fast: { id: 'light', vision: false, zh: '快速应答', en: 'Fast Reply' }
+    fast: { key: 'fast', tier: 'light', provider: 'zhipu', model: 'glm-4.5-air', vision: false, quota: false, zh: '快速回答', en: 'Quick' },
+    deep: { key: 'deep', tier: 'light', provider: 'kimi', model: 'kimi-k2.6', vision: false, quota: false, zh: '深度思考', en: 'Deep Think' },
+    flagship: { key: 'flagship', tier: 'flagship', provider: 'kimi', model: 'kimi-k3', vision: false, quota: true, zh: '旗舰模式', en: 'Flagship' },
+    vision: { key: 'vision', tier: 'vision', provider: 'zhipu', model: 'glm-4.5v', vision: true, quota: false, zh: '视觉识图', en: 'Vision' }
   };
-  var FALLBACK_TEXT = 'light';
-  var FALLBACK_VISION = 'vision';
+  var CHIP_ORDER = ['fast', 'deep', 'flagship', 'vision'];
+  var DEFAULT_KEY = 'deep';
+  var LEGACY = { reason: 'deep', fast: 'fast', vision: 'vision', light: 'fast', flagship: 'flagship' };
+
+  /* 与 router.js COMPLEX_HINTS 对齐（命中任一或超长文本 → 视为较难问题） */
+  var COMPLEX_HINTS = [
+    '对比', '比较', '区别', '差异', '优劣', '优缺点',
+    '为什么', '原理', '论证', '分析', '推演', '评估', '方案', '设计一套', '如何实现',
+    '详细', '深入', '展开讲', '技术细节', '发展趋势', '预测', '总结成', '写成报告',
+    '多个角度', '综合分析', '帮我规划', '路线图'
+  ];
+  var COMPLEX_LEN = 40;
+
+  /* 识图意图：仅命中这些词或已附图时，才显示「上传图片」按钮 */
+  var IMG_INTENT = /(图片|照片|相片|图像|截图|看图|识图|识别|辨认|认出|上传|拍|image|photo|picture|screenshot|upload)/i;
+
+  var ICONS = {
+    fast: '<svg class="ai-mm-chip-i" viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H10L9 22l8.5-11.5H12z"/></svg>',
+    deep: '<svg class="ai-mm-chip-i" viewBox="0 0 24 24"><path d="M12 2.8a6.8 6.8 0 0 0-3.9 12.3v2.4h7.8v-2.4A6.8 6.8 0 0 0 12 2.8z"/><path d="M9.6 20.6h4.8"/></svg>',
+    flagship: '<svg class="ai-mm-chip-i" viewBox="0 0 24 24"><path d="M3 7.5 7.4 11 12 4.4 16.6 11 21 7.5v10.1H3z"/></svg>',
+    vision: '<svg class="ai-mm-chip-i" viewBox="0 0 24 24"><path d="M2.2 12S5.8 6.2 12 6.2 21.8 12 21.8 12 18.2 17.8 12 17.8 2.2 12 2.2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>'
+  };
 
   var pending = [];      /* [{url, name}] 压缩后的 dataURL */
   var busy = false;
+  var onceKey = '';      /* 一次性档位覆盖（本问升级旗舰用） */
+  var askEl = null;
 
   function q(id) { return document.getElementById(id); }
   function esc(s) { return (typeof escapeHtml === 'function') ? escapeHtml(s) : String(s); }
@@ -18366,6 +19080,14 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     return /^en/i.test(document.documentElement.getAttribute('lang') || '');
   }
   function label(key) { return isEn() ? (MODELS[key] || {}).en : (MODELS[key] || {}).zh; }
+  /* 移动端判定：以布局宽度为准（≤640px 视为手机/小屏，含 ≤480px 场景） */
+  function isMobileUI() {
+    try {
+      if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) { return true; }
+    } catch (e) { }
+    var w = window.innerWidth || document.documentElement.clientWidth || 0;
+    return w > 0 && w <= 640;
+  }
   function toast(msg) {
     try { if (typeof showToast === 'function') { showToast(msg); return; } } catch (e) { }
     console.log('[AiMultimodal] ' + msg);
@@ -18374,30 +19096,166 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     try { if (typeof AI_CONFIG !== 'undefined') { return AI_CONFIG; } } catch (e) { }
     return null;
   }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
+  /* ---------- 平滑滚动到最新消息 ---------- */
+  function smoothToBottom() {
+    var c = q('aiChatMessages');
+    if (!c) { return; }
+    try {
+      if (typeof c.scrollTo === 'function') { c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' }); return; }
+    } catch (e) { }
+    var start = c.scrollTop, end = c.scrollHeight, t0 = Date.now();
+    (function step() {
+      var p = Math.min(1, (Date.now() - t0) / 360);
+      var e2 = 1 - Math.pow(1 - p, 3);
+      c.scrollTop = start + (end - start) * e2;
+      if (p < 1) { requestAnimationFrame(step); }
+    })();
+  }
+
+  /* ---------- 每日额度（服务端优先，本地兜底） ---------- */
+  function readLocalQuota() {
+    try {
+      var raw = localStorage.getItem(QUOTA_KEY);
+      if (raw) {
+        var j = JSON.parse(raw);
+        if (j && j.date === today() && typeof j.used === 'number') { return j; }
+      }
+    } catch (e) { }
+    return { date: today(), used: 0 };
+  }
+  function writeLocalQuota(j) {
+    try { localStorage.setItem(QUOTA_KEY, JSON.stringify({ date: today(), used: j.used || 0 })); } catch (e) { }
+  }
+  function quota() {
+    var s = null;
+    try { s = window.__aiQuota; } catch (e) { }
+    if (s && typeof s === 'object') {
+      var lim = (typeof s.limit === 'number' && s.limit > 0) ? s.limit : QUOTA_LIMIT;
+      var rem = null;
+      if (typeof s.remaining === 'number') { rem = s.remaining; }
+      else if (typeof s.left === 'number') { rem = s.left; }
+      else if (typeof s.used === 'number') { rem = lim - s.used; }
+      if (rem !== null && isFinite(rem)) {
+        rem = Math.max(0, Math.round(rem));
+        return { limit: lim, used: lim - rem, remaining: rem, source: 'server' };
+      }
+    }
+    if (window.__aiQuotaExceeded) { return { limit: QUOTA_LIMIT, used: QUOTA_LIMIT, remaining: 0, source: 'server' }; }
+    var j = readLocalQuota();
+    var used = Math.max(0, Math.min(QUOTA_LIMIT, j.used || 0));
+    return { limit: QUOTA_LIMIT, used: used, remaining: QUOTA_LIMIT - used, source: 'local' };
+  }
+  function consumeQuota() {
+    var j = readLocalQuota();
+    j.used = Math.min(QUOTA_LIMIT, (j.used || 0) + 1);
+    writeLocalQuota(j);
+    updateQuotaUI();
+  }
 
   /* ---------- 模型切换 ---------- */
   function currentModel() {
     var k = null;
     try { k = localStorage.getItem(MODEL_KEY); } catch (e) { }
-    if (!k || !MODELS[k]) { k = 'reason'; }
+    if (k && LEGACY[k] && !MODELS[k]) { k = LEGACY[k]; }
+    if (!k || !MODELS[k]) { k = DEFAULT_KEY; }
     return k;
   }
+  function providerFor(key) { return (MODELS[key] || MODELS.deep).provider; }
+  function tierFor(key) { return (MODELS[key] || MODELS.deep).tier; }
+
+  /* 供既有 sendAiMessage 调用：返回本次请求应落到的档位/provider（含一次性覆盖） */
+  function resolve() {
+    var k = onceKey || currentModel();
+    onceKey = '';
+    var m = MODELS[k] || MODELS.deep;
+    return { key: k, tier: m.tier, provider: m.provider, model: m.model };
+  }
+  function setOnce(key) { onceKey = MODELS[key] ? key : ''; }
+
+  function updateQuotaUI() {
+    var qq = quota();
+    var chip = document.querySelector('.ai-mm-chip[data-mm-model="flagship"]');
+    if (chip) {
+      var badge = chip.querySelector('.ai-mm-chip-q');
+      if (badge) { badge.textContent = qq.remaining; }
+      var exhausted = qq.remaining <= 0;
+      chip.classList.toggle('exhausted', exhausted);
+      chip.setAttribute('aria-disabled', exhausted ? 'true' : 'false');
+      chip.setAttribute('title', label('flagship') + ' · ' + ((MODELS.flagship || {}).model || '')
+        + (isEn() ? ' · ' : ' · 今日剩余 ') + qq.remaining + (isEn() ? ' left today' : ' 次'));
+    }
+    var h = q('aiMmHint');
+    if (h && !pending.length) {
+      if (currentModel() === 'flagship') {
+        h.textContent = isEn() ? ('Flagship · ' + qq.remaining + ' left') : ('旗舰剩余 ' + qq.remaining + ' 次');
+        h.classList.toggle('warn', qq.remaining <= 0);
+      } else {
+        h.classList.remove('warn');
+      }
+    }
+    if (qq.remaining <= 0 && currentModel() === 'flagship') {
+      setModel('deep', true);
+      toast(isEn() ? 'Flagship quota used up, switched to Deep Think' : '旗舰模式今日额度已用完，已切回「深度思考」');
+    }
+    updateCurrent();
+  }
+
   function setModel(key, silent) {
     if (!MODELS[key]) { return; }
+    if (MODELS[key].quota && quota().remaining <= 0) {
+      toast(isEn() ? 'Flagship quota used up today' : '旗舰模式今日 5 次额度已用完，明日恢复');
+      updateQuotaUI();
+      return;
+    }
+    var prev = null;
+    try { prev = localStorage.getItem(MODEL_KEY); } catch (e) { }
     try { localStorage.setItem(MODEL_KEY, key); } catch (e) { }
     var chips = document.querySelectorAll('.ai-mm-chip');
     for (var i = 0; i < chips.length; i++) {
       var on = chips[i].getAttribute('data-mm-model') === key;
       chips[i].classList.toggle('on', on);
       chips[i].setAttribute('aria-selected', on ? 'true' : 'false');
+      if (on) {
+        chips[i].classList.remove('ai-mm-pop');
+        void chips[i].offsetWidth;
+        chips[i].classList.add('ai-mm-pop');
+      }
     }
     updateHint();
     applyLangLabels();
+    if (prev !== key) { smoothToBottom(); }
     if (!silent) { toast((isEn() ? 'Model: ' : '已切换模型：') + label(key)); }
   }
   function visionKeyFor(key) {
     if (MODELS[key] && MODELS[key].vision) { return key; }
     return 'vision';
+  }
+
+  /* ---------- 识图意图判定 / 图片按钮显隐 ---------- */
+  function hasImageIntent() {
+    var input = q('aiChatInput');
+    var v = input ? (input.value || '') : '';
+    return pending.length > 0 || IMG_INTENT.test(v);
+  }
+  function refreshAttach() {
+    var at = q('aiMmAttach');
+    if (!at) { return; }
+    /* 特性②：图片入口改为常显，不再依赖输入框里的意图关键词 */
+    at.classList.add('show');
+    at.setAttribute('aria-hidden', 'false');
+    var full = pending.length >= MAX_IMAGES;
+    at.classList.toggle('busy', full);
+    at.title = full
+      ? (isEn() ? ('Up to ' + MAX_IMAGES + ' images') : ('最多 ' + MAX_IMAGES + ' 张图片'))
+      : (isMobileUI()
+        ? (isEn() ? 'Add photos (library / camera)' : '添加图片（相册 / 拍照）')
+        : (isEn() ? 'Attach images (or drag & drop)' : '添加图片（也可直接拖拽）'));
   }
 
   /* ---------- 图片输入 ---------- */
@@ -18467,6 +19325,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     var at = q('aiMmAttach');
     if (at) { at.classList.toggle('busy', pending.length >= MAX_IMAGES); }
     updateHint();
+    refreshAttach();
   }
 
   function clearPending() {
@@ -18475,13 +19334,22 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   }
 
   function updateHint() {
+    updateCurrent();
     var h = q('aiMmHint');
     if (!h) { return; }
     if (pending.length) {
       h.textContent = (isEn() ? pending.length + ' image(s) · vision on' : pending.length + ' 张图片 · 视觉通道已开启');
-    } else {
-      h.textContent = isEn() ? 'Images supported' : '支持图片输入';
+      h.classList.remove('warn');
+      return;
     }
+    if (currentModel() === 'flagship') {
+      var qq = quota();
+      h.textContent = isEn() ? ('Flagship · ' + qq.remaining + ' left') : ('旗舰剩余 ' + qq.remaining + ' 次');
+      h.classList.toggle('warn', qq.remaining <= 0);
+      return;
+    }
+    h.classList.remove('warn');
+    h.textContent = isEn() ? 'Images supported' : '支持图片输入';
   }
 
   /* 模型条静态文案随站点语言切换（不改站内 i18n 逻辑，仅跟随 <html lang>） */
@@ -18494,13 +19362,62 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       var k = chips[i].getAttribute('data-mm-model');
       var t = chips[i].querySelector('.ai-mm-chip-t');
       if (t && MODELS[k]) { t.textContent = label(k); }
+      var mo = chips[i].querySelector('.ai-mm-chip-m');
+      if (mo && MODELS[k]) { mo.textContent = MODELS[k].model; }
+      if (MODELS[k]) {
+        chips[i].setAttribute('title', label(k) + ' · ' + MODELS[k].model);
+        chips[i].setAttribute('aria-label', label(k) + ' · ' + MODELS[k].model
+          + (en ? ' (long-press for details)' : '（长按查看模型介绍）'));
+      }
       if (MODELS[k] && MODELS[k].vision) { chips[i].setAttribute('data-vision', '1'); }
     }
     var at = q('aiMmAttach');
-    if (at) { at.setAttribute('title', en ? 'Attach images' : '上传图片'); }
+    if (at) { refreshAttach(); }
     var rb = q('aiMmRemoveAll');
     if (rb) { rb.setAttribute('title', en ? 'Clear' : '清空图片'); }
     updateHint();
+    updateQuotaUI();
+  }
+
+  /* ---------- 难题升级确认卡 ---------- */
+  function removeAsk(anim) {
+    var el = askEl || q('aiMmAsk');
+    if (!el) { return; }
+    askEl = null;
+    if (anim === false) { el.remove(); return; }
+    el.classList.add('out');
+    setTimeout(function () { if (el.parentNode) { el.remove(); } }, 220);
+  }
+  function askUpgrade(canUpgrade, cb) {
+    removeAsk(false);
+    var overlay = q('aiChatOverlay');
+    if (!overlay) { cb(false); return; }
+    var qq = quota();
+    var card = document.createElement('div');
+    card.className = 'ai-mm-ask';
+    card.id = 'aiMmAsk';
+    card.innerHTML = '<div class="ai-mm-ask-t">' + (isEn() ? 'This looks like a tough question' : '这个问题有点难') + '</div>'
+      + '<div class="ai-mm-ask-d">'
+      + (canUpgrade
+        ? (isEn()
+          ? ('Switch to Flagship mode (Kimi k3) for a deeper answer? ' + qq.remaining + ' left today.')
+          : ('是否用「旗舰模式」（Kimi k3）深度回答？今日剩余 ' + qq.remaining + ' 次。'))
+        : (isEn() ? 'Flagship quota is used up today, answering with the current mode.' : '旗舰模式今日额度已用完，本次按当前模式回答。'))
+      + '</div>'
+      + '<div class="ai-mm-ask-b">'
+      + (canUpgrade ? '<button type="button" class="ai-mm-ask-yes" data-mm-ask="yes">' + (isEn() ? 'Upgrade' : '升级旗舰模式') + '</button>' : '')
+      + '<button type="button" class="ai-mm-ask-no" data-mm-ask="no">' + (canUpgrade ? (isEn() ? 'Keep current' : '就用当前模式') : (isEn() ? 'OK' : '知道了')) + '</button>'
+      + '</div>';
+    overlay.appendChild(card);
+    askEl = card;
+    smoothToBottom();
+    card.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('[data-mm-ask]') : null;
+      if (!b) { return; }
+      var yes = b.getAttribute('data-mm-ask') === 'yes';
+      removeAsk();
+      cb(!!yes);
+    });
   }
 
   /* ---------- 多模态发送（仅在附图时接管） ---------- */
@@ -18516,7 +19433,6 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     var mused = pending.slice();
     var mk = currentModel();
     var useKey = mused.length ? visionKeyFor(mk) : mk;
-    var modelId = (MODELS[useKey] || MODELS.fast).id;
     if (mused.length && useKey !== mk) {
       toast(isEn() ? 'Images detected → switched to Vision model' : '检测到图片输入，已自动切换到「视觉识图」模型');
       setModel(useKey, true);
@@ -18547,6 +19463,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     clearPending();
     if (sendBtn) { sendBtn.disabled = true; }
     busy = true;
+    smoothToBottom();
     try { if (typeof addLoadingIndicator === 'function') { addLoadingIndicator(); } } catch (e2) { }
 
     var ragHits = [];
@@ -18574,11 +19491,10 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     for (var k = 0; k < history.length; k++) { messages.push(history[k]); }
     messages.push({ role: 'user', content: content });
 
-    var reply = await requestOnce(modelId, messages, C);
-    if (!reply && modelId !== (mused.length ? FALLBACK_VISION : FALLBACK_TEXT)) {
-      var fb = mused.length ? FALLBACK_VISION : FALLBACK_TEXT;
+    var reply = await requestOnce(useKey, messages, C);
+    if (!reply && useKey !== 'vision') {
       toast(isEn() ? 'Model unavailable, auto fallback…' : '当前模型不可用，已自动回退到可用模型');
-      reply = await requestOnce(fb, messages, C);
+      reply = await requestOnce('vision', messages, C);
     }
 
     try { if (typeof removeLoadingIndicator === 'function') { removeLoadingIndicator(); } } catch (e7) { }
@@ -18599,21 +19515,25 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     } else {
       try { addMessage(isEn() ? 'Image request failed. Please try again later.' : '图片请求失败，请稍后重试。', 'ai'); } catch (e11) { }
     }
+    smoothToBottom();
+    updateQuotaUI();
   }
 
-  async function requestOnce(tierId, messages, C) {
+  async function requestOnce(key, messages, C) {
+    var m = MODELS[key] || MODELS.deep;
     try {
-      var controller = new AbortController();
-      var timeoutId = setTimeout(function () { controller.abort(); }, (C && C.timeout) || 45000);
       var data = await AIBridge.chat({
-        tier: tierId,
-        feature: 'mm_' + tierId,
+        provider: m.provider,
+        model: m.model,
+        tier: m.tier,
+        feature: 'mm_' + m.tier,
         messages: messages,
         max_tokens: 900,
-        temperature: 0.7,
-        signal: controller.signal
+        temperature: 0.7
       });
-      clearTimeout(timeoutId);
+
+      /* 服务端降级兜底：不再静默当正常回答渲染 */
+      if (window.AIDegraded && window.AIDegraded.is(data)) { window.AIDegraded.toast(data); }
 
       var reply = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
       if (Array.isArray(reply)) {
@@ -18625,13 +19545,66 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     } catch (e) { return null; }
   }
 
+  /* ---------- 包装既有 sendAiMessage（档位 / 额度 / 难题升级） ---------- */
+  var _origSendAiMessage = window.sendAiMessage;
+
+  function isComplex(text) {
+    if (!text) { return false; }
+    var t = String(text).trim();
+    if (t.length >= COMPLEX_LEN) { return true; }
+    for (var i = 0; i < COMPLEX_HINTS.length; i++) {
+      if (t.indexOf(COMPLEX_HINTS[i]) >= 0) { return true; }
+    }
+    return false;
+  }
+
+  function wrappedSendAiMessage() {
+    if (busy) { return; }
+    var input = q('aiChatInput');
+    var text = input ? (input.value || '').trim() : '';
+    if (pending.length) { sendMultimodal(); return; }
+    if (!text) { return; }
+
+    var mk = currentModel();
+    var qq = quota();
+
+    if (mk === 'flagship' && qq.remaining <= 0) {
+      toast(isEn() ? 'Flagship quota used up, switched to Deep Think' : '旗舰模式今日额度已用完，已切回「深度思考」');
+      setModel('deep', true);
+      mk = 'deep';
+    }
+
+    if ((mk === 'fast' || mk === 'deep') && isComplex(text)) {
+      var canUpgrade = quota().remaining > 0;
+      askUpgrade(canUpgrade, function (ok) {
+        if (ok) { setOnce('flagship'); consumeQuota(); }
+        if (typeof _origSendAiMessage === 'function') { _origSendAiMessage.apply(window, []); }
+        updateQuotaUI();
+      });
+      return;
+    }
+
+    if (mk === 'flagship') { setOnce('flagship'); consumeQuota(); }
+    if (typeof _origSendAiMessage === 'function') { _origSendAiMessage.apply(window, []); }
+  }
 
   /* ---------- 注入多模态 UI（纯增量：动态建节点，既有 DOM 与事件不变） ---------- */
   var ATTACH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.6" cy="10" r="1.7"/><path d="M3.4 17.2 8.8 12l3.6 3.6 3-3 5.2 5.2"/></svg>';
 
   function chipHTML(key) {
-    return '<button type="button" class="ai-mm-chip" data-mm-model="' + key + '" role="tab" aria-selected="false">'
-      + '<span class="ai-mm-dot"></span><span class="ai-mm-chip-t">' + label(key) + '</span></button>';
+    var m = MODELS[key] || {};
+    var title = label(key) + ' · ' + (m.model || '');
+    return '<button type="button" class="ai-mm-chip" data-mm-model="' + key + '" role="tab" aria-selected="false"'
+      + ' title="' + esc(title) + '"'
+      + ' aria-label="' + esc(title + (isEn() ? ' (long-press for details)' : '（长按查看模型介绍）')) + '">'
+      + '<span class="ai-mm-dot"></span>'
+      + (ICONS[key] || '')
+      + '<span class="ai-mm-chip-txt">'
+      + '<span class="ai-mm-chip-t">' + label(key) + '</span>'
+      + '<span class="ai-mm-chip-m">' + (m.model || '') + '</span>'
+      + '</span>'
+      + (m.quota ? '<span class="ai-mm-chip-q">' + QUOTA_LIMIT + '</span>' : '')
+      + '</button>';
   }
 
   function buildUI() {
@@ -18642,9 +19615,10 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     bar.className = 'ai-mm-bar';
     bar.id = 'aiMmBar';
     bar.setAttribute('role', 'tablist');
-    bar.innerHTML = '<span class="ai-mm-label">模型</span>'
-      + chipHTML('reason') + chipHTML('vision') + chipHTML('fast')
-      + '<span class="ai-mm-hint" id="aiMmHint">支持图片输入</span>';
+    var html = '<span class="ai-mm-label">模型</span>';
+    for (var i = 0; i < CHIP_ORDER.length; i++) { html += chipHTML(CHIP_ORDER[i]); }
+    html += '<span class="ai-mm-hint" id="aiMmHint">支持图片输入</span>';
+    bar.innerHTML = html;
     var header = overlay.querySelector('.ai-chat-header');
     if (header && header.nextSibling) { overlay.insertBefore(bar, header.nextSibling); }
     else { overlay.insertBefore(bar, overlay.firstChild); }
@@ -18663,6 +19637,15 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     file.style.display = 'none';
     overlay.appendChild(file);
 
+    /* 拍照入口（capture 提示移动端直接调起相机；桌面端等同普通选图，不影响） */
+    var camInput = document.createElement('input');
+    camInput.type = 'file';
+    camInput.id = 'aiMmCamera';
+    camInput.accept = 'image/*';
+    camInput.setAttribute('capture', 'environment');
+    camInput.style.display = 'none';
+    overlay.appendChild(camInput);
+
     var row = overlay.querySelector('.ai-chat-input-row');
     var send = q('aiChatSendBtn');
     if (row && send) {
@@ -18671,9 +19654,239 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       at.className = 'ai-mm-attach';
       at.id = 'aiMmAttach';
       at.title = '上传图片';
+      at.setAttribute('aria-hidden', 'true');
       at.innerHTML = ATTACH_SVG;
       row.insertBefore(at, send);
     }
+
+    /* 当前模型提示（输入区上方常驻：档位名 + 具体模型名） */
+    var cur = document.createElement('div');
+    cur.className = 'ai-mm-current';
+    cur.id = 'aiMmCurrent';
+    if (inputArea) { inputArea.insertBefore(cur, inputArea.firstChild); }
+
+    /* 拖拽提示浮层（桌面端把图片拖到对话面板时显示） */
+    var drop = document.createElement('div');
+    drop.className = 'ai-mm-drop';
+    drop.id = 'aiMmDrop';
+    drop.setAttribute('aria-hidden', 'true');
+    drop.innerHTML = '<div class="ai-mm-drop-in">'
+      + '<svg class="ai-mm-drop-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.6" cy="10" r="1.7"/><path d="M3.4 17.2 8.8 12l3.6 3.6 3-3 5.2 5.2"/></svg>'
+      + '<div class="ai-mm-drop-t">' + (isEn() ? 'Release to add images' : '松开鼠标即可添加图片') + '</div>'
+      + '<div class="ai-mm-drop-s">' + (isEn() ? ('JPG / PNG / WebP · up to ' + MAX_IMAGES) : ('支持 JPG / PNG / WebP，最多 ' + MAX_IMAGES + ' 张')) + '</div>'
+      + '</div>';
+    overlay.appendChild(drop);
+  }
+
+
+  /* ---------- 特性④ 模型介绍数据（长按档位按钮展示） ---------- */
+  var MODEL_INFO = {
+    fast: {
+      model: 'glm-4.5-air',
+      vendor: { zh: '智谱 AI（Zhipu · GLM 系列）', en: 'Zhipu AI (GLM series)' },
+      tier: { zh: '轻量快速档', en: 'Lightweight fast tier' },
+      ability: {
+        zh: ['轻量级模型，首字延迟低、出字快', '适合日常问答、名词解释与信息速查', '中文航空术语理解稳定'],
+        en: ['Lightweight, low first-token latency', 'Best for quick Q&A and lookups', 'Solid on Chinese aviation terms']
+      },
+      ctx: '128K tokens',
+      vision: { zh: '不支持图片输入', en: 'Text only' },
+      quota: { zh: '不限次（受服务端总额度与限流保护）', en: 'Unlimited (subject to server quota)' }
+    },
+    deep: {
+      model: 'kimi-k2.6',
+      vendor: { zh: '月之暗面（Moonshot AI · Kimi 系列）', en: 'Moonshot AI (Kimi series)' },
+      tier: { zh: '深度思考档', en: 'Deep thinking tier' },
+      ability: {
+        zh: ['长上下文推理，多步推导更稳', '适合机型对比、参数推算与方案撰写', '结构化输出质量高'],
+        en: ['Long-context multi-step reasoning', 'Good for comparisons and planning', 'High-quality structured output']
+      },
+      ctx: '256K tokens',
+      vision: { zh: '不支持图片输入', en: 'Text only' },
+      quota: { zh: '不限次（受服务端总额度与限流保护）', en: 'Unlimited (subject to server quota)' }
+    },
+    flagship: {
+      model: 'kimi-k3',
+      vendor: { zh: '月之暗面（Moonshot AI · Kimi 旗舰）', en: 'Moonshot AI (Kimi flagship)' },
+      tier: { zh: '旗舰深度推理档', en: 'Flagship tier' },
+      ability: {
+        zh: ['旗舰级深度推理，难题逐步展开', '长报告与多角度综合分析', '难题升级时优先调用'],
+        en: ['Flagship deep reasoning', 'Long reports, multi-angle analysis', 'Preferred for hard questions']
+      },
+      ctx: '256K tokens',
+      vision: { zh: '不支持图片输入', en: 'Text only' },
+      quota: { zh: '每日 5 次', en: '5 requests per day' }
+    },
+    vision: {
+      model: 'glm-4.5v',
+      vendor: { zh: '智谱 AI（Zhipu · GLM 视觉版）', en: 'Zhipu AI (GLM Vision)' },
+      tier: { zh: '视觉识图档', en: 'Vision tier' },
+      ability: {
+        zh: ['原生多模态视觉理解', '机型识别，涂装 / 仪表 / 铭牌识读', '图文混合问答'],
+        en: ['Native multimodal vision', 'Aircraft, livery and instrument reading', 'Image + text Q&A']
+      },
+      ctx: '128K tokens',
+      vision: { zh: '支持图片输入（检测到图片自动切换）', en: 'Supports images (auto-switch)' },
+      quota: { zh: '不限次（受服务端总额度与限流保护）', en: 'Unlimited (subject to server quota)' }
+    }
+  };
+
+  /* ---------- 当前模型提示（输入区上方常驻） ---------- */
+  function updateCurrent() {
+    var el = q('aiMmCurrent');
+    if (!el) { return; }
+    var key = currentModel();
+    var m = MODELS[key] || MODELS.deep;
+    var en = isEn();
+    var extra = '';
+    if (key === 'flagship') {
+      var qq = quota();
+      extra = en ? (' · ' + qq.remaining + ' left today') : (' · 今日剩余 ' + qq.remaining + ' 次');
+    }
+    el.innerHTML = '<span class="ai-mm-current-dot"></span>'
+      + '<span>' + (en ? 'Current model: ' : '当前模型：') + '</span>'
+      + '<b>' + esc(label(key)) + '</b>'
+      + '<code>' + esc(m.model || '') + '</code>'
+      + '<span>' + esc(extra) + '</span>'
+      + '<span class="ai-mm-current-tip">' + (en ? 'long-press a tier for details' : '长按档位查看模型介绍') + '</span>';
+  }
+
+  /* ---------- 特性④ 模型介绍卡（长按档位按钮 500ms 弹出） ---------- */
+  function openModelIntro(key) {
+    var m = MODELS[key];
+    var info = MODEL_INFO[key];
+    if (!m || !info) { return; }
+    var en = isEn();
+    var qq = quota();
+    var quotaText = (key === 'flagship')
+      ? (en ? ('5 per day · ' + qq.remaining + ' left today') : ('每日 5 次 · 当前剩余 ' + qq.remaining + ' 次'))
+      : (en ? info.quota.en : info.quota.zh);
+    var ability = (en ? info.ability.en : info.ability.zh) || [];
+    var tags = '';
+    for (var i = 0; i < ability.length; i++) {
+      tags += '<span class="ai-mm-intro-tag">' + esc(ability[i]) + '</span>';
+    }
+    var mask = document.createElement('div');
+    mask.className = 'ai-mm-intro-mask';
+    mask.id = 'aiMmIntroMask';
+    mask.innerHTML = '<div class="ai-mm-intro" role="dialog" aria-modal="true">'
+      + '<div class="ai-mm-intro-h">'
+      + '<span class="ai-mm-intro-badge">' + (ICONS[key] || '') + '</span>'
+      + '<div>'
+      + '<div class="ai-mm-intro-name">' + esc(info.model) + '</div>'
+      + '<div class="ai-mm-intro-tier">' + esc(label(key)) + ' · ' + esc(en ? info.tier.en : info.tier.zh) + '</div>'
+      + '</div></div>'
+      + '<div class="ai-mm-intro-rows">'
+      + '<div class="ai-mm-intro-row"><span class="ai-mm-intro-k">' + (en ? 'Tier' : '档位') + '</span><span class="ai-mm-intro-v">' + esc(label(key)) + '</span></div>'
+      + '<div class="ai-mm-intro-row"><span class="ai-mm-intro-k">' + (en ? 'Model' : '模型') + '</span><span class="ai-mm-intro-v">' + esc(info.model) + '</span></div>'
+      + '<div class="ai-mm-intro-row"><span class="ai-mm-intro-k">' + (en ? 'Vendor' : '厂商') + '</span><span class="ai-mm-intro-v">' + esc(en ? info.vendor.en : info.vendor.zh) + '</span></div>'
+      + '<div class="ai-mm-intro-row"><span class="ai-mm-intro-k">' + (en ? 'Abilities' : '能力') + '</span><span class="ai-mm-intro-v">' + tags + '</span></div>'
+      + '<div class="ai-mm-intro-row"><span class="ai-mm-intro-k">' + (en ? 'Context' : '上下文') + '</span><span class="ai-mm-intro-v">' + esc(info.ctx) + '</span></div>'
+      + '<div class="ai-mm-intro-row"><span class="ai-mm-intro-k">' + (en ? 'Vision' : '视觉') + '</span><span class="ai-mm-intro-v">' + esc(en ? info.vision.en : info.vision.zh) + '</span></div>'
+      + '<div class="ai-mm-intro-row"><span class="ai-mm-intro-k">' + (en ? 'Quota' : '额度') + '</span><span class="ai-mm-intro-v">' + esc(quotaText) + '</span></div>'
+      + '</div>'
+      + '<div class="ai-mm-intro-foot">' + (en ? 'Context window and quota follow the live server configuration.' : '上下文长度与额度以线上服务端实际配置为准。') + '</div>'
+      + '<button type="button" class="ai-mm-intro-close" data-mm-intro-close="1">' + (en ? 'Got it' : '知道了') + '</button>'
+      + '</div>';
+    var host = q('aiChatOverlay') || document.body;
+    host.appendChild(mask);
+    mask.classList.add('on');
+    if (window.requestAnimationFrame) { requestAnimationFrame(function () { mask.classList.add('on'); }); }
+    setTimeout(function () { mask.classList.add('on'); }, 24);
+
+    function close() {
+      mask.classList.remove('on');
+      setTimeout(function () { if (mask.parentNode) { mask.parentNode.removeChild(mask); } }, 240);
+    }
+    mask.addEventListener('click', function (e) {
+      var t = e.target;
+      if (t === mask || (t && t.closest && t.closest('[data-mm-intro-close]'))) { close(); }
+    });
+    document.addEventListener('keydown', function onEsc(e) {
+      if (e.key === 'Escape' || e.keyCode === 27) { document.removeEventListener('keydown', onEsc, true); close(); }
+    }, true);
+  }
+
+  /* ---------- 特性④ 长按手势（鼠标长按 + 触屏，500ms / 10px 阈值） ---------- */
+  var HOLD_MS = 500;
+  var HOLD_MOVE_PX = 10;
+  var suppressClickUntil = 0;
+
+  function bindLongPress(el) {
+    var timer = null, sx = 0, sy = 0;
+    function clear() { if (timer) { clearTimeout(timer); timer = null; } }
+    function start(x, y) {
+      sx = x; sy = y;
+      clear();
+      timer = setTimeout(function () {
+        timer = null;
+        suppressClickUntil = Date.now() + 700;   /* 抑制长按后紧跟的 click，避免误切换 */
+        openModelIntro(el.getAttribute('data-mm-model'));
+        try { if (navigator.vibrate) { navigator.vibrate(12); } } catch (eV) { }
+      }, HOLD_MS);
+    }
+    function move(x, y) {
+      if (Math.abs(x - sx) > HOLD_MOVE_PX || Math.abs(y - sy) > HOLD_MOVE_PX) { clear(); }
+    }
+    el.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) { return; }
+      start(e.clientX, e.clientY);
+    });
+    el.addEventListener('pointermove', function (e) { move(e.clientX, e.clientY); });
+    el.addEventListener('pointerup', clear);
+    el.addEventListener('pointerleave', clear);
+    el.addEventListener('pointercancel', clear);
+    el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    if (!window.PointerEvent) {   /* 老内核触屏兜底 */
+      el.addEventListener('touchstart', function (e) {
+        var t = e.touches && e.touches[0];
+        if (t) { start(t.clientX, t.clientY); }
+      }, { passive: true });
+      el.addEventListener('touchmove', function (e) {
+        var t = e.touches && e.touches[0];
+        if (t) { move(t.clientX, t.clientY); }
+      }, { passive: true });
+      el.addEventListener('touchend', clear);
+      el.addEventListener('touchcancel', clear);
+    }
+  }
+
+  /* ---------- 特性② 取图方式面板：相册选择 / 拍照 ---------- */
+  function openPickSheet() {
+    if (q('aiMmSheetMask')) { return; }
+    var en = isEn();
+    var icoAlbum = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.6" cy="10" r="1.7"/><path d="M3.4 17.2 8.8 12l3.6 3.6 3-3 5.2 5.2"/></svg>';
+    var icoCamera = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M3.5 8.6h2.6l1.4-2.3h9l1.4 2.3h2.6v9.5H3.5z"/><circle cx="12" cy="13.2" r="3.1"/></svg>';
+    var mask = document.createElement('div');
+    mask.className = 'ai-mm-sheet-mask';
+    mask.id = 'aiMmSheetMask';
+    mask.innerHTML = '<div class="ai-mm-sheet" role="dialog" aria-modal="true">'
+      + '<div class="ai-mm-sheet-t">' + (en ? 'Add images' : '添加图片') + '</div>'
+      + '<div class="ai-mm-sheet-b">'
+      + '<button type="button" data-mm-pick="album">' + icoAlbum + (en ? 'Choose from library' : '相册选择') + '</button>'
+      + '<button type="button" data-mm-pick="camera">' + icoCamera + (en ? 'Take a photo' : '拍照') + '</button>'
+      + '<button type="button" class="ai-mm-sheet-cancel" data-mm-pick="cancel">' + (en ? 'Cancel' : '取消') + '</button>'
+      + '</div></div>';
+    var host = q('aiChatOverlay') || document.body;
+    host.appendChild(mask);
+    mask.classList.add('on');
+    if (window.requestAnimationFrame) { requestAnimationFrame(function () { mask.classList.add('on'); }); }
+    setTimeout(function () { mask.classList.add('on'); }, 24);
+
+    function close() {
+      mask.classList.remove('on');
+      setTimeout(function () { if (mask.parentNode) { mask.parentNode.removeChild(mask); } }, 240);
+    }
+    mask.addEventListener('click', function (e) {
+      var t = e.target;
+      if (t === mask) { close(); return; }
+      var b = (t && t.closest) ? t.closest('[data-mm-pick]') : null;
+      if (!b) { return; }
+      var pick = b.getAttribute('data-mm-pick');
+      close();
+      if (pick === 'album') { var f = q('aiMmFile'); if (f) { f.click(); } }
+      if (pick === 'camera') { var c = q('aiMmCamera'); if (c) { c.click(); } }
+    });
   }
 
   /* ---------- 事件绑定 ---------- */
@@ -18684,15 +19897,32 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 
     var chips = overlay.querySelectorAll('.ai-mm-chip');
     for (var i = 0; i < chips.length; i++) {
-      chips[i].addEventListener('click', function () { setModel(this.getAttribute('data-mm-model')); });
+      chips[i].addEventListener('click', function () {
+        if (Date.now() < suppressClickUntil) { return; }   /* 长按弹出的介绍卡：不触发档位切换 */
+        setModel(this.getAttribute('data-mm-model'));
+      });
+      bindLongPress(chips[i]);   /* 特性④：长按 500ms 弹出模型介绍卡 */
     }
 
     var file = q('aiMmFile');
     if (file) {
       file.addEventListener('change', function () { addFiles(this.files || []); this.value = ''; });
     }
+    var cam = q('aiMmCamera');
+    if (cam) {
+      cam.addEventListener('change', function () { addFiles(this.files || []); this.value = ''; });
+    }
     var at = q('aiMmAttach');
-    if (at && file) { at.addEventListener('click', function () { file.click(); }); }
+    if (at) {
+      at.addEventListener('click', function () {
+        if (pending.length >= MAX_IMAGES) {
+          toast(isEn() ? ('Up to ' + MAX_IMAGES + ' images') : ('最多支持 ' + MAX_IMAGES + ' 张图片'));
+          return;
+        }
+        if (isMobileUI()) { openPickSheet(); return; }   /* 移动端：相册选择 / 拍照 */
+        if (file) { file.click(); }
+      });
+    }
 
     var box = q('aiMmPreview');
     if (box) {
@@ -18703,6 +19933,70 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
         if (!isNaN(idx)) { pending.splice(idx, 1); renderPreview(); }
       });
     }
+
+    /* 输入变化：仅同步加图入口状态（v71 起入口常显，不再依赖输入意图词；站内 oninput 仍照常执行） */
+    var input = q('aiChatInput');
+    if (input) {
+      input.addEventListener('input', function () { refreshAttach(); });
+      input.addEventListener('paste', function (e) {
+        var items = (e.clipboardData && e.clipboardData.items) || [];
+        var files = [];
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].kind === 'file') { var f = items[i].getAsFile(); if (f) { files.push(f); } }
+        }
+        if (files.length) { e.preventDefault(); addFiles(files); }
+      });
+    }
+    /* ---- 特性③ 拖拽提示浮层 + 增强 drop（保留原有 drop 入列逻辑） ---- */
+    var dropEl = q('aiMmDrop');
+    var dragDepth = 0;
+    function dragHasFiles(e) {
+      var dt = e && e.dataTransfer;
+      if (!dt) { return false; }
+      if (dt.types) {
+        for (var i = 0; i < dt.types.length; i++) { if (dt.types[i] === 'Files') { return true; } }
+      }
+      return !!(dt.files && dt.files.length);
+    }
+    function showDrop(on) {
+      if (!dropEl) { return; }
+      dropEl.classList.toggle('on', !!on);
+      dropEl.setAttribute('aria-hidden', on ? 'false' : 'true');
+    }
+    overlay.addEventListener('dragenter', function (e) {
+      if (!dragHasFiles(e)) { return; }
+      e.preventDefault();
+      dragDepth++;
+      showDrop(true);
+    });
+    overlay.addEventListener('dragover', function (e) {
+      if (!dragHasFiles(e)) { return; }
+      e.preventDefault();
+      try { if (e.dataTransfer) { e.dataTransfer.dropEffect = 'copy'; } } catch (eD) { }
+      showDrop(true);
+    });
+    overlay.addEventListener('dragleave', function (e) {
+      dragDepth = Math.max(0, dragDepth - 1);
+      if (dragDepth === 0 || !e.relatedTarget) { dragDepth = 0; showDrop(false); }
+    });
+    overlay.addEventListener('drop', function (e) {
+      dragDepth = 0;
+      showDrop(false);
+      var dt = e.dataTransfer;
+      if (!dt) { return; }
+      var files = [];
+      if (dt.files && dt.files.length) { files = dt.files; }
+      else if (dt.items && dt.items.length) {
+        for (var i = 0; i < dt.items.length; i++) {
+          if (dt.items[i].kind === 'file') { var f = dt.items[i].getAsFile(); if (f) { files.push(f); } }
+        }
+      }
+      if (files.length) {
+        e.preventDefault();
+        addFiles(files);
+        toast(isEn() ? (files.length + ' image(s) added') : ('已添加 ' + files.length + ' 张图片'));
+      }
+    });
 
     /* 回车 / 发送按钮：仅在“已附图”时接管（捕获阶段先于站内内联处理器） */
     document.addEventListener('keydown', function (e) {
@@ -18723,58 +20017,73 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       sendMultimodal();
     }, true);
 
-    /* 粘贴与拖拽图片 */
-    var input = q('aiChatInput');
-    if (input) {
-      input.addEventListener('paste', function (e) {
-        var items = (e.clipboardData && e.clipboardData.items) || [];
-        var files = [];
-        for (var i = 0; i < items.length; i++) {
-          if (items[i].kind === 'file') { var f = items[i].getAsFile(); if (f) { files.push(f); } }
-        }
-        if (files.length) { e.preventDefault(); addFiles(files); }
-      });
-    }
-    overlay.addEventListener('dragover', function (e) { e.preventDefault(); });
-    overlay.addEventListener('drop', function (e) {
-      var dt = e.dataTransfer;
-      if (dt && dt.files && dt.files.length) { e.preventDefault(); addFiles(dt.files); }
-    });
-
-    /* 关闭浮层时清空待发图片 */
+    /* 关闭浮层时清空待发图片 + 移除升级确认卡 */
     document.addEventListener('click', function (e) {
       var b = e.target && e.target.closest ? e.target.closest('.ai-chat-close') : null;
-      if (b) { clearPending(); }
+      if (b) { clearPending(); removeAsk(false); }
     }, true);
 
     /* 打开浮层时同步一次 UI */
     document.addEventListener('click', function (e) {
       var b = e.target && e.target.closest ? e.target.closest('[onclick*="openAiChat"], .ai-fab, #fabAiBtn') : null;
-      if (b) { setTimeout(function () { setModel(currentModel(), true); renderPreview(); }, 60); }
+      if (b) {
+        setTimeout(function () {
+          setModel(currentModel(), true);
+          renderPreview();
+          refreshAttach();
+          updateQuotaUI();
+          updateCurrent();
+          if (window.aiWaveSweep) { window.aiWaveSweep(document); }
+        }, 60);
+      }
     }, true);
+
+    /* 包装 sendAiMessage（档位/provider 透传 + 难题升级 + 额度） */
+    if (typeof _origSendAiMessage === 'function') { window.sendAiMessage = wrappedSendAiMessage; }
 
     setModel(currentModel(), true);
     applyLangLabels();
+    refreshAttach();
+    updateQuotaUI();
     try {
       new MutationObserver(applyLangLabels)
         .observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
     } catch (eL) { /* 老浏览器忽略 */ }
-    console.log('[AiMultimodal] 多模态+多模型已就绪 | 模型: ' + Object.keys(MODELS).join(' / ') + ' | 图片上限: ' + MAX_IMAGES + ' 张');
+    console.log('[AiMultimodal v2] 三档模型 + 多模态已就绪 | ' + CHIP_ORDER.join(' / ') + ' | 旗舰额度 ' + QUOTA_LIMIT + ' 次/日');
   }
 
   function boot() {
     bind();
     window.AiMultimodal = {
-      __v: '1.0',
+      __v: '2.0',
       models: MODELS,
       getModel: currentModel,
       setModel: setModel,
       pending: function () { return pending.slice(); },
       addFiles: addFiles,
       applyLang: applyLangLabels,
+      quota: quota,
+      refreshAttach: refreshAttach,
+      smoothToBottom: smoothToBottom,
+      info: MODEL_INFO,
+      intro: openModelIntro,
+      pickSheet: openPickSheet,
+      isMobile: isMobileUI,
+      wave: aiWaveHTML,
       state: function () {
-        return { model: currentModel(), modelId: (MODELS[currentModel()] || {}).id, images: pending.length, busy: busy };
+        return { model: currentModel(), tier: tierFor(currentModel()), provider: providerFor(currentModel()), images: pending.length, busy: busy, quota: quota() };
       }
+    };
+    /* 供既有 sendAiMessage 调用：本次请求应使用的档位/provider */
+    window.AiModelSelect = {
+      __v: '2.0',
+      resolve: resolve,
+      key: currentModel,
+      tier: function () { return tierFor(currentModel()); },
+      provider: function () { return providerFor(currentModel()); },
+      models: MODELS,
+      isComplex: isComplex,
+      quota: quota
     };
   }
 
@@ -19052,468 +20361,6 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   // 关闭：按钮 / 遮罩 / Esc
   if (closeBtn) { closeBtn.addEventListener("click", closeSheet); }
   mask.addEventListener("click", function (e) { if (e.target === mask) { closeSheet(); } });
-})();
-</script>
-<script>
-/* ============================================================================
- * v70 阶段1 · 问 AI 双模型路由层
- *   1) 左上角模型选择器：智谱 GLM（6 版） / Kimi（3 版）
- *   2) 快慢分流：快速问答 → 智谱；深度思考 → Kimi（选中 Kimi 任意版本自动进深度）
- *   3) 每日额度：深度思考每自然日 5 次，localStorage 计数，第 6 次自动降级智谱并提示
- *   4) 纯增量：不覆盖任何站点既有函数；通过 window.__avAiRoute() 钩子向
- *      AIBridge.chat 提供 provider / model / mode（仅作用于未指定 tier 的主问答）
- *   零密钥：本模块不接触任何 API Key，请求统一由 AIBridge 走同源 /api/chat
- * ========================================================================== */
-(function () {
-  'use strict';
-
-  var DEEP_LIMIT = 5;
-  var LS_QUOTA_PREFIX = 'av_ai_deep_quota_';
-  var LS_PREF = 'av_ai_model_pref';
-  var FAST_MODEL = { provider: 'zhipu', model: 'glm-4.7-flash' };
-  var DEEP_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
-  var DEGRADE_TEXT = '今日 Kimi 深度思考次数已用完，已自动切换智谱继续回答';
-
-  /* ---------------- 模型目录（阶段1：智谱 6 版 + Kimi 3 版） ---------------- */
-  var CATALOG = [
-    {
-      provider: 'zhipu', name: '智谱 GLM', mode: 'fast',
-      items: [
-        { id: 'glm-4.7-flash', label: 'GLM-4.7-Flash', sub: '免费 · 默认快速' },
-        { id: 'glm-4.5-flash', label: 'GLM-4.5-Flash', sub: '免费' },
-        { id: 'glm-4.6', label: 'GLM-4.6', sub: '快速' },
-        { id: 'glm-4.7', label: 'GLM-4.7', sub: '快速' },
-        { id: 'glm-5', label: 'GLM-5', sub: '快速' },
-        { id: 'glm-5.3', label: 'GLM-5.3', sub: '快速' }
-      ]
-    },
-    {
-      provider: 'kimi', name: 'Kimi', mode: 'deep',
-      items: [
-        { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '默认深度' },
-        { id: 'kimi-k3', label: 'Kimi K3', sub: '深度' },
-        { id: 'kimi-k2.7-code', label: 'Kimi K2.7-Code', sub: '深度 · 代码' }
-      ]
-    }
-  ];
-
-  var state = {
-    provider: FAST_MODEL.provider,
-    model: FAST_MODEL.model,
-    pendingDegrade: false
-  };
-
-  /* ---------------- 基础工具 ---------------- */
-  function el(id) { return document.getElementById(id); }
-  function pad2(n) { return (n < 10 ? '0' : '') + n; }
-  function todayKey() {
-    var d = new Date();
-    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
-  }
-  function quotaKey() { return LS_QUOTA_PREFIX + todayKey(); }
-  function safeGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
-  function safeSet(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* 隐私模式忽略 */ } }
-  function findItem(modelId) {
-    for (var i = 0; i < CATALOG.length; i++) {
-      for (var j = 0; j < CATALOG[i].items.length; j++) {
-        if (CATALOG[i].items[j].id === modelId) {
-          return { provider: CATALOG[i].provider, group: CATALOG[i].name, item: CATALOG[i].items[j] };
-        }
-      }
-    }
-    return null;
-  }
-  function modelLabel(modelId) {
-    var f = findItem(modelId);
-    return f ? f.item.label : modelId;
-  }
-  function modeOf(provider) { return provider === 'kimi' ? 'deep' : 'fast'; }
-
-  /* ---------------- 每日深度额度（localStorage 按自然日计数） ---------------- */
-  function getUsed() {
-    var v = parseInt(safeGet(quotaKey()) || '0', 10);
-    return isNaN(v) || v < 0 ? 0 : v;
-  }
-  function setUsed(n) { safeSet(quotaKey(), String(n)); }
-  function remaining() { return Math.max(0, DEEP_LIMIT - getUsed()); }
-  /* 返回 true 表示本次可用深度（已扣减）；false 表示额度已用完需降级 */
-  function consumeDeep() {
-    var used = getUsed();
-    if (used >= DEEP_LIMIT) return false;
-    setUsed(used + 1);
-    return true;
-  }
-
-  /* ---------------- 偏好持久化 ---------------- */
-  function loadPref() {
-    var raw = safeGet(LS_PREF);
-    if (!raw) return;
-    try {
-      var p = JSON.parse(raw);
-      var f = p && p.model ? findItem(p.model) : null;
-      if (f) { state.provider = f.provider; state.model = f.item.id; }
-    } catch (e) { /* 忽略非法缓存 */ }
-  }
-  function savePref() {
-    safeSet(LS_PREF, JSON.stringify({ provider: state.provider, model: state.model }));
-  }
-
-  /* ---------------- 渲染：模型选择器 ---------------- */
-  function renderPicker(force) {
-    var box = el('avAiPicker');
-    if (!box) return;
-    if (!force && !box.classList.contains('open')) return;
-    var html = '';
-    for (var i = 0; i < CATALOG.length; i++) {
-      var g = CATALOG[i];
-      html += '<div class="av-ai-group-h">' + g.name + '</div>';
-      for (var j = 0; j < g.items.length; j++) {
-        var it = g.items[j];
-        var active = (it.id === state.model) ? ' active' : '';
-        html += '<button type="button" class="av-ai-item' + active + '" role="menuitemradio" ' +
-          'aria-checked="' + (active ? 'true' : 'false') + '" ' +
-          'onclick="avAiSelectModel(\'' + it.id + '\')">' +
-          '<span>' + it.label + '</span>' +
-          '<span class="av-ai-item-sub">' + it.sub + '</span>' +
-          '</button>';
-      }
-    }
-    html += '<div class="av-ai-quota">今日剩余深度思考 <b>' + remaining() + '/' + DEEP_LIMIT + '</b>' +
-      '（深度思考由 Kimi 提供，每天 ' + DEEP_LIMIT + ' 次，用完自动切换智谱）</div>';
-    box.innerHTML = html;
-  }
-
-  /* ---------------- 渲染：左上角按钮 + 顶部徽标 ---------------- */
-  function renderHeader() {
-    var btn = el('avAiModelBtn');
-    var mode = modeOf(state.provider);
-    if (btn) {
-      btn.innerHTML =
-        '<span class="av-ai-model-dot ' + (mode === 'deep' ? 'deep' : 'fast') + '"></span>' +
-        '<span class="av-ai-model-btn-label">' + modelLabel(state.model) + '</span>' +
-        '<svg class="av-ai-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-      btn.setAttribute('title', '当前模型：' + modelLabel(state.model) + '（' + (mode === 'deep' ? '深度思考' : '快速问答') + '）');
-      btn.setAttribute('aria-label', '选择 AI 模型，当前 ' + modelLabel(state.model));
-    }
-    var bModel = el('avAiBadgeModel');
-    if (bModel) {
-      bModel.textContent = '模型：' + modelLabel(state.model);
-      bModel.setAttribute('data-provider', state.provider);
-    }
-    var bMode = el('avAiBadgeMode');
-    if (bMode) {
-      bMode.textContent = mode === 'deep' ? '深度思考' : '快速问答';
-      bMode.className = 'av-ai-badge ' + (mode === 'deep' ? 'mode-deep' : 'mode-fast');
-      bMode.setAttribute('data-mode', mode);
-    }
-    var bQuota = el('avAiBadgeQuota');
-    if (bQuota) {
-      bQuota.textContent = '今日剩余深度思考 ' + remaining() + '/' + DEEP_LIMIT;
-    }
-  }
-
-  function renderAll() { renderPicker(false); renderHeader(); }
-
-  /* ---------------- 对外交互：选择器开合 / 选模型 ---------------- */
-  window.avAiTogglePicker = function (ev) {
-    if (ev && ev.stopPropagation) ev.stopPropagation();
-    var box = el('avAiPicker');
-    var btn = el('avAiModelBtn');
-    if (!box) return;
-    var open = box.classList.toggle('open');
-    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) renderPicker(true);
-  };
-  window.avAiClosePicker = function () {
-    var box = el('avAiPicker');
-    var btn = el('avAiModelBtn');
-    if (box) box.classList.remove('open');
-    if (btn) btn.setAttribute('aria-expanded', 'false');
-  };
-  window.avAiSelectModel = function (modelId) {
-    var f = findItem(modelId);
-    if (!f) return;
-    state.provider = f.provider;
-    state.model = f.item.id;
-    savePref();
-    renderHeader();
-    renderPicker(true);
-    window.avAiClosePicker();
-  };
-  window.avAiCurrentRoute = function () {
-    return { provider: state.provider, model: state.model, mode: modeOf(state.provider), remaining: remaining() };
-  };
-
-  /* ---------------- 路由钩子：供 AIBridge.chat 在主问答（无 tier）时调用 ---------------- */
-  window.__avAiRoute = function () {
-    var provider = state.provider;
-    var model = state.model;
-    var mode = modeOf(provider);
-    var degraded = false;
-    if (mode === 'deep') {
-      if (!consumeDeep()) {
-        /* 第 6 次起：自动降级智谱，并预约一条提示（插入到本次回答气泡上方） */
-        degraded = true;
-        state.pendingDegrade = true;
-        provider = FAST_MODEL.provider;
-        model = FAST_MODEL.model;
-        mode = 'fast';
-      }
-    }
-    renderAll();
-    return {
-      provider: provider,
-      model: model,
-      mode: mode,
-      degraded: degraded,
-      requestedProvider: state.provider,
-      requestedModel: state.model
-    };
-  };
-
-  /* ---------------- 降级提示：插入到回答气泡上方 ---------------- */
-  function insertDegradeNote(msgEl) {
-    var box = el('aiChatMessages');
-    if (!box || !msgEl || !msgEl.parentNode) return;
-    var note = document.createElement('div');
-    note.className = 'av-ai-degrade-note';
-    note.textContent = DEGRADE_TEXT;
-    msgEl.parentNode.insertBefore(note, msgEl);
-  }
-  function watchMessages() {
-    var box = el('aiChatMessages');
-    if (!box || box.__avWatched) return;
-    box.__avWatched = true;
-    if (typeof window.MutationObserver !== 'function') return;
-    var mo = new window.MutationObserver(function (muts) {
-      if (!state.pendingDegrade) return;
-      for (var i = 0; i < muts.length; i++) {
-        var added = muts[i].addedNodes;
-        for (var j = 0; j < added.length; j++) {
-          var n = added[j];
-          if (n && n.nodeType === 1 && n.classList && n.classList.contains('ai-msg-ai')) {
-            insertDegradeNote(n);
-            state.pendingDegrade = false;
-            return;
-          }
-        }
-      }
-    });
-    mo.observe(box, { childList: true });
-  }
-
-  /* ---------------- 事件绑定与初始化 ---------------- */
-  function bindDismiss() {
-    document.addEventListener('click', function (e) {
-      var box = el('avAiPicker');
-      if (!box || !box.classList.contains('open')) return;
-      var t = e.target;
-      if (t && t.closest && (t.closest('#avAiPicker') || t.closest('#avAiModelBtn'))) return;
-      window.avAiClosePicker();
-    }, true);
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') window.avAiClosePicker();
-    });
-  }
-
-  function init() {
-    loadPref();
-    renderAll();
-    bindDismiss();
-    watchMessages();
-    document.addEventListener('visibilitychange', function () {
-      if (!document.hidden) renderAll();
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
-</script>
-<!-- ===== v70 阶段2 · 模型入口单点收敛 / 识图场景图片按钮 / 快速问答难题引导 ===== -->
-<script>
-/* ===== v70 阶段2 · 模型入口单点收敛 · 识图场景图片按钮 · 快速问答难题引导 ===== */
-(function () {
-  'use strict';
-  if (window.__avStage2) { return; }
-  window.__avStage2 = '1.0';
-
-  var PHOTO_INTENT_WINDOW = 3 * 60 * 1000;   /* 3 分钟内使用过「照片识机」→ 视为识图意图 */
-  var DEEP_LIMIT_HINT = 5;
-
-  var state = { imageMode: false, photoIntentAt: 0 };
-  var pendingQuestion = '';
-
-  function el(id) { return document.getElementById(id); }
-  function mm() { return window.AiMultimodal; }
-  function route() {
-    try { return (typeof window.avAiCurrentRoute === 'function') ? window.avAiCurrentRoute() : null; }
-    catch (e) { return null; }
-  }
-  function isDeepMode() { var r = route(); return !!(r && r.mode === 'deep'); }
-  function remainingDeep() { var r = route(); return (r && typeof r.remaining === 'number') ? r.remaining : 0; }
-
-  /* ---------------- ① 模型入口单点收敛：内部多模态模型跟随左上角选择器 ---------------- */
-  function syncMmModel() {
-    var m = mm();
-    if (!m || typeof m.setModel !== 'function') { return; }
-    try { m.setModel(state.imageMode ? 'vision' : (isDeepMode() ? 'reason' : 'fast'), true); } catch (e) { }
-  }
-
-  /* ---------------- ② 识图场景：图片按钮随场景显隐 + 问答类型 chip ---------------- */
-  function renderScene() {
-    var ov = el('aiChatOverlay');
-    var btn = el('avAiImageModeBtn');
-    if (ov) { ov.classList.toggle('av-ai-imaging', state.imageMode === true); }
-    if (btn) {
-      btn.textContent = state.imageMode ? '识图问答' : '纯文字问答';
-      btn.className = 'av-ai-badge ' + (state.imageMode ? 'mode-image' : 'mode-text');
-      btn.setAttribute('aria-pressed', state.imageMode ? 'true' : 'false');
-      btn.setAttribute('title', state.imageMode
-        ? '当前：识图问答（可上传照片识别）· 点击切回纯文字'
-        : '当前：纯文字问答 · 点击切换到识图问答');
-    }
-    syncMmModel();
-  }
-  function setImageMode(on) {
-    state.imageMode = on === true;
-    renderScene();
-  }
-  window.avAiToggleImageMode = function (ev) {
-    if (ev && ev.preventDefault) { ev.preventDefault(); }
-    if (ev && ev.stopPropagation) { ev.stopPropagation(); }
-    setImageMode(!state.imageMode);
-  };
-  window.avAiImageMode = function () { return state.imageMode === true; };
-
-  /* ---------------- 浮层入口包装：默认场景 + 内部模型复位覆盖 ---------------- */
-  function wrapOpenAiChat() {
-    if (typeof window.openAiChat !== 'function' || window.openAiChat.__avStage2) { return; }
-    var orig = window.openAiChat;
-    var wrapped = function () {
-      var photoIntent = state.photoIntentAt > 0 && (Date.now() - state.photoIntentAt) < PHOTO_INTENT_WINDOW;
-      var r = orig.apply(this, arguments);
-      setImageMode(photoIntent);
-      /* 基线 AiMultimodal 约 60ms 后按 localStorage 复位其内部模型，这里延后覆盖为当前场景模型 */
-      setTimeout(syncMmModel, 150);
-      return r;
-    };
-    wrapped.__avStage2 = true;
-    window.openAiChat = wrapped;
-  }
-  function wrapOpenPhotoAi() {
-    if (typeof window.openPhotoAi !== 'function' || window.openPhotoAi.__avStage2) { return; }
-    var orig = window.openPhotoAi;
-    var wrapped = function () {
-      state.photoIntentAt = Date.now();
-      return orig.apply(this, arguments);
-    };
-    wrapped.__avStage2 = true;
-    window.openPhotoAi = wrapped;
-  }
-  function wrapSelectModel() {
-    if (typeof window.avAiSelectModel !== 'function' || window.avAiSelectModel.__avStage2) { return; }
-    var orig = window.avAiSelectModel;
-    var wrapped = function () {
-      var r = orig.apply(this, arguments);
-      renderScene();
-      return r;
-    };
-    wrapped.__avStage2 = true;
-    window.avAiSelectModel = wrapped;
-  }
-
-  /* ---------------- ③ 快速问答答不上来 → 深度思考引导 ---------------- */
-  var GUIDE_NOTE = '这个问题有点难，要不要切到深度思考模式？';
-  var GUIDE_BTN = '切换深度思考（Kimi）';
-  var GUIDE_EMPTY_TEXT = '今日深度思考次数已用完，明天恢复';
-
-  function clearGuides() {
-    var box = el('aiChatMessages');
-    if (!box) { return; }
-    var olds = box.querySelectorAll('.av-ai-guide');
-    for (var i = 0; i < olds.length; i++) {
-      if (olds[i].parentNode) { olds[i].parentNode.removeChild(olds[i]); }
-    }
-  }
-
-  function buildGuide() {
-    var wrap = document.createElement('div');
-    wrap.className = 'av-ai-guide';
-
-    var note = document.createElement('div');
-    note.className = 'av-ai-guide-note';
-    note.textContent = GUIDE_NOTE;
-    wrap.appendChild(note);
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'av-ai-guide-btn';
-    var left = remainingDeep();
-    if (left > 0) {
-      btn.textContent = GUIDE_BTN + '（今日剩余 ' + left + '/' + DEEP_LIMIT_HINT + '）';
-      btn.addEventListener('click', function (e) {
-        if (e && e.preventDefault) { e.preventDefault(); }
-        if (e && e.stopPropagation) { e.stopPropagation(); }
-        goDeep();
-      });
-    } else {
-      btn.textContent = GUIDE_EMPTY_TEXT;
-      btn.disabled = true;
-      btn.setAttribute('aria-disabled', 'true');
-    }
-    wrap.appendChild(btn);
-    return wrap;
-  }
-
-  function goDeep() {
-    if (remainingDeep() <= 0) { return; }
-    var q = pendingQuestion;
-    clearGuides();
-    if (!q) { return; }
-    /* 复用左上角选择器切到 Kimi 默认深度模型（自动持久化偏好） */
-    if (typeof window.avAiSelectModel === 'function') { window.avAiSelectModel('kimi-k2.6'); }
-    var input = el('aiChatInput');
-    if (input) {
-      input.value = q;
-      if (typeof window.updateAiCharCount === 'function') { window.updateAiCharCount(); }
-    }
-    /* 走站内既有发送链：RAG 检索 / 额度扣减 / 降级提示 / 问答日志全部沿用 */
-    if (typeof window.sendAiMessage === 'function') { window.sendAiMessage(); }
-  }
-
-  /* 由 sendAiMessage 在主问答判定「答不上来」时调用 */
-  window.__avAiDifficultyGuide = function (question, noMatch) {
-    if (!noMatch) { return; }
-    if (state.imageMode) { return; }
-    if (isDeepMode()) { return; }
-    var box = el('aiChatMessages');
-    if (!box) { return; }
-    var nodes = box.querySelectorAll('.ai-msg-ai');
-    if (!nodes.length) { return; }
-    var last = nodes[nodes.length - 1];
-    if (!last || !last.parentNode) { return; }
-    clearGuides();
-    pendingQuestion = String(question == null ? '' : question);
-    last.parentNode.insertBefore(buildGuide(), last.nextSibling);
-  };
-
-  /* ---------------- 初始化 ---------------- */
-  function init() {
-    wrapSelectModel();
-    wrapOpenAiChat();
-    wrapOpenPhotoAi();
-    renderScene();
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
 })();
 </script>
 </body>
