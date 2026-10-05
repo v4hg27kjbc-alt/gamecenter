@@ -5991,6 +5991,19 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     </div>
   </div>
 
+  <!-- ===== 《无应答》Alpha Beta 入口横幅 ===== -->
+  <a class="abx-banner" href="/no-reply/" id="abxBanner" aria-label="《无应答 NO REPLY》Alpha Beta 体验版，点击前往">
+    <span class="abx-banner-l">
+      <span class="abx-banner-kicker">ALPHA BETA · NO REPLY</span>
+      <span class="abx-banner-title">《无应答》即日起进入 Alpha Beta 测试</span>
+      <span class="abx-banner-sub">雨夜、忙音与没有回音的拨号 · 现在可以在站内直接试玩，游玩中随时留下你的建议</span>
+    </span>
+    <span class="abx-banner-r">
+      <span class="abx-banner-badge"><i></i>内测进行中</span>
+      <span class="abx-banner-go">点击前往<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+    </span>
+  </a>
+
   <!-- ===== v70 国庆发布公告栏 ===== -->
   <section class="rln-announce" id="releaseAnnounce" aria-label="国庆发布公告">
     <span class="rln-stars" aria-hidden="true"><i class="rln-star rln-star-1"></i><i class="rln-star rln-star-2"></i><i class="rln-star rln-star-3"></i><i class="rln-star rln-star-4"></i><i class="rln-star rln-star-5"></i></span>
@@ -6038,8 +6051,9 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
         <div class="rln-card rln-card-game" data-rln-sheet="game" tabindex="0" role="button" aria-label="游戏预告详情，长按查看">
           <p class="rln-card-title">游戏预告</p>
           <p class="rln-game-name">无应答<span class="rln-game-en">NO REPLY</span></p>
-          <span class="rln-soon">即将上线</span>
-          <p class="rln-card-text">一九九八年冬，一架航班在东南沿海的夜里失联……单文件离线解谜游戏，长按查看简介与宣传片。</p>
+          <span class="rln-soon is-live">Alpha Beta 内测中</span>
+          <p class="rln-card-text">一九九八年冬，一架航班在东南沿海的夜里失联……单文件离线解谜游戏，现已开启 Alpha Beta 内测，可在线试玩并留下建议。</p>
+          <a class="abx-card-cta" href="/no-reply/" data-no-sheet>点击前往<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></a>
           <span class="rln-hint">长按查看详情</span>
         </div>
 
@@ -6208,7 +6222,7 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
 
   <!-- 弹层内容模板 · 游戏预告 -->
   <template id="rlnTplGame">
-    <p class="rln-lead">《无应答 NO REPLY》 · 单文件离线解谜游戏 · 即将上线</p>
+    <p class="rln-lead">《无应答 NO REPLY》 · 单文件离线解谜游戏 · <b style="color:#a9e6c6">Alpha Beta 内测进行中</b></p>
     <p>一九九八年冬，一架航班在东南沿海的夜里失联。二十五年后，你在档案馆值夜班，接手一箱没有归类的旧档案——塔台日志、录音机磁带、手绘航线图、泛黄的旅客名单。它们彼此看似无关，却指向同一段被抹去的航迹。</p>
     <p class="rln-sub-h">玩法与特色</p>
     <ul>
@@ -6228,7 +6242,12 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
         <p class="rln-video-note">宣传片暂时无法播放，稍后将随游戏一并上线，敬请期待。</p>
       </div>
     </div>
-    <p>游戏正在最后打磨，上线时间将在站内公布。</p>
+    <p>Alpha Beta 测试现已开启：主线可完整体验，剧情与表现仍在打磨。游玩记录的进度保存在本机浏览器，反馈建议可在体验页右下角随时提交，直达作者自营后台。</p>
+    <p style="margin-top:18px">
+      <a class="abx-tpl-go" href="/no-reply/" style="display:inline-flex;align-items:center;gap:9px;padding:12px 24px;border-radius:999px;text-decoration:none;border:1px solid rgba(227,171,84,.55);background:linear-gradient(180deg,rgba(227,171,84,.22),rgba(227,171,84,.07));color:#f2dcb2;font-size:14px;letter-spacing:.12em">点击前往 Alpha Beta 体验版
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </a>
+    </p>
   </template>
 
   <!-- 弹层内容模板 · 版本发布 -->
@@ -17331,6 +17350,176 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   #avAiImageModeBtn { font-size: 11px; }
 }
 /* <<< av-stage2 css <<< */
+
+/* ================= 《无应答》Alpha Beta 接入（abx） ================= */
+.abx-banner{
+  position: relative; display: flex; align-items: center; gap: 18px;
+  max-width: 1100px; margin: 14px auto 4px; padding: 16px 22px;
+  border-radius: 18px; overflow: hidden; text-decoration: none;
+  border: 1px solid rgba(227, 171, 84, .26);
+  background:
+    radial-gradient(680px 220px at 12% -40%, rgba(227, 171, 84, .16), transparent 70%),
+    radial-gradient(520px 200px at 96% 140%, rgba(111, 168, 220, .12), transparent 72%),
+    linear-gradient(140deg, #101724, #080b11 62%);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .34);
+  transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+}
+.abx-banner::after{
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(104deg, rgba(255, 255, 255, .045) 0 1px, transparent 1px 8px);
+  opacity: .5;
+}
+.abx-banner:hover{ transform: translateY(-2px); border-color: rgba(227, 171, 84, .5); box-shadow: 0 24px 60px rgba(0, 0, 0, .42); }
+.abx-banner-l{ position: relative; z-index: 2; flex: 1; min-width: 0; }
+.abx-banner-kicker{
+  display: block; font-family: var(--mono, ui-monospace, monospace);
+  font-size: 10.5px; letter-spacing: .34em; color: #c9a866; margin-bottom: 7px;
+}
+.abx-banner-title{ display: block; font-size: 18px; letter-spacing: .06em; color: #eef3fa; font-weight: 600; }
+.abx-banner-sub{ display: block; margin-top: 6px; font-size: 13px; color: #93a1b4; line-height: 1.75; }
+.abx-banner-r{ position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.abx-banner-badge{
+  display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px;
+  border: 1px solid rgba(111, 211, 154, .3); background: rgba(111, 211, 154, .08);
+  color: #a9e6c6; font-size: 11.5px; letter-spacing: .16em; font-family: var(--mono, monospace);
+}
+.abx-banner-badge i{ width: 6px; height: 6px; border-radius: 50%; background: #6fd39a; box-shadow: 0 0 9px #6fd39a; }
+.abx-banner-go{
+  display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(227, 171, 84, .24), rgba(227, 171, 84, .08));
+  border: 1px solid rgba(227, 171, 84, .5); color: #f4e0b8; font-size: 13.5px; letter-spacing: .1em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+.abx-banner:hover .abx-banner-go{ box-shadow: 0 0 26px rgba(227, 171, 84, .26), inset 0 1px 0 rgba(255, 255, 255, .1); }
+.abx-banner-go svg{ transition: transform .28s ease; }
+.abx-banner:hover .abx-banner-go svg{ transform: translateX(4px); }
+
+/* 卡片内前往链接 */
+.rln-card-game .abx-card-cta{
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; padding: 7px 14px;
+  border-radius: 999px; border: 1px solid rgba(227, 171, 84, .45); background: rgba(227, 171, 84, .1);
+  color: #f0d9ab; font-size: 12.5px; letter-spacing: .08em; text-decoration: none;
+  transition: all .22s ease; position: relative; z-index: 3;
+}
+.rln-card-game .abx-card-cta:hover{ border-color: #e3ab54; background: rgba(227, 171, 84, .18); color: #fff4dc; }
+.rln-soon.is-live{ color: #a9e6c6; border-color: rgba(111, 211, 154, .34); background: rgba(111, 211, 154, .08); }
+
+/* ================= 宣布弹窗 ================= */
+html.abx-lock{ overflow: hidden; }
+.abx{ position: fixed; inset: 0; z-index: 99998; display: flex; align-items: center; justify-content: center; padding: 22px; }
+.abx[hidden]{ display: none; }
+.abx-veil{
+  position: absolute; inset: 0; cursor: pointer;
+  background:
+    radial-gradient(760px 460px at 50% 14%, rgba(20, 30, 46, .5), transparent 72%),
+    rgba(3, 5, 9, .74);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  opacity: 0; transition: opacity .3s ease;
+}
+.abx.is-open .abx-veil{ opacity: 1; }
+.abx-card{
+  position: relative; z-index: 2; width: min(880px, 100%); max-height: 92svh; overflow: hidden;
+  display: grid; grid-template-columns: 300px 1fr; border-radius: 22px;
+  border: 1px solid rgba(227, 171, 84, .24);
+  background: linear-gradient(158deg, #0f1620, #070a10 62%);
+  box-shadow: 0 48px 120px rgba(0, 0, 0, .72), 0 0 0 1px rgba(255, 255, 255, .03) inset;
+  transform: translateY(22px) scale(.985); opacity: 0;
+  transition: transform .4s cubic-bezier(.22, .8, .24, 1), opacity .34s ease;
+}
+.abx.is-open .abx-card{ transform: none; opacity: 1; }
+.abx-card::before{
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background:
+    radial-gradient(420px 280px at 88% -14%, rgba(227, 171, 84, .16), transparent 70%),
+    radial-gradient(360px 260px at -10% 110%, rgba(111, 168, 220, .12), transparent 72%);
+}
+.abx-media{ position: relative; overflow: hidden; background: #05070b; }
+.abx-media img{
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: brightness(.86) saturate(.95); transform: scale(1.04);
+  transition: transform 1.2s cubic-bezier(.22, .8, .24, 1), filter .4s ease;
+}
+.abx.is-open .abx-media img{ transform: scale(1); filter: brightness(.94) saturate(1); }
+.abx-media::after{
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 42%, rgba(9, 12, 18, .9) 100%),
+              linear-gradient(180deg, rgba(6, 8, 12, .34), rgba(6, 8, 12, .12));
+}
+.abx-stamp{
+  position: absolute; left: 16px; top: 16px; z-index: 3; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(227, 171, 84, .5); background: rgba(6, 8, 12, .62);
+  backdrop-filter: blur(10px); color: #f0d9ab; font-family: var(--mono, ui-monospace, monospace);
+  font-size: 10.5px; letter-spacing: .26em;
+}
+.abx-date{
+  position: absolute; left: 16px; bottom: 16px; z-index: 3;
+  font-family: var(--mono, ui-monospace, monospace); font-size: 10.5px; letter-spacing: .22em; color: #a9b6c8;
+}
+.abx-body{ position: relative; z-index: 2; padding: 34px 34px 30px; overflow-y: auto; }
+.abx-rail{
+  position: absolute; right: 18px; top: 26px; z-index: 3; writing-mode: vertical-rl;
+  font-family: var(--mono, ui-monospace, monospace); font-size: 10px; letter-spacing: .46em;
+  color: rgba(200, 214, 232, .26); user-select: none;
+}
+.abx-close{
+  position: absolute; right: 14px; top: 14px; z-index: 6; width: 34px; height: 34px; border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, .12); background: rgba(10, 14, 20, .7); color: #b9c4d4;
+  font-size: 15px; line-height: 1; cursor: pointer; transition: all .2s ease;
+}
+.abx-close:hover{ border-color: rgba(227, 171, 84, .55); color: #f0d9ab; }
+.abx-kicker{
+  font-family: var(--mono, ui-monospace, monospace); font-size: 10.5px; letter-spacing: .38em;
+  color: #7d8899; margin-bottom: 12px;
+}
+.abx-title{ font-size: clamp(21px, 2.6vw, 27px); line-height: 1.5; letter-spacing: .05em; color: #eff4fb; margin-bottom: 14px; }
+.abx-title em{ font-style: normal; color: #eabf76; }
+.abx-lead{ font-size: 14px; line-height: 1.95; color: #97a5b8; margin-bottom: 18px; }
+.abx-tags{ list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 24px; }
+.abx-tags li{
+  padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, .03); color: #a9b6c8; font-size: 12px; letter-spacing: .08em;
+}
+.abx-acts{ display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.abx-go{
+  position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 30px; border-radius: 999px; text-decoration: none;
+  border: 1px solid rgba(227, 171, 84, .62); color: #23190a;
+  background: linear-gradient(180deg, #f2cf8d, #d9a54d);
+  font-size: 15px; font-weight: 600; letter-spacing: .16em;
+  box-shadow: 0 14px 34px rgba(227, 171, 84, .26);
+  transition: transform .24s ease, box-shadow .24s ease;
+}
+.abx-go::after{
+  content: ""; position: absolute; top: 0; bottom: 0; width: 42%;
+  left: -60%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: skewX(-18deg);
+}
+.abx-go:hover{ transform: translateY(-2px); box-shadow: 0 20px 44px rgba(227, 171, 84, .36); }
+.abx-go:hover::after{ animation: abxSweep 1s ease; }
+@keyframes abxSweep{ from{ left: -60%; } to{ left: 120%; } }
+.abx-go svg{ transition: transform .26s ease; }
+.abx-go:hover svg{ transform: translateX(4px); }
+.abx-later{
+  padding: 13px 20px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .14); background: transparent; color: #9aa8ba;
+  font-size: 13.5px; letter-spacing: .1em; transition: all .2s ease;
+}
+.abx-later:hover{ border-color: rgba(255, 255, 255, .28); color: #dbe3ee; }
+.abx-note{ margin-top: 16px; font-size: 12px; color: #6f7c8d; line-height: 1.85; }
+
+@media (max-width: 860px){
+  .abx-banner{ flex-direction: column; align-items: flex-start; gap: 14px; margin: 12px 14px 4px; padding: 16px 18px; }
+  .abx-banner-r{ width: 100%; justify-content: space-between; }
+  .abx-banner-title{ font-size: 16px; }
+  .abx{ padding: 14px; align-items: flex-start; }
+  .abx-card{ grid-template-columns: 1fr; max-height: 90svh; margin-top: 4svh; }
+  .abx-media{ height: 168px; }
+  .abx-media::after{ background: linear-gradient(180deg, rgba(6, 8, 12, .3), rgba(7, 10, 15, .96)); }
+  .abx-body{ padding: 22px 20px 24px; }
+  .abx-rail{ display: none; }
+  .abx-go{ flex: 1; justify-content: center; padding: 14px 22px; }
+}
+
 </style>
 
 <div id="cfDetailOverlay" aria-hidden="true">
@@ -18995,6 +19184,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 
   function onPointerDown(e) {
     if (!e.target || !e.target.closest) { return; }
+    if (e.target.closest("[data-no-sheet]")) { return; }
     if (e.pointerType === "mouse" && e.button !== 0) { return; }
     var card = e.target.closest("[data-rln-sheet]");
     if (!card) { return; }
@@ -19527,6 +19717,122 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   } else {
     init();
   }
+})();
+</script>
+
+<!-- ===== 《无应答》Alpha Beta 宣布弹窗 ===== -->
+<div class="abx" id="abxModal" hidden>
+  <div class="abx-veil" id="abxVeil"></div>
+  <div class="abx-card" role="dialog" aria-modal="true" aria-labelledby="abxTitle">
+    <button class="abx-close" id="abxClose" type="button" aria-label="关闭公告">✕</button>
+    <div class="abx-rail">NO REPLY · ALPHA BETA</div>
+    <div class="abx-media">
+      <img src="/no-reply/poster.png" alt="《无应答 NO REPLY》宣传海报" loading="lazy" decoding="async">
+      <span class="abx-stamp">ALPHA BETA</span>
+      <span class="abx-date">2026 · 内测开启</span>
+    </div>
+    <div class="abx-body">
+      <p class="abx-kicker">STATION ANNOUNCEMENT · NO.01</p>
+      <h3 class="abx-title" id="abxTitle">《无应答》即日起进入<br><em>Alpha Beta 测试</em></h3>
+      <p class="abx-lead">
+        一九九八年冬，一架航班在东南沿海的夜里失联。二十五年后，你在档案馆值夜班，
+        接手一箱没有归类的旧档案——塔台日志、录音磁带、手绘航线图。它们指向同一段被抹去的航迹。
+        有些消息发出去，就再也没有回音。
+      </p>
+      <ul class="abx-tags">
+        <li>互动叙事解谜</li>
+        <li>单文件离线运行</li>
+        <li>页面内全屏游玩</li>
+        <li>建议直达作者后台</li>
+      </ul>
+      <div class="abx-acts">
+        <a class="abx-go" id="abxGo" href="/no-reply/">
+          <span>点击前往</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+        </a>
+        <button class="abx-later" id="abxLater" type="button">稍后再说</button>
+      </div>
+      <p class="abx-note">内测期间剧情、数值与表现仍在调整；游玩中遇到的卡点、错字或想法，都可以在体验页随时写下。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var KEY = "aviation_abx_v1";
+  var modal = document.getElementById("abxModal");
+  if (!modal) { return; }
+  var card = modal.querySelector(".abx-card");
+  var lastFocus = null;
+
+  function readSeen() {
+    try { return localStorage.getItem(KEY) === "1"; } catch (err) { return false; }
+  }
+  function markSeen() {
+    try { localStorage.setItem(KEY, "1"); } catch (err) { /* 隐私模式静默忽略 */ }
+  }
+  function openAbx() {
+    if (modal.classList.contains("is-open")) { return; }
+    lastFocus = document.activeElement;
+    modal.hidden = false;
+    document.documentElement.classList.add("abx-lock");
+    void modal.offsetWidth;
+    modal.classList.add("is-open");
+    var go = document.getElementById("abxGo");
+    if (go) { try { go.focus({ preventScroll: true }); } catch (err) { try { go.focus(); } catch (e2) {} } }
+  }
+  function closeAbx() {
+    if (modal.hidden) { return; }
+    markSeen();
+    modal.classList.remove("is-open");
+    document.documentElement.classList.remove("abx-lock");
+    window.setTimeout(function () { modal.hidden = true; }, 380);
+    if (lastFocus && typeof lastFocus.focus === "function") {
+      try { lastFocus.focus({ preventScroll: true }); } catch (err) {}
+    }
+    lastFocus = null;
+  }
+
+  var closeBtn = document.getElementById("abxClose");
+  var laterBtn = document.getElementById("abxLater");
+  var veil = document.getElementById("abxVeil");
+  var goBtn = document.getElementById("abxGo");
+  if (closeBtn) { closeBtn.addEventListener("click", closeAbx); }
+  if (laterBtn) { laterBtn.addEventListener("click", closeAbx); }
+  if (veil) { veil.addEventListener("click", closeAbx); }
+  if (goBtn) { goBtn.addEventListener("click", markSeen); }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("is-open")) { closeAbx(); }
+  });
+  if (card) {
+    card.addEventListener("keydown", function (e) {
+      if (e.key !== "Tab") { return; }
+      var f = card.querySelectorAll("a[href], button");
+      if (!f.length) { return; }
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+
+  /* 首次访问时宣布；已看过不再打扰 */
+  if (!readSeen()) {
+    window.setTimeout(function () {
+      if (document.visibilityState === "hidden") {
+        document.addEventListener("visibilitychange", function onVis() {
+          if (document.visibilityState !== "hidden") {
+            document.removeEventListener("visibilitychange", onVis);
+            openAbx();
+          }
+        });
+        return;
+      }
+      openAbx();
+    }, 1400);
+  }
+
+  /* 供站内其它入口复用（横幅/卡片不受影响，这里仅暴露能力） */
+  window.__abxOpen = openAbx;
 })();
 </script>
 </body>

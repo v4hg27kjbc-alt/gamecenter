@@ -103,20 +103,36 @@ section.blk{padding:78px 0}
 .sec-desc{color:var(--dim);max-width:660px;font-size:14.5px;line-height:1.95}
 .rule{height:1px;background:linear-gradient(90deg,transparent,var(--line2) 18%,var(--line2) 82%,transparent);margin:0}
 
-/* 剧情五宫格 */
-.boards{display:grid;gap:14px;margin-top:28px;grid-template-columns:repeat(3,1fr)}
+/* 剧情一瞥 · 完整比例展示 */
+.boards{display:grid;gap:16px;margin-top:28px;grid-template-columns:1fr}
 .board{
 position:relative;border-radius:var(--r2);overflow:hidden;border:1px solid var(--line);
-background:var(--panel);aspect-ratio:16/11;
+background:linear-gradient(180deg,#0a0e16,#05070b);cursor:zoom-in;
+-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;touch-action:manipulation;
+transition:border-color .24s ease,box-shadow .24s ease;
 }
-.board img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.9)}
+.board:hover{border-color:var(--line3);box-shadow:0 22px 60px rgba(0,0,0,.45)}
+.board::after{
+content:"";position:absolute;inset:0;pointer-events:none;
+box-shadow:inset 0 0 0 1px rgba(227,171,84,.06),inset 0 -80px 90px -60px rgba(4,6,10,.9);
+}
+.board img{width:100%;height:auto;display:block;filter:brightness(.94);transition:filter .24s ease;
+-webkit-user-drag:none;pointer-events:none}
+.board:hover img{filter:brightness(1.02)}
 .board span{
-position:absolute;left:10px;bottom:8px;font-family:var(--mono);font-size:10.5px;
+position:absolute;left:10px;bottom:8px;z-index:2;font-family:var(--mono);font-size:10.5px;
 letter-spacing:.18em;color:#dfe6f0;text-shadow:0 1px 8px #000;background:rgba(4,6,10,.45);
 padding:3px 8px;border-radius:6px;backdrop-filter:blur(6px);
 }
-.board.wide{grid-column:span 3;aspect-ratio:23/9}
-.board.wide img{object-fit:cover}
+.board .board-tip{left:auto;right:10px;color:#e9d3a6;border:1px solid rgba(227,171,84,.3);background:rgba(4,6,10,.58)}
+.board .board-hint{
+position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);z-index:3;
+display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;
+border:1px solid rgba(227,171,84,.4);background:rgba(6,8,12,.74);backdrop-filter:blur(12px);
+color:#f0d9ab;font-size:12.5px;letter-spacing:.12em;white-space:nowrap;
+opacity:0;pointer-events:none;transition:opacity .26s ease,transform .26s ease;
+}
+.board:hover .board-hint,.board:focus-visible .board-hint{opacity:1;transform:translate(-50%,-50%) scale(1)}
 
 /* 特性 */
 .feat{display:grid;gap:14px;grid-template-columns:repeat(3,1fr);margin-top:26px}
@@ -253,8 +269,6 @@ footer{padding:44px 0 96px;border-top:1px solid var(--line);margin-top:20px}
 .foot-inner .f-r{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--dimmer);text-align:right;line-height:2}
 
 @media (max-width:820px){
-.boards{grid-template-columns:repeat(2,1fr)}
-.board.wide{grid-column:span 2;aspect-ratio:16/10}
 .feat{grid-template-columns:1fr}
 .player{height:min(74svh,640px)}
 .two{grid-template-columns:1fr}
@@ -262,13 +276,197 @@ footer{padding:44px 0 96px;border-top:1px solid var(--line);margin-top:20px}
 section.blk{padding:58px 0}
 }
 @media (max-width:520px){
-.boards{grid-template-columns:1fr}
-.board.wide{grid-column:span 1;aspect-ratio:16/11}
+.board .board-hint{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .t-en{letter-spacing:.42em}
 }
+
+/* ============ 顶部菜单栏 ============ */
+#topnav{
+position:fixed;top:0;left:0;right:0;z-index:66;
+border-bottom:1px solid transparent;
+transition:background .32s ease,border-color .32s ease,backdrop-filter .32s ease;
+}
+#topnav.scrolled{
+background:linear-gradient(180deg,rgba(6,8,12,.92),rgba(6,8,12,.78));
+backdrop-filter:blur(18px) saturate(1.25);
+border-bottom-color:var(--line);
+}
+.nav-in{max-width:1080px;margin:0 auto;padding:0 22px;height:62px;display:flex;align-items:center;gap:16px}
+.nav-brand{display:inline-flex;align-items:center;gap:9px;color:#e8eef7;letter-spacing:.16em;font-size:14.5px}
+.nav-brand i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 12px var(--amber);animation:pulse 2.6s ease-in-out infinite}
+.nav-brand span{font-family:var(--mono);font-size:9.5px;letter-spacing:.28em;color:var(--dimmer)}
+.nav-links{display:flex;align-items:center;gap:3px;margin-left:auto}
+.nav-links a,.nav-links button{
+padding:8px 13px;border-radius:9px;font-size:13.5px;color:var(--dim);
+letter-spacing:.09em;transition:all .2s ease;white-space:nowrap;
+}
+.nav-links a:hover,.nav-links button:hover{color:var(--text);background:rgba(255,255,255,.045)}
+.nav-links a.on{color:#f0d9ab;background:rgba(227,171,84,.1)}
+.nav-mine{
+display:inline-flex;align-items:center;gap:7px;margin-left:4px;
+border:1px solid var(--line2);color:#e8d7b2;
+}
+.nav-mine:hover{border-color:rgba(227,171,84,.55);background:rgba(227,171,84,.07)}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green);display:inline-block}
+.nav-dot[hidden]{display:none}
+.nav-cta{
+padding:9px 19px;border-radius:999px;font-size:13px;letter-spacing:.1em;
+background:linear-gradient(180deg,rgba(227,171,84,.2),rgba(227,171,84,.07));
+border:1px solid rgba(227,171,84,.45);color:#f2dcb2;transition:all .22s ease;
+}
+.nav-cta:hover{border-color:var(--amber);box-shadow:0 0 22px rgba(227,171,84,.22)}
+#hero{padding-top:110px}
+#play,#story,#about{scroll-margin-top:76px}
+
+/* ============ 全屏游玩 ============ */
+.play-tools{display:flex;gap:8px;margin-left:auto}
+.play-tool{
+display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;
+border:1px solid var(--line2);background:rgba(4,6,10,.5);color:var(--dim);
+font-size:12.5px;letter-spacing:.08em;transition:all .2s ease;
+}
+.play-tool:hover{border-color:rgba(227,171,84,.55);color:#f0d9ab}
+.play-tool.on{border-color:rgba(227,171,84,.6);color:#f2dcb2;background:rgba(227,171,84,.1)}
+.play-tool svg{flex:0 0 auto}
+.player{display:flex;align-items:center;justify-content:center;background:#04060a}
+.player iframe{display:block;width:100%;height:100%;border:0;background:#06080c}
+.player:fullscreen{height:100vh !important;width:100vw;border-radius:0;padding:0}
+.player:-webkit-full-screen{height:100vh !important;width:100vw;border-radius:0;padding:0}
+.player:fullscreen iframe,.player:-webkit-full-screen iframe{width:100%;height:100%}
+.player:fullscreen .player-cover,.player:-webkit-full-screen .player-cover,
+.player.is-fs .player-cover{display:none}
+.player.is-fs{
+position:fixed !important;inset:0;z-index:88;
+height:100vh !important;width:100vw !important;border-radius:0;padding:0;
+}
+html.nr-fs-lock,html.nr-fs-lock body{overflow:hidden}
+.fs-exit{
+position:absolute;right:14px;top:14px;z-index:6;display:none;
+align-items:center;gap:7px;padding:8px 15px;border-radius:999px;
+border:1px solid rgba(227,171,84,.42);background:rgba(6,8,12,.78);
+backdrop-filter:blur(12px);color:#f0d9ab;font-size:12.5px;letter-spacing:.1em;
+box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+.player:fullscreen .fs-exit,.player:-webkit-full-screen .fs-exit,.player.is-fs .fs-exit{display:inline-flex}
+.fs-exit:hover{border-color:var(--amber);box-shadow:0 0 24px rgba(227,171,84,.24)}
+.play-rotate{
+position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;display:none;
+align-items:center;gap:8px;padding:8px 15px;border-radius:999px;
+border:1px solid rgba(227,171,84,.34);background:rgba(6,8,12,.82);
+backdrop-filter:blur(12px);color:#e9d3a6;font-size:12px;letter-spacing:.14em;white-space:nowrap;
+}
+.player:fullscreen .play-rotate,.player.is-fs .play-rotate{display:inline-flex}
+.fs-note{
+position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;
+padding:8px 16px;border-radius:999px;border:1px solid var(--line2);background:rgba(6,8,12,.84);
+backdrop-filter:blur(12px);color:var(--dim);font-size:12px;letter-spacing:.1em;
+opacity:0;pointer-events:none;transition:opacity .3s ease;white-space:nowrap;
+}
+.fs-note.show{opacity:1}
+
+/* ============ 反馈进展弹窗 ============ */
+.np-notice{
+position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:22px;
+background:rgba(3,5,9,.74);backdrop-filter:blur(6px);
+opacity:0;pointer-events:none;transition:opacity .28s ease;
+}
+.np-notice.open{opacity:1;pointer-events:auto}
+.np-card{
+position:relative;width:min(520px,100%);padding:26px 24px 22px;border-radius:var(--r3);
+border:1px solid rgba(227,171,84,.28);
+background:linear-gradient(180deg,#141b26,#0a0e15);
+box-shadow:0 40px 110px rgba(0,0,0,.7),0 0 0 1px rgba(227,171,84,.05) inset;
+transform:translateY(16px) scale(.98);transition:transform .32s cubic-bezier(.22,.8,.24,1);
+overflow:hidden;
+}
+.np-notice.open .np-card{transform:none}
+.np-card::before{
+content:"";position:absolute;inset:0;pointer-events:none;
+background:radial-gradient(440px 240px at 90% -12%,rgba(227,171,84,.16),transparent 70%);
+}
+.np-card>*{position:relative}
+.np-kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.4em;color:var(--dimmer);margin-bottom:10px}
+.np-card h3{font-size:20px;letter-spacing:.1em;color:#eaf0f8;margin-bottom:6px}
+.np-sub{font-size:13px;color:var(--dim);line-height:1.85}
+.np-list{max-height:40svh;overflow-y:auto;margin:16px 0 18px;padding-right:2px}
+.np-item{
+padding:12px 13px;border-radius:var(--r2);border:1px solid var(--line);
+background:linear-gradient(180deg,rgba(20,27,38,.7),rgba(14,19,28,.7));margin-bottom:10px;
+}
+.np-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.np-type{font-size:11.5px;color:#e9d3a6;border:1px solid rgba(227,171,84,.3);background:rgba(227,171,84,.08);border-radius:6px;padding:2px 8px}
+.np-st{font-family:var(--mono);font-size:10px;letter-spacing:.12em;padding:2px 8px;border-radius:6px}
+.np-st.new{color:#cbb083;border:1px solid rgba(227,171,84,.28);background:rgba(227,171,84,.06)}
+.np-st.done{color:#a9e6c6;border:1px solid rgba(111,211,154,.3);background:rgba(111,211,154,.08)}
+.np-reply{font-size:13px;color:#bfe9d5;line-height:1.8;margin-bottom:6px}
+.np-c{font-size:12px;color:var(--dimmer);line-height:1.75}
+.np-acts{display:flex;flex-wrap:wrap;gap:10px}
+
+@media (max-width:820px){
+.nav-in{height:58px;padding:0 14px;gap:10px}
+.nav-brand span{display:none}
+.nav-links{margin-left:auto;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a,.nav-links button{padding:7px 10px;font-size:12.5px}
+.nav-cta{display:none}
+#hero{padding-top:96px}
+.play-tools{margin-left:0}
+.play-tool span{display:none}
+.play-tool{padding:7px 10px}
+}
+
+
+/* ============ 大图查看 ============ */
+html.nr-lb-lock{overflow:hidden}
+.lb[hidden]{display:none}
+.lb{
+position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;
+padding:18px;background:rgba(3,5,9,.95);backdrop-filter:blur(7px);
+opacity:0;pointer-events:none;transition:opacity .26s ease;
+}
+.lb.open{opacity:1;pointer-events:auto}
+.lb img{
+max-width:100%;max-height:calc(100svh - 92px);width:auto;height:auto;display:block;
+border-radius:12px;border:1px solid var(--line2);
+box-shadow:0 40px 110px rgba(0,0,0,.72);
+touch-action:pinch-zoom;
+transform:scale(.985);transition:transform .28s cubic-bezier(.22,.8,.24,1);
+}
+.lb.open img{transform:none}
+.lb-close{
+position:absolute;right:16px;top:16px;width:40px;height:40px;border-radius:12px;
+border:1px solid rgba(255,255,255,.14);background:rgba(10,14,20,.72);
+backdrop-filter:blur(12px);color:#c8d2e0;font-size:16px;
+}
+.lb-close:hover{border-color:rgba(227,171,84,.55);color:#f0d9ab}
+.lb-tip{
+position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--dimmer);
+text-align:center;padding:0 16px;
+}
+@media (max-width:520px){
+.lb{padding:10px}
+.lb img{max-height:calc(100svh - 120px)}
+.lb-tip{font-size:10.5px;letter-spacing:.12em}
+}
+
 </style>
 </head>
 <body>
+
+<nav id="topnav" aria-label="页面导航">
+  <div class="nav-in">
+    <a class="nav-brand" href="#hero"><i></i><b>无应答</b><span>NO REPLY</span></a>
+    <div class="nav-links">
+      <a href="#play" data-nav="play">在线试玩</a>
+      <a href="#story" data-nav="story">情节一瞥</a>
+      <a href="#about" data-nav="about">内测说明</a>
+      <button type="button" class="nav-mine" id="navMine">我的反馈<i class="nav-dot" id="navDot" hidden></i></button>
+    </div>
+    <button type="button" class="nav-cta" id="navSuggest">写建议</button>
+  </div>
+</nav>
+
 
 <!-- ========== 首屏 ========== -->
 <header id="hero">
@@ -311,6 +509,12 @@ section.blk{padding:58px 0}
         <div class="dots"><i></i><i></i><i></i></div>
         <div class="url">henry126923.pages.dev/no-reply/game.html</div>
         <div class="tag" id="barTag">未启动</div>
+        <div class="play-tools">
+          <button type="button" class="play-tool" id="btnFs" title="全屏游玩：画面按屏幕尺寸最佳适配铺满">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M4 9V4h5M20 15v5h-5M15 4h5v5M9 20H4v-5"/></svg>
+            <span id="fsLabel">全屏游玩</span>
+          </button>
+        </div>
       </div>
       <div class="player">
         <div class="player-cover" id="playerCover">
@@ -326,6 +530,9 @@ section.blk{padding:58px 0}
           </div>
         </div>
         <iframe id="gameFrame" title="无应答 NO REPLY 游戏" allow="autoplay; fullscreen" style="display:none"></iframe>
+        <button type="button" class="fs-exit" id="fsExit">退出全屏 ✕</button>
+        <div class="play-rotate" id="rotateHint">建议横屏游玩 · 画面更完整</div>
+        <div class="fs-note" id="fsNote">已按屏幕最佳比例铺满</div>
       </div>
       <div class="play-foot">
         <div class="hint">游玩中随手留下 <b>体验建议</b>：卡点、节奏、剧情、文案、Bug，都算数。</div>
@@ -345,9 +552,13 @@ section.blk{padding:58px 0}
   <div class="wrap">
     <div class="sec-label">STORYBOARD</div>
     <h2 class="sec-title">情节一瞥</h2>
-    <p class="sec-desc">五幕剪影，拼出一个雨夜里没能接通的故事。轻微的剧透，但不影响你亲自走一遍。</p>
+    <p class="sec-desc">五幕剪影，拼出一个雨夜里没能接通的故事。完整的五宫格按原比例展示，长按或点击任意位置可放大细看。</p>
     <div class="boards">
-      <div class="board wide"><img src="storyboard.png" alt="无应答 · 情节五宫格"></div>
+      <div class="board" data-zoom="storyboard.png" tabindex="0" role="button" aria-label="放大查看《无应答》情节五宫格">
+        <img src="storyboard.png" alt="无应答 · 情节五宫格 · 五幕剪影">
+        <span class="board-tip">点击 / 长按看大图</span>
+        <span class="board-hint">长按或点击 · 大屏查看完整五宫格</span>
+      </div>
     </div>
   </div>
 </section>
@@ -560,6 +771,7 @@ scrim.addEventListener('click', closeDrawer);
 document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDrawer(); });
 
 function switchPane(name){
+  if(name === 'mine'){ var d = document.getElementById('navDot'); if(d) d.hidden = true; }
   document.querySelectorAll('.dw-tab').forEach(function(t){
     t.classList.toggle('on', t.getAttribute('data-pane') === name);
   });
@@ -683,6 +895,258 @@ function loadMine(){
   });
 }
 document.getElementById('mineRefresh').addEventListener('click', loadMine);
+</script>
+
+<!-- ========== 反馈进展提示 ========== -->
+<div class="np-notice" id="npNotice">
+  <div class="np-card" role="dialog" aria-modal="true" aria-labelledby="npTitle">
+    <p class="np-kicker">FEEDBACK UPDATE</p>
+    <h3 id="npTitle">你的建议有新进展</h3>
+    <p class="np-sub">你之前留下的建议，作者已经处理并给了回复。具体内容可在「我的反馈」里回看。</p>
+    <div class="np-list" id="npList"></div>
+    <div class="np-acts">
+      <button type="button" class="btn amber" id="npView">查看我的反馈</button>
+      <button type="button" class="btn ghost" id="npLater">稍后再看</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== 顶部菜单栏 ========== */
+(function(){
+  var nav = document.getElementById('topnav');
+  if(!nav) return;
+  function onScroll(){ nav.classList.toggle('scrolled', window.scrollY > 40); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('.nav-links a[data-nav]'));
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('data-nav')] = a; });
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        links.forEach(function(a){ a.classList.remove('on'); });
+        var t = map[e.target.id];
+        if(t) t.classList.add('on');
+      });
+    }, {rootMargin:'-45% 0px -50% 0px', threshold:0});
+    ['play','story','about'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) io.observe(el);
+    });
+  }
+  var mine = document.getElementById('navMine');
+  if(mine) mine.addEventListener('click', function(){ closeNotice(); openDrawer('mine'); });
+  var sug = document.getElementById('navSuggest');
+  if(sug) sug.addEventListener('click', function(){ openDrawer('write'); });
+})();
+
+/* ========== 全屏游玩（最佳适配） ========== */
+(function(){
+  var player = document.querySelector('.player');
+  if(!player) return;
+  var fsBtn = document.getElementById('btnFs');
+  var fsLabel = document.getElementById('fsLabel');
+  var fsExit = document.getElementById('fsExit');
+  var rotate = document.getElementById('rotateHint');
+  var note = document.getElementById('fsNote');
+  var lockY = 0, noteTimer = 0;
+
+  function fsEl(){
+    return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+  }
+  function activate(){
+    if(launched === false){ try{ launchGame(); }catch(e){} }
+    if(player.requestFullscreen){
+      var p = player.requestFullscreen();
+      if(p && p.catch) p.catch(function(){ softFs(); });
+    } else if(player.webkitRequestFullscreen){
+      player.webkitRequestFullscreen();
+    } else {
+      softFs();
+    }
+  }
+  function softFs(){
+    /* iOS Safari 等不支持元素全屏：退化为覆盖窗口的沉浸模式 */
+    if(player.classList.contains('is-fs')) return;
+    lockY = window.scrollY || window.pageYOffset || 0;
+    player.classList.add('is-fs');
+    document.documentElement.classList.add('nr-fs-lock');
+    sync();
+    flash('iOS 设备已切换为沉浸模式 · 可横屏游玩');
+  }
+  function exitFs(){
+    if(fsEl()){
+      var f = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+      if(f) f.call(document);
+    }
+    if(player.classList.contains('is-fs')){
+      player.classList.remove('is-fs');
+      document.documentElement.classList.remove('nr-fs-lock');
+      window.scrollTo(0, lockY);
+    }
+    sync();
+  }
+  function sync(){
+    var on = !!fsEl() || player.classList.contains('is-fs');
+    if(fsLabel) fsLabel.textContent = on ? '退出全屏' : '全屏游玩';
+    if(fsBtn) fsBtn.classList.toggle('on', on);
+    if(rotate) rotate.style.display = (on && window.matchMedia('(orientation:portrait)').matches && window.innerWidth <= 860) ? 'inline-flex' : 'none';
+  }
+  function flash(txt){
+    if(!note) return;
+    note.textContent = txt;
+    note.classList.add('show');
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(function(){ note.classList.remove('show'); }, 2600);
+  }
+  if(fsBtn) fsBtn.addEventListener('click', function(){
+    if(fsEl() || player.classList.contains('is-fs')){ exitFs(); return; }
+    activate();
+    flash('已按屏幕最佳比例铺满');
+    setTimeout(sync, 420);
+  });
+  if(fsExit) fsExit.addEventListener('click', exitFs);
+  player.addEventListener('dblclick', function(){ if(launched) fsBtn.click(); });
+  ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(function(ev){
+    document.addEventListener(ev, function(){ sync(); setTimeout(sync, 300); });
+  });
+  window.addEventListener('orientationchange', sync);
+  window.addEventListener('resize', sync);
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && player.classList.contains('is-fs')) exitFs(); });
+  sync();
+})();
+
+/* ========== 反馈进展提示 ========== */
+var NR_SEEN_KEY = 'nr_alpha_seen_v1';
+function nrEsc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+function checkFeedbackUpdates(items){
+  var prev = null;
+  try{ prev = JSON.parse(localStorage.getItem(NR_SEEN_KEY) || 'null'); }catch(e){ prev = null; }
+  var cur = {}, changed = [];
+  (items || []).forEach(function(it){ cur[it.id] = { s: it.status || '', r: (it.reply || '').length }; });
+  if(prev && typeof prev === 'object'){
+    (items || []).forEach(function(it){
+      var p = prev[it.id];
+      if(!p){ if(it.reply || it.status === 'done') changed.push(it); return; }
+      var newReply = (it.reply || '').length > (p.r || 0);
+      var justDone = (it.status === 'done' && p.s !== 'done');
+      if(newReply || justDone) changed.push(it);
+    });
+  }
+  try{ localStorage.setItem(NR_SEEN_KEY, JSON.stringify(cur)); }catch(e){}
+  if(changed.length) showNotice(changed);
+}
+function showNotice(items){
+  var box = document.getElementById('npList');
+  var notice = document.getElementById('npNotice');
+  if(!box || !notice) return;
+  box.innerHTML = items.slice(0, 5).map(function(it){
+    var done = it.status === 'done';
+    var reply = String(it.reply || '');
+    var body = reply
+      ? nrEsc(reply.slice(0, 140)) + (reply.length > 140 ? '…' : '')
+      : '作者更新了这条建议的处理状态。';
+    var content = String(it.content || '').replace('【无应答 · Alpha Beta 体验版】', '').slice(0, 56);
+    return '<div class="np-item">' +
+      '<div class="np-top"><span class="np-type">' + nrEsc(it.type) + '</span>' +
+      '<span class="np-st ' + (done ? 'done' : 'new') + '">' + (done ? '已处理' : '有回复') + '</span></div>' +
+      '<div class="np-reply">' + body + '</div>' +
+      '<div class="np-c">原建议：' + nrEsc(content) + '</div>' +
+    '</div>';
+  }).join('');
+  notice.classList.add('open');
+  var dot = document.getElementById('navDot');
+  if(dot) dot.hidden = false;
+}
+function closeNotice(){
+  var notice = document.getElementById('npNotice');
+  if(notice) notice.classList.remove('open');
+}
+(function(){
+  var v = document.getElementById('npView');
+  var l = document.getElementById('npLater');
+  var n = document.getElementById('npNotice');
+  if(v) v.addEventListener('click', function(){ closeNotice(); openDrawer('mine'); });
+  if(l) l.addEventListener('click', closeNotice);
+  if(n) n.addEventListener('click', function(e){ if(e.target === n) closeNotice(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeNotice(); });
+
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      fetch(FEEDBACK_API + '/api/my-feedback?uid=' + encodeURIComponent(UID) + '&limit=50')
+        .then(function(r){ return r.json(); })
+        .then(function(j){ checkFeedbackUpdates((j && j.items) || []); })
+        .catch(function(){});
+    }, 1200);
+  });
+})();
+</script>
+
+
+<!-- ========== 大图查看 ========== -->
+<div class="lb" id="lightbox" hidden>
+  <img id="lbImg" alt="">
+  <button type="button" class="lb-close" id="lbClose" aria-label="关闭大图">✕</button>
+  <p class="lb-tip">长按 / 点击图片区域均可关闭 · 移动端可双指放大</p>
+</div>
+
+<script>
+(function(){
+  var lb = document.getElementById('lightbox');
+  var img = document.getElementById('lbImg');
+  if(!lb || !img) return;
+  var timer = 0, pressedByLong = 0, openedAt = 0;
+
+  function open(src, alt){
+    if(!src) return;
+    img.setAttribute('src', src);
+    img.setAttribute('alt', alt || '');
+    lb.hidden = false;
+    void lb.offsetWidth;
+    lb.classList.add('open');
+    openedAt = Date.now();
+    document.documentElement.classList.add('nr-lb-lock');
+  }
+  function close(){
+    if(lb.hidden) return;
+    lb.classList.remove('open');
+    document.documentElement.classList.remove('nr-lb-lock');
+    window.setTimeout(function(){ lb.hidden = true; img.removeAttribute('src'); }, 260);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-zoom]'), function(box){
+    var src = box.getAttribute('data-zoom');
+    var inner = box.querySelector('img');
+    var alt = inner ? inner.getAttribute('alt') : '';
+    box.addEventListener('pointerdown', function(){
+      clearTimeout(timer);
+      timer = window.setTimeout(function(){ pressedByLong = Date.now(); open(src, alt); }, 420);
+    });
+    ['pointerup','pointerleave','pointercancel','pointermove'].forEach(function(ev){
+      box.addEventListener(ev, function(){ clearTimeout(timer); });
+    });
+    box.addEventListener('click', function(){
+      if(Date.now() - pressedByLong < 600) return;   /* 长按已打开，忽略随后的 click */
+      open(src, alt);
+    });
+    box.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(src, alt); }
+      if(e.key === 'Escape') close();
+    });
+  });
+
+  lb.addEventListener('click', function(){ if(Date.now() - openedAt < 360) return; close(); });
+  var c = document.getElementById('lbClose');
+  if(c) c.addEventListener('click', function(e){ e.stopPropagation(); close(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+})();
 </script>
 </body>
 </html>
