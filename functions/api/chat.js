@@ -195,7 +195,7 @@ export async function handleChat(context, options) {
    * 额度用尽 → 直接 429 + quota_exceeded，绝不静默降级到其它模型。
    * 计数时机为「上游成功返回之后」，故缓存命中 / 预生成命中 / 降级兜底都不消耗额度。
    */
-  var flagshipCall = isFlagshipRoute(route.tier, route.provider);
+  var flagshipCall = isFlagshipRoute(route.tier, route.provider, route.model);
   var quotaScopeRef = await resolveQuotaScope(env, { visitorId: visitorId, ip: ipRaw });
   var quotaState = await readQuota(env, quotaScopeRef);
   if (flagshipCall && quotaState.enabled && quotaState.remaining <= 0) {

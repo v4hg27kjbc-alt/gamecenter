@@ -69,11 +69,14 @@ export function flagshipDailyLimit(env) {
   return Math.max(1, n);
 }
 
-/** 是否旗舰档调用：仅 tier=flagship 且 provider=kimi（缺省 provider 视为 kimi） */
-export function isFlagshipRoute(tier, provider) {
+/** 是否旗舰档调用：仅 tier=flagship 且 provider=kimi 且模型为 kimi-k3（缺省 provider 视为 kimi）。
+ * 全站默认 kimi-k2.6 不计配额，保证所有功能真实可用；显式选 kimi-k3 才消耗每日深度次数。 */
+export function isFlagshipRoute(tier, provider, model) {
   var t = String(tier === undefined || tier === null ? '' : tier).toLowerCase();
   var p = String(provider === undefined || provider === null || provider === '' ? FLAGSHIP_PROVIDER : provider).toLowerCase();
-  return t === FLAGSHIP_TIER && p === FLAGSHIP_PROVIDER;
+  if (t !== FLAGSHIP_TIER || p !== FLAGSHIP_PROVIDER) return false;
+  var m = String(model || '').trim().toLowerCase();
+  return m === 'kimi-k3';
 }
 
 /** 访客维度：ai_vid 哈希优先，缺失时用 IP 哈希兜底 */

@@ -1098,22 +1098,31 @@ body.light-mode .ai-msg-ai pre { background: var(--c-neutral-100-3); }
 .ai-msg-ai a { color: var(--accent); text-decoration: underline; }
 .ai-msg-ai p { margin: var(--space-3) 0; }
 
-/* Loading 动画 */
+/* Loading 动画：波浪感（错峰起伏，尺寸用 em 相对单位，自动适配不同比例聊天框） */
 .ai-loading {
-  display: flex; align-items: center; gap: var(--space-6);
+  display: inline-flex; align-items: flex-end; gap: 0.4em;
   padding: var(--space-12) var(--space-16);
   align-self: flex-start;
   background: var(--c-white-a080);
   border-radius: var(--radius-16) var(--radius-16) var(--radius-16) var(--radius-4);
+  min-height: 2.4em; box-sizing: border-box;
+  position: relative; overflow: hidden;
 }
 body.light-mode .ai-loading { background: var(--c-neutral-100-10); }
 .ai-loading span {
-  width: 8px; height: 8px; border-radius: var(--radius-full);
-  background: var(--accent);
-  animation: aiDot 1.4s ease-in-out infinite;
+  width: 0.42em; height: 1.1em; border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent), rgba(212, 175, 55, 0.26));
+  transform-origin: bottom center;
+  animation: aiWave 1.4s ease-in-out infinite;
+  will-change: transform, height;
 }
+.ai-loading span:nth-child(1) { animation-delay: 0s; }
 .ai-loading span:nth-child(2) { animation-delay: 0.2s; }
 .ai-loading span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes aiWave {
+  0%, 100% { height: 0.55em; transform: scaleY(0.55); opacity: 0.55; }
+  50% { height: 1.9em; transform: scaleY(1); opacity: 1; }
+}
 .news-summary-result {
   white-space: pre-wrap; line-height: 2; padding: var(--space-10) 0; font-size: var(--fs-r100);
   animation: newsSummaryFade 0.55s cubic-bezier(0.16, 1, 0.3, 1);
@@ -6450,8 +6459,8 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     </button>
   </div>
   <div class="av-ai-badges" id="avAiBadges">
-    <span class="av-ai-badge" id="avAiBadgeModel">模型：GLM-4.7-Flash</span>
-    <span class="av-ai-badge mode-fast" id="avAiBadgeMode">快速问答</span>
+    <span class="av-ai-badge" id="avAiBadgeModel">模型：Kimi K2.6</span>
+    <span class="av-ai-badge mode-deep" id="avAiBadgeMode">深度思考</span>
     <span class="av-ai-badge" id="avAiBadgeQuota">今日剩余深度思考 5/5</span>
     <button type="button" class="av-ai-badge mode-text" id="avAiImageModeBtn" aria-pressed="false" title="当前：纯文字问答 · 点击切换到识图问答" onclick="avAiToggleImageMode(event)"></button>
   </div>
@@ -10738,6 +10747,34 @@ window.AIBridge = (function () {
     return json.token;
   }
 
+  /* 2.5) AI 失败上报管理员：自动记入 /api/qa-logs（后台「答不上来的问题 Top 榜」与记录数） */
+  function reportAiFailure(o, err) {
+    try {
+      var q = '';
+      var msgs = (o && o.messages) || [];
+      for (var i = msgs.length - 1; i >= 0; i--) {
+        var mm = msgs[i];
+        if (mm && mm.role === 'user') {
+          q = mm.content || '';
+          if (Array.isArray(q)) {
+            q = q.map(function (p) { return (p && (p.text || p.content)) || ''; }).join(' ');
+          }
+          break;
+        }
+      }
+      q = String(q || '').slice(0, 200);
+      if (!q) return;
+      var _uid = '';
+      try { if (typeof p3GetAnonUid === 'function') _uid = p3GetAnonUid(); } catch (e) {}
+      fetch('/api/qa-logs', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: q, reason: 'llm-failed', hits: 0, answered: false, uid: _uid })
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   /* 3) 统一请求：入参沿用 OpenAI 风格（messages / temperature / max_tokens），
    *    返回值也伪装成 OpenAI 风格，旧代码的 data.choices[0].message.content 无需改动。 */
   async function chat(opts) {
@@ -10764,7 +10801,7 @@ window.AIBridge = (function () {
       _avRoute.provider = _avRoute.provider || ((_avRoute.mode === 'deep') ? 'kimi' : 'zhipu');
       body.provider = _avRoute.provider;
       body.mode = _avRoute.mode;
-      body.model = _avRoute.model || ((_avRoute.provider === 'kimi') ? 'kimi-k2.6' : 'glm-4.7-flash');
+      body.model = _avRoute.model || ((_avRoute.provider === 'kimi') ? 'kimi-k2.6' : 'glm-4.5-air');
     } else if (o.model && !o.tier) {
       body.model = o.model;
     }
@@ -10805,6 +10842,10 @@ window.AIBridge = (function () {
         });
       }
       json = await res.json().catch(function () { return null; });
+    } catch (err) {
+      /* AI 无法回答（网络失败 / 超时 / 服务端错误）→ 自动上报管理员，后台可查记录数 */
+      reportAiFailure(o, err);
+      throw err;
     } finally {
       clearTimeout(timeoutId);
     }
@@ -11748,9 +11789,9 @@ async function sendAiMessage() {
     clearTimeout(timeoutId);
     removeLoadingIndicator();
     if (err.name === 'AbortError') {
-      addMessage(t('aiTimeout'), 'ai');
+      addMessage(t('aiTimeout') + '（已通知站长处理）', 'ai');
     } else {
-      addMessage(t('aiError'), 'ai');
+      addMessage(t('aiError') + '（已通知站长处理）', 'ai');
     }
   } finally {
     sendBtn.disabled = false;
@@ -19309,36 +19350,31 @@ transform:translateX(-130%);animation:abxBannerSweep 7.2s ease-in-out 1.8s infin
   var DEEP_LIMIT = 5;
   var LS_QUOTA_PREFIX = 'av_ai_deep_quota_';
   var LS_PREF = 'av_ai_model_pref';
-  var FAST_MODEL = { provider: 'zhipu', model: 'glm-4.7-flash' };
+  var FAST_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
   var DEEP_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
-  var DEGRADE_TEXT = '今日 Kimi 深度思考次数已用完，已自动切换智谱继续回答';
+  var DEGRADE_TEXT = '今日 Kimi K3 深度思考次数已用完，已自动切换 Kimi K2.6 继续回答';
 
-  /* ---------------- 模型目录（阶段1：智谱 6 版 + Kimi 3 版） ---------------- */
+  /* ---------------- 模型目录（全站统一 Kimi；智谱仅保留智谱 4 = GLM-4.5-Air 免费兜底） ---------------- */
   var CATALOG = [
     {
-      provider: 'zhipu', name: '智谱 GLM', mode: 'fast',
+      provider: 'kimi', name: 'Kimi（全站统一默认）', mode: 'deep',
       items: [
-        { id: 'glm-4.7-flash', label: 'GLM-4.7-Flash', sub: '免费 · 默认快速' },
-        { id: 'glm-4.5-flash', label: 'GLM-4.5-Flash', sub: '免费' },
-        { id: 'glm-4.6', label: 'GLM-4.6', sub: '快速' },
-        { id: 'glm-4.7', label: 'GLM-4.7', sub: '快速' },
-        { id: 'glm-5', label: 'GLM-5', sub: '快速' },
-        { id: 'glm-5.3', label: 'GLM-5.3', sub: '快速' }
+        { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '默认 · 全站统一' },
+        { id: 'kimi-k3', label: 'Kimi K3', sub: '深度 · 每日限次' },
+        { id: 'kimi-k2.7-code', label: 'Kimi K2.7-Code', sub: '代码' }
       ]
     },
     {
-      provider: 'kimi', name: 'Kimi', mode: 'deep',
+      provider: 'zhipu', name: '智谱（仅保留智谱 4）', mode: 'fast',
       items: [
-        { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '默认深度' },
-        { id: 'kimi-k3', label: 'Kimi K3', sub: '深度' },
-        { id: 'kimi-k2.7-code', label: 'Kimi K2.7-Code', sub: '深度 · 代码' }
+        { id: 'glm-4.5-air', label: 'GLM-4.5-Air', sub: '智谱 4 · 兜底' }
       ]
     }
   ];
 
   var state = {
-    provider: FAST_MODEL.provider,
-    model: FAST_MODEL.model,
+    provider: 'kimi',
+    model: 'kimi-k2.6',
     pendingDegrade: false
   };
 
@@ -19418,7 +19454,7 @@ transform:translateX(-130%);animation:abxBannerSweep 7.2s ease-in-out 1.8s infin
       }
     }
     html += '<div class="av-ai-quota">今日剩余深度思考 <b>' + remaining() + '/' + DEEP_LIMIT + '</b>' +
-      '（深度思考由 Kimi 提供，每天 ' + DEEP_LIMIT + ' 次，用完自动切换智谱）</div>';
+      '（深度思考由 Kimi K3 提供，每天 ' + DEEP_LIMIT + ' 次，用完自动切换 Kimi K2.6）</div>';
     box.innerHTML = html;
   }
 
@@ -19490,14 +19526,14 @@ transform:translateX(-130%);animation:abxBannerSweep 7.2s ease-in-out 1.8s infin
     var model = state.model;
     var mode = modeOf(provider);
     var degraded = false;
-    if (mode === 'deep') {
+    if (provider === 'kimi' && model === 'kimi-k3') {
       if (!consumeDeep()) {
-        /* 第 6 次起：自动降级智谱，并预约一条提示（插入到本次回答气泡上方） */
+        /* 第 6 次起：K3 深度额度用完，自动降级 Kimi K2.6，并预约一条提示（插入到本次回答气泡上方） */
         degraded = true;
         state.pendingDegrade = true;
-        provider = FAST_MODEL.provider;
-        model = FAST_MODEL.model;
-        mode = 'fast';
+        provider = 'kimi';
+        model = 'kimi-k2.6';
+        mode = 'deep';
       }
     }
     renderAll();

@@ -54,8 +54,8 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_FLAGSHIP' },
       zhipu: { key: 'ZHIPU_MODEL_FLAGSHIP' }
     },
-    model: 'kimi-k3',
-    models: { kimi: 'kimi-k3', zhipu: 'glm-4.7' },
+    model: 'kimi-k2.6',
+    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5-air' },
     label: '旗舰档',
     maxTokens: 4096,
     temperature: 0.6,
@@ -69,7 +69,7 @@ export const TIER_DEFAULTS = {
       zhipu: { key: 'ZHIPU_MODEL_VISION' }
     },
     model: 'kimi-k2.6',
-    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5v' },
+    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5-air' },
     label: '视觉档',
     maxTokens: 2048,
     temperature: 0.5,
@@ -83,7 +83,7 @@ export const TIER_DEFAULTS = {
       zhipu: { key: 'ZHIPU_MODEL_CODE' }
     },
     model: 'kimi-k2.7-code-highspeed',
-    models: { kimi: 'kimi-k2.7-code-highspeed', zhipu: 'glm-4.6' },
+    models: { kimi: 'kimi-k2.7-code-highspeed', zhipu: 'glm-4.5-air' },
     label: '代码档',
     maxTokens: 4096,
     temperature: 0.3,
@@ -166,8 +166,8 @@ export function modelAllowlist(env) {
   });
   // Kimi 全系实测可用模型一律放行，便于前端按功能显式指定档位
   base.push('kimi-k3', 'kimi-k2.6', 'kimi-k2.7-code', 'kimi-k2.7-code-highspeed');
-  // 智谱实测可用模型（以 /api/paas/v4/models 返回为准）
-  base.push('glm-4.5-air', 'glm-4.5', 'glm-4.5v', 'glm-4.6', 'glm-4.7', 'glm-5');
+  // 智谱仅保留「智谱 4」= glm-4.5-air（免费兜底档），其余智谱模型一律不放行
+  base.push('glm-4.5-air');
   var extra = parseList(env && env.AI_MODEL_ALLOWLIST).concat(parseList(env && env.ZHIPU_MODEL_ALLOWLIST));
   return base.concat(extra).filter(function (v, i, arr) { return v && arr.indexOf(v) === i; });
 }
