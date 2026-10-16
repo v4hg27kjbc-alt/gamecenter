@@ -4061,6 +4061,39 @@ body.light-mode .map-container .leaflet-tile-pane {
 }
 #newsPanelOverlay.visible { display: flex; }
 
+/* ===== v-fix1016：交互式 AI 选题面板 ===== */
+#topicIdeasOverlay {
+  position: fixed; inset: 0; z-index: 10001;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#topicIdeasOverlay.visible { display: flex; }
+.ti-step-hint { color: var(--text-dim); font-size: var(--fs-r080); margin-bottom: var(--space-12); }
+.ti-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-12); }
+.ti-card {
+  position: relative; padding: var(--space-14) var(--space-16);
+  border: 1px solid var(--glass-border); border-radius: var(--radius-16);
+  background: var(--glass-bg); color: var(--text);
+  cursor: pointer; transition: all var(--dur-250) ease; user-select: none;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.ti-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.ti-card.selected {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(59,130,246,0.16), rgba(139,92,246,0.14));
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.ti-card .ti-title { font-weight: var(--fw-600); font-size: var(--fs-r092); line-height: 1.5; margin: var(--space-6) 0; }
+.ti-card .ti-hook { font-size: var(--fs-r080); color: var(--text-dim); line-height: 1.6; }
+.ti-tag { display: inline-block; font-size: var(--fs-r072); color: var(--accent); background: var(--c-blue-100-a150-2); padding: 2px var(--space-8); border-radius: var(--radius-50); }
+.ti-group .ti-title { font-size: var(--fs-r095); }
+.ti-plan h4 { margin: var(--space-14) 0 var(--space-6); font-size: var(--fs-r095); color: var(--accent); }
+.ti-plan ul { margin: 0; padding-left: var(--space-20); }
+.ti-plan li { margin: var(--space-4) 0; }
+.ti-note { margin-top: var(--space-12); padding: var(--space-8) var(--space-12); border-radius: var(--radius-12); background: rgba(59,130,246,0.08); color: var(--text-dim); font-size: var(--fs-r080); }
+
 .ai-review-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: var(--space-16) var(--space-24);
@@ -6400,6 +6433,7 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     <button class="filter-chip collect-record-btn" id="collectRecordBtn" onclick="openCollectRecord()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21z"/></svg><span id="collectRecordBtnText">收藏记录</span><span class="collect-record-dot" id="collectRecordDot">0</span></button>
     <button class="filter-chip ai-chat-btn" id="photoAiBtn" onclick="openPhotoAi()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg><span id="photoAiBtnText">照片识机</span></button>
     <button class="filter-chip ai-chat-btn" id="collectAnalysisBtn" onclick="openCollectAnalysis()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M3 3v18h18"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="12" y1="16" x2="12" y2="6"/><line x1="17" y1="16" x2="17" y2="13"/></svg><span id="collectAnalysisBtnText">AI 收藏分析</span></button>
+    <button class="filter-chip ai-chat-btn" id="topicIdeasBtn" onclick="openTopicIdeas()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M12 3l2.2 5.4L20 10l-5.8 1.6L12 17l-2.2-5.4L4 10l5.8-1.6z"/><path d="M12 17v4"/></svg><span id="topicIdeasBtnText">AI 选题</span></button>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
@@ -6595,6 +6629,23 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     <button class="news-summary-btn wordcount-btn active" id="wc400" onclick="selectWordCount(400)">400字</button>
     <button class="news-summary-btn wordcount-btn" id="wc600" onclick="selectWordCount(600)">600字</button>
     <button class="news-summary-btn" onclick="generateNewsSummaryInPanel()" style="background:linear-gradient(135deg,var(--c-blue-100-a300),rgba(139,92,246,0.3));border-color:var(--c-blue-100-a500);">生成</button>
+  </div>
+</div>
+
+<div id="topicIdeasOverlay">
+  <div class="ai-review-header">
+    <span class="ai-review-title">AI 选题<span class="ai-review-model">互动策划</span></span>
+    <button class="ai-review-close" onclick="closeTopicIdeas()" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="ai-review-content" id="topicIdeasContent">
+    <div style="text-align:center;color:var(--text-dim);padding:var(--space-40) 0;">让 AI 帮你策划民航内容选题：先生成 6 个方向，再细化角度，最后产出完整方案。</div>
+  </div>
+  <div class="ai-review-footer" style="display:flex;gap:var(--space-10);justify-content:center;align-items:center;flex-wrap:wrap;">
+    <button class="news-summary-btn" id="topicIdeasStepBtn" onclick="topicIdeasStep()">开始选题</button>
+    <button class="news-summary-btn" id="topicIdeasRegenBtn" onclick="topicIdeasRegen()" style="display:none;">换一批 / 重新生成</button>
+    <button class="news-summary-btn" id="topicIdeasCopyBtn" onclick="topicIdeasCopy()" style="display:none;">复制结果</button>
   </div>
 </div>
 
@@ -10187,6 +10238,7 @@ document.addEventListener('keydown', (e) => {
   if (document.querySelector('.image-lightbox')) { closeImageLightbox(); return; }
   if (document.getElementById('quizOverlay') && document.getElementById('quizOverlay').classList.contains('visible')) { closeQuiz(); return; }
   if (document.getElementById('badgeOverlay') && document.getElementById('badgeOverlay').classList.contains('visible')) { closeBadges(); return; }
+  if (document.getElementById('topicIdeasOverlay') && document.getElementById('topicIdeasOverlay').classList.contains('visible')) { closeTopicIdeas(); return; }
   if (document.getElementById('aiReviewOverlay').classList.contains('visible')) { closeAiReview(); return; }
   if (document.getElementById('newsPanelOverlay') && document.getElementById('newsPanelOverlay').classList.contains('visible')) { closeNewsPanel(); return; }
   if (document.getElementById('cfDetailOverlay') && document.getElementById('cfDetailOverlay').classList.contains('visible')) { v57CloseFactDetail(); return; }
@@ -10887,7 +10939,7 @@ window.AIBridge = (function () {
 })();
 
 /* ===== AI 全局配置（已无密钥：调用统一走同源 /api/chat） ===== */
-const AI_CONFIG = { timeout: 45000 };
+const AI_CONFIG = { timeout: 90000 };
 
 // ===== 照片识机 =====
 const PA_ENGINES = {1:4,2:2,3:2,4:2,5:2,6:2,7:2,8:2,9:2,10:2,20:2,21:2,22:4,23:4,24:4,25:0,26:4,27:4,28:4,29:3,30:3,31:2,32:2,33:4,34:4,35:4,36:4,37:2,38:2};
@@ -13949,7 +14001,7 @@ function cabinImgFallback(img) {
 /* 统一弹窗滚动守护：关闭上层弹窗后，若下层仍有全屏层，则继续保持滚动锁定 */
 function anyTopOverlayOpen() {
   var ids = ['aiChatOverlay','aiReviewOverlay','photoAiOverlay','collectAnalysisOverlay',
-    'newsPanelOverlay','quizOverlay','badgeOverlay','badgeDetailOverlay','letterOverlay',
+    'newsPanelOverlay','topicIdeasOverlay','quizOverlay','badgeOverlay','badgeDetailOverlay','letterOverlay',
     'liveryOverlay','cabinOverlay','collectRecordOverlay'];
   for (var i = 0; i < ids.length; i++) {
     var el = document.getElementById(ids[i]);
@@ -14445,6 +14497,287 @@ async function generateNewsSummaryInPanel() {
     clearTimeout(timeoutId);
     content.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px 0;">' + (err.name === 'AbortError' ? '请求超时' : '生成失败') + '，请重试</div>';
   }
+}
+
+/* ===== v-fix1016：交互式 AI 选题（topic_ideas 三步流） ===== */
+var TI = { step: 0, ideas: [], selected: [], angleGroups: [], chosen: null, plan: null, running: false };
+var TI_ACTIVE_CTRL = null;
+
+function tiEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+function tiToastHint(msg) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:20002;background:rgba(0,0,0,0.78);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;pointer-events:none;transition:opacity .3s ease;';
+  document.body.appendChild(t);
+  setTimeout(function () { t.style.opacity = '0'; }, 1800);
+  setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 2200);
+}
+
+function tiAbortRunning() {
+  if (TI_ACTIVE_CTRL) { try { TI_ACTIVE_CTRL.abort(); } catch (e) {} TI_ACTIVE_CTRL = null; }
+}
+
+function tiShowLoading(c, hint) {
+  c.innerHTML = '<div style="white-space:normal;text-align:center;color:var(--text-dim);padding:var(--space-24) 0;">' + tiEsc(hint || '') + '</div><div class="ai-loading" style="margin:0 auto;"><span></span><span></span><span></span></div>';
+}
+
+function tiSetButtons(step) {
+  var sb = document.getElementById('topicIdeasStepBtn');
+  var rb = document.getElementById('topicIdeasRegenBtn');
+  var cb = document.getElementById('topicIdeasCopyBtn');
+  if (step === 1) {
+    sb.style.display = ''; sb.textContent = '下一步'; sb.disabled = true;
+    rb.style.display = ''; rb.textContent = '换一批 / 重新生成';
+    cb.style.display = 'none';
+  } else if (step === 2) {
+    sb.style.display = ''; sb.textContent = '生成方案'; sb.disabled = true;
+    rb.style.display = ''; rb.textContent = '重新生成角度';
+    cb.style.display = 'none';
+  } else {
+    sb.style.display = 'none';
+    rb.style.display = ''; rb.textContent = '换一批 / 重新生成';
+    cb.style.display = '';
+  }
+}
+
+function tiParseJson(raw) {
+  var s = String(raw == null ? '' : raw).trim();
+  if (!s) return null;
+  var a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a < 0 || b <= a) return null;
+  try { return JSON.parse(s.slice(a, b + 1)); } catch (e) {}
+  try { return JSON.parse(s); } catch (e2) { return null; }
+}
+
+async function tiCall(promptText, maxTok) {
+  var controller = new AbortController();
+  TI_ACTIVE_CTRL = controller;
+  var timeoutId = setTimeout(function () { controller.abort(); }, (AI_CONFIG && AI_CONFIG.timeout) || 90000);
+  try {
+    var data = await AIBridge.chat({
+      tier: 'light',
+      feature: 'topic_ideas',
+      messages: [
+        { role: 'system', content: '你是民航领域资深内容策划主编。只输出严格 JSON，不要输出任何多余文字、解释或代码块标记。' },
+        { role: 'user', content: promptText }
+      ],
+      max_tokens: maxTok || 2048,
+      temperature: 0.7,
+      timeout: (AI_CONFIG && AI_CONFIG.timeout) || 90000,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    TI_ACTIVE_CTRL = null;
+    var raw = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    return { parsed: tiParseJson(raw), raw: raw || '', degraded: !!(data && data._degraded), degradeKind: (data && data._degradeKind) || '' };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    TI_ACTIVE_CTRL = null;
+    throw err;
+  }
+}
+
+function tiRenderError(c, r, msg) {
+  var html = '<div style="text-align:center;color:var(--text-dim);padding:var(--space-40) 0;">' + tiEsc(msg) + '</div>';
+  if (r && r.degraded) html += '<div class="ti-note">AI 繁忙，已切换兜底模型，返回内容可能不是预期格式</div>';
+  c.innerHTML = html;
+  tiSetButtons(3);
+}
+
+function openTopicIdeas() {
+  saveScrollState();
+  document.getElementById('topicIdeasOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+  if (TI.step === 0) {
+    TI.step = 1;
+    var c = document.getElementById('topicIdeasContent');
+    c.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:var(--space-40) 0;">点击下方「开始选题」，AI 将为你生成 6 个候选方向</div>';
+    document.getElementById('topicIdeasStepBtn').style.display = '';
+    document.getElementById('topicIdeasStepBtn').textContent = '开始选题';
+    document.getElementById('topicIdeasStepBtn').disabled = false;
+    document.getElementById('topicIdeasRegenBtn').style.display = 'none';
+    document.getElementById('topicIdeasCopyBtn').style.display = 'none';
+  }
+}
+
+function closeTopicIdeas() {
+  tiAbortRunning();
+  document.getElementById('topicIdeasOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  restoreScrollState();
+}
+
+async function topicIdeasStart() {
+  if (TI.running) return;
+  TI.running = true;
+  TI.step = 1;
+  TI.selected = [];
+  var c = document.getElementById('topicIdeasContent');
+  tiShowLoading(c, '正在生成 6 个候选选题方向…');
+  try {
+    var r = await tiCall('请为航空爱好者策划 6 个新颖、有传播力的民航内容选题（覆盖机型科普、航空公司、机场出行、民航历史、行业趋势等方向）。直接输出严格 JSON：{"ideas":[{"title":"选题标题","hook":"一句话简介"}]}，共 6 项。title 不超过 25 字，hook 不超过 40 字，不要输出 JSON 以外的任何内容。');
+    var obj = r.parsed;
+    if (!obj || !Array.isArray(obj.ideas) || !obj.ideas.length) {
+      tiRenderError(c, r, 'AI 返回内容无法解析，请点击「换一批 / 重新生成」重试');
+      TI.running = false;
+      return;
+    }
+    TI.ideas = obj.ideas.slice(0, 6);
+    var html = '<div class="ti-step-hint">第 1 步 / 3：选择 1~3 个你感兴趣的选题方向（点击卡片切换）</div><div class="ti-cards">';
+    TI.ideas.forEach(function (it, i) {
+      html += '<div class="ti-card" data-i="' + i + '" onclick="tiToggleIdea(' + i + ')"><div class="ti-tag">候选 ' + (i + 1) + '</div><div class="ti-title">' + tiEsc(it.title) + '</div><div class="ti-hook">' + tiEsc(it.hook) + '</div></div>';
+    });
+    html += '</div>';
+    if (r.degraded) html += '<div class="ti-note">AI 繁忙，已切换兜底模型生成</div>';
+    c.innerHTML = html;
+    tiSetButtons(1);
+  } catch (err) {
+    tiRenderError(c, null, (err && err.name === 'AbortError') ? '请求超时，请点击「换一批 / 重新生成」重试' : '生成失败，请点击「换一批 / 重新生成」重试');
+  }
+  TI.running = false;
+}
+
+function tiToggleIdea(i) {
+  if (TI.running || !TI.ideas[i]) return;
+  var idx = TI.selected.indexOf(i);
+  var card = document.querySelector('#topicIdeasContent .ti-card[data-i="' + i + '"]');
+  if (idx >= 0) {
+    TI.selected.splice(idx, 1);
+    if (card) card.classList.remove('selected');
+  } else {
+    if (TI.selected.length >= 3) { tiToastHint('最多选择 3 个'); return; }
+    TI.selected.push(i);
+    if (card) card.classList.add('selected');
+  }
+  document.getElementById('topicIdeasStepBtn').disabled = TI.selected.length === 0;
+}
+
+async function tiFetchAngles(selIdeas) {
+  if (TI.running) return;
+  TI.running = true;
+  TI.step = 2;
+  TI.chosen = null;
+  var c = document.getElementById('topicIdeasContent');
+  tiShowLoading(c, '正在为所选方向生成细化角度…');
+  try {
+    var list = selIdeas.map(function (i) { return TI.ideas[i].title; }).join('；');
+    var r = await tiCall('用户感兴趣的选题方向如下：' + list + '。请为每个选题给出 3~4 个可执行的细化角度（如 科普解读 / 机型盘点 / 历史故事 / 行业趋势 / 出行攻略 / 数据可视化等）。直接输出严格 JSON：{"angles":[{"title":"原选题标题","options":["角度1","角度2","角度3","角度4"]}]}，每个选题一组，不要输出 JSON 以外的任何内容。');
+    var obj = r.parsed;
+    if (!obj || !Array.isArray(obj.angles) || !obj.angles.length) {
+      tiRenderError(c, r, 'AI 返回内容无法解析，请点击「换一批 / 重新生成」重试');
+      TI.running = false;
+      return;
+    }
+    TI.angleGroups = obj.angles.slice(0, selIdeas.length);
+    var html = '<div class="ti-step-hint">第 2 步 / 3：每个方向选择 1 个你感兴趣的细化角度（点击选中）</div>';
+    TI.angleGroups.forEach(function (g, gi) {
+      html += '<div class="ti-group" style="margin-bottom:var(--space-16);"><div class="ti-title" style="font-weight:var(--fw-600);margin-bottom:var(--space-8);">' + tiEsc(g.title || ('方向 ' + (gi + 1))) + '</div><div class="ti-cards">';
+      (g.options || []).forEach(function (op, oi) {
+        html += '<div class="ti-card ti-angle" data-g="' + gi + '" data-o="' + oi + '" onclick="tiPickAngle(' + gi + ',' + oi + ')">' + tiEsc(op) + '</div>';
+      });
+      html += '</div></div>';
+    });
+    if (r.degraded) html += '<div class="ti-note">AI 繁忙，已切换兜底模型生成</div>';
+    c.innerHTML = html;
+    tiSetButtons(2);
+  } catch (err) {
+    tiRenderError(c, null, (err && err.name === 'AbortError') ? '请求超时，请点击「换一批 / 重新生成」重试' : '生成失败，请点击「换一批 / 重新生成」重试');
+  }
+  TI.running = false;
+}
+
+function tiPickAngle(gi, oi) {
+  if (TI.running) return;
+  var g = TI.angleGroups[gi];
+  if (!g || !g.options || !g.options[oi]) return;
+  TI.chosen = { ideaIdx: gi, ideaTitle: g.title || '', angle: g.options[oi] };
+  var cards = document.querySelectorAll('#topicIdeasContent .ti-card.ti-angle');
+  for (var i = 0; i < cards.length; i++) cards[i].classList.remove('selected');
+  var card = document.querySelector('#topicIdeasContent .ti-card[data-g="' + gi + '"][data-o="' + oi + '"]');
+  if (card) card.classList.add('selected');
+  document.getElementById('topicIdeasStepBtn').disabled = false;
+}
+
+async function tiFetchPlan(chosen) {
+  if (TI.running) return;
+  TI.running = true;
+  TI.step = 3;
+  var c = document.getElementById('topicIdeasContent');
+  tiShowLoading(c, '正在生成完整选题方案…');
+  try {
+    var r = await tiCall('基于选题「' + chosen.ideaTitle + '」与细化角度「' + chosen.angle + '」，产出一份可直接执行的民航内容选题方案。直接输出严格 JSON：{"plan":{"title":"最终标题","selling_points":["核心卖点1","核心卖点2"],"outline":["内容大纲1","内容大纲2","内容大纲3"],"format":"推荐内容形式，如图文长文/短视频/播客/数据图表","tags":["标签1","标签2"]}}。selling_points 2~3 条，outline 3~5 条，不要输出 JSON 以外的任何内容。');
+    var obj = r.parsed;
+    if (!obj || !obj.plan) {
+      tiRenderError(c, r, 'AI 返回内容无法解析，请点击「换一批 / 重新生成」重试');
+      TI.running = false;
+      return;
+    }
+    TI.plan = obj.plan;
+    var p = TI.plan;
+    var html = '<div class="ti-step-hint">第 3 步 / 3：选题方案已生成，可复制或换一批重新生成</div><div class="ti-plan">';
+    html += '<h4>选题标题</h4><div style="font-size:var(--fs-r110);font-weight:var(--fw-600);">' + tiEsc(p.title || '') + '</div>';
+    if (Array.isArray(p.selling_points) && p.selling_points.length) {
+      html += '<h4>核心卖点</h4><ul>' + p.selling_points.map(function (s) { return '<li>' + tiEsc(s) + '</li>'; }).join('') + '</ul>';
+    }
+    if (Array.isArray(p.outline) && p.outline.length) {
+      html += '<h4>内容大纲</h4><ul>' + p.outline.map(function (s) { return '<li>' + tiEsc(s) + '</li>'; }).join('') + '</ul>';
+    }
+    if (p.format) html += '<h4>推荐内容形式</h4><div>' + tiEsc(p.format) + '</div>';
+    if (Array.isArray(p.tags) && p.tags.length) {
+      html += '<h4>标签</h4><div style="display:flex;flex-wrap:wrap;gap:var(--space-8);">' + p.tags.map(function (t) { return '<span class="ti-tag">#' + tiEsc(t) + '</span>'; }).join('') + '</div>';
+    }
+    html += '</div>';
+    if (r.degraded) html += '<div class="ti-note">AI 繁忙，已切换兜底模型生成</div>';
+    c.innerHTML = html;
+    tiSetButtons(3);
+  } catch (err) {
+    tiRenderError(c, null, (err && err.name === 'AbortError') ? '请求超时，请点击「换一批 / 重新生成」重试' : '生成失败，请点击「换一批 / 重新生成」重试');
+  }
+  TI.running = false;
+}
+
+function topicIdeasStep() {
+  if (TI.running) return;
+  if (TI.step === 1) {
+    if (!TI.selected.length) { tiToastHint('请先选择 1~3 个感兴趣的方向'); return; }
+    tiFetchAngles(TI.selected);
+  } else if (TI.step === 2) {
+    if (!TI.chosen) { tiToastHint('请先选择一个细化角度'); return; }
+    tiFetchPlan(TI.chosen);
+  }
+}
+
+async function topicIdeasRegen() {
+  if (TI.running) return;
+  if (TI.step === 1) { await topicIdeasStart(); }
+  else if (TI.step === 2) { await tiFetchAngles(TI.selected); }
+  else if (TI.step === 3 && TI.chosen) { await tiFetchPlan(TI.chosen); }
+}
+
+function topicIdeasCopy() {
+  var p = TI.plan;
+  if (!p) { tiToastHint('暂无方案可复制'); return; }
+  var lines = [];
+  lines.push('【选题】' + (p.title || ''));
+  (p.selling_points || []).forEach(function (s) { lines.push('· 卖点：' + s); });
+  (p.outline || []).forEach(function (s) { lines.push('· 大纲：' + s); });
+  if (p.format) lines.push('· 形式：' + p.format);
+  if (p.tags && p.tags.length) lines.push('· 标签：#' + p.tags.join(' #'));
+  var text = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { tiToastHint('已复制选题方案'); }, function () { tiLegacyCopy(text); });
+  } else {
+    tiLegacyCopy(text);
+  }
+}
+
+function tiLegacyCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); tiToastHint('已复制选题方案'); } catch (e) { tiToastHint('复制失败，请手动复制'); }
+  document.body.removeChild(ta);
 }
 </script>
 
@@ -17846,6 +18179,7 @@ transform:translateX(-130%);animation:abxBannerSweep 7.2s ease-in-out 1.8s infin
     { k: 'aiChat',          sel: '#aiChatOverlay',          form: 'fullscreen', size: '4', open: ['visible'] },
     { k: 'aiReview',        sel: '#aiReviewOverlay',        form: 'fullscreen', size: '4', open: ['visible'] },
     { k: 'newsPanel',       sel: '#newsPanelOverlay',       form: 'fullscreen', size: '4', open: ['visible', 'active'] },
+    { k: 'topicIdeas',      sel: '#topicIdeasOverlay',      form: 'fullscreen', size: '4', open: ['visible', 'active'] },
     { k: 'quiz',            sel: '#quizOverlay',            form: 'fullscreen', size: '3', open: ['visible'] },
     { k: 'badge',           sel: '#badgeOverlay',           form: 'fullscreen', size: '3', open: ['visible'] },
     { k: 'photoAi',         sel: '#photoAiOverlay',         form: 'fullscreen', size: '4', open: ['visible'] },
