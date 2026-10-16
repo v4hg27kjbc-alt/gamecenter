@@ -51,8 +51,9 @@ export async function onRequestOptions(context) {
 export async function onRequestPost(context) {
   try {
     var env = context.env || {};
-    if (!env.DB) {
-      return fail('AI_LOG_DB', '服务端未配置 D1 绑定（DB），无法记录问答日志', 500, {});
+    var db = env.DB || env.AI_LOG_DB;
+    if (!db) {
+      return fail('AI_LOG_DB', '服务端未配置 D1 绑定（DB / AI_LOG_DB），无法记录问答日志', 500, {});
     }
     var body = await readJsonBody(context.request, 8192);
     if (!body.ok) {
@@ -71,8 +72,8 @@ export async function onRequestPost(context) {
     var answered = data.answered ? 1 : 0;
     var uid = str(data.uid, 80);
 
-    await ensureTable(env.DB);
-    await env.DB.prepare(
+    await ensureTable(db);
+    await db.prepare(
       'INSERT INTO qa_logs (question, reason, hits, answered, uid, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     )
       .bind(q, reason, hits, answered, uid, nowIso())
