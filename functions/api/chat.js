@@ -61,7 +61,7 @@ import {
 } from './_lib/quota.js';
 import { degradeJson, degradeSse, sseFromText, sseQueueEvent, sseChunk, sseDone, pickFallback } from './_lib/degrade.js';
 
-const FEATURES = ['chat', 'photo', 'compare', 'translate', 'summary', 'code', 'story'];
+const FEATURES = ['chat', 'photo', 'compare', 'translate', 'summary', 'code', 'story', 'topic_ideas'];
 const DEGRADE_CACHE_TTL = 60;
 
 /**
