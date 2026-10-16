@@ -450,6 +450,72 @@ text-align:center;padding:0 16px;
 .lb-tip{font-size:10.5px;letter-spacing:.12em}
 }
 
+
+
+/* ========== 暗夜雨幕 × 金色强调 · 动画层（2026-10-16） ========== */
+/* 首屏入场 */
+.hero-inner>*{opacity:0;transform:translateY(18px);animation:heroIn .72s cubic-bezier(.22,.8,.24,1) forwards}
+.hero-inner>*:nth-child(1){animation-delay:.1s}
+.hero-inner>*:nth-child(2){animation-delay:.22s}
+.hero-inner>*:nth-child(3){animation-delay:.34s}
+.hero-inner>*:nth-child(4){animation-delay:.46s}
+.hero-inner>*:nth-child(5){animation-delay:.58s}
+.hero-inner>*:nth-child(6){animation-delay:.7s}
+.hero-inner>*:nth-child(7){animation-delay:.82s}
+@keyframes heroIn{to{opacity:1;transform:none}}
+/* 标题金色光扫 */
+.t-title{position:relative;overflow:hidden}
+.t-title::after{
+content:"";position:absolute;left:-26%;top:-10%;bottom:-10%;width:22%;
+background:linear-gradient(105deg,transparent,rgba(227,171,84,.16),transparent);
+filter:blur(5px);transform:skewX(-14deg);pointer-events:none;z-index:1;
+animation:titleSweep 5.8s ease-in-out 1.6s infinite;
+}
+@keyframes titleSweep{0%,60%{left:-26%;opacity:0}64%{opacity:1}94%{left:118%;opacity:0}100%{left:118%;opacity:0}}
+/* 分隔线流光 */
+.rule{position:relative;overflow:hidden}
+.rule::after{
+content:"";position:absolute;inset:0;
+background:linear-gradient(90deg,transparent,rgba(227,171,84,.4),transparent);
+transform:translateX(-100%);animation:ruleFlow 6.5s ease-in-out 2.4s infinite;pointer-events:none;
+}
+@keyframes ruleFlow{0%{transform:translateX(-100%)}55%{transform:translateX(100%)}100%{transform:translateX(100%)}}
+/* 按钮辉光 */
+.hero-actions .btn{transition:box-shadow .3s ease,transform .3s ease}
+.hero-actions .btn:hover{box-shadow:0 0 0 1px rgba(227,171,84,.35),0 0 30px rgba(227,171,84,.2);transform:translateY(-2px)}
+/* 区块入场 */
+.js .blk,.js .boards{opacity:0;transform:translateY(26px);transition:opacity .72s ease,transform .72s cubic-bezier(.22,.8,.24,1)}
+.js .blk.in,.js .boards.in{opacity:1;transform:none}
+/* 情节一瞥 · 五格点亮 */
+.cellflash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0}
+.board.flash .cellflash{animation:cellWrap 3.1s ease .05s forwards}
+@keyframes cellWrap{0%{opacity:0}9%{opacity:1}76%{opacity:1}100%{opacity:0}}
+.cellflash i{position:absolute;opacity:0;border:1px solid rgba(227,171,84,.92);border-radius:3px;
+background:rgba(227,171,84,.09);box-shadow:0 0 26px rgba(227,171,84,.34),inset 0 0 20px rgba(227,171,84,.2);
+animation:cellCell .56s cubic-bezier(.22,.8,.24,1) forwards;animation-delay:calc(.12s + var(--i)*.17s)}
+@keyframes cellCell{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:scale(1)}}
+.cellflash i:nth-child(1){left:0;top:0;width:33.34%;height:50%}
+.cellflash i:nth-child(2){left:33.33%;top:0;width:33.34%;height:50%}
+.cellflash i:nth-child(3){left:66.66%;top:0;width:33.34%;height:50%}
+.cellflash i:nth-child(4){left:16.66%;top:50%;width:33.34%;height:50%}
+.cellflash i:nth-child(5){left:50%;top:50%;width:33.34%;height:50%}
+/* 大图开合 */
+.lb img{transition:transform .34s cubic-bezier(.22,.8,.24,1),opacity .3s ease,border-color .3s ease;transform:scale(.9);opacity:.96}
+.lb.open img{transform:none;opacity:1}
+.lb.open img{animation:lbGlow 3s ease-in-out .2s infinite}
+@keyframes lbGlow{0%,100%{box-shadow:0 40px 110px rgba(0,0,0,.72),0 0 0 1px rgba(227,171,84,.18)}50%{box-shadow:0 40px 110px rgba(0,0,0,.72),0 0 0 1px rgba(227,171,84,.5)}}
+.lb.closing{opacity:0;transition:opacity .3s ease}
+.lb.closing img{transform:scale(.9);opacity:0}
+/* 减弱动态效果 */
+@media (prefers-reduced-motion:reduce){
+*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+@media (max-width:820px){
+.hero-inner>*{animation-delay:0s!important}
+.cellflash{display:none}
+.lb.open img{animation:none}
+}
+
 </style>
 </head>
 <body>
@@ -557,7 +623,8 @@ text-align:center;padding:0 16px;
       <div class="board" data-zoom="storyboard.png" tabindex="0" role="button" aria-label="放大查看《无应答》情节五宫格">
         <img src="storyboard.png" alt="无应答 · 情节五宫格 · 五幕剪影">
         <span class="board-tip">点击 / 长按看大图</span>
-        <span class="board-hint">长按或点击 · 大屏查看完整五宫格</span>
+                <span class="board-hint">长按或点击 · 大屏查看完整五宫格</span>
+        <span class="cellflash" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i></span>
       </div>
     </div>
   </div>
@@ -1116,9 +1183,14 @@ function closeNotice(){
   }
   function close(){
     if(lb.hidden) return;
+    lb.classList.add('closing');
     lb.classList.remove('open');
     document.documentElement.classList.remove('nr-lb-lock');
-    window.setTimeout(function(){ lb.hidden = true; img.removeAttribute('src'); }, 260);
+    window.setTimeout(function(){
+      lb.hidden = true;
+      lb.classList.remove('closing');
+      img.removeAttribute('src');
+    }, 330);
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-zoom]'), function(box){
@@ -1148,5 +1220,32 @@ function closeNotice(){
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
 })();
 </script>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var nodes = document.querySelectorAll('.blk');
+  var boards = document.querySelector('.boards');
+  function reveal(t){ t.classList.add('in'); }
+  function flashStory(t){ var b = t.querySelector('.board'); if(b) b.classList.add('flash'); }
+  if('IntersectionObserver' in window){
+    var obs = new IntersectionObserver(function(es){
+      es.forEach(function(en){
+        if(!en.isIntersecting) return;
+        var t = en.target;
+        if(t.classList && t.classList.contains('blk')){ reveal(t); if(t.id==='story') flashStory(t); obs.unobserve(t); }
+        else if(t === boards){ reveal(t); obs.unobserve(t); }
+      });
+    }, { threshold: .18 });
+    Array.prototype.forEach.call(nodes, function(n){ obs.observe(n); });
+    if(boards) obs.observe(boards);
+  } else {
+    Array.prototype.forEach.call(nodes, function(n){ reveal(n); });
+    var b = document.querySelector('.board'); if(b) b.classList.add('flash');
+    if(boards) reveal(boards);
+  }
+})();
+</script>
+
 </body>
 </html>
