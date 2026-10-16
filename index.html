@@ -6036,51 +6036,8 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     </div>
   </div>
 
-  <!-- ===== v70 国庆发布公告栏 ===== -->  <!-- ===== v70 国庆发布公告栏 ===== -->
-  <section class="rln-announce" id="releaseAnnounce" aria-label="国庆发布公告">
-    <span class="rln-stars" aria-hidden="true"><i class="rln-star rln-star-1"></i><i class="rln-star rln-star-2"></i><i class="rln-star rln-star-3"></i><i class="rln-star rln-star-4"></i><i class="rln-star rln-star-5"></i></span>
-
-    <div class="rln-head">
-      <span class="rln-badge"><span class="rln-dot" aria-hidden="true"></span>国庆 · 发布公告</span>
-      <span class="rln-date">2026-10-01 · 中华人民共和国成立 77 周年</span>
-      <button class="rln-toggle" id="rlnToggle" type="button" aria-expanded="true" aria-controls="rlnBody" aria-label="收起发布公告栏">
-        <span class="rln-toggle-ico" aria-hidden="true"></span><span class="rln-toggle-text">收起</span>
-      </button>
-    </div>
-
-    <p class="rln-collapsed-note" id="rlnCollapsedNote">国庆快乐 · v70 全新引擎已于今日上线 · 20261001-v70</p>
-
-    <div class="rln-body" id="rlnBody">
-      <div class="rln-body-inner">
-      <h2 class="rln-festival">国庆快乐</h2>
-      <p class="rln-festival-sub">祝祖国繁荣昌盛，祝各位飞友假期愉快、起落平安。感谢一路相伴，本站 v70 全新引擎已于今日上线。</p>
-
-      <div class="rln-grid">
-        <div class="rln-card rln-card-engine" data-rln-sheet="engine" tabindex="0" role="button" aria-label="全新引擎详情，长按查看">
-          <p class="rln-card-title">全新引擎 · v70 底层框架升级</p>
-          <p class="rln-card-text">本次不是一次补丁式更新，而是一次引擎级换代：从数据、渲染、交互、内容到知识，五层底层框架全部重建。</p>
-          <ul class="rln-list">
-            <li>数据层 · 航司官方资产引擎：23 家航司 Logo 与简介结构化托管、按需渲染</li>
-            <li>渲染层 · 液态玻璃 v2 材质引擎：柔光按钮层，轻量替代多层重投影</li>
-            <li>交互层 · 长按手势统一入口：事件委托 + 单例弹层，鼠标触控同源</li>
-            <li>内容层 · 快讯多源聚合引擎：30 条内容池，去重、来源标注与跨天重置</li>
-            <li>知识层 · 知识图谱下钻引擎：返回栈 _kgReturn 精准回溯来源节点</li>
-          </ul>
-          <span class="rln-hint">长按查看详情</span>
-        </div>
-
-        <div class="rln-card rln-card-cmp" data-rln-sheet="compare" tabindex="0" role="button" aria-label="升级对比详情，长按查看">
-          <p class="rln-card-title">升级对比 · v70 全新引擎 vs 上一代 v69</p>
-          <p class="rln-card-text">与上一代相比，本次是底层工程与体验的双重换代：12 个维度逐项实测对比，体积、代码、资产、内容、动效全线升级。</p>
-          <div class="rln-cmp-strip">
-            <span class="rln-cmp-chip">文件体积 809,901 → 1,299,845 字节</span>
-            <span class="rln-cmp-chip">代码 14,467 → 18,395 行</span>
-            <span class="rln-cmp-chip">脚本模块 10 → 15 个</span>
-          </div>
-          <span class="rln-hint">长按查看详情</span>
-        </div>
-
-        <div class="rln-card rln-card-game" data-rln-sheet="game" tabindex="0" role="button" aria-label="游戏预告详情，长按查看">
+  <!-- 游戏预告 · 无应答（独立入口） -->
+        <div class="rln-card rln-card-game" data-rln-sheet="game" tabindex="0" role="button" aria-label="游戏预告详情，长按查看" style="margin: var(--space-24, 24px) auto 0;">
           <p class="rln-card-title">游戏预告</p>
           <p class="rln-game-name">无应答<span class="rln-game-en">NO REPLY</span></p>
           <span class="rln-soon is-live">Alpha Beta 内测中</span>
@@ -6088,19 +6045,6 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
           <a class="abx-card-cta" href="/no-reply/" data-no-sheet>点击前往<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></a>
           <span class="rln-hint">长按查看详情</span>
         </div>
-
-        <div class="rln-card rln-card-ver" data-rln-sheet="version" tabindex="0" role="button" aria-label="版本发布详情，长按查看">
-          <p class="rln-card-title">版本发布</p>
-          <p class="rln-card-text">2026-10-01 推送上线，桌面端与移动端同步生效。</p>
-          <span class="rln-ver">20261001-v70</span>
-          <span class="rln-hint">长按查看详情</span>
-        </div>
-      </div>
-
-      <p class="rln-foot"><span class="rln-foot-icon" aria-hidden="true"></span>长按卡片查看详情</p>
-      </div>
-    </div>
-  </section>
 
   <!-- 长按详情 · 单例玻璃弹层 -->
   <div class="rln-sheet-mask" id="rlnSheet" hidden>
@@ -6111,146 +6055,6 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
       <div class="rln-sheet-body"></div>
     </div>
   </div>
-
-  <!-- 弹层内容模板 · 更新引擎 -->
-  <template id="rlnTplEngine">
-    <p class="rln-lead">本次 v70 不是一次补丁式更新，而是一次引擎级换代。过去散落在各区块、各自为战的实现，被统一收敛为五层引擎：数据层、渲染层、交互层、内容层、知识层。</p>
-    <div class="rln-layer">
-      <p class="rln-layer-h">数据层 · 航司官方资产引擎</p>
-      <p>23 家航空公司的官方 Logo 与简介完成结构化托管，以键值数据表按需取用：进入视口或展开时才渲染对应图形，首屏不再一次性解码全部高清资源，加载更轻、滚动更稳。南航 Logo 经去白底重绘（抠净背景并做白底反混合、紧致裁切），透明率约 79%，比例由 CSS 锁定，任何容器内都不拉伸变形。</p>
-    </div>
-    <div class="rln-layer">
-      <p class="rln-layer-h">渲染层 · 液态玻璃 v2 材质引擎</p>
-      <p>以 <b>--sg-hi</b> 内高光、<b>--sg-rim</b> 边缘光、<b>--sg-glow</b> 柔光晕与 <b>--sg-spring</b> 缓动曲线构成按钮玻璃层 <b>.lg-btn</b>，用轻量柔光替代过去的多层重投影，并移除了高开销的折射滤镜。实时模糊与重绘成本显著下降，长列表滚动更顺，弱性能设备会自动降级为纯色，仍保持同一套观感基线。</p>
-    </div>
-    <div class="rln-layer">
-      <p class="rln-layer-h">交互层 · 长按手势统一入口</p>
-      <p>以文档级事件委托监听指针事件，统一 <b>500ms</b> 判定与 <b>10px</b> 位移阈值——手指或鼠标一旦移动超过阈值即判定为滑动，长按自动取消，不会误触。桌面鼠标与移动端触控共用同一套逻辑，并附触感反馈。</p>
-      <p>弹层采用单例模式：打开时填充内容、关闭时清空并暂停媒体，不重复注入 DOM；支持关闭按钮、点击遮罩、键盘 Esc 三种退出方式，长按期间禁用文本选择与系统唤出菜单。</p>
-    </div>
-    <div class="rln-layer">
-      <p class="rln-layer-h">内容层 · 快讯多源聚合引擎</p>
-      <p>内容池扩充至 30 条，多源抓取与内置静态池双轨运行：接口不可用时自动回落到本地池，页面永远有内容。标题级去重让「换一换」不再重复；新增来源标注，每条信息都可追溯；切换采用 0.32s 淡入，消除闪屏；跨天自动重置已读状态与滚动位置，次日打开即是最新一批。</p>
-    </div>
-    <div class="rln-layer">
-      <p class="rln-layer-h">知识层 · 知识图谱下钻与返回栈</p>
-      <p>知识图谱支持从任意节点逐层下钻到机型详情，并以 <b>_kgReturn</b> 维护返回栈：逐层返回时精确回到来源节点与位置，不会迷路；首次进入提供引导提示，降低上手门槛。以上五层构成本次更新的底层框架，后续新功能都将在同一套引擎上扩展。</p>
-    </div>
-  </template>
-
-  <!-- 弹层内容模板 · 升级对比（v70 vs v69） -->
-  <template id="rlnTplCompare">
-    <p class="rln-lead">本表为 v70 全新引擎与上一代 v69 的逐项实测对比，共 12 个维度。左列为上一代实现，中列为本代实现，右列为实测变化。</p>
-
-    <div class="rln-cmp-wrap">
-      <table class="rln-cmp-table">
-        <thead>
-          <tr>
-            <th scope="col">对比维度</th>
-            <th scope="col">上一代 · v69</th>
-            <th scope="col">本代 · v70</th>
-            <th scope="col">实测变化</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">文件体积</th>
-            <td class="rln-cmp-old">809,901 字节</td>
-            <td class="rln-cmp-new">1,299,845 字节</td>
-            <td class="rln-cmp-delta">+489,944 字节</td>
-          </tr>
-          <tr>
-            <th scope="row">代码行数</th>
-            <td class="rln-cmp-old">14,467 行</td>
-            <td class="rln-cmp-new">18,395 行</td>
-            <td class="rln-cmp-delta">+3,928 行</td>
-          </tr>
-          <tr>
-            <th scope="row">脚本模块</th>
-            <td class="rln-cmp-old">10 个</td>
-            <td class="rln-cmp-new">15 个</td>
-            <td class="rln-cmp-delta">+5 个</td>
-          </tr>
-          <tr>
-            <th scope="row">航司标识</th>
-            <td class="rln-cmp-old">手绘矢量 SVG 83 处，无官方资产</td>
-            <td class="rln-cmp-new">23 家官方矢量资产，AIRLINE_LOGO_DATA 驱动</td>
-            <td class="rln-cmp-delta">手绘转为官方资产</td>
-          </tr>
-          <tr>
-            <th scope="row">航司简介</th>
-            <td class="rln-cmp-old">无</td>
-            <td class="rln-cmp-new">长按唤出简介</td>
-            <td class="rln-cmp-delta">从无到有</td>
-          </tr>
-          <tr>
-            <th scope="row">快讯内容池</th>
-            <td class="rln-cmp-old">15 条</td>
-            <td class="rln-cmp-new">30 条</td>
-            <td class="rln-cmp-delta">翻倍</td>
-          </tr>
-          <tr>
-            <th scope="row">快讯来源</th>
-            <td class="rln-cmp-old">无标注</td>
-            <td class="rln-cmp-new">逐条来源标注</td>
-            <td class="rln-cmp-delta">每条可追溯</td>
-          </tr>
-          <tr>
-            <th scope="row">切换过渡</th>
-            <td class="rln-cmp-old">整块重绘，无过渡</td>
-            <td class="rln-cmp-new">0.32s 淡入</td>
-            <td class="rln-cmp-delta">消除切换闪烁</td>
-          </tr>
-          <tr>
-            <th scope="row">重投影模糊 filter:blur</th>
-            <td class="rln-cmp-old">109 处</td>
-            <td class="rln-cmp-new">23 处</td>
-            <td class="rln-cmp-delta">-86 处</td>
-          </tr>
-          <tr>
-            <th scope="row">知识图谱</th>
-            <td class="rln-cmp-old">无下钻返回</td>
-            <td class="rln-cmp-new">返回栈 _kgReturn</td>
-            <td class="rln-cmp-delta">层级可回溯</td>
-          </tr>
-          <tr>
-            <th scope="row">新用户引导</th>
-            <td class="rln-cmp-old">无</td>
-            <td class="rln-cmp-new">首次长按引导</td>
-            <td class="rln-cmp-delta">从无到有</td>
-          </tr>
-          <tr>
-            <th scope="row">多媒体</th>
-            <td class="rln-cmp-old">无</td>
-            <td class="rln-cmp-new">宣传片按需加载（H.264）</td>
-            <td class="rln-cmp-delta">从无到有</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="rln-sub-h">三个具体举例</p>
-
-    <div class="rln-eg">
-      <p class="rln-eg-h">例一 · 找南航</p>
-      <p class="rln-eg-old"><span class="rln-eg-tag">上一代</span>航司标识靠手绘矢量徽标拼凑，只能看个大概轮廓，没有官方资产，也没有任何航司背景信息。</p>
-      <p class="rln-eg-new"><span class="rln-eg-tag">本代</span>南航使用官方透明底 logo（去白底重绘，透明率约 79%），比例锁定不变形；长按 logo 还能唤出航司简介。</p>
-    </div>
-
-    <div class="rln-eg">
-      <p class="rln-eg-h">例二 · 快讯换一换</p>
-      <p class="rln-eg-old"><span class="rln-eg-tag">上一代</span>每次只取 5 条，且会和上批重复；切换时整块重绘，出现明显闪烁。</p>
-      <p class="rln-eg-new"><span class="rln-eg-tag">本代</span>去重后取满 15 条，每条标注来源，切换以 0.32s 淡入完成，不再闪烁。</p>
-    </div>
-
-    <div class="rln-eg">
-      <p class="rln-eg-h">例三 · 知识图谱返回</p>
-      <p class="rln-eg-old"><span class="rln-eg-tag">上一代</span>下钻后一关闭就丢失层级，只能从头再点一遍。</p>
-      <p class="rln-eg-new"><span class="rln-eg-tag">本代</span>以返回栈 _kgReturn 记录来路，逐层返回可回到原节点。</p>
-    </div>
-
-    <p class="rln-cmp-foot">数据说明：以上为 v70 与 v69 的逐项实测值，体积、行数、模块数、模糊处数均取自交付文件实测量。</p>
-  </template>
 
   <!-- 弹层内容模板 · 游戏预告 -->
   <template id="rlnTplGame">
@@ -6280,27 +6084,6 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
       </a>
     </p>
-  </template>
-
-  <!-- 弹层内容模板 · 版本发布 -->
-  <template id="rlnTplVersion">
-    <p class="rln-lead">版本号 20261001-v70 · 2026-10-01 推送上线 · 桌面端与移动端同步生效</p>
-    <p class="rln-sub-h">本次更新主题：全新引擎</p>
-    <ul>
-      <li>数据层：23 家航司官方 Logo 与简介结构化托管，按需渲染。</li>
-      <li>渲染层：液态玻璃 v2 材质引擎（内高光／边缘光／柔光晕），以柔光替代重投影。</li>
-      <li>交互层：长按手势统一入口，公告与游戏预告等卡片均可长按查看详情。</li>
-      <li>内容层：快讯内容池扩至 30 条，去重、来源标注、0.32s 淡入与跨天重置。</li>
-      <li>知识层：知识图谱下钻与返回栈 _kgReturn，首次使用引导。</li>
-    </ul>
-    <p class="rln-sub-h">兼容与校验</p>
-    <p>桌面端与移动端多视口均通过校验，浏览器控制台 0 报错；页面仍为单文件静态交付，AI 能力经服务端网关调用，不在前端暴露任何密钥。</p>
-    <div class="rln-tag-row">
-      <span class="rln-tag">单文件交付</span>
-      <span class="rln-tag">桌面 / 移动自适应</span>
-      <span class="rln-tag">控制台 0 报错</span>
-      <span class="rln-tag">20261001-v70</span>
-    </div>
   </template>
 
   <div class="hero-banner" id="heroBanner">
@@ -16690,271 +16473,6 @@ body.light-mode .ai-mm-chip.on { color: #fff; }
 body.light-mode .ai-mm-attach { background-color: rgba(0, 0, 0, .04); }
 body.light-mode .ai-mm-hint { color: rgba(0, 0, 0, .42); }
 
-/* ===========================================================================
-   v70 国庆发布版 · 发布公告栏（国庆主题）+ 长按详情弹层
-   [id: release-announce / sheet: rlnSheet]
-   —— 主题：2026-10-01 国庆，沉稳红金配色 + 五星装饰 + 静态金色纹带；
-      全区块零装饰动画（无扫光、无高亮流动、无浮动），仅保留状态切换过渡；
-   —— 动效一致性：卡片按压 scale(.97) 对齐站内 .card:active，过渡统一取自
-      站点变量 --dur-450 / --ease-out-expo；弹层入场复用站点既有
-      @keyframes overlayIn（0.28s ease）与 @keyframes modalSlideIn
-      （0.45s cubic-bezier(0.16,1,0.3,1)），不另造动画；
-   —— 长按进度反馈：卡片底部 2px 进度条，500ms 与长按判定同时长、同步缓动；
-   —— 收起 / 展开：右上角按钮折叠为窄提示条，localStorage 记忆，过渡同站内；
-   —— 保留站点玻璃语言：半透底 + 内高光 + 柔和外投影 + 暖白磨砂子卡；
-   —— 层叠：公告栏 z-index 1（低于 .header 的 5）；弹层 10095（低于站内
-      最高层 99999，高于内容层与既有 10090 系列）；装饰伪元素 pointer-events:none。
-   =========================================================================== */
-
-.rln-announce {
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-  overflow: hidden;
-  margin-bottom: var(--space-24, 24px);
-  padding: var(--space-22, 22px) var(--space-26, 26px) var(--space-18, 18px);
-  border-radius: var(--radius-24, 24px);
-  border: 1px solid rgba(255, 214, 130, .38);
-  background-color: rgba(122, 22, 26, .78);
-  background-image: linear-gradient(135deg,
-      rgba(141, 26, 26, .94) 0%,
-      rgba(165, 36, 32, .90) 44%,
-      rgba(111, 20, 24, .95) 100%);
-  box-shadow:
-    0 22px 54px -22px rgba(74, 8, 12, .70),
-    0 6px 18px -10px rgba(40, 6, 8, .40),
-    inset 0 1px 0 rgba(255, 236, 196, .42),
-    inset 0 -28px 46px -36px rgba(255, 214, 130, .34);
-  color: #fff6ea;
-  transition: padding var(--dur-450) var(--ease-out-expo);
-}
-
-/* 收起态：仅留标题行与窄提示条 */
-.rln-announce.is-collapsed {
-  padding: var(--space-14, 14px) var(--space-18, 18px) var(--space-12, 12px);
-}
-
-/* 静态金色纹带（重复纹理，非流动效果） */
-.rln-announce::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 6px;
-  background-image: repeating-linear-gradient(90deg,
-      rgba(255, 214, 130, .62) 0 16px,
-      rgba(255, 214, 130, .12) 16px 32px);
-  opacity: .55;
-  pointer-events: none;
-}
-
-/* 右上角柔光底晕 */
-.rln-announce::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: -70px;
-  right: -50px;
-  width: 250px;
-  height: 250px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%,
-      rgba(255, 214, 130, .26) 0%,
-      rgba(255, 214, 130, .10) 44%,
-      rgba(255, 214, 130, 0) 72%);
-  pointer-events: none;
-}
-
-/* 五星装饰（静态，位置近似国旗排布；下移让位于右上角收起按钮） */
-.rln-stars {
-  position: absolute;
-  z-index: -1;
-  top: 50px;
-  right: 22px;
-  width: 118px;
-  height: 118px;
-  pointer-events: none;
-}
-
-.rln-star {
-  position: absolute;
-  display: block;
-  background-image: linear-gradient(180deg, #ffe9a8, #f4c451);
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  opacity: .90;
-}
-
-.rln-star-1 { width: 50px; height: 50px; top: 0; left: 0; }
-.rln-star-2 { width: 19px; height: 19px; top: -3px; left: 60px; }
-.rln-star-3 { width: 19px; height: 19px; top: 22px; left: 82px; }
-.rln-star-4 { width: 19px; height: 19px; top: 54px; left: 76px; }
-.rln-star-5 { width: 19px; height: 19px; top: 76px; left: 50px; }
-
-/* ---- 头部：徽章 + 日期 + 收起按钮 ---- */
-.rln-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-right: 132px;
-}
-
-.rln-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: var(--fs-r075, 12px);
-  font-weight: var(--fw-700, 700);
-  letter-spacing: .06em;
-  color: #5c1006;
-  background-image: linear-gradient(180deg, #ffe6a8, #f3c657);
-  border: 1px solid rgba(255, 240, 200, .70);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .70), 0 2px 8px -4px rgba(60, 10, 8, .55);
-}
-
-.rln-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #a5241f;
-}
-
-.rln-date {
-  font-size: var(--fs-r075, 12px);
-  letter-spacing: .04em;
-  color: rgba(255, 236, 210, .86);
-}
-
-/* ---- 收起 / 展开按钮（右上角，过渡参数同站内卡片与按钮） ---- */
-.rln-toggle {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 214, 130, .46);
-  background-color: rgba(60, 8, 10, .34);
-  background-image: linear-gradient(180deg, rgba(255, 246, 232, .18), rgba(255, 246, 232, .06));
-  color: #ffe9bd;
-  font-family: inherit;
-  font-size: var(--fs-r075, 12px);
-  font-weight: var(--fw-700, 700);
-  letter-spacing: .06em;
-  line-height: 1.2;
-  cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 236, 196, .38), 0 4px 12px -8px rgba(30, 4, 6, .70);
-  transition: transform var(--dur-450) var(--ease-out-expo),
-              border-color var(--dur-450) var(--ease-out-expo),
-              background-color var(--dur-450) var(--ease-out-expo),
-              box-shadow var(--dur-450) var(--ease-out-expo);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.rln-toggle:hover {
-  border-color: rgba(255, 232, 170, .78);
-  background-color: rgba(96, 16, 18, .46);
-}
-
-.rln-toggle:active { transform: scale(0.97); }
-
-.rln-toggle:focus-visible {
-  outline: 2px solid rgba(255, 226, 150, .85);
-  outline-offset: 2px;
-}
-
-/* 箭头：展开态朝上（收起），收起态朝下（展开） */
-.rln-toggle-ico {
-  width: 9px;
-  height: 9px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: translateY(-2px) rotate(225deg);
-  transition: transform var(--dur-450) var(--ease-out-expo);
-}
-
-.rln-announce.is-collapsed .rln-toggle-ico { transform: translateY(-1px) rotate(45deg); }
-
-/* 收起后的窄提示条 */
-.rln-collapsed-note {
-  margin: 0;
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  font-size: var(--fs-r075, 12px);
-  line-height: 1.6;
-  letter-spacing: .04em;
-  color: rgba(255, 236, 210, .88);
-  transition: max-height var(--dur-450) var(--ease-out-expo),
-              margin var(--dur-450) var(--ease-out-expo),
-              opacity var(--dur-300) var(--ease-standard);
-}
-
-.rln-announce.is-collapsed .rln-collapsed-note {
-  max-height: 56px;
-  margin: 8px 0 2px;
-  opacity: 1;
-}
-
-/* ---- 可折叠主体（grid-template-rows 过渡，无裁剪跳变） ---- */
-.rln-body {
-  display: grid;
-  grid-template-rows: 1fr;
-  transition: grid-template-rows var(--dur-450) var(--ease-out-expo),
-              opacity var(--dur-300) var(--ease-standard);
-}
-
-.rln-body-inner {
-  min-height: 0;
-  overflow: hidden;
-  visibility: visible;
-  transition: visibility 0s linear 0s;
-}
-
-/* 收起后主体不可点选 / 不可聚焦（延迟到折叠过渡结束再隐藏） */
-.rln-announce.is-collapsed .rln-body-inner {
-  visibility: hidden;
-  transition: visibility 0s linear var(--dur-450);
-}
-
-.rln-announce.is-collapsed .rln-body {
-  grid-template-rows: 0fr;
-  opacity: 0;
-}
-
-/* ---- 国庆祝福主视觉 ---- */
-.rln-festival {
-  margin: var(--space-12, 12px) 0 var(--space-4, 4px);
-  font-size: var(--fs-r170, 26px);
-  line-height: 1.25;
-  font-weight: var(--fw-800, 800);
-  letter-spacing: .06em;
-  color: #fff8ef;
-  text-shadow: 0 2px 14px rgba(50, 6, 8, .40);
-}
-
-.rln-festival-sub {
-  margin: 0 0 var(--space-16, 16px);
-  font-size: var(--fs-r086, 13px);
-  line-height: 1.6;
-  color: rgba(255, 238, 216, .90);
-}
-
-/* ---- 卡片网格：引擎卡与对比卡整行，游戏/版本并排 ---- */
-.rln-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-14, 14px);
-  align-items: stretch;
-}
 
 .rln-card {
   position: relative;
@@ -16973,8 +16491,6 @@ body.light-mode .ai-mm-hint { color: rgba(0, 0, 0, .42); }
   transition: all var(--dur-450) var(--ease-out-expo);
 }
 
-.rln-card-engine { grid-column: 1 / -1; }
-.rln-card-cmp { grid-column: 1 / -1; }
 
 .rln-card[data-rln-sheet] {
   cursor: pointer;
@@ -17043,36 +16559,6 @@ body.light-mode .ai-mm-hint { color: rgba(0, 0, 0, .42); }
   color: rgba(255, 226, 170, .62);
 }
 
-/* 版本号徽标 */
-.rln-ver {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  margin-top: var(--space-10, 10px);
-  padding: 4px 10px;
-  border-radius: var(--radius-10, 10px);
-  background: rgba(48, 6, 8, .34);
-  border: 1px solid rgba(255, 214, 130, .40);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: var(--fs-r075, 12px);
-  letter-spacing: .04em;
-  color: #ffe9bd;
-}
-
-/* ---- 升级对比卡：正面三条核心差异 ---- */
-.rln-cmp-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: var(--space-10, 10px);
-}
-
-.rln-cmp-chip {
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: var(--fs-r070, 11px);
-  letter-spacing: .02em;
-  background: rgba(255, 214, 130, .14);
   border: 1px solid rgba(255, 214, 130, .30);
   color: #ffe6b8;
   font-variant-numeric: tabular-nums;
@@ -17111,56 +16597,6 @@ body.light-mode .ai-mm-hint { color: rgba(0, 0, 0, .42); }
 }
 
 .rln-card-game .rln-card-text { margin-top: var(--space-10, 10px); }
-
-/* 更新引擎 · 分层清单 */
-.rln-list {
-  list-style: none;
-  margin: var(--space-10, 10px) 0 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-
-.rln-list li {
-  position: relative;
-  padding-left: 20px;
-  font-size: var(--fs-r078, 12.5px);
-  line-height: 1.6;
-  color: rgba(255, 240, 224, .92);
-}
-
-.rln-list li::before {
-  content: "";
-  position: absolute;
-  left: 3px;
-  top: .50em;
-  width: 8px;
-  height: 8px;
-  background-image: linear-gradient(135deg, #ffe9a8, #f0bd44);
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-}
-
-/* ---- 区块脚注：长按提示 ---- */
-.rln-foot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: var(--space-14, 14px) 0 0;
-  font-size: var(--fs-r078, 12.5px);
-  letter-spacing: .06em;
-  color: rgba(255, 236, 210, .82);
-}
-
-.rln-foot-icon {
-  position: relative;
-  width: 15px;
-  height: 15px;
-  border-radius: 5px;
-  border: 1px solid rgba(255, 226, 170, .75);
-  box-shadow: inset 0 0 0 2px rgba(255, 226, 170, .18);
-}
 
 /* ===================== 长按详情弹层 ===================== */
 
@@ -17272,20 +16708,6 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   color: #ffeecd;
 }
 
-.rln-sheet-body .rln-layer {
-  margin: 0 0 14px;
-  padding: 0 0 0 12px;
-  border-left: 2px solid rgba(255, 214, 130, .48);
-}
-
-.rln-sheet-body .rln-layer-h {
-  margin: 0 0 4px;
-  font-size: var(--fs-r086, 13.5px);
-  font-weight: var(--fw-700, 700);
-  color: #ffd98a;
-  letter-spacing: .02em;
-}
-
 .rln-sheet-body ul {
   margin: 6px 0 12px;
   padding-left: 18px;
@@ -17297,130 +16719,6 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 }
 
 /* ---- 升级对比 · 表格（窄屏横向滚动，表头吸顶） ---- */
-.rln-cmp-wrap {
-  margin: 6px 0 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 214, 130, .28);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.rln-cmp-table {
-  width: 100%;
-  min-width: 560px;
-  border-collapse: collapse;
-  font-size: var(--fs-r078, 12.5px);
-  font-variant-numeric: tabular-nums;
-}
-
-.rln-cmp-table th,
-.rln-cmp-table td {
-  padding: 8px 10px;
-  text-align: left;
-  vertical-align: top;
-  border-bottom: 1px solid rgba(255, 214, 130, .16);
-}
-
-.rln-cmp-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: rgba(96, 16, 20, .97);
-  color: #ffd98a;
-  font-size: var(--fs-r075, 12px);
-  font-weight: var(--fw-700, 700);
-  letter-spacing: .04em;
-  white-space: nowrap;
-}
-
-.rln-cmp-table tbody th {
-  color: #ffeecd;
-  font-weight: var(--fw-700, 700);
-  white-space: nowrap;
-}
-
-.rln-cmp-table tbody tr:nth-child(even) { background: rgba(255, 214, 130, .05); }
-.rln-cmp-table tbody tr:last-child th,
-.rln-cmp-table tbody tr:last-child td { border-bottom: none; }
-
-.rln-cmp-old { color: rgba(255, 236, 210, .70); }
-.rln-cmp-new { color: #ffe0a0; font-weight: var(--fw-700, 700); }
-.rln-cmp-delta { color: rgba(255, 214, 130, .92); white-space: nowrap; }
-
-/* ---- 升级对比 · 三个举例 ---- */
-.rln-eg {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 214, 130, .08);
-  border: 1px solid rgba(255, 214, 130, .20);
-}
-
-.rln-eg-h {
-  margin: 0 0 6px;
-  font-size: var(--fs-r086, 13px);
-  font-weight: var(--fw-700, 700);
-  color: #ffd98a;
-}
-
-.rln-eg-old,
-.rln-eg-new {
-  position: relative;
-  margin: 0 0 6px;
-  padding-left: 56px;
-  font-size: var(--fs-r078, 12.5px);
-  line-height: 1.65;
-  color: rgba(255, 242, 228, .92);
-}
-
-.rln-eg-old:last-child,
-.rln-eg-new:last-child { margin-bottom: 0; }
-
-.rln-eg-tag {
-  position: absolute;
-  left: 0;
-  top: .18em;
-  padding: 1px 6px;
-  border-radius: 6px;
-  font-size: var(--fs-r070, 11px);
-  letter-spacing: .04em;
-}
-
-.rln-eg-old .rln-eg-tag {
-  background: rgba(255, 255, 255, .10);
-  border: 1px solid rgba(255, 255, 255, .18);
-  color: rgba(255, 238, 216, .72);
-}
-
-.rln-eg-new .rln-eg-tag {
-  background: rgba(255, 214, 130, .20);
-  border: 1px solid rgba(255, 214, 130, .42);
-  color: #ffe6b8;
-}
-
-.rln-cmp-foot {
-  margin: 14px 0 0;
-  font-size: var(--fs-r070, 11.5px);
-  line-height: 1.6;
-  color: rgba(255, 226, 190, .68);
-}
-
-.rln-tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 0 14px;
-}
-
-.rln-tag {
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: var(--fs-r070, 11.5px);
-  background: rgba(255, 214, 130, .14);
-  border: 1px solid rgba(255, 214, 130, .30);
-  color: #ffe6b8;
-}
-
 .rln-sub-h {
   margin: 16px 0 6px;
   font-size: var(--fs-r086, 13.5px);
@@ -17489,43 +16787,12 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   color: rgba(255, 226, 190, .78);
 }
 
-/* ---- 中屏 ---- */
-@media (max-width: 1024px) {
-  .rln-head { padding-right: 128px; }
-}
 
 /* ---- 移动端 ---- */
 @media (max-width: 768px) {
-  .rln-announce {
-    padding: var(--space-18, 18px) var(--space-16, 16px) var(--space-14, 14px);
-    border-radius: var(--radius-18, 18px);
-    margin-bottom: var(--space-18, 18px);
-  }
-  .rln-announce.is-collapsed { padding: var(--space-12, 12px) var(--space-14, 14px); }
-  .rln-head { padding-right: 104px; gap: 8px; }
-  .rln-toggle { top: 10px; right: 10px; padding: 4px 10px; }
-  .rln-stars { top: 44px; right: 12px; width: 84px; height: 84px; }
-  .rln-star-1 { width: 37px; height: 37px; }
-  .rln-star-2 { width: 14px; height: 14px; top: -2px; left: 44px; }
-  .rln-star-3 { width: 14px; height: 14px; top: 16px; left: 60px; }
-  .rln-star-4 { width: 14px; height: 14px; top: 40px; left: 56px; }
-  .rln-star-5 { width: 14px; height: 14px; top: 56px; left: 37px; }
-  .rln-announce::before { width: 190px; height: 190px; top: -58px; right: -44px; }
-  .rln-festival { font-size: var(--fs-r140, 21px); margin-top: var(--space-10, 10px); }
-  .rln-festival-sub { font-size: var(--fs-r080, 13px); margin-bottom: var(--space-14, 14px); }
-  .rln-grid { grid-template-columns: 1fr; gap: var(--space-10, 10px); }
-  .rln-card-engine { grid-column: auto; }
-  .rln-card-cmp { grid-column: auto; }
-  .rln-list { gap: 5px; }
   .rln-sheet-mask { padding: 12px; align-items: flex-end; }
   .rln-sheet { width: 100%; max-height: 88vh; padding: 22px 18px 20px; border-radius: 18px; }
   .rln-sheet-title { font-size: var(--fs-r115, 17px); }
-  .rln-cmp-table { min-width: 520px; font-size: var(--fs-r075, 12px); }
-  .rln-cmp-table th,
-  .rln-cmp-table td { padding: 7px 9px; }
-  .rln-eg-old,
-  .rln-eg-new { padding-left: 0; }
-  .rln-eg-tag { position: static; display: inline-block; margin-right: 6px; vertical-align: 1px; }
 }
 
 /* ---- 减少动效 ---- */
@@ -17535,10 +16802,6 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   .rln-sheet-mask.is-open .rln-sheet { animation: none; }
   .rln-sheet-mask.is-closing .rln-sheet { transition: none; }
   .rln-card,
-  .rln-toggle,
-  .rln-toggle-ico,
-  .rln-collapsed-note,
-  .rln-body { transition: none; }
   .rln-card[data-rln-sheet]::after { transition: none; }
   .rln-card.rln-pressing { transform: none; filter: none; }
 }
@@ -19198,64 +18461,27 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     <a class="airline-modal-site" id="airlineModalSite" href="#" target="_blank" rel="noopener">访问官网</a>
   </div>
 </div>
-<!-- v70 国庆发布版 · 公告卡片长按详情（长按手势统一入口 + 单例弹层 + 视频降级） -->
+<!-- 游戏预告卡 · 长按详情（长按手势统一入口 + 单例弹层 + 视频降级） -->
 <script>
 /* ===========================================================================
-   v70 国庆发布版 · 公告卡片长按详情 + 公告栏收起 / 展开
+   游戏预告卡 · 长按详情（长按手势统一入口 + 单例弹层 + 视频降级）
    —— 长按手势统一入口：document 级事件委托（capture）+ 500ms / 10px 阈值
    —— 单例弹层：填充式打开、清空式关闭、暂停媒体、不重复注入 DOM
    —— 动效一致性：按压 / 进度 / 入场 / 关闭时长与曲线全部取自站点既有
       CSS 变量（--dur-450 / --dur-250 / --ease-out-expo / --ease-standard），
       弹层入场复用站点既有 @keyframes overlayIn 与 modalSlideIn，不另造动画
-   —— 收起 / 展开：折为窄提示条并用 localStorage 记忆上次状态
    —— 宣传片：相对路径 + preload=metadata，失败时优雅降级为封面与提示
    =========================================================================== */
 (function () {
   "use strict";
 
-  if (window.__rlnReleaseSheet) { return; }
-  window.__rlnReleaseSheet = true;
+  if (window.__rlnSheetInit) { return; }
+  window.__rlnSheetInit = true;
 
   var HOLD_MS = 500;
   var MOVE_PX = 10;
   var CLOSE_MS = 250;
 
-  /* ---------- 公告栏收起 / 展开（localStorage 记忆） ---------- */
-  var COLLAPSE_KEY = "aviation-rln-announce-collapsed";
-
-  (function () {
-    var panel = document.getElementById("releaseAnnounce");
-    var btn = document.getElementById("rlnToggle");
-    var body = document.getElementById("rlnBody");
-    if (!panel || !btn || !body) { return; }
-
-    var label = btn.querySelector(".rln-toggle-text");
-
-    function readState() {
-      try { return window.localStorage.getItem(COLLAPSE_KEY) === "1"; }
-      catch (err) { return false; }
-    }
-
-    function saveState(collapsed) {
-      try { window.localStorage.setItem(COLLAPSE_KEY, collapsed ? "1" : "0"); }
-      catch (err) { /* 隐私模式等不可写场景静默忽略 */ }
-    }
-
-    function apply(collapsed) {
-      panel.classList.toggle("is-collapsed", collapsed);
-      btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
-      btn.setAttribute("aria-label", collapsed ? "展开发布公告栏" : "收起发布公告栏");
-      if (label) { label.textContent = collapsed ? "展开" : "收起"; }
-    }
-
-    apply(readState());
-
-    btn.addEventListener("click", function () {
-      var collapsed = !panel.classList.contains("is-collapsed");
-      apply(collapsed);
-      saveState(collapsed);
-    });
-  })();
 
   var mask = document.getElementById("rlnSheet");
   if (!mask) { return; }
@@ -19266,17 +18492,11 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   var closeBtn = mask.querySelector(".rln-sheet-close");
 
   var META = {
-    engine: { kicker: "此次更新简介", title: "全新引擎 · 底层框架分层详解" },
-    compare: { kicker: "升级对比", title: "v70 全新引擎 vs 上一代 v69 · 全方位对比" },
-    game: { kicker: "游戏预告", title: "无应答 NO REPLY" },
-    version: { kicker: "版本发布", title: "v70 · 2026-10-01 正式上线" }
+    game: { kicker: "游戏预告", title: "无应答 NO REPLY" }
   };
 
   var TPL = {
-    engine: "rlnTplEngine",
-    compare: "rlnTplCompare",
-    game: "rlnTplGame",
-    version: "rlnTplVersion"
+    game: "rlnTplGame"
   };
 
   var pressTimer = null;
