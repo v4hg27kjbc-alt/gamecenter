@@ -69,7 +69,7 @@ export const TIER_DEFAULTS = {
       zhipu: { key: 'ZHIPU_MODEL_VISION' }
     },
     model: 'kimi-k2.6',
-    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5-air' },
+    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5v' },
     label: '视觉档',
     maxTokens: 2048,
     temperature: 0.5,
