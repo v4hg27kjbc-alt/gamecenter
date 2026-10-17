@@ -736,8 +736,42 @@ function streamUpstream(info) {
         var decoder = new TextDecoder();
         var acc = { text: '' };
         var pending = '';
+        // 读取 idle 超时：连接建立后上游长时间无数据（思考/网络挂起）时不再无限等待，
+        // 超时即取消并降级兜底，保证每个请求在档位超时内必有结果
+        var idleMs = (info.route.config && info.route.config.timeoutMs) || 30000;
+        function readWithTimeout() {
+          return new Promise(function (resolve) {
+            var t = setTimeout(function () { resolve({ timedOut: true }); }, idleMs);
+            reader.read().then(function (v) {
+              clearTimeout(t);
+              resolve({ timedOut: false, value: v });
+            }).catch(function (e) {
+              clearTimeout(t);
+              resolve({ timedOut: false, error: e });
+            });
+          });
+        }
         while (true) {
-          var part = await reader.read();
+          var rd = await readWithTimeout();
+          if (rd.timedOut) {
+            try { await reader.cancel(); } catch (e) { /* 忽略 */ }
+            var fb = pickFallback(info.requestId, 'timeout');
+            send(sseChunk(fb, 'local-fallback', { degraded: true, id: 'chatcmpl-local-fallback' }));
+            send(sseDone('local-fallback', { id: 'chatcmpl-local-fallback' }));
+            await logCall(info.env, {
+              feature: info.feature, tier: info.route.tier, routeReason: info.route.reason,
+              model: info.route.model, stream: 1, cached: false, ragHit: info.ctx.rag.hit,
+              ragDocs: info.ctx.rag.docsCount, glossaryHits: info.ctx.glossary.count,
+              degraded: true, degradeKind: 'idle_timeout', status: 200,
+              errorCode: 'upstream_idle_timeout', queueWaitMs: queueLog.waitMs,
+              queueRetries: queueLog.retried, latencyMs: Date.now() - info.started,
+              fp: info.fp, requestId: info.requestId, visitorHash: info.visitorHash, ipHash: info.ipHash
+            }).catch(function () {});
+            finish();
+            return;
+          }
+          if (rd.error) break;
+          var part = rd.value;
           if (part.done) break;
           var raw = decoder.decode(part.value, { stream: true });
           send(raw);

@@ -440,17 +440,22 @@ export function dayString(ts) {
   return d.getUTCFullYear() + '-' + m + '-' + day;
 }
 
-/** 带超时的 fetch 包装：返回 { ok, response, timedOut, error } */
-export async function fetchWithTimeout(url, init, timeoutMs) {
+/** 带超时的 fetch 包装：返回 { ok, response, timedOut, error }
+ * connectMs 用于「连接建立 + 响应头」阶段快速失败（默认 10s，跨境上游抖动时
+ * 立即重试切换，而不是让用户干等满档位超时）；读取阶段由调用方通过 timeoutMs 控制。
+ */
+export async function fetchWithTimeout(url, init, timeoutMs, connectMs) {
   var controller = new AbortController();
-  var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+  var connectLimit = connectMs > 0 ? connectMs : 10000;
+  var connTimer = setTimeout(function () { controller.abort(); }, connectLimit);
   try {
     var merged = Object.assign({}, init || {}, { signal: controller.signal });
     var res = await fetch(url, merged);
-    clearTimeout(timer);
+    clearTimeout(connTimer);
+    // 连接已建立：后续读取阶段的整体超时由调用方另行控制（这里不再接管）
     return { ok: true, response: res };
   } catch (err) {
-    clearTimeout(timer);
+    clearTimeout(connTimer);
     var aborted = err && (err.name === 'AbortError' || /abort/i.test(String(err.message || '')));
     return { ok: false, timedOut: aborted, error: (err && err.message) || 'fetch failed' };
   }

@@ -523,7 +523,7 @@ async function callUpstreamOnce(env, o, provider) {
 
   var endpoint = providerEndpoint(env, provider);
   var queueEvents = [];
-  var netRetry = Math.max(0, Math.min(2, toInt(env.AI_UPSTREAM_RETRY, 1)));
+  var netRetry = Math.max(0, Math.min(3, toInt(env.AI_UPSTREAM_RETRY, 2)));
 
   var outcome = await runSerial(
     env,
@@ -533,7 +533,9 @@ async function callUpstreamOnce(env, o, provider) {
         var res = await fetchWithTimeout(
           endpoint,
           { method: 'POST', headers: headers, body: JSON.stringify(body) },
-          timeoutMs
+          timeoutMs,
+          // 连接阶段快速失败（跨境上游抖动常见 SSL 握手挂死）：10s 内连不上即重试/切换
+          10000
         );
 
         if (!res.ok) {
