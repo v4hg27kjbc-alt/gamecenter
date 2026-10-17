@@ -10630,11 +10630,11 @@ window.AIBridge = (function () {
       }
     }
     if (_avRoute) {
-      _avRoute.mode = _avRoute.mode || ((_avRoute.provider === 'kimi') ? 'deep' : 'fast');
-      _avRoute.provider = _avRoute.provider || ((_avRoute.mode === 'deep') ? 'kimi' : 'zhipu');
+      _avRoute.mode = _avRoute.mode || 'deep';
+      _avRoute.provider = _avRoute.provider || 'kimi';
       body.provider = _avRoute.provider;
       body.mode = _avRoute.mode;
-      body.model = _avRoute.model || ((_avRoute.provider === 'kimi') ? 'kimi-k2.6' : 'glm-4.5-air');
+      body.model = _avRoute.model || 'kimi-k2.6';
     } else if (o.model && !o.tier) {
       body.model = o.model;
     }
@@ -18963,9 +18963,9 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       ]
     },
     {
-      provider: 'zhipu', name: '智谱（仅保留智谱 4）', mode: 'fast',
+      provider: 'zhipu', name: '智谱（暂不可用）', mode: 'fast', disabled: true,
       items: [
-        { id: 'glm-4.5-air', label: 'GLM-4.5-Air', sub: '智谱 4 · 兜底' }
+        { id: 'glm-4.5-air', label: 'GLM-4.5-Air', sub: '智谱 4 · 暂不可用' }
       ]
     }
   ];
@@ -19024,7 +19024,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     try {
       var p = JSON.parse(raw);
       var f = p && p.model ? findItem(p.model) : null;
-      if (f) { state.provider = f.provider; state.model = f.item.id; }
+      if (f && f.provider !== 'zhipu') { state.provider = f.provider; state.model = f.item.id; }
     } catch (e) { /* 忽略非法缓存 */ }
   }
   function savePref() {

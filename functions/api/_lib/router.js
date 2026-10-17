@@ -54,8 +54,8 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_FLAGSHIP' },
       zhipu: { key: 'ZHIPU_MODEL_FLAGSHIP' }
     },
-    model: 'glm-4.5-air',
-    models: { kimi: 'glm-4.5-air', zhipu: 'glm-4.5-air' },
+    model: 'kimi-k3',
+    models: { kimi: 'kimi-k3', zhipu: 'glm-4.5-air' },
     label: '旗舰档',
     maxTokens: 4096,
     temperature: 0.6,
@@ -82,8 +82,8 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_CODE' },
       zhipu: { key: 'ZHIPU_MODEL_CODE' }
     },
-    model: 'glm-4.5-air',
-    models: { kimi: 'glm-4.5-air', zhipu: 'glm-4.5-air' },
+    model: 'kimi-k2.7-code',
+    models: { kimi: 'kimi-k2.7-code', zhipu: 'glm-4.5-air' },
     label: '代码档',
     maxTokens: 4096,
     temperature: 0.3,

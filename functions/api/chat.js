@@ -183,6 +183,10 @@ export async function handleChat(context, options) {
   var feature = FEATURES.indexOf(String(input.feature || '')) >= 0 ? String(input.feature) : 'chat';
 
   /* ---------- 5. 分级路由（含上游 provider 选择：缺省 kimi，向后兼容） ---------- */
+  /* 全站限定 Kimi：显式请求 zhipu 时直接返回「暂不可用」，不再路由智谱上游 */
+  if (input.provider && String(input.provider) === 'zhipu') {
+    return fail(ERR.NOT_CONFIGURED, '智谱模型暂不可用，请使用 Kimi 模型', 503, cors.headers);
+  }
   var route = resolveTier(
     {
       provider: input.provider,
@@ -388,7 +392,8 @@ export async function handleChat(context, options) {
   }
 
   /* ---------- 9. 上游调用（按 provider 分别串行排队 + 429 指数退避，各上游并发上限 1） ---------- */
-  var alt = alternateConfig(env, route.config);
+  /* 全站限定 Kimi：仅当显式请求 zhipu 时才允许切 kimi 兜底；kimi 请求不再切智谱 */
+  var alt = (route.provider === 'zhipu') ? alternateConfig(env, route.config) : null;
 
   if (wantStream) {
     // 流式：先立刻建立 SSE 通道回传「排队中 / 重试中」，上游就绪后原样转发
