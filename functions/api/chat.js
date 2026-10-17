@@ -43,6 +43,7 @@ import {
 } from './_lib/http.js';
 import { requireToken, tokenFailResponse } from './_lib/auth.js';
 import { checkRateLimit, rateLimitHeaders, buildScopes } from './_lib/ratelimit.js';
+import { checkRestricted } from './_lib/usercontrol.js';
 import { getFlags } from './_lib/flags.js';
 import { resolveTier, resolveGenerationParams, validateMessages, lastUserText, alternateConfig } from './_lib/router.js';
 import { buildChatContext, messagesForUpstream, digestAnswer, NO_RECORD_TEXT } from './_lib/context.js';
@@ -154,6 +155,21 @@ export async function handleChat(context, options) {
   var rate = await checkRateLimit(env, buildScopes(env, { ipHash: ipHash, visitorHash: visitorHash }, 'chat'));
   if (!rate.ok) {
     return fail(ERR.RATE_LIMITED, '调用过于频繁，请稍后重试', 429, Object.assign({}, cors.headers, rateLimitHeaders(rate)));
+  }
+
+  /* 访客协助：受限名单 / 地区限制 / 全体管控检查（委婉文案） */
+  var uc = await checkRestricted(env, {
+    visitorHash: visitorHash,
+    ip: ipRaw,
+    country: request.headers.get('cf-ipcountry') || ''
+  });
+  if (uc.restricted) {
+    return fail(
+      ERR.FORBIDDEN,
+      '当前区域/账号暂不可使用 AI 服务。如有疑问，可在页面点击「协助申请」联系站长解除。',
+      403,
+      cors.headers
+    );
   }
 
   /* ---------- 4. 请求体 ---------- */

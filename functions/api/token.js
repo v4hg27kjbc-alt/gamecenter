@@ -32,6 +32,7 @@ import {
 import { issueToken, DEFAULT_TOKEN_TTL, MAX_TOKEN_TTL, TOKEN_SCOPES, tokenSecretInfo } from './_lib/auth.js';
 import { checkRateLimit, rateLimitHeaders, buildScopes } from './_lib/ratelimit.js';
 import { getFlags } from './_lib/flags.js';
+import { recordVisit, checkRestricted } from './_lib/usercontrol.js';
 
 export async function onRequestOptions(context) {
   return corsPreflight(context.request, context.env, { methods: 'GET, POST, OPTIONS' });
@@ -52,6 +53,16 @@ export async function onRequestGet(context) {
 
   if (bootstrap || !visitorId) {
     var newId = generateVisitorId();
+    /* 访问统计：新访客首访落库 */
+    try {
+      var nvHash = await hashId(newId, env);
+      await recordVisit(env, {
+        visitorHash: nvHash,
+        ip: getClientIp(request),
+        country: request.headers.get('cf-ipcountry') || '',
+        ua: request.headers.get('user-agent') || ''
+      });
+    } catch (e) {}
     return ok(
       {
         visitorId: newId,
@@ -68,6 +79,17 @@ export async function onRequestGet(context) {
       })
     );
   }
+
+  /* 访问统计：老访客回来也记录（60s 窗口合并） */
+  try {
+    var ovHash = await hashId(visitorId, env);
+    await recordVisit(env, {
+      visitorHash: ovHash,
+      ip: getClientIp(request),
+      country: request.headers.get('cf-ipcountry') || '',
+      ua: request.headers.get('user-agent') || ''
+    });
+  } catch (e) {}
 
   return ok(
     {
@@ -99,6 +121,21 @@ export async function onRequestPost(context) {
   var rate = await checkRateLimit(env, buildScopes(env, { ipHash: ipHash, visitorHash: visitorHash }, 'token'));
   if (!rate.ok) {
     return fail(ERR.RATE_LIMITED, '令牌签发过于频繁，请稍后重试', 429, Object.assign({}, cors.headers, rateLimitHeaders(rate)));
+  }
+
+  /* 访客协助：受限名单 / 地区限制 / 全体管控检查（委婉文案，不出现"黑名单"字样） */
+  var uc = await checkRestricted(env, {
+    visitorHash: visitorHash,
+    ip: getClientIp(request),
+    country: request.headers.get('cf-ipcountry') || ''
+  });
+  if (uc.restricted) {
+    return fail(
+      ERR.FORBIDDEN,
+      '当前区域/账号暂不可使用 AI 服务。如有疑问，可在页面点击「协助申请」联系站长解除。',
+      403,
+      cors.headers
+    );
   }
 
   var body = await readJsonBody(request, 32 * 1024);

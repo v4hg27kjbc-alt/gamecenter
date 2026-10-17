@@ -10549,26 +10549,35 @@ window.AIBridge = (function () {
     return bootPromise;
   }
 
-  /* 2) 取短期令牌（带内存缓存，提前 60 秒续签） */
+  /* 2) 取短期令牌（带内存缓存，提前 60 秒续签；网络抖动自动重试，最多 3 次） */
   async function getToken(force) {
     var now = Math.floor(Date.now() / 1000);
     if (!force && tokenCache.value && tokenCache.expireAt - 60 > now) {
       return tokenCache.value;
     }
     await bootstrap();
-    var res = await fetch('/api/token', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scope: TOKEN_SCOPE, ttl: TOKEN_TTL })
-    });
-    var json = await res.json().catch(function () { return {}; });
-    if (!json || !json.ok || !json.token) {
-      throw new Error('TOKEN_FAILED: ' + ((json && json.error) || res.status));
+    var lastErr = null;
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        var res = await fetch('/api/token', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scope: TOKEN_SCOPE, ttl: TOKEN_TTL })
+        });
+        var json = await res.json().catch(function () { return {}; });
+        if (json && json.ok && json.token) {
+          tokenCache.value = json.token;
+          tokenCache.expireAt = now + (json.expiresIn || TOKEN_TTL);
+          return json.token;
+        }
+        lastErr = 'TOKEN_FAILED: ' + ((json && json.error) || res.status);
+      } catch (e) {
+        lastErr = String((e && e.message) || e);
+      }
+      if (attempt < 2) await new Promise(function (r) { setTimeout(r, 600 * (attempt + 1)); });
     }
-    tokenCache.value = json.token;
-    tokenCache.expireAt = now + (json.expiresIn || TOKEN_TTL);
-    return json.token;
+    throw new Error(lastErr || 'TOKEN_FAILED');
   }
 
   /* 2.5) AI 失败上报管理员：自动记入 /api/qa-logs（后台「答不上来的问题 Top 榜」与记录数） */
@@ -10637,39 +10646,61 @@ window.AIBridge = (function () {
     var controller = new AbortController();
     var timeoutId = setTimeout(function () { controller.abort(); }, o.timeout || (AI_CONFIG && AI_CONFIG.timeout) || 90000);
 
-    var res, json;
-    try {
-      res = await fetch('/api/chat', {
+    /* 网络抖动/5xx 自动重试一次（令牌刷新重试除外），超时不重试避免服务端双倍负载 */
+    function isRetryableErr(err, status) {
+      if (status >= 500 && status <= 599) return true;
+      if (!err) return false;
+      var msg = String(err.message || err.name || '');
+      if (/abort|timeout|timed out/i.test(msg)) return false;
+      return true; // 网络层错误（TypeError: fetch failed / IncompleteRead / SSL 等）
+    }
+    async function doChat(body2, token2) {
+      var rr = await fetch('/api/chat', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-AI-Token': token
-        },
-        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json', 'X-AI-Token': token2 },
+        body: JSON.stringify(body2),
         signal: o.signal || controller.signal
       });
+      return rr;
+    }
+
+    var res, json;
+    try {
+      res = await doChat(body, token);
       clearTimeout(timeoutId);
 
       /* 令牌过期 → 强制刷新后重试一次（不多次重试） */
       if (res.status === 401) {
         token = await getToken(true);
-        res = await fetch('/api/chat', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-AI-Token': token
-          },
-          body: JSON.stringify(body),
-          signal: o.signal || controller.signal
-        });
+        res = await doChat(body, token);
+      } else if (res.status >= 500) {
+        /* 服务端 5xx：等 800ms 重试一次 */
+        await new Promise(function (r) { setTimeout(r, 800); });
+        res = await doChat(body, token);
       }
       json = await res.json().catch(function () { return null; });
     } catch (err) {
-      /* AI 无法回答（网络失败 / 超时 / 服务端错误）→ 自动上报管理员，后台可查记录数 */
-      reportAiFailure(o, err);
-      throw err;
+      /* 网络层错误（跨境网络抖动常见）：重试一次；超时/中断不重试 */
+      var retried = false;
+      if (isRetryableErr(err)) {
+        try {
+          res = await doChat(body, token);
+          clearTimeout(timeoutId);
+          json = await res.json().catch(function () { return null; });
+          retried = true;
+        } catch (e2) {
+          err = e2;
+        }
+      }
+      if (!retried || !json || (res && res.status >= 500)) {
+        if (!retried && !isRetryableErr(err) && (res && res.status === 401)) {
+          /* 令牌失效重试分支已在上层处理 */
+        }
+        /* AI 无法回答（网络失败 / 超时 / 服务端错误）→ 自动上报管理员，后台可查记录数 */
+        reportAiFailure(o, err);
+        throw err;
+      }
     } finally {
       clearTimeout(timeoutId);
     }
@@ -10681,6 +10712,14 @@ window.AIBridge = (function () {
         json = { ok: true, answer: _c0, model: json.model, degraded: true, finishReason: (json.choices[0].finish_reason || 'stop') };
       }
     }
+    /* 访客协助：受限（403 委婉文案）→ 在线提示并可提交「协助申请」 */
+    if (res && res.status === 403 && json && json.error && String(json.message || '').indexOf('协助申请') >= 0) {
+      try { if (window.AiFeedback) window.AiFeedback.showRestricted(String(json.message || '')); } catch (e) {}
+      var rerr = new Error('AI_RESTRICTED: ' + (json.message || ''));
+      rerr.code = json.error;
+      rerr.status = 403;
+      throw rerr;
+    }
     if (!json || json.ok !== true) {
       var err = new Error('AI_FAILED: ' + ((json && json.error) || res.status));
       err.code = (json && json.error) || 'http_' + res.status;
@@ -10689,7 +10728,7 @@ window.AIBridge = (function () {
     }
 
     /* 归一化为 OpenAI 风格响应，旧解析代码无需改动 */
-    return {
+    var _norm = {
       choices: [{ index: 0, message: { role: 'assistant', content: json.answer || '' }, finish_reason: json.finishReason || 'stop' }],
       model: json.model,
       _tier: json.tier,
@@ -10699,6 +10738,9 @@ window.AIBridge = (function () {
       _usage: json.usage,
       _requestId: json.requestId
     };
+    /* 主动 AI：回答不准确 / 缺信息时在线通知用户，可反馈站长或补充信息 */
+    try { if (window.AiFeedback) window.AiFeedback.maybe(o, _norm); } catch (e) {}
+    return _norm;
   }
 
   /* 4) 便捷取文本 */
@@ -10709,6 +10751,227 @@ window.AIBridge = (function () {
 
   return { bootstrap: bootstrap, getToken: getToken, chat: chat, text: text };
 })();
+
+/* ===== 主动 AI 反馈助手：回答不准确时在线通知 + 可反馈站长 + 引导补全信息 ===== */
+(function () {
+  'use strict';
+  var STYLE_ID = 'ai-feedback-style';
+  if (!document.getElementById(STYLE_ID)) {
+    var css = document.createElement('style');
+    css.id = STYLE_ID;
+    css.textContent = [
+      '#aiFeedbackWrap{position:fixed;right:18px;bottom:88px;z-index:99999;max-width:330px;transform:translateY(30px);opacity:0;pointer-events:none;transition:transform .5s cubic-bezier(.2,.9,.3,1.2),opacity .4s ease;font-family:inherit}',
+      '#aiFeedbackWrap.show{transform:translateY(0);opacity:1;pointer-events:auto}',
+      '#aiFeedbackCard{position:relative;overflow:hidden;border-radius:16px;padding:14px 16px 12px;background:linear-gradient(145deg,rgba(24,28,44,.96),rgba(16,19,32,.98));border:1px solid rgba(120,150,255,.28);box-shadow:0 12px 34px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.08);color:#eef1ff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}',
+      '#aiFeedbackCard::before{content:"";position:absolute;top:-40%;left:-20%;width:140%;height:120%;background:radial-gradient(ellipse at 30% 20%,rgba(90,120,255,.16),transparent 60%);pointer-events:none;animation:aiFbGlow 4.5s ease-in-out infinite}',
+      '@keyframes aiFbGlow{0%,100%{opacity:.5;transform:translateX(0)}50%{opacity:1;transform:translateX(8%)}}',
+      '#aiFeedbackCard .fb-title{font-size:14px;font-weight:700;letter-spacing:.3px;margin-bottom:5px;display:flex;align-items:center;gap:7px}',
+      '#aiFeedbackCard .fb-title .dot{width:8px;height:8px;border-radius:50%;background:#ffd166;box-shadow:0 0 10px rgba(255,209,102,.9);animation:aiFbPing 1.8s ease-out infinite}',
+      '@keyframes aiFbPing{0%{box-shadow:0 0 0 0 rgba(255,209,102,.55)}70%{box-shadow:0 0 0 8px rgba(255,209,102,0)}100%{box-shadow:0 0 0 0 rgba(255,209,102,0)}}',
+      '#aiFeedbackCard .fb-desc{font-size:12.5px;line-height:1.55;color:#b9c3e6;margin-bottom:10px}',
+      '#aiFeedbackCard .fb-actions{display:flex;gap:8px;flex-wrap:wrap}',
+      '#aiFeedbackCard .fb-btn{flex:1;min-width:120px;padding:7px 10px;border:0;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;background:linear-gradient(135deg,#4a63ff,#6a3dff);color:#fff;box-shadow:0 3px 12px rgba(74,99,255,.35)}',
+      '#aiFeedbackCard .fb-btn:hover{transform:translateY(-1px);filter:brightness(1.12);box-shadow:0 5px 16px rgba(74,99,255,.5)}',
+      '#aiFeedbackCard .fb-btn:active{transform:scale(.97)}',
+      '#aiFeedbackCard .fb-btn.ghost{background:rgba(120,150,255,.12);color:#c6d2ff;box-shadow:none;border:1px solid rgba(120,150,255,.3)}',
+      '#aiFeedbackCard .fb-btn.ghost:hover{background:rgba(120,150,255,.2)}',
+      '#aiFeedbackCard .fb-input{display:block;width:100%;box-sizing:border-box;margin:6px 0;padding:8px 10px;border-radius:8px;border:1px solid rgba(120,150,255,.25);background:rgba(8,12,26,.5);color:#eef1ff;font-size:12.5px;outline:none;transition:border .2s,box-shadow .2s}',
+      '#aiFeedbackCard .fb-input:focus{border-color:#4a63ff;box-shadow:0 0 0 3px rgba(74,99,255,.18)}',
+      '#aiFeedbackCard .fb-input::placeholder{color:#6b76a8}',
+      '#aiFeedbackCard .fb-close{position:absolute;top:8px;right:10px;width:22px;height:22px;border:0;background:transparent;color:#7f8ac0;font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:background .2s,color .2s}',
+      '#aiFeedbackCard .fb-close:hover{background:rgba(255,255,255,.08);color:#fff}',
+      '#aiFeedbackCard .fb-sent{font-size:12.5px;color:#7ee0a3;font-weight:600;display:none;padding:2px 0}',
+      '@media (max-width:640px){#aiFeedbackWrap{right:12px;left:12px;max-width:none;bottom:80px}}'
+    ].join('\n');
+    document.head.appendChild(css);
+  }
+
+  var wrap = null;
+  function ensureWrap() {
+    if (wrap && document.body.contains(wrap)) return wrap;
+    wrap = document.createElement('div');
+    wrap.id = 'aiFeedbackWrap';
+    wrap.innerHTML = '' +
+      '<div id="aiFeedbackCard">' +
+      '<button class="fb-close" id="aiFbClose" aria-label="关闭">✕</button>' +
+      '<div id="aiFbNormal">' +
+      '<div class="fb-title"><span class="dot"></span><span id="aiFbTitle">这次回答可能不够准确</span></div>' +
+      '<div class="fb-desc" id="aiFbDesc">你的问题我已经记下来啦，站长看到后会持续优化 AI。你也可以直接反馈，或补充信息让我答得更准～</div>' +
+      '<div class="fb-actions">' +
+      '<button class="fb-btn" id="aiFbReport">反馈给站长</button>' +
+      '<button class="fb-btn ghost" id="aiFbMore">补充信息再问</button>' +
+      '</div>' +
+      '<div class="fb-sent" id="aiFbSent">已送达，谢谢反馈！</div>' +
+      '</div>' +
+      '<div id="aiFbRestricted" style="display:none">' +
+      '<div class="fb-title"><span class="dot"></span><span>AI 服务暂不可用</span></div>' +
+      '<div class="fb-desc" id="aiFbRDesc">当前区域/账号暂不可使用 AI 服务。你可以提交协助申请，站长收到后会尽快处理～</div>' +
+      '<input class="fb-input" id="aiFbRNote" placeholder="补充说明（选填）" maxlength="300">' +
+      '<input class="fb-input" id="aiFbRContact" placeholder="联系方式（选填）" maxlength="120">' +
+      '<div class="fb-actions">' +
+      '<button class="fb-btn" id="aiFbRSend">提交协助申请</button>' +
+      '<button class="fb-btn ghost" id="aiFbRClose">知道了</button>' +
+      '</div>' +
+      '<div class="fb-sent" id="aiFbRSent">已提交，站长收到后会尽快处理！</div>' +
+      '</div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    document.getElementById('aiFbClose').addEventListener('click', hide);
+    document.getElementById('aiFbReport').addEventListener('click', reportToOwner);
+    document.getElementById('aiFbMore').addEventListener('click', askMore);
+    document.getElementById('aiFbRSend').addEventListener('click', submitAppeal);
+    document.getElementById('aiFbRClose').addEventListener('click', hide);
+    return wrap;
+  }
+
+  var hideTimer = null;
+  function show() {
+    ensureWrap();
+    wrap.classList.add('show');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hide, 15000);
+  }
+  function hide() {
+    clearTimeout(hideTimer);
+    if (wrap) wrap.classList.remove('show');
+  }
+
+  var lastQuestion = '';
+  function reportToOwner() {
+    try {
+      var q = String(lastQuestion || '').slice(0, 200);
+      var uid = '';
+      try { if (typeof p3GetAnonUid === 'function') uid = p3GetAnonUid(); } catch (e) {}
+      fetch('/api/qa-logs', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: q, reason: 'user-report', hits: 0, answered: false, uid: uid })
+      }).catch(function () {});
+    } catch (e) {}
+    document.getElementById('aiFbReport').style.display = 'none';
+    document.getElementById('aiFbMore').style.display = 'none';
+    document.getElementById('aiFbSent').style.display = 'block';
+    setTimeout(hide, 2200);
+  }
+  function askMore() {
+    hide();
+    var inp = document.getElementById('aiChatInput');
+    if (inp) {
+      inp.focus();
+      inp.placeholder = '补充机型 / 航班号 / 城市或日期，我能答得更准～';
+    }
+    /* 顺带给出可点示例（会话级只提示一次） */
+    try {
+      if (!sessionStorage.getItem('ai_fb_guided')) {
+        sessionStorage.setItem('ai_fb_guided', '1');
+        var q = String(lastQuestion || '');
+        var tip = '试试补充：「' + q.slice(0, 24) + '」具体是指哪款机型 / 哪条航线呢？';
+        try { if (typeof window.showAiToast === 'function') window.showAiToast(tip); } catch (e) {}
+      }
+    } catch (e) {}
+  }
+
+  var NEED_CONTEXT = /多少钱|票价|价格|怎么买|怎么去|几点|时刻|航班|航线|在哪|哪里|如何|路线|怎么飞|能不能|可以吗|是什么型号|是哪款/i;
+  var HAS_ENTITY = /[0-9Ａ-Ｚa-zA-Z]{2,}|航班|CZ|MU|CA|HU|ZH|3U|9C|HU|MF|GS|机型|航空|机场|北京|上海|广州|深圳|成都|昆明|西安|重庆|杭州|南京|武汉|长沙|乌鲁木齐|拉萨/i;
+  var SEEN_KEY = 'ai_feedback_seen';
+
+  /* 受限提示：展示协助申请表单（10 分钟内不重复弹出） */
+  function showRestricted(desc) {
+    try {
+      var now = Date.now();
+      var seen = JSON.parse(sessionStorage.getItem(SEEN_KEY) || '{}');
+      var k = 'restricted';
+      if (seen[k] && now - seen[k] < 600000) return;
+      seen[k] = now;
+      sessionStorage.setItem(SEEN_KEY, JSON.stringify(seen));
+    } catch (e) {}
+    ensureWrap();
+    document.getElementById('aiFbNormal').style.display = 'none';
+    document.getElementById('aiFbRestricted').style.display = 'block';
+    if (desc) document.getElementById('aiFbRDesc').textContent = desc + ' 你可以提交协助申请，站长收到后会尽快处理～';
+    document.getElementById('aiFbRNote').value = '';
+    document.getElementById('aiFbRContact').value = '';
+    document.getElementById('aiFbRSend').style.display = '';
+    document.getElementById('aiFbRClose').style.display = '';
+    document.getElementById('aiFbRSent').style.display = 'none';
+    show();
+  }
+
+  /* 提交协助申请（公开接口，访客标识由服务端从 Cookie 解析） */
+  function submitAppeal() {
+    var note = (document.getElementById('aiFbRNote').value || '').trim();
+    var contact = (document.getElementById('aiFbRContact').value || '').trim();
+    var btn = document.getElementById('aiFbRSend');
+    btn.disabled = true;
+    fetch('/api/admin/control?action=appeal', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: String(lastQuestion || '').slice(0, 200), note: note, contact: contact })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      btn.disabled = false;
+      if (d && d.ok) {
+        btn.style.display = 'none';
+        document.getElementById('aiFbRClose').style.display = 'none';
+        document.getElementById('aiFbRSent').style.display = 'block';
+        setTimeout(hide, 2600);
+      } else {
+        btn.textContent = '提交失败，请重试';
+        setTimeout(function () { btn.textContent = '提交协助申请'; }, 2200);
+      }
+    }).catch(function () {
+      btn.disabled = false;
+      btn.textContent = '网络异常，请重试';
+      setTimeout(function () { btn.textContent = '提交协助申请'; }, 2200);
+    });
+  }
+
+  function maybe(o, ret) {
+    try {
+      var msgs = (o && o.messages) || [];
+      var q = '';
+      for (var i = msgs.length - 1; i >= 0; i--) {
+        var mm = msgs[i];
+        if (mm && mm.role === 'user') { q = (mm.content || ''); break; }
+      }
+      if (Array.isArray(q)) q = q.map(function (p) { return (p && (p.text || p.content)) || ''; }).join(' ');
+      q = String(q || '').trim();
+      if (!q) return;
+      var ans = (ret && ret.choices && ret.choices[0] && ret.choices[0].message && ret.choices[0].message.content) || '';
+      ans = String(ans || '').trim();
+      lastQuestion = q;
+
+      var needNotice = false;
+      var needGuide = false;
+      if (ret && ret._degraded) needNotice = true;                      // 服务端降级兜底
+      else if (ans.length < 10) needNotice = true;                       // 空答 / 过短
+      if (NEED_CONTEXT.test(q) && !HAS_ENTITY.test(q)) needGuide = true; // 缺关键信息 → 引导补全
+
+      if (!needNotice && !needGuide) return;
+      /* 同类型提示 10 分钟内不重复骚扰 */
+      var key = (needGuide ? 'g:' : 'n:') + q.slice(0, 40);
+      try {
+        var seen = JSON.parse(sessionStorage.getItem(SEEN_KEY) || '{}');
+        var now = Date.now();
+        if (seen[key] && now - seen[key] < 600000) return;
+        seen[key] = now;
+        sessionStorage.setItem(SEEN_KEY, JSON.stringify(seen));
+      } catch (e) {}
+      if (needGuide && !needNotice) {
+        document.getElementById('aiFbTitle').textContent = '补充一下信息，答得更准';
+        document.getElementById('aiFbDesc').textContent = '你的问题里还没提到机型 / 航班 / 城市等关键信息，补充后我会给出更准确的答案～';
+      } else {
+        document.getElementById('aiFbTitle').textContent = '这次回答可能不够准确';
+        document.getElementById('aiFbDesc').textContent = '你的问题我已经记下来啦，站长看到后会持续优化 AI。你也可以直接反馈，或补充信息让我答得更准～';
+      }
+      show();
+    } catch (e) {}
+  }
+
+  window.AiFeedback = { maybe: maybe, show: show, hide: hide, showRestricted: showRestricted, submitAppeal: submitAppeal };
+})();
+
 
 /* ===== AI 全局配置（已无密钥：调用统一走同源 /api/chat） ===== */
 const AI_CONFIG = { timeout: 90000 };

@@ -292,7 +292,8 @@ function defaultOriginAllowed(origin, env) {
     for (var i = 0; i < extra.length; i++) {
       if (host === extra[i] || host.slice(-(extra[i].length + 1)) === '.' + extra[i]) return true;
     }
-    return host === 'henry126923.pages.dev' || /\.henry126923\.pages\.dev$/.test(host);
+    return host === 'henry126923.pages.dev' || /\.henry126923\.pages\.dev$/.test(host)
+      || host === 'henry126923-admincenter.pages.dev' || /\.henry126923-admincenter\.pages\.dev$/.test(host);
   } catch (e) {
     return false;
   }
