@@ -40,8 +40,8 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_LIGHT', alias: 'AI_MODEL_STANDARD' },
       zhipu: { key: 'ZHIPU_MODEL_LIGHT', alias: 'ZHIPU_MODEL_STANDARD' }
     },
-    model: 'glm-4.5-air',
-    models: { kimi: 'glm-4.5-air', zhipu: 'glm-4.5-air' },
+    model: 'kimi-k2.6',
+    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5-air' },
     label: '标准档',
     maxTokens: 1600,
     temperature: 0.6,
