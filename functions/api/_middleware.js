@@ -58,7 +58,8 @@ function defaultOriginAllowed(origin) {
     if (u.protocol !== 'https:') return false;
     var host = u.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return true;      // wrangler pages dev
-    return host === 'henry126923.pages.dev' || /\.henry126923\.pages\.dev$/.test(host);
+    return host === 'henry126923.pages.dev' || /\.henry126923\.pages\.dev$/.test(host)
+      || host === 'henry126923-admincenter.pages.dev' || /\.henry126923-admincenter\.pages\.dev$/.test(host);
   } catch (e) {
     return false;
   }
@@ -242,8 +243,12 @@ export async function onRequest(context) {
     );
   }
 
-  // ---- 5. 管理端口令存在性预检（正确性由业务函数校验） ----
-  if (isAdmin && !readAdminToken(request)) {
+  // ---- 5. 管理端口令存在性预检（正确性由业务函数校验）
+  //        公开通道豁免：POST /api/admin/control?action=appeal 是访客提交「解除协助申请」，
+  //        无需管理员口令，直接放行到业务函数（control.js 内部二次校验访客标识）。
+  var isPublicAppeal =
+    isAdmin && request.method === 'POST' && url.searchParams.get('action') === 'appeal';
+  if (isAdmin && !isPublicAppeal && !readAdminToken(request)) {
     return jsonResponse(
       { ok: false, error: 'unauthorized', message: '缺少管理员口令（X-Admin-Token 或 ?token=）' },
       401,
