@@ -40,12 +40,12 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_LIGHT', alias: 'AI_MODEL_STANDARD' },
       zhipu: { key: 'ZHIPU_MODEL_LIGHT', alias: 'ZHIPU_MODEL_STANDARD' }
     },
-    model: 'kimi-k2.6',
-    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5-air' },
+    model: 'glm-4.5-air',
+    models: { kimi: 'glm-4.5-air', zhipu: 'glm-4.5-air' },
     label: '标准档',
     maxTokens: 1600,
     temperature: 0.6,
-    timeoutMs: 70000,
+    timeoutMs: 30000,
     purpose: '日常问答 / 术语解释 / 功能引导 / 内容润色 / 图文识图'
   },
   flagship: {
@@ -54,12 +54,12 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_FLAGSHIP' },
       zhipu: { key: 'ZHIPU_MODEL_FLAGSHIP' }
     },
-    model: 'kimi-k2.6',
-    models: { kimi: 'kimi-k2.6', zhipu: 'glm-4.5-air' },
+    model: 'glm-4.5-air',
+    models: { kimi: 'glm-4.5-air', zhipu: 'glm-4.5-air' },
     label: '旗舰档',
     maxTokens: 4096,
     temperature: 0.6,
-    timeoutMs: 90000,
+    timeoutMs: 45000,
     purpose: '复杂推理 / 多机型横向对比 / 长文本分析 / 方案生成'
   },
   vision: {
@@ -73,7 +73,7 @@ export const TIER_DEFAULTS = {
     label: '视觉档',
     maxTokens: 2048,
     temperature: 0.5,
-    timeoutMs: 80000,
+    timeoutMs: 40000,
     purpose: '图片识别 / 看图问答 / 机型外观判定（多模态 content 数组）'
   },
   code: {
@@ -82,12 +82,12 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_CODE' },
       zhipu: { key: 'ZHIPU_MODEL_CODE' }
     },
-    model: 'kimi-k2.7-code-highspeed',
-    models: { kimi: 'kimi-k2.7-code-highspeed', zhipu: 'glm-4.5-air' },
+    model: 'glm-4.5-air',
+    models: { kimi: 'glm-4.5-air', zhipu: 'glm-4.5-air' },
     label: '代码档',
     maxTokens: 4096,
     temperature: 0.3,
-    timeoutMs: 90000,
+    timeoutMs: 45000,
     purpose: '代码生成 / 脚本改写 / 结构化配置输出'
   }
 };
@@ -166,8 +166,8 @@ export function modelAllowlist(env) {
   });
   // Kimi 全系实测可用模型一律放行，便于前端按功能显式指定档位
   base.push('kimi-k3', 'kimi-k2.6', 'kimi-k2.7-code', 'kimi-k2.7-code-highspeed');
-  // 智谱仅保留「智谱 4」= glm-4.5-air（免费兜底档），其余智谱模型一律不放行
-  base.push('glm-4.5-air');
+  // 智谱仅保留「智谱 4」= glm-4.5-air（免费兜底档）与视觉档 glm-4.5v，其余智谱模型一律不放行
+  base.push('glm-4.5-air', 'glm-4.5v');
   var extra = parseList(env && env.AI_MODEL_ALLOWLIST).concat(parseList(env && env.ZHIPU_MODEL_ALLOWLIST));
   return base.concat(extra).filter(function (v, i, arr) { return v && arr.indexOf(v) === i; });
 }

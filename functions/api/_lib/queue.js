@@ -90,7 +90,7 @@ async function acquireLease(env, opts) {
   // Cloudflare KV 硬性要求 expirationTtl ≥ 60s：低于 60 会直接抛错，锁永远写不进去（历史故障根因）
   var ttlSec = Math.max(60, Math.min(3600, Math.round(toInt(env.AI_QUEUE_LEASE_TTL_MS, 90000) / 1000)));
   // 排队等待上限：锁正常时几乎瞬时获得，超过该值说明上游被长任务占用，尽早降级而非让访客白等
-  var deadline = Date.now() + toInt(env.AI_QUEUE_WAIT_TIMEOUT_MS, 30000);
+  var deadline = Date.now() + toInt(env.AI_QUEUE_WAIT_TIMEOUT_MS, 20000);
   var poll = Math.max(120, toInt(env.AI_QUEUE_POLL_MS, 350));
   var started = Date.now();
   var position = 0;

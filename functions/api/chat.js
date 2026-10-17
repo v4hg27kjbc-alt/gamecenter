@@ -625,9 +625,15 @@ function streamUpstream(info) {
           done = true;
         }
       }
+      // 心跳：排队等待与上游响应期间持续回传 SSE 注释行，避免网关因长时间无数据掐断连接
+      // （历史故障根因：kimi-k2.6 思考期 60~120s 无任何字节回传，客户端被 IncompleteRead / SSL 超时打断）
+      var hbTimer = setInterval(function () {
+        send(': hb\n\n');
+      }, 12000);
       function finish() {
         if (done) return;
         done = true;
+        try { clearInterval(hbTimer); } catch (e) { /* 忽略 */ }
         try { controller.close(); } catch (e) { /* 忽略 */ }
       }
 
