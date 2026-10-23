@@ -146,8 +146,9 @@ async function sendSmsVerifyCode(ak, sk, phone, code, env) {
     const text = await res.text();
     let data = null;
     try { data = JSON.parse(text); } catch (e) { data = null; }
-    if (res.ok && data && data.code === 'OK') {
-      const bizId = data.model && data.model.bizId ? data.model.bizId : '';
+    if (res.ok && data && (data.code === 'OK' || data.Code === 'OK')) {
+      const model = data.model || data.Model || {};
+      const bizId = model.bizId || model.BizId || '';
       return { ok: true, bizId: bizId };
     }
     const msg = (data && (data.message || data.Message)) || text.slice(0, 120) || ('HTTP ' + res.status);
