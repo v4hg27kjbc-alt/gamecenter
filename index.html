@@ -6204,7 +6204,6 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     <button class="filter-chip quiz-btn" id="badgeBtn" onclick="openBadges()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l3 3 5-6"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.9 4.9l1.4 1.4"/><path d="M17.7 17.7l1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.9 19.1l1.4-1.4"/><path d="M17.7 6.3l1.4-1.4"/></svg><span id="badgeBtnText">成就</span></button>
     <div class="collection-count" id="collectionCount" data-pattern="collected">已收藏 0 架</div>
     <button class="filter-chip collect-record-btn" id="collectRecordBtn" onclick="openCollectRecord()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21z"/></svg><span id="collectRecordBtnText">收藏记录</span><span class="collect-record-dot" id="collectRecordDot">0</span></button>
-    <button class="filter-chip ai-chat-btn" id="photoAiBtn" onclick="openPhotoAi()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 17l5-5 4 4 3-3 6 6"/></svg><span id="photoAiBtnText">照片识机</span></button>
     <button class="filter-chip ai-chat-btn" id="collectAnalysisBtn" onclick="openCollectAnalysis()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M3 3v18h18"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="12" y1="16" x2="12" y2="6"/><line x1="17" y1="16" x2="17" y2="13"/></svg><span id="collectAnalysisBtnText">AI 收藏分析</span></button>
     <button class="filter-chip ai-chat-btn" id="aiExpoBtn" onclick="openAiExpo()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M12 3l2.2 5.4L20 10l-5.8 1.6L12 17l-2.2-5.4L4 10l5.8-1.6z"/><path d="M12 17v4"/></svg><span id="aiExpoBtnText">AI 策划展</span></button>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
@@ -18935,9 +18934,9 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 <script>
 /* ============================================================================
  * v70 阶段1 · 问 AI 双模型路由层
- *   1) 左上角模型选择器：智谱 GLM（6 版） / Kimi（3 版）
- *   2) 快慢分流：快速问答 → 智谱；深度思考 → Kimi（选中 Kimi 任意版本自动进深度）
- *   3) 每日额度：深度思考每自然日 5 次，localStorage 计数，第 6 次自动降级智谱并提示
+ *   1) 左上角模型选择器：Kimi（3 版：K2.6 / K3 / K2.7-Code）
+ *   2) 全站统一 Kimi：快速问答与深度思考均走 Kimi（智谱已全线移除）
+ *   3) 每日额度：深度思考每自然日 5 次，localStorage 计数，第 6 次自动切回 Kimi K2.6 并提示
  *   4) 纯增量：不覆盖任何站点既有函数；通过 window.__avAiRoute() 钩子向
  *      AIBridge.chat 提供 provider / model / mode（仅作用于未指定 tier 的主问答）
  *   零密钥：本模块不接触任何 API Key，请求统一由 AIBridge 走同源 /api/chat
@@ -18952,7 +18951,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   var DEEP_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
   var DEGRADE_TEXT = '今日 Kimi K3 深度思考次数已用完，已自动切换 Kimi K2.6 继续回答';
 
-  /* ---------------- 模型目录（全站统一 Kimi；智谱仅保留智谱 4 = GLM-4.5-Air 免费兜底） ---------------- */
+  /* ---------------- 模型目录（全站仅 Kimi；智谱已全部下线） ---------------- */
   var CATALOG = [
     {
       provider: 'kimi', name: 'Kimi（全站统一默认）', mode: 'deep',
@@ -18960,12 +18959,6 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
         { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '默认 · 全站统一' },
         { id: 'kimi-k3', label: 'Kimi K3', sub: '深度 · 每日限次' },
         { id: 'kimi-k2.7-code', label: 'Kimi K2.7-Code', sub: '代码' }
-      ]
-    },
-    {
-      provider: 'zhipu', name: '智谱（暂不可用）', mode: 'fast', disabled: true,
-      items: [
-        { id: 'glm-4.5-air', label: 'GLM-4.5-Air', sub: '智谱 4 · 暂不可用' }
       ]
     }
   ];
