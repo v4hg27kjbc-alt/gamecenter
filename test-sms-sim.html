@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>短信验证码测试</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f7; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { background: #fff; border-radius: 16px; box-shadow: 0 2px 24px rgba(0,0,0,0.08); padding: 36px 32px; width: 380px; max-width: 90vw; }
+  h2 { text-align: center; color: #1d1d1f; margin-bottom: 24px; font-size: 20px; }
+  .field { margin-bottom: 16px; }
+  label { display: block; font-size: 13px; color: #6e6e73; margin-bottom: 6px; }
+  input { width: 100%; height: 44px; border: 1.5px solid #d2d2d7; border-radius: 10px; padding: 0 14px; font-size: 15px; outline: none; transition: border-color .2s; }
+  input:focus { border-color: #007aff; }
+  input::placeholder { color: #aeaeb2; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  .btn { height: 44px; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; flex: 1; }
+  .btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-send { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; min-width: 120px; }
+  .btn-send:hover { opacity: .9; }
+  .btn-send:disabled { opacity: .5; cursor: not-allowed; }
+  .msg { margin-top: 16px; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; display: none; }
+  .msg.success { display: block; background: #eafaf1; color: #1b9a3c; border: 1px solid #b7eac8; }
+  .msg.error { display: block; background: #fef0ef; color: #cf352e; border: 1px solid #fddbd8; }
+  .msg.info { display: block; background: #edf5ff; color: #1a56db; border: 1px solid #cfe0fa; }
+  .divider { height: 1px; background: #e5e5ea; margin: 20px 0; }
+  .section-title { font-size: 13px; color: #6e6e73; margin-bottom: 12px; }
+  .log-box { background: #fafafa; border: 1px solid #e5e5ea; border-radius: 10px; padding: 12px; max-height: 200px; overflow-y: auto; font-family: SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.6; color: #424245; }
+  .log-entry { padding: 2px 0; }
+  .log-time { color: #8e8e93; }
+  .log-ok { color: #1b9a3c; }
+  .log-err { color: #cf352e; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .badge-sim { background: #fff3cd; color: #856404; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>📱 短信验证码测试 <span class="badge badge-sim">模拟模式</span></h2>
+
+  <div class="field">
+    <label>手机号</label>
+    <input type="tel" id="phone" placeholder="请输入手机号" maxlength="11" value="">
+  </div>
+
+  <button class="btn btn-send" id="sendBtn" onclick="sendCode()">获取验证码</button>
+
+  <div id="sendMsg" class="msg"></div>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label>验证码（模拟生成）</label>
+    <input type="text" id="code" placeholder="点击发送后自动填入" maxlength="6">
+  </div>
+
+  <button class="btn btn-primary" id="verifyBtn" onclick="verifyCode()" disabled>验证登录</button>
+
+  <div id="verifyMsg" class="msg"></div>
+
+  <div class="divider"></div>
+
+  <p class="section-title">操作日志</p>
+  <div class="log-box" id="logBox"></div>
+</div>
+
+<script>
+const SIM_CODE = '888888'; // 模拟验证码固定值
+let codeSent = false;
+
+function log(text, type) {
+  const box = document.getElementById('logBox');
+  const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  const cls = type === 'ok' ? 'log-ok' : type === 'err' ? 'log-err' : '';
+  box.innerHTML += `<div class="log-entry"><span class="log-time">${time}</span> <span class="${cls}">${text}</span></div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+function showMsg(el, text, type) {
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+function sendCode() {
+  const phone = document.getElementById('phone').value.trim();
+  if (!/^1[3-9]\d{9}$/.test(phone)) {
+    showMsg(document.getElementById('sendMsg'), '手机号格式不正确', 'error');
+    log('发送失败：手机号格式错误', 'err');
+    return;
+  }
+
+  if (codeSent) {
+    showMsg(document.getElementById('sendMsg'), '已发送过验证码，请等待或重新输入手机号', 'info');
+    log('重复发送请求被拒绝', 'err');
+    return;
+  }
+
+  showMsg(document.getElementById('sendMsg'), '正在发送...', 'info');
+  log(`向 ${phone} 发送验证码...`, '');
+
+  setTimeout(function() {
+    codeSent = true;
+    document.getElementById('code').value = SIM_CODE;
+    document.getElementById('code').disabled = false;
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('verifyBtn').disabled = false;
+    showMsg(document.getElementById('sendMsg'), `✅ 验证码已发送至 ${phone.slice(0,3)}****${phone.slice(7)}（模拟码: ${SIM_CODE}）`, 'success');
+    log(`✅ 验证码已发送到 ${phone}`, 'ok');
+  }, 800);
+}
+
+function verifyCode() {
+  const phone = document.getElementById('phone').value.trim();
+  const code = document.getElementById('code').value.trim();
+
+  if (!code) {
+    showMsg(document.getElementById('verifyMsg'), '请输入验证码', 'error');
+    log('验证失败：未输入验证码', 'err');
+    return;
+  }
+
+  if (code === SIM_CODE) {
+    showMsg(document.getElementById('verifyMsg'), '✅ 验证通过！登录成功！', 'success');
+    log(`✅ 验证码校验通过 (${SIM_CODE}) - 登录成功`, 'ok');
+    document.getElementById('verifyBtn').disabled = true;
+  } else {
+    showMsg(document.getElementById('verifyMsg'), '❌ 验证码错误，请重试', 'error');
+    log(`❌ 验证码校验失败 (输入:${code}, 正确:${SIM_CODE})`, 'err');
+  }
+}
+
+// 初始化日志
+log('测试页面加载完成，进入模拟模式', '');
+</script>
+</body>
+</html>
