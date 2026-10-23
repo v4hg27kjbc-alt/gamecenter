@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>短信验证码登录测试</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #f4f6fb;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 380px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(31, 45, 61, 0.10);
+    padding: 32px 28px;
+  }
+  h1 {
+    font-size: 20px;
+    color: #1f2d3d;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #8492a6;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    color: #3c4a5d;
+    margin: 14px 0 6px;
+  }
+  .row { display: flex; gap: 8px; }
+  input {
+    flex: 1;
+    width: 100%;
+    height: 44px;
+    border: 1px solid #d3dce6;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 15px;
+    color: #1f2d3d;
+    outline: none;
+    background: #fafbfd;
+  }
+  input:focus { border-color: #3b82f6; background: #fff; }
+  button {
+    height: 44px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .btn-code {
+    min-width: 116px;
+    background: #e8f0fe;
+    color: #3b82f6;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .btn-code:disabled { color: #a0aec0; background: #edf2f7; cursor: not-allowed; }
+  .btn-login {
+    width: 100%;
+    margin-top: 24px;
+    background: #3b82f6;
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn-login:disabled { background: #9db8e8; cursor: not-allowed; }
+  .msg {
+    margin-top: 16px;
+    min-height: 20px;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+    word-break: break-all;
+  }
+  .msg.ok { color: #16a34a; }
+  .msg.err { color: #dc2626; }
+  .msg.info { color: #8492a6; }
+  .tip {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed #e2e8f0;
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>短信验证码登录测试</h1>
+    <p class="sub">民航客机收藏馆 · 独立测试页（不依赖主站页面）</p>
+
+    <label for="phoneInput">手机号</label>
+    <div class="row">
+      <input type="tel" id="phoneInput" maxlength="11" placeholder="请输入 11 位手机号" autocomplete="tel">
+      <button type="button" class="btn-code" id="sendBtn">获取验证码</button>
+    </div>
+
+    <label for="codeInput">验证码</label>
+    <input type="text" id="codeInput" maxlength="6" placeholder="请输入 6 位验证码" autocomplete="one-time-code">
+
+    <button type="button" class="btn-login" id="loginBtn">登 录</button>
+    <div class="msg" id="msg"></div>
+
+    <p class="tip">说明：验证码 5 分钟内有效，同手机号 60 秒内限发 1 条。登录仅验证短信流程，未接入真实账号体系。</p>
+  </div>
+
+<script>
+(function () {
+  var sendBtn = document.getElementById('sendBtn');
+  var loginBtn = document.getElementById('loginBtn');
+  var phoneInput = document.getElementById('phoneInput');
+  var codeInput = document.getElementById('codeInput');
+  var msgEl = document.getElementById('msg');
+  var countdown = 0;
+  var timer = null;
+
+  function showMsg(text, type) {
+    msgEl.textContent = text;
+    msgEl.className = 'msg ' + (type || 'info');
+  }
+  function validPhone(p) {
+    return /^1[3-9]\d{9}$/.test(p);
+  }
+
+  function startCountdown(sec) {
+    countdown = sec;
+    sendBtn.disabled = true;
+    sendBtn.textContent = countdown + 's';
+    clearInterval(timer);
+    timer = setInterval(function () {
+      countdown -= 1;
+      if (countdown <= 0) {
+        clearInterval(timer);
+        sendBtn.disabled = false;
+        sendBtn.textContent = '获取验证码';
+      } else {
+        sendBtn.textContent = countdown + 's';
+      }
+    }, 1000);
+  }
+
+  sendBtn.addEventListener('click', async function () {
+    var phone = phoneInput.value.trim();
+    if (!validPhone(phone)) {
+      showMsg('请输入正确的 11 位手机号', 'err');
+      return;
+    }
+    showMsg('正在发送验证码…', 'info');
+    sendBtn.disabled = true;
+    try {
+      var res = await fetch('/api/sms-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber: phone })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (data && data.ok) {
+        showMsg('验证码已发送至 ' + (data.phone || phone) + '（' + (data.expireIn || 300) + ' 秒内有效）', 'ok');
+        codeInput.focus();
+        startCountdown(60);
+      } else {
+        showMsg((data && data.message) || '发送失败，请稍后再试', 'err');
+        sendBtn.disabled = false;
+      }
+    } catch (e) {
+      showMsg('网络异常，请稍后再试', 'err');
+      sendBtn.disabled = false;
+    }
+  });
+
+  loginBtn.addEventListener('click', async function () {
+    var phone = phoneInput.value.trim();
+    var code = codeInput.value.trim();
+    if (!validPhone(phone)) {
+      showMsg('请输入正确的 11 位手机号', 'err');
+      return;
+    }
+    if (!/^\d{4,8}$/.test(code)) {
+      showMsg('请输入正确的验证码', 'err');
+      return;
+    }
+    showMsg('正在校验…', 'info');
+    loginBtn.disabled = true;
+    try {
+      var res = await fetch('/api/sms-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber: phone, code: code })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (data && data.ok) {
+        showMsg('登录成功：验证码校验通过（手机号 ' + data.phone + '）', 'ok');
+      } else {
+        showMsg((data && data.message) || '校验失败，请重试', 'err');
+      }
+    } catch (e) {
+      showMsg('网络异常，请稍后再试', 'err');
+    }
+    loginBtn.disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
