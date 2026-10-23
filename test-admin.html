@@ -6,10 +6,12 @@
 <title>测试后台</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #fff; color: #333; min-height: 100vh; }
-.header { background: #fff; border-bottom: 1px solid #eee; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #fff; color: #333; min-height: 100vh; transition: background .4s, color .4s; }
+.header { background: #fff; border-bottom: 1px solid #eee; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; transition: background .4s, border-color .4s; }
 .header h1 { font-size: 20px; font-weight: 600; }
-.tabs { display: flex; gap: 0; border-bottom: 1px solid #eee; padding: 0 24px; }
+.theme-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd; background: transparent; cursor: pointer; font-size: 13px; transition: all .2s; color: inherit; }
+.theme-btn:hover { background: rgba(0,0,0,.05); }
+.tabs { display: flex; gap: 0; border-bottom: 1px solid #eee; padding: 0 24px; transition: border-color .4s; }
 .tab { padding: 12px 20px; cursor: pointer; font-size: 14px; color: #999; border-bottom: 2px solid transparent; transition: all .2s; user-select: none; }
 .tab.active { color: #333; border-bottom-color: #4a90d9; font-weight: 500; }
 .tab:hover:not(.active) { color: #555; }
@@ -17,11 +19,11 @@ body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* 短信面板 */
-.sms-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+/* 卡片 */
+.sms-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 24px; margin-bottom: 20px; transition: background .4s, border-color .4s, box-shadow .4s; }
 .sms-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
 .form-row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
-.input { flex: 1; height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; font-size: 14px; outline: none; transition: border-color .2s; }
+.input { flex: 1; height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; font-size: 14px; outline: none; transition: all .2s; }
 .input:focus { border-color: #4a90d9; }
 .btn { height: 40px; padding: 0 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: all .2s; white-space: nowrap; }
 .btn-primary { background: #4a90d9; color: #fff; }
@@ -33,7 +35,7 @@ body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 .msg { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-top: 12px; display: none; }
 .msg.success { display: block; background: #e8f5e9; color: #2e7d32; }
 .msg.error { display: block; background: #ffebee; color: #c62828; }
-.log-area { background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 12px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; line-height: 1.8; }
+.log-area { background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 12px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; line-height: 1.8; transition: background .4s, border-color .4s; }
 .log-entry { padding: 2px 0; border-bottom: 1px dashed #eee; }
 .log-time { color: #999; }
 
@@ -48,12 +50,117 @@ body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 .user-table th { background: #fafafa; font-weight: 500; color: #666; position: sticky; top: 0; }
 .user-table tr:hover td { background: #fafafa; }
 .empty-tip { text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
+
+/* ===== 主题：深色 ===== */
+body.dark { background: #1a1a2e; color: #e0e0e0; }
+body.dark .header { background: #16213e; border-color: #2a2a4a; }
+body.dark .tabs { border-color: #2a2a4a; }
+body.dark .tab.active { color: #e0e0e0; border-bottom-color: #e94560; }
+body.dark .sms-card { background: #16213e; border-color: #2a2a4a; }
+body.dark .input { background: #0f3460; border-color: #2a2a4a; color: #e0e0e0; }
+body.dark .input:focus { border-color: #e94560; }
+body.dark .btn-primary { background: #e94560; }
+body.dark .btn-primary:hover { background: #c73650; }
+body.dark .btn-ghost { color: #e94560; border-color: #2a2a4a; }
+body.dark .btn-ghost:hover { background: rgba(233,69,96,.1); }
+body.dark .log-area { background: #0f3460; border-color: #2a2a4a; }
+body.dark .log-entry { border-color: #2a2a4a; }
+body.dark .user-table th { background: #0f3460; color: #aaa; }
+body.dark .user-table td { border-color: #2a2a4a; }
+body.dark .user-table tr:hover td { background: #0f3460; }
+body.dark .empty-tip { color: #666; }
+body.dark #dinoCanvas { background: #16213e; border-color: #2a2a4a; }
+
+/* ===== 主题：渐变紫蓝 ===== */
+body.gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+body.gradient .header { background: rgba(255,255,255,.1); backdrop-filter: blur(10px); border-color: rgba(255,255,255,.15); }
+body.gradient .tabs { border-color: rgba(255,255,255,.15); }
+body.gradient .tab { color: rgba(255,255,255,.7); }
+body.gradient .tab.active { color: #fff; border-bottom-color: #fff; }
+body.gradient .sms-card { background: rgba(255,255,255,.12); backdrop-filter: blur(10px); border-color: rgba(255,255,255,.2); }
+body.gradient .input { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.25); color: #fff; }
+body.gradient .input::placeholder { color: rgba(255,255,255,.5); }
+body.gradient .input:focus { border-color: rgba(255,255,255,.6); }
+body.gradient .btn-primary { background: rgba(255,255,255,.25); backdrop-filter: blur(5px); color: #fff; }
+body.gradient .btn-primary:hover { background: rgba(255,255,255,.35); }
+body.gradient .btn-primary:disabled { background: rgba(255,255,255,.1); color: rgba(255,255,255,.4); }
+body.gradient .btn-ghost { color: #fff; border-color: rgba(255,255,255,.3); }
+body.gradient .btn-ghost:hover { background: rgba(255,255,255,.15); }
+body.gradient .msg.success { background: rgba(46,125,50,.3); color: #b9f6ca; }
+body.gradient .msg.error { background: rgba(198,40,40,.3); color: #ffcdd2; }
+body.gradient .log-area { background: rgba(0,0,0,.15); border-color: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
+body.gradient .log-entry { border-color: rgba(255,255,255,.08); }
+body.gradient .log-time { color: rgba(255,255,255,.4); }
+body.gradient .user-table th { background: rgba(0,0,0,.15); color: rgba(255,255,255,.6); }
+body.gradient .user-table td { border-color: rgba(255,255,255,.1); }
+body.gradient .user-table tr:hover td { background: rgba(255,255,255,.05); }
+body.gradient .empty-tip { color: rgba(255,255,255,.4); }
+body.gradient #dinoCanvas { background: rgba(0,0,0,.2); border-color: rgba(255,255,255,.2); }
+
+/* ===== 主题：暖色日落 ===== */
+body.sunset { background: linear-gradient(to bottom, #ffecd2 0%, #fcb69f 100%); color: #333; }
+body.sunset .header { background: rgba(255,255,255,.7); backdrop-filter: blur(10px); border-color: rgba(0,0,0,.08); }
+body.sunset .tabs { border-color: rgba(0,0,0,.08); }
+body.sunset .tab { color: #888; }
+body.sunset .tab.active { color: #333; border-bottom-color: #e67e22; }
+body.sunset .sms-card { background: rgba(255,255,255,.75); backdrop-filter: blur(10px); border-color: rgba(0,0,0,.08); }
+body.sunset .input { background: rgba(255,255,255,.6); border-color: rgba(0,0,0,.1); color: #333; }
+body.sunset .input:focus { border-color: #e67e22; }
+body.sunset .btn-primary { background: #e67e22; }
+body.sunset .btn-primary:hover { background: #d35400; }
+body.sunset .btn-ghost { color: #e67e22; border-color: rgba(0,0,0,.1); }
+body.sunset .btn-ghost:hover { background: rgba(230,126,34,.1); }
+body.sunset .msg.success { background: rgba(46,125,50,.15); color: #2e7d32; }
+body.sunset .msg.error { background: rgba(198,40,40,.15); color: #c62828; }
+body.sunset .log-area { background: rgba(255,255,255,.5); border-color: rgba(0,0,0,.08); }
+body.sunset .log-entry { border-color: rgba(0,0,0,.06); }
+body.sunset .log-time { color: #999; }
+body.sunset .user-table th { background: rgba(255,255,255,.5); color: #666; }
+body.sunset .user-table td { border-color: rgba(0,0,0,.06); }
+body.sunset .user-table tr:hover td { background: rgba(255,255,255,.4); }
+body.sunset .empty-tip { color: #bbb; }
+body.sunset #dinoCanvas { background: rgba(255,255,255,.6); border-color: rgba(0,0,0,.1); }
+
+/* ===== 主题：赛博朋克 ===== */
+body.cyber { background: #0a0a1a; color: #0ff; }
+body.cyber .header { background: #0a0a1a; border-color: #0ff; box-shadow: 0 0 20px rgba(0,255,255,.1); }
+body.cyber .header h1 { text-shadow: 0 0 10px #0ff; }
+body.cyber .tabs { border-color: #0ff; }
+body.cyber .tab { color: #0aa; }
+body.cyber .tab.active { color: #0ff; border-bottom-color: #0ff; text-shadow: 0 0 8px #0ff; }
+body.cyber .sms-card { background: rgba(0,255,255,.03); border-color: #0ff; box-shadow: 0 0 15px rgba(0,255,255,.08), inset 0 0 30px rgba(0,255,255,.02); }
+body.cyber .sms-card h2 { text-shadow: 0 0 8px #0ff; }
+body.cyber .input { background: rgba(0,255,255,.05); border-color: #0ff; color: #0ff; }
+body.cyber .input:focus { border-color: #0ff; box-shadow: 0 0 10px rgba(0,255,255,.3); }
+body.cyber .btn-primary { background: #0ff; color: #0a0a1a; font-weight: bold; }
+body.cyber .btn-primary:hover { background: #0cc; box-shadow: 0 0 15px rgba(0,255,255,.4); }
+body.cyber .btn-primary:disabled { background: #0aa; color: #0a0a1a; }
+body.cyber .btn-ghost { color: #0ff; border-color: #0ff; }
+body.cyber .btn-ghost:hover { background: rgba(0,255,255,.1); box-shadow: 0 0 10px rgba(0,255,255,.2); }
+body.cyber .msg.success { background: rgba(0,255,255,.1); color: #0ff; border: 1px solid rgba(0,255,255,.3); }
+body.cyber .msg.error { background: rgba(255,0,100,.1); color: #ff0064; border: 1px solid rgba(255,0,100,.3); }
+body.cyber .log-area { background: rgba(0,255,255,.02); border-color: #0ff; }
+body.cyber .log-entry { border-color: rgba(0,255,255,.1); }
+body.cyber .log-time { color: #0aa; }
+body.cyber .user-table th { background: rgba(0,255,255,.05); color: #0ff; border-color: #0ff; }
+body.cyber .user-table td { border-color: rgba(0,255,255,.1); }
+body.cyber .user-table tr:hover td { background: rgba(0,255,255,.05); }
+body.cyber .empty-tip { color: #0aa; }
+body.cyber #dinoCanvas { background: rgba(0,255,255,.03); border-color: #0ff; box-shadow: 0 0 10px rgba(0,255,255,.1); }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>测试后台</h1>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <span style="font-size:12px;color:#999;margin-right:4px;">皮肤</span>
+    <button class="theme-btn" onclick="setTheme('')">纯白</button>
+    <button class="theme-btn" onclick="setTheme('dark')">深色</button>
+    <button class="theme-btn" onclick="setTheme('gradient')">紫蓝</button>
+    <button class="theme-btn" onclick="setTheme('sunset')">日落</button>
+    <button class="theme-btn" onclick="setTheme('cyber')">赛博</button>
+  </div>
 </div>
 
 <div class="tabs">
@@ -111,6 +218,16 @@ body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 </div>
 
 <script>
+// ===== 主题切换 =====
+function setTheme(name) {
+  document.body.className = name;
+  localStorage.setItem('test_theme', name);
+}
+(function() {
+  var saved = localStorage.getItem('test_theme');
+  if (saved) document.body.className = saved;
+})();
+
 // ===== Tab 切换 =====
 document.querySelectorAll('.tab').forEach(function(t) {
   t.addEventListener('click', function() {
