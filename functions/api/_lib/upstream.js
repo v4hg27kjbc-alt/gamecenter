@@ -99,13 +99,13 @@ export const CIRCUIT_FAIL_KEY = 'ai:circuit:fail';
  */
 export const MODEL_CAPS = {
   /* ---------- 上游 A：Kimi / Moonshot ---------- */
-  /* sampling：采样参数硬约束。Moonshot 新一代模型（k2.6 / k3 / k2.7-code 系列）只接受
-   * temperature=1、top_p=0.95，传其它值一律 400 invalid_request_error（2026-10 实测）。
+  /* sampling：采样参数硬约束。Moonshot Kimi K2.6 只接受 temperature=0.6（线上实测 400
+   * invalid temperature: only 0.6 is allowed），其它值一律 400；top_p 允许 0.95。
    * 服务端档位默认 temperature 为 0.3~0.6、top_p 0.9，若原样透传会导致全部上游调用失败
    * （表现为 /api/chat 恒返回 local-fallback，_degrade_kind=unavailable），故在此登记为硬约束，
    * 由 buildRequestBody 强制覆盖。新增 Moonshot 模型时务必先实测并在此登记。 */
-  'kimi-k3': { provider: 'kimi', vision: true, thinking: 'effort', effort: ['low', 'high', 'max'], context: 1000000, sampling: { temperature: 1, top_p: 0.95 }, note: '旗舰 / 原生视觉 / 1M 上下文 / 始终思考' },
-  'kimi-k2.6': { provider: 'kimi', vision: true, thinking: 'toggle', context: 256000, sampling: { temperature: 1, top_p: 0.95 }, note: '视觉 + 文本 / 256k' },
+  'kimi-k3': { provider: 'kimi', vision: true, thinking: 'effort', effort: ['low', 'high', 'max'], context: 1000000, sampling: { temperature: 0.6, top_p: 0.95 }, note: '旗舰 / 原生视觉 / 1M 上下文 / 始终思考' },
+  'kimi-k2.6': { provider: 'kimi', vision: true, thinking: 'toggle', context: 256000, sampling: { temperature: 0.6, top_p: 0.95 }, note: '视觉 + 文本 / 256k' },
   'kimi-k2.7-code': { provider: 'kimi', vision: false, thinking: 'toggle', context: 256000, sampling: { temperature: 1, top_p: 0.95 }, note: '代码专用' },
   'kimi-k2.7-code-highspeed': { provider: 'kimi', vision: false, thinking: 'toggle', context: 256000, sampling: { temperature: 1, top_p: 0.95 }, note: '代码专用（高速）' },
 
