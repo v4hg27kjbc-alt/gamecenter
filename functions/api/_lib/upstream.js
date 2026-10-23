@@ -414,6 +414,9 @@ export function buildRequestBody(model, messages, params, stream, provider) {
   // 取值按 provider 各自规格放行（两家均只有 enabled / disabled）
   var allowed = spec.thinkingValues || ['enabled', 'disabled'];
   var thinkingWanted = p.thinking;
+  // 默认关闭深度思考：kimi-k2.6 默认思考模式首 token 极慢（reasoning 千级 token），
+  // 复杂 JSON / 带图请求易超 30s 触发上游超时降级；显式传 thinking 时尊重调用方。
+  if (!thinkingWanted && caps.thinking === 'toggle') thinkingWanted = 'disabled';
   if (prov === 'zhipu' && thinkingWanted && allowed.indexOf(thinkingWanted) < 0) {
     // 防御：智谱收到 effort 字面量（low / high / max …）时折算成开关，非法值丢弃走上游默认，
     // 严禁原样透传 thinking:{type:'high'}——上游会判非法参数返回 4xx
