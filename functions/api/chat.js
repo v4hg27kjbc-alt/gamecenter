@@ -470,7 +470,7 @@ export async function handleChat(context, options) {
       degraded: true,
       visitorHash: visitorHash
     });
-    var degradeHeaders = Object.assign({}, baseHeaders, { 'X-AI-Degraded': '1', 'X-AI-Degrade-Kind': kind, 'X-AI-Cache': 'MISS' });
+    var degradeHeaders = Object.assign({}, baseHeaders, { 'X-AI-Degraded': '1', 'X-AI-Degrade-Kind': kind, 'X-AI-Cache': 'MISS', 'X-AI-Error': String((upstream && upstream.detail) || '').slice(0, 300), 'X-AI-Error-Code': (upstream && upstream.errorCode) || '' });
     if (wantStream) return degradeSse(fallback, 'local-fallback', kind, degradeHeaders);
     if (o.compat) return compatDegrade(fallback, kind, degradeHeaders);
     return degradeSite(fallback, kind, degradeHeaders, route, requestId);
