@@ -45,7 +45,7 @@ export const TIER_DEFAULTS = {
     label: '标准档',
     maxTokens: 1600,
     temperature: 0.6,
-    timeoutMs: 30000,
+    timeoutMs: 45000,
     purpose: '日常问答 / 术语解释 / 功能引导 / 内容润色 / 图文识图'
   },
   flagship: {
@@ -73,7 +73,7 @@ export const TIER_DEFAULTS = {
     label: '视觉档',
     maxTokens: 2048,
     temperature: 0.5,
-    timeoutMs: 40000,
+    timeoutMs: 60000,
     purpose: '图片识别 / 看图问答 / 机型外观判定（多模态 content 数组）'
   },
   code: {
