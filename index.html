@@ -4070,6 +4070,195 @@ body.light-mode .map-container .leaflet-tile-pane {
   font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
 }
 #aiExpoOverlay.visible { display: flex; }
+
+/* ===== 今日执飞 · 航线执飞卡（fly-board） ===== */
+#flyBoardOverlay {
+  position: fixed; inset: 0; z-index: 10001;
+  background: var(--body-bg);
+  display: none;
+  flex-direction: column;
+  font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+#flyBoardOverlay.visible { display: flex; }
+.fly-form { display: flex; align-items: flex-end; gap: var(--space-12); flex-wrap: wrap; justify-content: center; margin-bottom: var(--space-16); }
+.fly-field { display: flex; flex-direction: column; gap: 6px; }
+.fly-label { font-size: var(--fs-r075); color: var(--text-secondary, rgba(255,255,255,0.6)); letter-spacing: .06em; }
+.fly-select {
+  appearance: none; -webkit-appearance: none;
+  min-width: 132px; padding: var(--space-10) var(--space-14);
+  padding-right: 34px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(231,171,84,0.4);
+  border-radius: var(--radius-14, 14px);
+  color: var(--text);
+  font-size: var(--fs-r095);
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23e7ab54' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+.fly-select:focus { border-color: #e7ab54; box-shadow: 0 0 0 3px rgba(231,171,84,0.22); }
+.fly-select option { background: #101c2b; color: #e8edf4; }
+.fly-route-arrow { color: #e7ab54; padding-bottom: var(--space-8); opacity: .9; }
+.fly-dispatch-wrap { text-align: center; margin-bottom: var(--space-16); }
+.fly-dispatch-btn {
+  display: inline-flex; align-items: center; gap: var(--space-8);
+  padding: var(--space-12) var(--space-28);
+  border: 1px solid rgba(231,171,84,0.55); border-radius: var(--radius-50, 999px);
+  background: linear-gradient(135deg, rgba(231,171,84,0.28), rgba(231,171,84,0.12));
+  color: #f2c98a; font-size: var(--fs-r1, 1rem); font-weight: var(--fw-600, 600);
+  letter-spacing: .08em; cursor: pointer;
+  transition: transform .18s ease, box-shadow .25s ease, background .25s ease;
+  box-shadow: 0 2px 14px rgba(231,171,84,0.18);
+}
+.fly-dispatch-btn:hover { background: linear-gradient(135deg, rgba(231,171,84,0.4), rgba(231,171,84,0.2)); box-shadow: 0 4px 20px rgba(231,171,84,0.3); }
+.fly-dispatch-btn:active { transform: scale(.96); }
+.fly-dispatch-btn:disabled { opacity: .6; cursor: default; transform: none; }
+.fly-dispatch-btn.fly-pulsing { animation: flyPulse 1s ease-in-out infinite; }
+@keyframes flyPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231,171,84,0.35); }
+  50% { box-shadow: 0 0 0 10px rgba(231,171,84,0); }
+}
+/* —— 滚动舞台 —— */
+.fly-stage { position: relative; display: none; margin: var(--space-6) 0 var(--space-10); }
+.fly-stage.visible { display: block; }
+.fly-reel {
+  display: flex; gap: var(--space-10);
+  overflow: hidden;
+  padding: var(--space-14) 0;
+  will-change: transform;
+  transform: translateX(0);
+}
+.fly-reel-frame {
+  position: absolute; inset: 0;
+  border-radius: var(--radius-16, 16px);
+  border: 1px solid rgba(231,171,84,0.28);
+  background: rgba(231,171,84,0.04);
+  pointer-events: none;
+  box-shadow: inset 0 0 24px rgba(0,0,0,0.3);
+}
+.fly-reel-marker {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #e7ab54;
+  filter: drop-shadow(0 0 8px rgba(231,171,84,0.8));
+  pointer-events: none;
+  z-index: 2;
+}
+.fly-reel-marker::after {
+  content: ''; position: absolute; left: 50%; top: 100%;
+  width: 2px; height: 18px; transform: translateX(-50%);
+  background: linear-gradient(#e7ab54, rgba(231,171,84,0));
+}
+.fly-reel-hint { text-align: center; font-size: var(--fs-r075); color: rgba(255,255,255,0.55); margin-top: var(--space-10); letter-spacing: .1em; }
+.fly-reel-item {
+  flex: 0 0 auto;
+  width: 128px;
+  padding: var(--space-12) var(--space-10);
+  border-radius: var(--radius-14, 14px);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  transition: border-color .25s ease, background .25s ease, box-shadow .25s ease;
+}
+.fly-reel-item.landed {
+  border-color: rgba(231,171,84,0.9);
+  background: rgba(231,171,84,0.12);
+  box-shadow: 0 0 22px rgba(231,171,84,0.35);
+}
+.fly-reel-ic {
+  width: 52px; height: 52px; margin: 0 auto var(--space-8);
+  border-radius: var(--radius-50, 999px);
+  background: linear-gradient(135deg, rgba(231,171,84,0.28), rgba(231,171,84,0.08));
+  color: #e7ab54;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700;
+  border: 1px solid rgba(231,171,84,0.35);
+}
+.fly-reel-acname { font-size: var(--fs-r082, 0.82rem); color: #dfe6ef; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* —— 执飞卡 —— */
+.fly-ticket-wrap { display: none; justify-content: center; padding-top: var(--space-8); }
+.fly-ticket-wrap.visible { display: flex; }
+.fly-ticket {
+  position: relative;
+  width: min(460px, 100%);
+  padding: var(--space-16);
+  border-radius: 20px;
+  background: linear-gradient(150deg, #0d1a2b 0%, #10233a 55%, #0b1522 100%);
+  border: 1px solid rgba(231,171,84,0.4);
+  color: #e8edf4;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 0 40px rgba(231,171,84,0.05);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  opacity: 0; transform: translateY(56px) scale(0.97);
+  transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .5s ease, box-shadow .6s ease;
+}
+.fly-ticket-wrap.visible .fly-ticket { opacity: 1; transform: translateY(0) scale(1); }
+.fly-ticket-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-14); }
+.fly-ticket-brand { display: flex; align-items: center; gap: 8px; font-size: var(--fs-r095); font-weight: 700; letter-spacing: .14em; color: #f2c98a; }
+.fly-ticket-logo {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(231,171,84,0.16); border: 1px solid rgba(231,171,84,0.5);
+  color: #e7ab54; font-size: 15px;
+}
+.fly-ticket-date { font-size: var(--fs-r075); color: rgba(255,255,255,0.55); letter-spacing: .06em; }
+.fly-ticket-route { display: flex; align-items: center; gap: var(--space-10); margin-bottom: var(--space-14); }
+.fly-ticket-city {
+  font-size: clamp(1.6rem, 6vw, 2.3rem); font-weight: 800;
+  color: #fff; letter-spacing: .04em; line-height: 1.1;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fly-ticket-city small { display: block; font-size: var(--fs-r07); color: rgba(231,171,84,0.85); font-weight: 600; letter-spacing: .18em; }
+.fly-ticket-line { flex: 1; color: rgba(231,171,84,0.7); min-width: 44px; }
+.fly-ticket-aircraft { display: flex; gap: var(--space-12); align-items: center; padding: var(--space-10); border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); margin-bottom: var(--space-12); }
+.fly-ticket-img {
+  width: 96px; height: 64px; border-radius: 10px; overflow: hidden; flex: 0 0 auto;
+  background: linear-gradient(135deg, rgba(231,171,84,0.2), rgba(231,171,84,0.05));
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(231,171,84,0.3);
+}
+.fly-ticket-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fly-ticket-img .fly-ticket-img-fb { font-size: 30px; font-weight: 800; color: #e7ab54; }
+.fly-ticket-acinfo { min-width: 0; }
+.fly-ticket-acname { font-size: var(--fs-r105, 1.05rem); font-weight: 700; color: #f2c98a; margin-bottom: var(--space-6); line-height: 1.3; }
+.fly-ticket-specs { font-size: var(--fs-r075); color: rgba(255,255,255,0.7); line-height: 1.7; }
+.fly-ticket-specs b { color: #e7ab54; font-weight: 600; }
+.fly-ticket-note {
+  position: relative;
+  padding: var(--space-12) var(--space-14);
+  border-left: 3px solid #e7ab54;
+  background: rgba(231,171,84,0.07);
+  border-radius: 0 12px 12px 0;
+  font-size: var(--fs-r085, 0.85rem); line-height: 1.75; color: rgba(255,255,255,0.85);
+  margin-bottom: var(--space-14);
+}
+.fly-ticket-note .fly-note-caption { color: #e7ab54; font-weight: 700; letter-spacing: .08em; margin-right: 6px; }
+.fly-ticket-stamp {
+  position: absolute; right: var(--space-16); bottom: var(--space-14);
+  width: 74px; height: 74px;
+  color: rgba(231,171,84,0.55);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  transform: rotate(-8deg) scale(0);
+  opacity: 0;
+}
+.fly-ticket-wrap.visible .fly-ticket-stamp { animation: flyStampIn .45s cubic-bezier(.2,1.4,.3,1) .55s forwards; }
+@keyframes flyStampIn {
+  0% { transform: rotate(-8deg) scale(0); opacity: 0; }
+  60% { transform: rotate(-8deg) scale(1.15); opacity: 1; }
+  100% { transform: rotate(-8deg) scale(1); opacity: 1; }
+}
+.fly-save-tip { text-align: center; font-size: var(--fs-r075); color: rgba(255,255,255,0.5); margin-top: var(--space-8); }
+@media (prefers-reduced-motion: reduce) {
+  .fly-ticket { transition: none; }
+  .fly-ticket-wrap.visible .fly-ticket-stamp { animation: none; transform: rotate(-8deg) scale(1); opacity: 1; }
+  .fly-dispatch-btn.fly-pulsing { animation: none; }
+}
+#flyBoardOverlay .ai-review-content { white-space: normal; }
 .expo-meta { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-bottom: var(--space-14); }
 .expo-date-badge {
   display: inline-flex; align-items: center; gap: 6px;
@@ -6206,6 +6395,7 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     <button class="filter-chip collect-record-btn" id="collectRecordBtn" onclick="openCollectRecord()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21z"/></svg><span id="collectRecordBtnText">收藏记录</span><span class="collect-record-dot" id="collectRecordDot">0</span></button>
     <button class="filter-chip ai-chat-btn" id="collectAnalysisBtn" onclick="openCollectAnalysis()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M3 3v18h18"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="12" y1="16" x2="12" y2="6"/><line x1="17" y1="16" x2="17" y2="13"/></svg><span id="collectAnalysisBtnText">AI 收藏分析</span></button>
     <button class="filter-chip ai-chat-btn" id="aiExpoBtn" onclick="openAiExpo()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M12 3l2.2 5.4L20 10l-5.8 1.6L12 17l-2.2-5.4L4 10l5.8-1.6z"/><path d="M12 17v4"/></svg><span id="aiExpoBtnText">AI 策划展</span></button>
+    <button class="filter-chip ai-chat-btn" id="flyBtn" onclick="openFlyBoard()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:var(--space-4)"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5v1l3.5-.5 3.5.5v-1L13 19v-5.5l8 2.5z"/></svg><span id="flyBtnText">今日执飞</span></button>
     <button class="export-collection-btn" id="exportCollectionBtn" disabled onclick="exportCollectionImage()" title="导出收藏长图">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       导出收藏长图
@@ -6417,6 +6607,79 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
   <div class="ai-review-footer" style="display:flex;gap:var(--space-10);justify-content:center;align-items:center;flex-wrap:wrap;">
     <button class="news-summary-btn" id="aiExpoRegenBtn" onclick="expoRegen()">换今日主题</button>
     <button class="news-summary-btn" id="aiExpoCopyBtn" onclick="expoCopy()">复制策展文案</button>
+  </div>
+</div>
+
+<!-- ===== 今日执飞 · 航线执飞卡（fly-board） ===== -->
+<div id="flyBoardOverlay">
+  <div class="ai-review-header">
+    <span class="ai-review-title">今日执飞<span class="ai-review-model">航线执飞卡 · 随机派机</span></span>
+    <button class="ai-review-close" onclick="closeFlyBoard()" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="ai-review-content" id="flyBoardContent">
+    <div class="fly-form">
+      <div class="fly-field">
+        <label class="fly-label" for="flyDepSel">出发地</label>
+        <select class="fly-select" id="flyDepSel"></select>
+      </div>
+      <div class="fly-route-arrow">
+        <svg width="26" height="20" viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 10h22"/><path d="M17 3l6 7-6 7"/></svg>
+      </div>
+      <div class="fly-field">
+        <label class="fly-label" for="flyArrSel">目的地</label>
+        <select class="fly-select" id="flyArrSel"></select>
+      </div>
+    </div>
+    <div class="fly-dispatch-wrap">
+      <button class="fly-dispatch-btn" id="flyDispatchBtn" onclick="flyDispatch()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5v1l3.5-.5 3.5.5v-1L13 19v-5.5l8 2.5z"/></svg>
+        <span id="flyDispatchBtnText">派机</span>
+      </button>
+    </div>
+    <div class="fly-stage" id="flyStage" aria-hidden="true">
+      <div class="fly-reel" id="flyReel"></div>
+      <div class="fly-reel-frame"></div>
+      <div class="fly-reel-marker">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 1l9 12H1z"/></svg>
+      </div>
+      <div class="fly-reel-hint">正在为你安排执飞机型…</div>
+    </div>
+    <div class="fly-ticket-wrap" id="flyTicketWrap">
+      <div class="fly-ticket" id="flyTicket">
+        <div class="fly-ticket-top">
+          <div class="fly-ticket-brand">
+            <span class="fly-ticket-logo">✈</span>
+            <span>今日执飞</span>
+          </div>
+          <div class="fly-ticket-date" id="flyTicketDate"></div>
+        </div>
+        <div class="fly-ticket-route">
+          <div class="fly-ticket-city" id="flyTicketDep">---</div>
+          <div class="fly-ticket-line">
+            <svg viewBox="0 0 120 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="4 4"><path d="M6 10h100"/><path d="M100 4l10 6-10 6"/></svg>
+          </div>
+          <div class="fly-ticket-city" id="flyTicketArr">---</div>
+        </div>
+        <div class="fly-ticket-aircraft">
+          <div class="fly-ticket-img" id="flyTicketImg"><span id="flyTicketImgFallback"></span></div>
+          <div class="fly-ticket-acinfo">
+            <div class="fly-ticket-acname" id="flyTicketAcName"></div>
+            <div class="fly-ticket-specs" id="flyTicketSpecs"></div>
+          </div>
+        </div>
+        <div class="fly-ticket-note" id="flyTicketNote"></div>
+        <div class="fly-ticket-stamp" id="flyTicketStamp">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="32" cy="32" r="26"/><path d="M32 12v8M32 44v8M12 32h8M44 32h8"/><path d="M18.5 18.5l5.7 5.7M39.8 39.8l5.7 5.7M45.5 18.5l-5.7 5.7M24.2 39.8l-5.7 5.7"/></svg>
+          <span>派机确认</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ai-review-footer" style="display:flex;gap:var(--space-10);justify-content:center;align-items:center;flex-wrap:wrap;">
+    <button class="news-summary-btn" id="flySaveBtn" onclick="flySaveTicket()">保存长图</button>
+    <button class="news-summary-btn" id="flySoundBtn" onclick="toggleFlySound()">音效：开</button>
   </div>
 </div>
 
@@ -10009,6 +10272,7 @@ document.addEventListener('keydown', (e) => {
   if (document.querySelector('.image-lightbox')) { closeImageLightbox(); return; }
   if (document.getElementById('quizOverlay') && document.getElementById('quizOverlay').classList.contains('visible')) { closeQuiz(); return; }
   if (document.getElementById('badgeOverlay') && document.getElementById('badgeOverlay').classList.contains('visible')) { closeBadges(); return; }
+  if (document.getElementById('flyBoardOverlay') && document.getElementById('flyBoardOverlay').classList.contains('visible')) { closeFlyBoard(); return; }
   if (document.getElementById('aiExpoOverlay') && document.getElementById('aiExpoOverlay').classList.contains('visible')) { closeAiExpo(); return; }
   if (document.getElementById('aiReviewOverlay').classList.contains('visible')) { closeAiReview(); return; }
   if (document.getElementById('newsPanelOverlay') && document.getElementById('newsPanelOverlay').classList.contains('visible')) { closeNewsPanel(); return; }
@@ -14035,7 +14299,7 @@ function cabinImgFallback(img) {
 /* 统一弹窗滚动守护：关闭上层弹窗后，若下层仍有全屏层，则继续保持滚动锁定 */
 function anyTopOverlayOpen() {
   var ids = ['aiChatOverlay','aiReviewOverlay','photoAiOverlay','collectAnalysisOverlay',
-    'newsPanelOverlay','aiExpoOverlay','quizOverlay','badgeOverlay','badgeDetailOverlay','letterOverlay',
+    'newsPanelOverlay','aiExpoOverlay','flyBoardOverlay','quizOverlay','badgeOverlay','badgeDetailOverlay','letterOverlay',
     'liveryOverlay','cabinOverlay','collectRecordOverlay'];
   for (var i = 0; i < ids.length; i++) {
     var el = document.getElementById(ids[i]);
@@ -17486,6 +17750,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     { k: 'aiReview',        sel: '#aiReviewOverlay',        form: 'fullscreen', size: '4', open: ['visible'] },
     { k: 'newsPanel',       sel: '#newsPanelOverlay',       form: 'fullscreen', size: '4', open: ['visible', 'active'] },
     { k: 'aiExpo',          sel: '#aiExpoOverlay',           form: 'fullscreen', size: '4', open: ['visible', 'active'] },
+    { k: 'flyBoard',        sel: '#flyBoardOverlay',         form: 'fullscreen', size: '4', open: ['visible'] },
     { k: 'quiz',            sel: '#quizOverlay',            form: 'fullscreen', size: '3', open: ['visible'] },
     { k: 'badge',           sel: '#badgeOverlay',           form: 'fullscreen', size: '3', open: ['visible'] },
     { k: 'photoAi',         sel: '#photoAiOverlay',         form: 'fullscreen', size: '4', open: ['visible'] },
@@ -18095,6 +18360,463 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   } else {
     boot();
   }
+})();
+
+/* ===========================================================================
+   今日执飞 · 航线执飞卡（fly-board）—— 纯增量模块
+   复用既有 overlay/glass/滚动锁契约；不覆盖任何既有函数。
+   音效：Web Audio 合成（风声/盖章/点击）；导出：html2canvas CDN。
+   =========================================================================== */
+(function () {
+  var FLY_SOUND_KEY = 'flySound';
+  var flySoundEnabled = (function () { try { return localStorage.getItem(FLY_SOUND_KEY) !== 'off'; } catch (e) { return true; } })();
+  var flyCtx = null;
+  var flyAnimId = 0;
+  var flyRunning = false;
+  var flyWindNodes = null;
+  var FLY_POOL = null;
+  var FLY_ITEM_W = 128;
+  var FLY_ITEM_STEP = 138;
+
+  /* —— 候选池：从既有 aircrafts 提取民航机型（附中文名） —— */
+  function flyPool() {
+    if (FLY_POOL) return FLY_POOL;
+    var arr = (typeof aircrafts !== 'undefined' && Array.isArray(aircrafts)) ? aircrafts : [];
+    var src = arr.filter(function (a) { return a && a.category === 'civil'; });
+    if (!src.length) {
+      src = [
+        { id: 1, code: 'Airbus A380', image: '', specs: { seats: '525 人', cruise_speed: '0.85 马赫', max_range: '15,200 km', capacity: '525–853 人' } },
+        { id: 2, code: 'Boeing 787-9', image: '', specs: { seats: '290 人', cruise_speed: '0.85 马赫', max_range: '14,140 km', capacity: '242–330 人' } },
+        { id: 5, code: 'COMAC C919', image: '', specs: { seats: '168 人', cruise_speed: '0.785 马赫', max_range: '5,555 km', capacity: '158–192 人' } },
+        { id: 6, code: 'Airbus A320neo', image: '', specs: { seats: '165 人', cruise_speed: '0.78 马赫', max_range: '6,300 km', capacity: '150–194 人' } }
+      ];
+    }
+    FLY_POOL = src.map(function (a) {
+      var nm = (typeof t === 'function') ? t(a.name) : (a.code || '');
+      if (!nm || nm === a.name) nm = a.code || '';
+      return { id: a.id, name: nm, code: a.code || '', img: a.image || '', specs: a.specs || {}, tags: a.tags || [] };
+    });
+    return FLY_POOL;
+  }
+
+  function flyAirportList() {
+    var src = (typeof airports !== 'undefined') ? airports : {};
+    var list = Object.keys(src).map(function (k) {
+      return { code: k, name: (src[k] && src[k].name) || k, lat: src[k] && src[k].lat || 0, lng: src[k] && src[k].lng || 0 };
+    });
+    if (!list.length) {
+      list = [
+        { code: 'PEK', name: '北京', lat: 40.08, lng: 116.58 },
+        { code: 'PVG', name: '上海', lat: 31.14, lng: 121.81 },
+        { code: 'CAN', name: '广州', lat: 23.39, lng: 113.30 },
+        { code: 'HKG', name: '香港', lat: 22.31, lng: 113.91 },
+        { code: 'SIN', name: '新加坡', lat: 1.36, lng: 103.99 },
+        { code: 'DXB', name: '迪拜', lat: 25.25, lng: 55.36 },
+        { code: 'LHR', name: '伦敦', lat: 51.47, lng: -0.46 },
+        { code: 'JFK', name: '纽约', lat: 40.64, lng: -73.78 }
+      ];
+    }
+    return list;
+  }
+
+  /* —— 大圆距离（km），用于航程匹配 —— */
+  function flyDistKm(a, b) {
+    if (!a || !b) return 0;
+    if ((!a.lat && !a.lng) || (!b.lat && !b.lng)) return 0;
+    var R = 6371;
+    var dLat = (b.lat - a.lat) * Math.PI / 180;
+    var dLng = (b.lng - a.lng) * Math.PI / 180;
+    var la = a.lat * Math.PI / 180;
+    var lb = b.lat * Math.PI / 180;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(la) * Math.cos(lb) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  function flyParseRange(s) {
+    if (!s) return 0;
+    var m = String(s).replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+    return m ? parseFloat(m[1]) : 0;
+  }
+
+  /* —— 为航线挑 1~2 架：优先航程可覆盖，否则取最接近的 —— */
+  function flyPickForRoute(dep, arr, airportsMap) {
+    var pool = flyPool();
+    var d = flyDistKm(airportsMap[dep] || null, airportsMap[arr] || null);
+    var need = d > 0 ? d : 2200;
+    var fits = pool.filter(function (a) {
+      var r = flyParseRange(a.specs.max_range);
+      return r > 0 && r >= need * 1.12;
+    });
+    if (!fits.length) {
+      var sorted = pool.slice().sort(function (a, b) { return flyParseRange(b.specs.max_range) - flyParseRange(a.specs.max_range); });
+      fits = sorted.slice(0, Math.min(4, sorted.length));
+    }
+    function one() { return fits[Math.floor(Math.random() * fits.length)]; }
+    var main = one();
+    var alt = null;
+    if (fits.length > 1 && Math.random() < 0.45) {
+      var b = one();
+      if (b.id !== main.id) alt = b;
+    }
+    return { main: main, alt: alt, dist: d };
+  }
+
+  /* —— 音效：Web Audio 合成 —— */
+  function flyGetCtx() {
+    if (!flyCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) flyCtx = new AC();
+    }
+    if (flyCtx && flyCtx.state === 'suspended' && flyCtx.resume) flyCtx.resume();
+    return flyCtx;
+  }
+  function flyTone(freq, start, dur, type, vol, freqEnd) {
+    var ctx = flyGetCtx();
+    if (!ctx) return;
+    try {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = type || 'sine';
+      var t0 = ctx.currentTime + (start || 0);
+      osc.frequency.setValueAtTime(freq, t0);
+      if (freqEnd) osc.frequency.exponentialRampToValueAtTime(freqEnd, t0 + (dur || 0.3));
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(vol || 0.16, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + (dur || 0.3));
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + (dur || 0.3) + 0.05);
+    } catch (e) {}
+  }
+  function flyNoiseBuf(ctx, dur) {
+    var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    return buf;
+  }
+  function flyStartWind() {
+    if (!flySoundEnabled) return;
+    var ctx = flyGetCtx();
+    if (!ctx) return;
+    try {
+      var src = ctx.createBufferSource();
+      src.buffer = flyNoiseBuf(ctx, 5);
+      src.loop = true;
+      var filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 320;
+      filter.Q.value = 0.8;
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.18);
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      src.start();
+      flyWindNodes = { src: src, filter: filter, gain: gain };
+    } catch (e) {}
+  }
+  function flyStopWind() {
+    if (!flyWindNodes) return;
+    var nodes = flyWindNodes;
+    flyWindNodes = null;
+    try {
+      if (nodes.gain && flyCtx) {
+        nodes.gain.gain.setValueAtTime(nodes.gain.gain.value, flyCtx.currentTime);
+        nodes.gain.gain.exponentialRampToValueAtTime(0.0001, flyCtx.currentTime + 0.25);
+      }
+      setTimeout(function () { try { nodes.src.stop(); } catch (e2) {} }, 350);
+    } catch (e) {}
+  }
+  function flyStamp() {
+    if (!flySoundEnabled) return;
+    flyTone(170, 0, 0.28, 'sine', 0.28, 46);
+    flyTone(60, 0.02, 0.3, 'triangle', 0.24, 40);
+    var ctx = flyGetCtx();
+    if (!ctx) return;
+    try {
+      var src = ctx.createBufferSource();
+      src.buffer = flyNoiseBuf(ctx, 0.09);
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'highpass';
+      bp.frequency.value = 1800;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.15, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.09);
+      src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+      src.start();
+    } catch (e) {}
+  }
+  function flyClick() { if (flySoundEnabled) flyTone(720, 0, 0.08, 'sine', 0.07); }
+
+  function toggleFlySound() {
+    flySoundEnabled = !flySoundEnabled;
+    try { localStorage.setItem(FLY_SOUND_KEY, flySoundEnabled ? 'on' : 'off'); } catch (e) {}
+    var btn = document.getElementById('flySoundBtn');
+    if (btn) btn.textContent = '音效：' + (flySoundEnabled ? '开' : '关');
+    if (flySoundEnabled) flyClick();
+  }
+
+  /* —— 下拉初始化 —— */
+  function flyFillSelects() {
+    var dep = document.getElementById('flyDepSel');
+    var arr = document.getElementById('flyArrSel');
+    if (!dep || !arr) return;
+    if (dep.options.length > 1) return;
+    var list = flyAirportList();
+    var html = '';
+    for (var i = 0; i < list.length; i++) html += '<option value="' + list[i].code + '">' + list[i].name + ' ' + list[i].code + '</option>';
+    dep.innerHTML = html;
+    arr.innerHTML = html;
+    var i1 = Math.floor(Math.random() * list.length);
+    var i2 = Math.floor(Math.random() * (list.length - 1));
+    if (i2 >= i1) i2++;
+    dep.selectedIndex = i1;
+    arr.selectedIndex = i2;
+  }
+
+  /* —— 滚动舞台 —— */
+  function flyEaseOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+  function flyBuildReel(pool, targetPoolIdx) {
+    var reel = document.getElementById('flyReel');
+    if (!reel) return null;
+    var seq = [];
+    var i, j;
+    for (i = 0; i < 2; i++) for (j = 0; j < pool.length; j++) seq.push(pool[j]);
+    for (i = 0; i < Math.min(4, pool.length); i++) seq.push(pool[i]);
+    var html = '';
+    for (i = 0; i < seq.length; i++) {
+      var letter = (seq[i].name || seq[i].code || '?').slice(0, 1);
+      html += '<div class="fly-reel-item"><div class="fly-reel-ic">' + letter + '</div><div class="fly-reel-acname">' + seq[i].name + '</div></div>';
+    }
+    reel.innerHTML = html;
+    var pickedGlobalIdx = pool.length + targetPoolIdx;
+    var targetX = pickedGlobalIdx * FLY_ITEM_STEP + FLY_ITEM_STEP / 2;
+    var stage = document.getElementById('flyStage');
+    var viewW = stage && stage.clientWidth > 200 ? stage.clientWidth : 420;
+    var dest = -(targetX - viewW / 2);
+    return { dest: dest, pickedGlobalIdx: pickedGlobalIdx };
+  }
+  function flyRunReel(pool, targetPoolIdx, done) {
+    var reel = document.getElementById('flyReel');
+    var stage = document.getElementById('flyStage');
+    if (!reel || !stage) { done(); return; }
+    var plan = flyBuildReel(pool, targetPoolIdx);
+    if (!plan) { done(); return; }
+    var duration = 4200;
+    var startTs = null;
+    var token = ++flyAnimId;
+    flyStartWind();
+    function frame(ts) {
+      if (flyAnimId !== token) return;
+      if (!startTs) startTs = ts;
+      var t = Math.min(1, (ts - startTs) / duration);
+      var eased = flyEaseOutQuart(t);
+      var x = plan.dest * eased;
+      reel.style.transform = 'translateX(' + x + 'px)';
+      var speed = 1 - eased;
+      if (flyWindNodes && flyWindNodes.filter) {
+        try { flyWindNodes.filter.frequency.value = 300 + 1500 * (0.25 + 0.75 * speed); } catch (e) {}
+      }
+      if (t < 1) {
+        window.requestAnimationFrame(frame);
+      } else {
+        reel.style.transform = 'translateX(' + plan.dest + 'px)';
+        flyStopWind();
+        var items = reel.children;
+        for (var i = 0; i < items.length; i++) items[i].classList.remove('landed');
+        if (items[plan.pickedGlobalIdx]) items[plan.pickedGlobalIdx].classList.add('landed');
+        flyStamp();
+        setTimeout(done, 460);
+      }
+    }
+    window.requestAnimationFrame(frame);
+  }
+
+  /* —— 机长口吻点评 —— */
+  var FLY_LINES = {
+    1: '双层大块头，起飞时整条跑道都得让三分。今天这条线它来压阵，稳。',
+    2: '复合材料机身，最擅长钻长途夜航。乘客睡一觉，它还在云端溜达，省油是看家本事。',
+    3: '罗尔斯·罗伊斯引擎的动静，听着跟吟诗似的。长途交给它，机长我放心。',
+    4: '推力大得离谱，爬升的时候连咖啡都得端稳。老将出马，一条顶俩。',
+    5: '国产新秀上阵，仪表盘摸起来都是新鲜味。今天带它跑一趟，给航线涨涨士气。',
+    6: '单通道里的劳模，起降利索、不挑跑道，一天四段来回不在话下。',
+    7: '换了新发动机，噪音小了一圈，翼尖小翼一翘，省油省到财务部都笑。',
+    8: '中远程万金油，宽体里的大众款，哪条线缺飞机找它准没错。',
+    9: '支线小钢炮，跑道短也不怵，小机场的宠儿，今天替你去探探路。',
+    10: '客舱宽敞是它的骄傲，飞短途也跟坐头等舱似的，乘客的腰最懂。',
+    26: '四发巨无霸的收尾之作，登机门一开廊桥都排队。今天这班，排面给足。',
+    27: '喷气时代的老祖宗，驾驶舱全是机械手感。今天拉出来遛遛，全凭老司机。',
+    28: '707 加长版，越洋航线的开拓者。飞得慢，但每一步都算数。',
+    29: '后三发小尾巴，短跑道起降是绝活。当年机场常客，今天依然利索。',
+    30: '727 加长款，1970 年代卖得最好的一台。今天这班，怀旧值拉满。',
+    31: '第一代 737，小巧可靠。别看年纪大，短途通勤还是把好手。',
+    32: '737 的加长版，服役半个世纪的老伙计。机长闭着眼都知道每个开关在哪。',
+    33: '747 开山之作，双层机头一出场就惊艳世界。今天来，照样压得住场。',
+    34: '747 经典款，跨太平洋的熟面孔。四发轰鸣，是那个年代的底气。',
+    35: '缩短机身换超远航程，当年的跨洋传说。今天拉出来，还是那个范儿。',
+    36: '747 家族承上启下的一代，货舱客舱两开花。老规矩，慢热但可靠。',
+    37: '空客开局之作，宽体客机的老祖宗。慢悠悠地飞，像位老绅士。',
+    38: 'A300 加长版，中短途宽体的老前辈。声音低沉，落地温柔。'
+  };
+  var FLY_DEFAULT_LINES = [
+    '今天这班交给它，机长先把巡航速度调到顺手，剩下交给老天。',
+    '机型有点年头，但保养得比我头发还精神，飞这条线绰绰有余。',
+    '驾驶舱手感熟得很，航线长短都难不倒它，放心登机。',
+    '这架我飞过不少回，起飞滑跑稳，落地也利索，乘客好评率高。'
+  ];
+  function flyLineFor(ac) {
+    if (FLY_LINES[ac.id]) return FLY_LINES[ac.id];
+    return FLY_DEFAULT_LINES[Math.floor(Math.random() * FLY_DEFAULT_LINES.length)];
+  }
+
+  /* —— 渲染执飞卡 —— */
+  function flyRenderTicket(main, alt, dep, arr, airportsMap, dist) {
+    var dateEl = document.getElementById('flyTicketDate');
+    var depEl = document.getElementById('flyTicketDep');
+    var arrEl = document.getElementById('flyTicketArr');
+    var imgEl = document.getElementById('flyTicketImg');
+    var nameEl = document.getElementById('flyTicketAcName');
+    var specEl = document.getElementById('flyTicketSpecs');
+    var noteEl = document.getElementById('flyTicketNote');
+    var depInfo = airportsMap[dep] || { name: dep, code: dep };
+    var arrInfo = airportsMap[arr] || { name: arr, code: arr };
+    var now = new Date();
+    var dateStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
+    if (dateEl) dateEl.textContent = dateStr;
+    if (depEl) depEl.innerHTML = depInfo.name + '<small>' + dep + '</small>';
+    if (arrEl) arrEl.innerHTML = arrInfo.name + '<small>' + arr + '</small>';
+    if (nameEl) nameEl.textContent = main.name;
+    var s = main.specs || {};
+    var speed = s.cruise_speed || '—';
+    var seats = s.seats || s.capacity || '—';
+    var range = s.max_range || '—';
+    var distLine = dist > 0 ? Math.round(dist) + ' km' : '—';
+    if (specEl) {
+      specEl.innerHTML = '巡航速度 <b>' + speed + '</b>　载客量 <b>' + seats + '</b>　航程 <b>' + range + '</b>　航线 <b>' + distLine + '</b>' + (alt ? '<br>备机：' + alt.name : '');
+    }
+    if (noteEl) noteEl.innerHTML = '<span class="fly-note-caption">机长</span>' + flyLineFor(main);
+    if (imgEl) {
+      var fb = document.createElement('span');
+      fb.className = 'fly-ticket-img-fb';
+      fb.textContent = (main.name || main.code || '?').slice(0, 1);
+      imgEl.innerHTML = '';
+      imgEl.appendChild(fb);
+      if (main.img) {
+        var im = document.createElement('img');
+        im.src = main.img;
+        im.alt = main.name;
+        im.onload = function () { imgEl.innerHTML = ''; imgEl.appendChild(im); };
+      }
+    }
+  }
+
+  /* —— 派机主流程 —— */
+  function flyDispatch() {
+    if (flyRunning) return;
+    var btn = document.getElementById('flyDispatchBtn');
+    var btnText = document.getElementById('flyDispatchBtnText');
+    var depSel = document.getElementById('flyDepSel');
+    var arrSel = document.getElementById('flyArrSel');
+    if (!depSel || !arrSel) return;
+    var dep = depSel.value;
+    var arr = arrSel.value;
+    if (dep === arr) {
+      var ai = arrSel.selectedIndex + 1;
+      if (ai >= arrSel.options.length) ai = 0;
+      arrSel.selectedIndex = ai;
+      arr = arrSel.value;
+    }
+    var airportsMap = {};
+    var list = flyAirportList();
+    for (var i = 0; i < list.length; i++) airportsMap[list[i].code] = list[i];
+    var choice = flyPickForRoute(dep, arr, airportsMap);
+    var wrap = document.getElementById('flyTicketWrap');
+    var stage = document.getElementById('flyStage');
+    var content = document.getElementById('flyBoardContent');
+    flyRunning = true;
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.textContent = '派机中…';
+    if (wrap) wrap.classList.remove('visible');
+    if (stage) { stage.classList.add('visible'); stage.style.display = 'block'; }
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function finish() {
+      flyRunning = false;
+      if (btn) btn.disabled = false;
+      if (btnText) btnText.textContent = '派机';
+      flyRenderTicket(choice.main, choice.alt, dep, arr, airportsMap, choice.dist);
+      if (wrap) wrap.classList.add('visible');
+      if (content) {
+        try { content.scrollTo({ top: content.scrollHeight, behavior: 'smooth' }); } catch (e) { content.scrollTop = content.scrollHeight; }
+      }
+      if (btn && !btn.classList.contains('fly-pulsing')) btn.classList.add('fly-pulsing');
+      setTimeout(function () { if (btn) btn.classList.remove('fly-pulsing'); }, 900);
+    }
+    if (reduced) {
+      setTimeout(finish, 350);
+    } else {
+      flyRunReel(flyPool(), choice.main ? flyPool().indexOf(choice.main) : 0, finish);
+    }
+  }
+
+  /* —— 长图导出 —— */
+  function flySaveTicket() {
+    var ticket = document.getElementById('flyTicket');
+    var btn = document.getElementById('flySaveBtn');
+    if (!ticket) return;
+    if (typeof html2canvas === 'undefined') {
+      alert('长图库尚未加载，请检查网络后重试');
+      return;
+    }
+    var wrap = document.getElementById('flyTicketWrap');
+    if (!wrap || !wrap.classList.contains('visible')) {
+      alert('先派机出票，再保存长图');
+      return;
+    }
+    var old = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = '导出中…'; btn.disabled = true; }
+    html2canvas(ticket, { backgroundColor: '#0b1522', scale: 2, useCORS: true }).then(function (canvas) {
+      var a = document.createElement('a');
+      a.download = '今日执飞-航线执飞卡.png';
+      a.href = canvas.toDataURL('image/png');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (btn) { btn.textContent = old; btn.disabled = false; }
+    }).catch(function () {
+      if (btn) { btn.textContent = old; btn.disabled = false; }
+      alert('导出失败，请重试');
+    });
+  }
+
+  /* —— 面板开关（复用既有滚动锁/玻璃动效契约） —— */
+  function openFlyBoard() {
+    if (typeof saveScrollState === 'function') saveScrollState();
+    var overlay = document.getElementById('flyBoardOverlay');
+    if (!overlay) return;
+    overlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    flyFillSelects();
+    var sb = document.getElementById('flySoundBtn');
+    if (sb) sb.textContent = '音效：' + (flySoundEnabled ? '开' : '关');
+    flyClick();
+  }
+  function closeFlyBoard() {
+    flyAnimId++;
+    flyRunning = false;
+    flyStopWind();
+    var overlay = document.getElementById('flyBoardOverlay');
+    if (overlay) overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+    if (typeof restoreScrollState === 'function') restoreScrollState();
+  }
+
+  window.openFlyBoard = openFlyBoard;
+  window.closeFlyBoard = closeFlyBoard;
+  window.flyDispatch = flyDispatch;
+  window.toggleFlySound = toggleFlySound;
+  window.flySaveTicket = flySaveTicket;
 })();
 
 </script>
@@ -19382,5 +20104,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   }
 })();
 </script>
+<!-- 今日执飞：html2canvas 长图导出（CDN 按需加载，不影响既有功能） -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </body>
 </html>
