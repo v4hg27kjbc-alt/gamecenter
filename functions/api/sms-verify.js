@@ -140,7 +140,7 @@ async function sendSmsVerifyCode(ak, sk, phone, code, env) {
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(function () { controller.abort(); }, 10000);
+    const timer = setTimeout(function () { controller.abort(); }, 30000);
     const res = await fetch(url, { method: 'GET', signal: controller.signal });
     clearTimeout(timer);
     const text = await res.text();
