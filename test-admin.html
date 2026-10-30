@@ -7,15 +7,28 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #fff; color: #333; min-height: 100vh; transition: background .4s, color .4s; }
-.header { background: #fff; border-bottom: 1px solid #eee; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; transition: background .4s, border-color .4s; }
+
+/* ===== 布局：侧边栏 + 主区 ===== */
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 216px; flex: 0 0 216px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; transition: background .4s, border-color .4s; }
+.side-logo { padding: 18px 16px 14px; font-size: 16px; font-weight: 700; color: #4a90d9; border-bottom: 1px solid #f0f0f0; letter-spacing: .5px; }
+.side-nav { flex: 1; overflow-y: auto; padding: 10px 0; }
+.nav-item { padding: 12px 20px; cursor: pointer; font-size: 14px; color: #666; border-left: 3px solid transparent; transition: all .2s; user-select: none; }
+.nav-item.active { color: #4a90d9; font-weight: 600; border-left-color: #4a90d9; background: rgba(74,144,217,.08); }
+.nav-item:hover:not(.active) { color: #4a90d9; background: rgba(74,144,217,.05); }
+.side-foot { padding: 14px 16px; border-top: 1px solid #f0f0f0; text-align: center; }
+.admin-gate { width: 46px; height: 46px; margin: 0 auto 6px; font-size: 28px; line-height: 46px; border-radius: 12px; cursor: pointer; user-select: none; transition: transform .15s, box-shadow .3s; background: rgba(74,144,217,.08); }
+.admin-gate:active { transform: scale(.92); }
+.admin-gate.on { box-shadow: 0 0 14px rgba(74,144,217,.45); }
+.admin-gate-tip { font-size: 11px; color: #aaa; }
+.admin-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #4a90d9; color: #fff; margin-left: 6px; vertical-align: middle; }
+.main { flex: 1; margin-left: 216px; min-width: 0; }
+.header { background: #fff; border-bottom: 1px solid #eee; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; transition: background .4s, border-color .4s; position: sticky; top: 0; z-index: 90; }
 .header h1 { font-size: 20px; font-weight: 600; }
 .theme-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd; background: transparent; cursor: pointer; font-size: 13px; transition: all .2s; color: inherit; }
 .theme-btn:hover { background: rgba(0,0,0,.05); }
-.tabs { display: flex; gap: 0; border-bottom: 1px solid #eee; padding: 0 24px; transition: border-color .4s; }
-.tab { padding: 12px 20px; cursor: pointer; font-size: 14px; color: #999; border-bottom: 2px solid transparent; transition: all .2s; user-select: none; }
-.tab.active { color: #333; border-bottom-color: #4a90d9; font-weight: 500; }
-.tab:hover:not(.active) { color: #555; }
-.content { padding: 24px; max-width: 800px; margin: 0 auto; }
+
+.content { padding: 24px; max-width: 960px; margin: 0 auto; }
 .panel { display: none; }
 .panel.active { display: block; }
 
@@ -31,6 +44,9 @@ body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
 .btn-ghost { background: transparent; color: #4a90d9; border: 1px solid #ddd; }
 .btn-ghost:hover { background: #f5f8fc; }
+.btn-danger { background: #e53935; color: #fff; }
+.btn-danger:hover { background: #c62828; }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12px; border-radius: 5px; }
 .code-row { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
 .msg { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-top: 12px; display: none; }
 .msg.success { display: block; background: #e8f5e9; color: #2e7d32; }
@@ -39,23 +55,108 @@ body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 .log-entry { padding: 2px 0; border-bottom: 1px dashed #eee; }
 .log-time { color: #999; }
 
-/* 小恐龙 */
-.dino-canvas-wrap { text-align: center; margin-bottom: 20px; }
-#dinoCanvas { border: 1px solid #ddd; border-radius: 4px; background: #fff; touch-action: none; }
-.dino-hint { font-size: 12px; color: #999; margin-top: 8px; }
+/* 总览 */
+.overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.ov-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 18px; cursor: pointer; transition: all .2s; }
+.ov-card:hover { border-color: #4a90d9; box-shadow: 0 2px 12px rgba(74,144,217,.12); }
+.ov-card .ov-label { font-size: 12px; color: #999; margin-bottom: 8px; }
+.ov-card .ov-value { font-size: 22px; font-weight: 600; color: #4a90d9; }
+.ov-card .ov-sub { font-size: 12px; color: #aaa; margin-top: 6px; }
+.ov-card .ov-flag { display: inline-block; font-size: 11px; padding: 2px 10px; border-radius: 10px; margin-top: 6px; }
+.ov-flag.ok { background: #e8f5e9; color: #2e7d32; }
+.ov-flag.off { background: #ffebee; color: #c62828; }
+.ov-flag.warn { background: #fff3e0; color: #e65100; }
 
-/* 用户列表 */
+/* 开关 */
+.switch-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.switch { position: relative; width: 48px; height: 26px; flex: 0 0 48px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider { position: absolute; inset: 0; background: #ccc; border-radius: 26px; transition: .25s; cursor: pointer; }
+.switch .slider:before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .25s; }
+.switch input:checked + .slider { background: #4a90d9; }
+.switch input:checked + .slider:before { transform: translateX(22px); }
+.switch-label { font-size: 14px; }
+.switch-label small { color: #999; font-size: 12px; }
+
+/* 状态条 */
+.stat-bar { display: flex; flex-wrap: wrap; gap: 14px; padding: 12px 14px; background: #f7fbff; border: 1px solid #d9e8f7; border-radius: 8px; margin-bottom: 14px; font-size: 13px; }
+.stat-bar .sb-item { color: #555; }
+.stat-bar .sb-item b { color: #4a90d9; font-size: 16px; margin: 0 3px; }
+
+/* 统计卡（Kimi 用量） */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 14px 16px; }
+.stat-card .sc-label { font-size: 12px; color: #999; margin-bottom: 6px; }
+.stat-card .sc-value { font-size: 20px; font-weight: 600; color: #4a90d9; word-break: break-all; }
+.stat-card .sc-sub { font-size: 12px; color: #aaa; margin-top: 4px; }
+.kimi-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.kimi-toolbar .spacer { flex: 1; }
+.loading-tip { padding: 20px; text-align: center; color: #999; font-size: 13px; }
+.locked-tip { padding: 30px 20px; text-align: center; color: #999; font-size: 14px; }
+.locked-tip .big { font-size: 44px; margin-bottom: 10px; }
+.section-title { font-size: 14px; font-weight: 600; margin: 18px 0 10px; color: #555; }
+
+/* 表格 */
 .user-table { width: 100%; border-collapse: collapse; }
-.user-table th, .user-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+.user-table th, .user-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
 .user-table th { background: #fafafa; font-weight: 500; color: #666; position: sticky; top: 0; }
 .user-table tr:hover td { background: #fafafa; }
+.user-table .ops { white-space: nowrap; }
 .empty-tip { text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
+.visitor-hash { font-family: monospace; font-size: 12px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; margin-right: 4px; }
+.tag.red { background: #ffebee; color: #c62828; }
+.tag.orange { background: #fff3e0; color: #e65100; }
+.tag.green { background: #e8f5e9; color: #2e7d32; }
+
+/* 消息中心 */
+.inbox-list .inbox-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; background: #fff; }
+.inbox-item .inbox-phone { font-weight: 600; color: #4a90d9; }
+.inbox-item .inbox-time { font-size: 12px; color: #999; }
+.inbox-item .inbox-content { font-size: 14px; margin-top: 4px; }
+.inbox-item .inbox-del { margin-left: auto; }
+
+/* 进线小窗（右下角） */
+#toastWrap { position: fixed; right: 20px; bottom: 20px; z-index: 1200; display: flex; flex-direction: column; gap: 10px; max-width: 320px; }
+.toast { background: #fff; border: 1px solid #d9e8f7; border-left: 4px solid #4a90d9; border-radius: 10px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.12); animation: toastSlideIn .5s ease-out, toastBreathe 2.6s ease-in-out .5s infinite; position: relative; }
+.toast .toast-title { font-size: 12px; color: #4a90d9; font-weight: 600; margin-bottom: 4px; }
+.toast .toast-phone { font-weight: 600; }
+.toast .toast-time { font-size: 11px; color: #999; margin-left: 8px; font-weight: 400; }
+.toast .toast-content { font-size: 13px; color: #555; margin-top: 2px; }
+.toast .toast-close { position: absolute; top: 6px; right: 8px; cursor: pointer; color: #bbb; font-size: 14px; line-height: 1; padding: 2px; }
+.toast .toast-close:hover { color: #e53935; }
+@keyframes toastSlideIn { from { transform: translateY(-130%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes toastBreathe { 0%, 100% { box-shadow: 0 8px 24px rgba(74,144,217,.18); } 50% { box-shadow: 0 8px 30px rgba(74,144,217,.5); } }
+
+/* 超管密码弹窗 */
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1500; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal-box { background: #fff; border-radius: 12px; padding: 26px 28px; width: 320px; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+.modal-box h3 { font-size: 16px; margin-bottom: 14px; }
+.modal-box .input { width: 100%; margin-bottom: 6px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.modal-msg { font-size: 12px; color: #e53935; min-height: 16px; margin-top: 4px; }
+
+/* 维护模式毛玻璃遮罩 */
+#maintOverlay { position: fixed; inset: 0; z-index: 2000; background: rgba(255,255,255,.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
+.maint-box { text-align: center; }
+.maint-box .maint-icon { font-size: 84px; line-height: 1.2; }
+.maint-box .maint-text { font-size: 22px; font-weight: 600; color: #333; margin-top: 8px; }
+.maint-box .maint-sub { font-size: 13px; color: #888; margin-top: 6px; }
+.maint-box .btn { margin-top: 18px; }
 
 /* ===== 主题：深色 ===== */
 body.dark { background: #1a1a2e; color: #e0e0e0; }
+body.dark .sidebar { background: #16213e; border-color: #2a2a4a; }
+body.dark .side-logo { color: #e94560; border-color: #2a2a4a; }
+body.dark .nav-item { color: #aaa; }
+body.dark .nav-item.active { color: #e94560; border-left-color: #e94560; background: rgba(233,69,96,.12); }
+body.dark .nav-item:hover:not(.active) { color: #e94560; background: rgba(233,69,96,.08); }
+body.dark .side-foot { border-color: #2a2a4a; }
+body.dark .admin-gate { background: rgba(233,69,96,.1); }
+body.dark .admin-gate.on { box-shadow: 0 0 14px rgba(233,69,96,.45); }
+body.dark .admin-gate-tip { color: #666; }
+body.dark .admin-badge { background: #e94560; }
 body.dark .header { background: #16213e; border-color: #2a2a4a; }
-body.dark .tabs { border-color: #2a2a4a; }
-body.dark .tab.active { color: #e0e0e0; border-bottom-color: #e94560; }
 body.dark .sms-card { background: #16213e; border-color: #2a2a4a; }
 body.dark .input { background: #0f3460; border-color: #2a2a4a; color: #e0e0e0; }
 body.dark .input:focus { border-color: #e94560; }
@@ -65,18 +166,50 @@ body.dark .btn-ghost { color: #e94560; border-color: #2a2a4a; }
 body.dark .btn-ghost:hover { background: rgba(233,69,96,.1); }
 body.dark .log-area { background: #0f3460; border-color: #2a2a4a; }
 body.dark .log-entry { border-color: #2a2a4a; }
+body.dark .ov-card { background: #16213e; border-color: #2a2a4a; }
+body.dark .ov-card .ov-label { color: #888; }
+body.dark .ov-card .ov-value { color: #e94560; }
+body.dark .ov-card .ov-sub { color: #666; }
+body.dark .ov-card:hover { border-color: #e94560; box-shadow: 0 2px 12px rgba(233,69,96,.15); }
+body.dark .stat-bar { background: #0f3460; border-color: #2a2a4a; }
+body.dark .stat-bar .sb-item { color: #aaa; }
+body.dark .stat-bar .sb-item b { color: #e94560; }
+body.dark .stat-card { background: #16213e; border-color: #2a2a4a; }
+body.dark .stat-card .sc-label { color: #888; }
+body.dark .stat-card .sc-value { color: #e94560; }
+body.dark .stat-card .sc-sub { color: #666; }
+body.dark .section-title { color: #aaa; }
 body.dark .user-table th { background: #0f3460; color: #aaa; }
 body.dark .user-table td { border-color: #2a2a4a; }
 body.dark .user-table tr:hover td { background: #0f3460; }
 body.dark .empty-tip { color: #666; }
+body.dark .switch .slider { background: #444; }
+body.dark .switch input:checked + .slider { background: #e94560; }
+body.dark .inbox-list .inbox-item { background: #16213e; border-color: #2a2a4a; }
+body.dark .inbox-item .inbox-phone { color: #e94560; }
+body.dark .inbox-item .inbox-time { color: #666; }
+body.dark .modal-box { background: #16213e; color: #e0e0e0; border: 1px solid #2a2a4a; }
+body.dark .modal-box .input { background: #0f3460; }
+body.dark .toast { background: #16213e; border-color: #2a2a4a; border-left-color: #e94560; }
+body.dark .toast .toast-title { color: #e94560; }
+body.dark .toast .toast-content { color: #ccc; }
+body.dark .maint-box .maint-text { color: #e0e0e0; }
+body.dark .maint-box .maint-sub { color: #888; }
 body.dark #dinoCanvas { background: #16213e; border-color: #2a2a4a; }
 
 /* ===== 主题：渐变紫蓝 ===== */
 body.gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+body.gradient .sidebar { background: rgba(30,27,75,.65); backdrop-filter: blur(12px); border-color: rgba(255,255,255,.15); }
+body.gradient .side-logo { color: #fff; border-color: rgba(255,255,255,.15); }
+body.gradient .nav-item { color: rgba(255,255,255,.7); }
+body.gradient .nav-item.active { color: #fff; border-left-color: #fff; background: rgba(255,255,255,.14); }
+body.gradient .nav-item:hover:not(.active) { color: #fff; background: rgba(255,255,255,.1); }
+body.gradient .side-foot { border-color: rgba(255,255,255,.15); }
+body.gradient .admin-gate { background: rgba(255,255,255,.12); }
+body.gradient .admin-gate.on { box-shadow: 0 0 14px rgba(255,255,255,.5); }
+body.gradient .admin-gate-tip { color: rgba(255,255,255,.5); }
+body.gradient .admin-badge { background: rgba(255,255,255,.25); color: #fff; }
 body.gradient .header { background: rgba(255,255,255,.1); backdrop-filter: blur(10px); border-color: rgba(255,255,255,.15); }
-body.gradient .tabs { border-color: rgba(255,255,255,.15); }
-body.gradient .tab { color: rgba(255,255,255,.7); }
-body.gradient .tab.active { color: #fff; border-bottom-color: #fff; }
 body.gradient .sms-card { background: rgba(255,255,255,.12); backdrop-filter: blur(10px); border-color: rgba(255,255,255,.2); }
 body.gradient .input { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.25); color: #fff; }
 body.gradient .input::placeholder { color: rgba(255,255,255,.5); }
@@ -91,18 +224,54 @@ body.gradient .msg.error { background: rgba(198,40,40,.3); color: #ffcdd2; }
 body.gradient .log-area { background: rgba(0,0,0,.15); border-color: rgba(255,255,255,.1); color: rgba(255,255,255,.8); }
 body.gradient .log-entry { border-color: rgba(255,255,255,.08); }
 body.gradient .log-time { color: rgba(255,255,255,.4); }
+body.gradient .ov-card { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+body.gradient .ov-card .ov-label { color: rgba(255,255,255,.65); }
+body.gradient .ov-card .ov-value { color: #fff; }
+body.gradient .ov-card .ov-sub { color: rgba(255,255,255,.5); }
+body.gradient .ov-card:hover { border-color: rgba(255,255,255,.5); box-shadow: 0 2px 12px rgba(255,255,255,.15); }
+body.gradient .ov-flag.ok { background: rgba(46,125,50,.3); color: #b9f6ca; }
+body.gradient .ov-flag.off { background: rgba(198,40,40,.3); color: #ffcdd2; }
+body.gradient .ov-flag.warn { background: rgba(230,81,0,.3); color: #ffcc80; }
+body.gradient .stat-bar { background: rgba(0,0,0,.15); border-color: rgba(255,255,255,.1); }
+body.gradient .stat-bar .sb-item { color: rgba(255,255,255,.8); }
+body.gradient .stat-bar .sb-item b { color: #fff; }
+body.gradient .stat-card { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+body.gradient .stat-card .sc-label { color: rgba(255,255,255,.6); }
+body.gradient .stat-card .sc-value { color: #fff; }
+body.gradient .stat-card .sc-sub { color: rgba(255,255,255,.5); }
+body.gradient .section-title { color: rgba(255,255,255,.75); }
 body.gradient .user-table th { background: rgba(0,0,0,.15); color: rgba(255,255,255,.6); }
 body.gradient .user-table td { border-color: rgba(255,255,255,.1); }
 body.gradient .user-table tr:hover td { background: rgba(255,255,255,.05); }
 body.gradient .empty-tip { color: rgba(255,255,255,.4); }
+body.gradient .switch .slider { background: rgba(255,255,255,.25); }
+body.gradient .switch input:checked + .slider { background: rgba(255,255,255,.6); }
+body.gradient .switch .slider:before { background: #fff; }
+body.gradient .inbox-list .inbox-item { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+body.gradient .inbox-item .inbox-phone { color: #fff; }
+body.gradient .inbox-item .inbox-time { color: rgba(255,255,255,.5); }
+body.gradient .modal-box { background: rgba(30,27,75,.95); color: #fff; border: 1px solid rgba(255,255,255,.2); }
+body.gradient .toast { background: rgba(30,27,75,.95); border-color: rgba(255,255,255,.2); border-left-color: #fff; }
+body.gradient .toast .toast-title { color: #fff; }
+body.gradient .toast .toast-content { color: rgba(255,255,255,.85); }
+body.gradient .toast .toast-time { color: rgba(255,255,255,.5); }
+body.gradient .maint-box .maint-text { color: #fff; }
+body.gradient .maint-box .maint-sub { color: rgba(255,255,255,.7); }
 body.gradient #dinoCanvas { background: rgba(0,0,0,.2); border-color: rgba(255,255,255,.2); }
 
 /* ===== 主题：暖色日落 ===== */
 body.sunset { background: linear-gradient(to bottom, #ffecd2 0%, #fcb69f 100%); color: #333; }
+body.sunset .sidebar { background: rgba(255,255,255,.7); backdrop-filter: blur(12px); border-color: rgba(0,0,0,.08); }
+body.sunset .side-logo { color: #e67e22; border-color: rgba(0,0,0,.06); }
+body.sunset .nav-item { color: #888; }
+body.sunset .nav-item.active { color: #e67e22; border-left-color: #e67e22; background: rgba(230,126,34,.1); }
+body.sunset .nav-item:hover:not(.active) { color: #e67e22; background: rgba(230,126,34,.06); }
+body.sunset .side-foot { border-color: rgba(0,0,0,.06); }
+body.sunset .admin-gate { background: rgba(230,126,34,.1); }
+body.sunset .admin-gate.on { box-shadow: 0 0 14px rgba(230,126,34,.45); }
+body.sunset .admin-gate-tip { color: #bbb; }
+body.sunset .admin-badge { background: #e67e22; color: #fff; }
 body.sunset .header { background: rgba(255,255,255,.7); backdrop-filter: blur(10px); border-color: rgba(0,0,0,.08); }
-body.sunset .tabs { border-color: rgba(0,0,0,.08); }
-body.sunset .tab { color: #888; }
-body.sunset .tab.active { color: #333; border-bottom-color: #e67e22; }
 body.sunset .sms-card { background: rgba(255,255,255,.75); backdrop-filter: blur(10px); border-color: rgba(0,0,0,.08); }
 body.sunset .input { background: rgba(255,255,255,.6); border-color: rgba(0,0,0,.1); color: #333; }
 body.sunset .input:focus { border-color: #e67e22; }
@@ -115,19 +284,50 @@ body.sunset .msg.error { background: rgba(198,40,40,.15); color: #c62828; }
 body.sunset .log-area { background: rgba(255,255,255,.5); border-color: rgba(0,0,0,.08); }
 body.sunset .log-entry { border-color: rgba(0,0,0,.06); }
 body.sunset .log-time { color: #999; }
+body.sunset .ov-card { background: rgba(255,255,255,.75); border-color: rgba(0,0,0,.08); }
+body.sunset .ov-card .ov-label { color: #999; }
+body.sunset .ov-card .ov-value { color: #e67e22; }
+body.sunset .ov-card .ov-sub { color: #bbb; }
+body.sunset .ov-card:hover { border-color: #e67e22; box-shadow: 0 2px 12px rgba(230,126,34,.15); }
+body.sunset .stat-bar { background: rgba(255,255,255,.5); border-color: rgba(0,0,0,.08); }
+body.sunset .stat-bar .sb-item { color: #666; }
+body.sunset .stat-bar .sb-item b { color: #e67e22; }
+body.sunset .stat-card { background: rgba(255,255,255,.75); border-color: rgba(0,0,0,.08); }
+body.sunset .stat-card .sc-label { color: #999; }
+body.sunset .stat-card .sc-value { color: #e67e22; }
+body.sunset .stat-card .sc-sub { color: #bbb; }
+body.sunset .section-title { color: #666; }
 body.sunset .user-table th { background: rgba(255,255,255,.5); color: #666; }
 body.sunset .user-table td { border-color: rgba(0,0,0,.06); }
 body.sunset .user-table tr:hover td { background: rgba(255,255,255,.4); }
 body.sunset .empty-tip { color: #bbb; }
+body.sunset .switch .slider { background: rgba(0,0,0,.15); }
+body.sunset .switch input:checked + .slider { background: #e67e22; }
+body.sunset .inbox-list .inbox-item { background: rgba(255,255,255,.75); border-color: rgba(0,0,0,.08); }
+body.sunset .inbox-item .inbox-phone { color: #e67e22; }
+body.sunset .inbox-item .inbox-time { color: #999; }
+body.sunset .modal-box { background: rgba(255,255,255,.95); color: #333; border: 1px solid rgba(0,0,0,.08); }
+body.sunset .toast { background: rgba(255,255,255,.95); border-color: rgba(0,0,0,.1); border-left-color: #e67e22; }
+body.sunset .toast .toast-title { color: #e67e22; }
+body.sunset .toast .toast-content { color: #555; }
+body.sunset .maint-box .maint-text { color: #333; }
+body.sunset .maint-box .maint-sub { color: #888; }
 body.sunset #dinoCanvas { background: rgba(255,255,255,.6); border-color: rgba(0,0,0,.1); }
 
 /* ===== 主题：赛博朋克 ===== */
 body.cyber { background: #0a0a1a; color: #0ff; }
+body.cyber .sidebar { background: #0a0a1a; border-color: #0ff; box-shadow: 0 0 20px rgba(0,255,255,.08); }
+body.cyber .side-logo { color: #0ff; border-color: #0ff; text-shadow: 0 0 10px #0ff; }
+body.cyber .nav-item { color: #0aa; }
+body.cyber .nav-item.active { color: #0ff; border-left-color: #0ff; background: rgba(0,255,255,.1); text-shadow: 0 0 8px #0ff; }
+body.cyber .nav-item:hover:not(.active) { color: #0ff; background: rgba(0,255,255,.06); }
+body.cyber .side-foot { border-color: #0ff; }
+body.cyber .admin-gate { background: rgba(0,255,255,.08); }
+body.cyber .admin-gate.on { box-shadow: 0 0 14px rgba(0,255,255,.5); }
+body.cyber .admin-gate-tip { color: #0aa; }
+body.cyber .admin-badge { background: #0ff; color: #0a0a1a; }
 body.cyber .header { background: #0a0a1a; border-color: #0ff; box-shadow: 0 0 20px rgba(0,255,255,.1); }
 body.cyber .header h1 { text-shadow: 0 0 10px #0ff; }
-body.cyber .tabs { border-color: #0ff; }
-body.cyber .tab { color: #0aa; }
-body.cyber .tab.active { color: #0ff; border-bottom-color: #0ff; text-shadow: 0 0 8px #0ff; }
 body.cyber .sms-card { background: rgba(0,255,255,.03); border-color: #0ff; box-shadow: 0 0 15px rgba(0,255,255,.08), inset 0 0 30px rgba(0,255,255,.02); }
 body.cyber .sms-card h2 { text-shadow: 0 0 8px #0ff; }
 body.cyber .input { background: rgba(0,255,255,.05); border-color: #0ff; color: #0ff; }
@@ -142,80 +342,291 @@ body.cyber .msg.error { background: rgba(255,0,100,.1); color: #ff0064; border: 
 body.cyber .log-area { background: rgba(0,255,255,.02); border-color: #0ff; }
 body.cyber .log-entry { border-color: rgba(0,255,255,.1); }
 body.cyber .log-time { color: #0aa; }
+body.cyber .ov-card { background: rgba(0,255,255,.03); border-color: #0ff; }
+body.cyber .ov-card .ov-label { color: #0aa; }
+body.cyber .ov-card .ov-value { color: #0ff; text-shadow: 0 0 8px #0ff; }
+body.cyber .ov-card .ov-sub { color: #0aa; }
+body.cyber .ov-card:hover { border-color: #0ff; box-shadow: 0 0 12px rgba(0,255,255,.25); }
+body.cyber .ov-flag.ok { background: rgba(0,255,255,.1); color: #0ff; }
+body.cyber .ov-flag.off { background: rgba(255,0,100,.12); color: #ff0064; }
+body.cyber .ov-flag.warn { background: rgba(255,255,0,.1); color: #ff0; }
+body.cyber .stat-bar { background: rgba(0,255,255,.02); border-color: #0ff; }
+body.cyber .stat-bar .sb-item { color: #0aa; }
+body.cyber .stat-bar .sb-item b { color: #0ff; }
+body.cyber .stat-card { background: rgba(0,255,255,.03); border-color: #0ff; }
+body.cyber .stat-card .sc-label { color: #0aa; }
+body.cyber .stat-card .sc-value { color: #0ff; text-shadow: 0 0 8px #0ff; }
+body.cyber .stat-card .sc-sub { color: #0aa; }
+body.cyber .section-title { color: #0ff; }
 body.cyber .user-table th { background: rgba(0,255,255,.05); color: #0ff; border-color: #0ff; }
 body.cyber .user-table td { border-color: rgba(0,255,255,.1); }
 body.cyber .user-table tr:hover td { background: rgba(0,255,255,.05); }
 body.cyber .empty-tip { color: #0aa; }
+body.cyber .switch .slider { background: #0aa; }
+body.cyber .switch input:checked + .slider { background: #0ff; }
+body.cyber .switch .slider:before { background: #0a0a1a; }
+body.cyber .inbox-list .inbox-item { background: rgba(0,255,255,.03); border-color: #0ff; }
+body.cyber .inbox-item .inbox-phone { color: #0ff; text-shadow: 0 0 6px #0ff; }
+body.cyber .inbox-item .inbox-time { color: #0aa; }
+body.cyber .modal-box { background: #0a0a1a; color: #0ff; border: 1px solid #0ff; box-shadow: 0 0 20px rgba(0,255,255,.2); }
+body.cyber .toast { background: rgba(0,20,25,.95); border-color: #0ff; border-left-color: #0ff; box-shadow: 0 0 16px rgba(0,255,255,.25); }
+body.cyber .toast .toast-title { color: #0ff; }
+body.cyber .toast .toast-content { color: #0aa; }
+body.cyber .toast .toast-time { color: #0aa; }
+body.cyber .maint-box .maint-text { color: #0ff; text-shadow: 0 0 12px #0ff; }
+body.cyber .maint-box .maint-sub { color: #0aa; }
 body.cyber #dinoCanvas { background: rgba(0,255,255,.03); border-color: #0ff; box-shadow: 0 0 10px rgba(0,255,255,.1); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>测试后台</h1>
-  <div style="display:flex;gap:6px;align-items:center;">
-    <span style="font-size:12px;color:#999;margin-right:4px;">皮肤</span>
-    <button class="theme-btn" onclick="setTheme('')">纯白</button>
-    <button class="theme-btn" onclick="setTheme('dark')">深色</button>
-    <button class="theme-btn" onclick="setTheme('gradient')">紫蓝</button>
-    <button class="theme-btn" onclick="setTheme('sunset')">日落</button>
-    <button class="theme-btn" onclick="setTheme('cyber')">赛博</button>
+<div class="layout">
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="side-logo">🚗 测试后台</div>
+    <nav class="side-nav" id="sideNav">
+      <div class="nav-item" data-tab="overview">总览</div>
+      <div class="nav-item active" data-tab="sms">短信收发</div>
+      <div class="nav-item" data-tab="game">小恐龙</div>
+      <div class="nav-item" data-tab="users">用户管理</div>
+      <div class="nav-item" data-tab="inbox">消息中心</div>
+      <div class="nav-item" data-tab="kimi">Kimi用量</div>
+      <div class="nav-item" data-tab="settings">系统设置</div>
+    </nav>
+    <div class="side-foot">
+      <div class="admin-gate" id="adminGate" title="长按进入超管模式">🚧</div>
+      <div class="admin-gate-tip" id="adminGateTip">长按 🚧 进入超管</div>
+    </div>
+  </aside>
+
+  <!-- 主区 -->
+  <div class="main">
+    <div class="header">
+      <h1>测试后台 <span class="admin-badge" id="adminBadge" style="display:none;">超管</span></h1>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-size:12px;color:#999;margin-right:4px;">皮肤</span>
+        <button class="theme-btn" onclick="setTheme('')">纯白</button>
+        <button class="theme-btn" onclick="setTheme('dark')">深色</button>
+        <button class="theme-btn" onclick="setTheme('gradient')">紫蓝</button>
+        <button class="theme-btn" onclick="setTheme('sunset')">日落</button>
+        <button class="theme-btn" onclick="setTheme('cyber')">赛博</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- 总览 -->
+      <div id="panel-overview" class="panel">
+        <div class="sms-card">
+          <h2>总览</h2>
+          <div class="overview-grid">
+            <div class="ov-card" onclick="switchTab('sms')">
+              <div class="ov-label">短信模块</div>
+              <div class="ov-value" id="ovSmsStatus">启用</div>
+              <div class="ov-sub" id="ovSmsDetail">已发送 0 次 · 剩余 1000</div>
+              <span class="ov-flag ok" id="ovSmsFlag">运行中</span>
+            </div>
+            <div class="ov-card" onclick="switchTab('settings')">
+              <div class="ov-label">维护模式</div>
+              <div class="ov-value" id="ovMaint">关闭</div>
+              <div class="ov-sub">毛玻璃遮罩</div>
+              <span class="ov-flag off" id="ovMaintFlag">未开启</span>
+            </div>
+            <div class="ov-card" onclick="switchTab('kimi')">
+              <div class="ov-label">超管模式</div>
+              <div class="ov-value" id="ovAdmin">未授权</div>
+              <div class="ov-sub">长按侧边栏 🚧 解锁</div>
+              <span class="ov-flag off" id="ovAdminFlag">未授权</span>
+            </div>
+            <div class="ov-card" onclick="switchTab('inbox')">
+              <div class="ov-label">消息中心</div>
+              <div class="ov-value" id="ovInbox">0 条</div>
+              <div class="ov-sub">进线消息提醒</div>
+              <span class="ov-flag ok">正常</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 短信面板 -->
+      <div id="panel-sms" class="panel active">
+        <div class="sms-card">
+          <h2>短信收发模块</h2>
+          <div class="switch-row">
+            <label class="switch">
+              <input type="checkbox" id="smsEnabledSwitch" onchange="toggleSmsEnabled()">
+              <span class="slider"></span>
+            </label>
+            <span class="switch-label">短信模块启用/停用 <small id="smsEnabledTip">（停用后发送与登录按钮置灰）</small></span>
+          </div>
+          <div class="stat-bar" id="smsStatBar">
+            <span class="sb-item">已发送 <b id="smsSentCount">0</b> 次</span>
+            <span class="sb-item">剩余额度 <b id="smsRemainCount">1000</b> 次</span>
+            <span class="sb-item">最近回执 <b id="smsLastReceipt">-</b></span>
+          </div>
+          <div class="form-row">
+            <input type="tel" class="input" id="phoneInput" placeholder="输入手机号" maxlength="11">
+            <button class="btn btn-primary" id="sendBtn" onclick="sendCode()">获取验证码</button>
+          </div>
+          <div class="code-row">
+            <input type="text" class="input" id="codeInput" placeholder="输入验证码" maxlength="6">
+            <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">登录</button>
+          </div>
+          <div id="msgBox" class="msg"></div>
+        </div>
+        <div class="sms-card">
+          <h2>操作日志</h2>
+          <div class="log-area" id="logArea"></div>
+        </div>
+      </div>
+
+      <!-- 小恐龙 -->
+      <div id="panel-game" class="panel">
+        <div class="sms-card">
+          <h2>小恐龙游戏</h2>
+          <div class="dino-canvas-wrap">
+            <canvas id="dinoCanvas" width="600" height="200"></canvas>
+          </div>
+          <p class="dino-hint">按空格键或点击屏幕跳跃 · 躲避障碍物</p>
+          <div style="text-align:center;margin-top:12px;">
+            <button class="btn btn-ghost" onclick="resetGame()">重新开始</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用户管理 -->
+      <div id="panel-users" class="panel">
+        <div class="sms-card" id="visitorCard">
+          <h2>访客实时管控 <span class="admin-badge" id="visitorAdminTip" style="display:none;">超管</span></h2>
+          <div id="visitorLocked" class="locked-tip">
+            <div class="big">🚧</div>
+            访客管控仅超管可见，请长按侧边栏 🚧 进入超管模式
+          </div>
+          <div id="visitorBody" style="display:none;">
+            <div class="kimi-toolbar">
+              <button class="btn btn-ghost btn-sm" onclick="loadVisitors()">刷新访客</button>
+              <span style="font-size:12px;color:#999;" id="visitorMeta"></span>
+            </div>
+            <div id="visitorTableWrap" class="loading-tip">点击「刷新访客」加载列表</div>
+          </div>
+        </div>
+        <div class="sms-card">
+          <h2>本地注册用户</h2>
+          <table class="user-table" id="userTable">
+            <thead><tr><th>#</th><th>手机号</th><th>密码</th><th>注册时间</th></tr></thead>
+            <tbody id="userBody"></tbody>
+          </table>
+          <div id="emptyTip" class="empty-tip">暂无注册用户</div>
+        </div>
+      </div>
+
+      <!-- 消息中心 -->
+      <div id="panel-inbox" class="panel">
+        <div class="sms-card">
+          <h2>消息中心</h2>
+          <div class="kimi-toolbar">
+            <button class="btn btn-primary btn-sm" onclick="simulateIncoming()">模拟进线</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearInbox()">清空消息</button>
+            <span style="font-size:12px;color:#999;">点击「模拟进线」触发右下角提醒小窗</span>
+          </div>
+          <div class="inbox-list" id="inboxList">
+            <div class="empty-tip">暂无进线消息</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kimi用量 -->
+      <div id="panel-kimi" class="panel">
+        <div class="sms-card">
+          <h2>Kimi 用量面板</h2>
+          <div id="kimiLocked" class="locked-tip">
+            <div class="big">🚧</div>
+            Kimi 用量仅超管可见，请长按侧边栏 🚧 进入超管模式
+          </div>
+          <div id="kimiBody" style="display:none;">
+            <div class="kimi-toolbar">
+              <button class="btn btn-primary btn-sm" onclick="loadKimiStats()">加载用量</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadKimiCalls()">调用明细</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadKimiPricing()">计价表</button>
+              <span style="font-size:12px;color:#999;" id="kimiMeta"></span>
+            </div>
+            <div id="kimiSummary"></div>
+            <div id="kimiDetails" style="display:none;">
+              <div class="section-title" id="kimiDetailsTitle">调用明细</div>
+              <div id="kimiDetailsBody" class="loading-tip">加载中...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 系统设置 -->
+      <div id="panel-settings" class="panel">
+        <div class="sms-card">
+          <h2>维护模式</h2>
+          <div id="maintLocked" class="locked-tip" style="display:none;">
+            <div class="big">🚧</div>
+            维护模式仅超管可操作，请长按侧边栏 🚧 进入超管模式
+          </div>
+          <div id="maintBody" style="display:block;">
+            <div class="switch-row">
+              <label class="switch">
+                <input type="checkbox" id="maintSwitch" onchange="toggleMaintenance()">
+                <span class="slider"></span>
+              </label>
+              <span class="switch-label">开启维护模式 <small>（整个后台显示毛玻璃遮罩）</small></span>
+            </div>
+            <p style="font-size:12px;color:#999;">开启后全站显示毛玻璃遮罩 + 🚧 + 「维护中」文案，退出需超管权限。</p>
+          </div>
+        </div>
+        <div class="sms-card">
+          <h2>超管状态</h2>
+          <div id="adminStatus">
+            <div class="switch-row">
+              <span class="switch-label" id="adminStateLabel">当前未进入超管模式</span>
+            </div>
+            <div class="kimi-toolbar">
+              <button class="btn btn-ghost btn-sm" onclick="openAdminPwd()">重新验证口令</button>
+              <button class="btn btn-danger btn-sm" id="adminLogoutBtn" style="display:none;" onclick="logoutAdmin()">退出超管</button>
+            </div>
+          </div>
+        </div>
+        <div class="sms-card">
+          <h2>短信额度设置</h2>
+          <div class="form-row">
+            <input type="number" class="input" id="smsQuotaInput" placeholder="初始额度（默认1000）" min="1">
+            <button class="btn btn-ghost" onclick="saveSmsQuota()">保存额度</button>
+          </div>
+          <p style="font-size:12px;color:#999;">剩余次数 = 初始额度 - 已发送次数（本地估算，仅用于展示）。</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" data-tab="sms">短信收发</div>
-  <div class="tab" data-tab="game">小恐龙游戏</div>
-  <div class="tab" data-tab="users">注册用户</div>
-</div>
-
-<div class="content">
-  <!-- 短信面板 -->
-  <div id="panel-sms" class="panel active">
-    <div class="sms-card">
-      <h2>发送验证码</h2>
-      <div class="form-row">
-        <input type="tel" class="input" id="phoneInput" placeholder="输入手机号" maxlength="11">
-        <button class="btn btn-primary" id="sendBtn" onclick="sendCode()">获取验证码</button>
-      </div>
-      <div class="code-row">
-        <input type="text" class="input" id="codeInput" placeholder="输入验证码" maxlength="6">
-        <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">登录</button>
-      </div>
-      <div id="msgBox" class="msg"></div>
-    </div>
-    <div class="sms-card">
-      <h2>操作日志</h2>
-      <div class="log-area" id="logArea"></div>
-    </div>
-  </div>
-
-  <!-- 小恐龙 -->
-  <div id="panel-game" class="panel">
-    <div class="sms-card">
-      <h2>小恐龙游戏</h2>
-      <div class="dino-canvas-wrap">
-        <canvas id="dinoCanvas" width="600" height="200"></canvas>
-      </div>
-      <p class="dino-hint">按空格键或点击屏幕跳跃 · 躲避障碍物</p>
-      <div style="text-align:center;margin-top:12px;">
-        <button class="btn btn-ghost" onclick="resetGame()">重新开始</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 用户列表 -->
-  <div id="panel-users" class="panel">
-    <div class="sms-card">
-      <h2>注册用户列表</h2>
-      <table class="user-table" id="userTable">
-        <thead><tr><th>#</th><th>手机号</th><th>密码</th><th>注册时间</th></tr></thead>
-        <tbody id="userBody"></tbody>
-      </table>
-      <div id="emptyTip" class="empty-tip">暂无注册用户</div>
+<!-- 超管密码弹窗 -->
+<div class="modal-mask" id="adminPwdMask" style="display:none;">
+  <div class="modal-box">
+    <h3>🚧 超管验证</h3>
+    <input type="password" class="input" id="adminPwdInput" placeholder="输入管理员口令" autocomplete="off">
+    <div class="modal-msg" id="adminPwdMsg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminPwd()">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="verifyAdmin()">验证</button>
     </div>
   </div>
 </div>
+
+<!-- 维护模式遮罩 -->
+<div id="maintOverlay" style="display:none;">
+  <div class="maint-box">
+    <div class="maint-icon">🚧</div>
+    <div class="maint-text">维护中</div>
+    <div class="maint-sub">系统正在维护，请稍后再来</div>
+    <button class="btn btn-primary" onclick="exitMaintenance()">退出维护模式</button>
+  </div>
+</div>
+
+<!-- 进线小窗 -->
+<div id="toastWrap"></div>
 
 <script>
 // ===== 主题切换 =====
@@ -228,14 +639,17 @@ function setTheme(name) {
   if (saved) document.body.className = saved;
 })();
 
-// ===== Tab 切换 =====
-document.querySelectorAll('.tab').forEach(function(t) {
-  t.addEventListener('click', function() {
-    document.querySelectorAll('.tab').forEach(function(x) { x.classList.remove('active'); });
-    document.querySelectorAll('.panel').forEach(function(x) { x.classList.remove('active'); });
-    t.classList.add('active');
-    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
-  });
+// ===== 侧边栏导航 =====
+function switchTab(name) {
+  document.querySelectorAll('.nav-item').forEach(function(x) { x.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(x) { x.classList.remove('active'); });
+  var nav = document.querySelector('.nav-item[data-tab="' + name + '"]');
+  if (nav) nav.classList.add('active');
+  var panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+}
+document.querySelectorAll('.nav-item').forEach(function(t) {
+  t.addEventListener('click', function() { switchTab(t.dataset.tab); });
 });
 
 // ===== 工具函数 =====
@@ -253,47 +667,284 @@ function addLog(text) {
   entry.innerHTML = '<span class="log-time">' + time + '</span> ' + escHtml(text);
   area.insertBefore(entry, area.firstChild);
 }
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function jsStr(s) { return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+function fetchJson(url, opts, timeoutMs) {
+  var t = timeoutMs || 20000;
+  var ctrl = new AbortController();
+  var timer = setTimeout(function() { ctrl.abort(); }, t);
+  return fetch(url, Object.assign({ signal: ctrl.signal }, opts || {}))
+    .then(function(res) {
+      return res.json().then(function(data) {
+        data._status = res.status;
+        return data;
+      }).catch(function() { return { _status: res.status, _notJson: true }; });
+    })
+    .finally(function() { clearTimeout(timer); });
+}
+function fmtNum(n) { return Number(n || 0).toLocaleString('zh-CN'); }
+function fmtTime(ts) {
+  if (ts == null || ts === '') return '-';
+  var d;
+  if (typeof ts === 'number') d = new Date(ts < 1e12 ? ts * 1000 : ts);
+  else { d = new Date(String(ts).length === 10 ? Number(ts) * 1000 : String(ts)); if (isNaN(d.getTime())) return String(ts); }
+  function p(v) { return v.toString().padStart(2,'0'); }
+  return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+}
+
+// ===== 超管模式 =====
+function isAdmin() { return localStorage.getItem('test_admin') === '1'; }
+var adminGateTimer = null;
+var adminGateEl = document.getElementById('adminGate');
+adminGateEl.addEventListener('pointerdown', function(e) {
+  e.preventDefault();
+  adminGateEl.classList.add('on');
+  adminGateTimer = setTimeout(function() { openAdminPwd(); }, 1500);
+});
+function clearGateTimer() {
+  if (adminGateTimer) { clearTimeout(adminGateTimer); adminGateTimer = null; }
+  adminGateEl.classList.remove('on');
+}
+adminGateEl.addEventListener('pointerup', clearGateTimer);
+adminGateEl.addEventListener('pointerleave', clearGateTimer);
+adminGateEl.addEventListener('pointercancel', clearGateTimer);
+
+function openAdminPwd() {
+  clearGateTimer();
+  document.getElementById('adminPwdInput').value = '';
+  document.getElementById('adminPwdMsg').textContent = '';
+  document.getElementById('adminPwdMask').style.display = 'flex';
+  setTimeout(function() { document.getElementById('adminPwdInput').focus(); }, 50);
+}
+function closeAdminPwd() { document.getElementById('adminPwdMask').style.display = 'none'; }
+function verifyAdmin() {
+  var pwd = document.getElementById('adminPwdInput').value.trim();
+  var msgEl = document.getElementById('adminPwdMsg');
+  if (!pwd) { msgEl.textContent = '请输入口令'; return; }
+  msgEl.textContent = '验证中...';
+  fetchJson('/api/admin/stats?days=7', { headers: { 'X-Admin-Token': pwd, 'Authorization': 'Bearer ' + pwd } })
+    .then(function(data) {
+      if (data && data.ok) {
+        localStorage.setItem('test_admin', '1');
+        closeAdminPwd();
+        addLog('超管验证成功');
+        applyAdminUI();
+        showMsg('已进入超管模式', 'success');
+      } else if (data && data._status === 401) {
+        msgEl.textContent = '口令错误或未配置管理员口令（401）';
+      } else {
+        msgEl.textContent = '验证失败：' + ((data && data.message) || '接口异常');
+      }
+    })
+    .catch(function(e) {
+      msgEl.textContent = '网络错误：' + e.message;
+    });
+}
+function logoutAdmin() {
+  localStorage.removeItem('test_admin');
+  addLog('退出超管模式');
+  applyAdminUI();
+  showMsg('已退出超管模式', 'success');
+}
+function applyAdminUI() {
+  var admin = isAdmin();
+  document.getElementById('adminBadge').style.display = admin ? '' : 'none';
+  document.getElementById('adminGateTip').textContent = admin ? '超管已启用' : '长按 🚧 进入超管';
+  // Kimi
+  document.getElementById('kimiLocked').style.display = admin ? 'none' : '';
+  document.getElementById('kimiBody').style.display = admin ? '' : 'none';
+  // 访客管控
+  document.getElementById('visitorLocked').style.display = admin ? 'none' : '';
+  document.getElementById('visitorBody').style.display = admin ? '' : 'none';
+  document.getElementById('visitorAdminTip').style.display = admin ? '' : 'none';
+  // 维护模式
+  document.getElementById('maintLocked').style.display = admin ? 'none' : '';
+  document.getElementById('maintBody').style.display = admin ? '' : 'none';
+  document.getElementById('maintSwitch').disabled = !admin;
+  document.getElementById('adminLogoutBtn').style.display = admin ? '' : 'none';
+  document.getElementById('adminStateLabel').textContent = admin ? '已进入超管模式（口令已通过接口验证）' : '当前未进入超管模式';
+  updateOverview();
+  if (admin) loadKimiStats();
+}
+
+// ===== 维护模式 =====
+function maintOn() { return localStorage.getItem('test_maintenance') === '1'; }
+function toggleMaintenance() {
+  var on = document.getElementById('maintSwitch').checked;
+  if (on) {
+    if (!isAdmin()) { document.getElementById('maintSwitch').checked = false; alert('仅超管可开启维护模式'); return; }
+    localStorage.setItem('test_maintenance', '1');
+    addLog('开启维护模式');
+  } else {
+    localStorage.removeItem('test_maintenance');
+    addLog('关闭维护模式');
+  }
+  showMaintOverlay();
+  updateOverview();
+}
+function showMaintOverlay() {
+  document.getElementById('maintOverlay').style.display = maintOn() ? 'flex' : 'none';
+  document.getElementById('maintSwitch').checked = maintOn();
+}
+function exitMaintenance() {
+  if (!isAdmin()) { alert('仅超管可退出维护模式'); return; }
+  localStorage.removeItem('test_maintenance');
+  document.getElementById('maintSwitch').checked = false;
+  showMaintOverlay();
+  addLog('退出维护模式');
+  updateOverview();
+}
+
+// ===== 消息进线 =====
+function getInbox() { try { return JSON.parse(localStorage.getItem('test_inbox') || '[]'); } catch(e) { return []; } }
+function saveInbox(list) { localStorage.setItem('test_inbox', JSON.stringify(list)); }
+var incomingTemplates = [
+  '我想咨询一下刚才提交的申请进度',
+  '验证码收不到，麻烦看一下',
+  '请问维护什么时候结束？',
+  '订单状态有变化，请尽快联系我',
+  '我收到了短信，但是内容显示乱码'
+];
+function simulateIncoming() {
+  var phone = '1' + (Math.random() < 0.5 ? '3' : '5') + Math.random().toString().slice(2, 11).replace(/\D/g, '');
+  phone = (phone.slice(0, 11)).padEnd(11, '0');
+  var content = incomingTemplates[Math.floor(Math.random() * incomingTemplates.length)];
+  var msg = { phone: phone, time: new Date().toLocaleString(), content: content };
+  var list = getInbox();
+  list.unshift(msg);
+  if (list.length > 100) list = list.slice(0, 100);
+  saveInbox(list);
+  renderInbox();
+  pushToast(msg);
+  addLog('模拟进线 → ' + phone);
+  updateOverview();
+}
+function pushToast(msg) {
+  var wrap = document.getElementById('toastWrap');
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = '<span class="toast-close" onclick="this.parentNode.remove()">✕</span>' +
+    '<div class="toast-title">📩 新消息进线</div>' +
+    '<div><span class="toast-phone">' + escHtml(msg.phone) + '</span><span class="toast-time">' + escHtml(msg.time) + '</span></div>' +
+    '<div class="toast-content">' + escHtml(msg.content) + '</div>';
+  wrap.appendChild(t);
+  // 排队：最多同时 4 个，超出移除最早的
+  while (wrap.children.length > 4) wrap.removeChild(wrap.firstChild);
+  // 12 秒后自动收起
+  setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 12000);
+}
+function renderInbox() {
+  var list = getInbox();
+  var box = document.getElementById('inboxList');
+  if (!list.length) { box.innerHTML = '<div class="empty-tip">暂无进线消息</div>'; return; }
+  box.innerHTML = list.map(function(m, i) {
+    return '<div class="inbox-item">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<span class="inbox-phone">' + escHtml(m.phone) + '</span> <span class="inbox-time">' + escHtml(m.time) + '</span>' +
+        '<div class="inbox-content">' + escHtml(m.content) + '</div>' +
+      '</div>' +
+      '<button class="btn btn-ghost btn-sm inbox-del" onclick="removeInbox(' + i + ')">删除</button>' +
+    '</div>';
+  }).join('');
+}
+function removeInbox(i) {
+  var list = getInbox();
+  list.splice(i, 1);
+  saveInbox(list);
+  renderInbox();
+  updateOverview();
+}
+function clearInbox() {
+  if (!getInbox().length) return;
+  saveInbox([]);
+  renderInbox();
+  addLog('清空进线消息');
+  updateOverview();
+}
 
 // ===== 短信收发 =====
+function smsEnabled() { return localStorage.getItem('test_sms_enabled') !== '0'; }
+function getSmsQuota() { return parseInt(localStorage.getItem('test_sms_quota') || '1000', 10) || 1000; }
+function getSmsSent() { return parseInt(localStorage.getItem('test_sms_sent') || '0', 10) || 0; }
+function updateSmsStatus() {
+  var on = smsEnabled();
+  var sent = getSmsSent();
+  var quota = getSmsQuota();
+  var remain = Math.max(0, quota - sent);
+  document.getElementById('smsEnabledSwitch').checked = on;
+  document.getElementById('sendBtn').disabled = !on;
+  document.getElementById('loginBtn').disabled = !on;
+  document.getElementById('smsEnabledTip').textContent = on ? '（停用后发送与登录按钮置灰）' : '（已停用，按钮已置灰）';
+  document.getElementById('smsSentCount').textContent = fmtNum(sent);
+  document.getElementById('smsRemainCount').textContent = fmtNum(remain);
+  document.getElementById('smsQuotaInput').value = quota;
+  if (on) {
+    var biz = localStorage.getItem('test_sms_last_bizid');
+    document.getElementById('smsLastReceipt').textContent = biz ? biz : '-';
+  }
+  updateOverview();
+}
+function toggleSmsEnabled() {
+  var on = document.getElementById('smsEnabledSwitch').checked;
+  localStorage.setItem('test_sms_enabled', on ? '1' : '0');
+  addLog(on ? '短信模块启用' : '短信模块停用');
+  updateSmsStatus();
+}
+function saveSmsQuota() {
+  var v = parseInt(document.getElementById('smsQuotaInput').value, 10);
+  if (!v || v < 1) { alert('请输入有效额度（≥1）'); return; }
+  localStorage.setItem('test_sms_quota', String(v));
+  addLog('短信初始额度设置为 ' + v);
+  updateSmsStatus();
+}
 var sendTimer = null;
 async function sendCode() {
+  if (!smsEnabled()) { showMsg('短信模块已停用，无法发送', 'error'); return; }
   var phone = document.getElementById('phoneInput').value.trim();
   if (!/^1[3-9]\d{9}$/.test(phone)) { showMsg('请输入正确的手机号', 'error'); return; }
   var btn = document.getElementById('sendBtn');
   btn.disabled = true;
   btn.textContent = '等待中...';
   try {
-    var res = await fetch('/api/sms-verify', {
+    var res = await fetchJson('/api/sms-verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phoneNumber: phone })
     });
-    var data = await res.json();
-    if (data.ok) {
-      showMsg('验证码已发送至 ' + phone.slice(0,3) + '****' + phone.slice(7), 'success');
-      addLog('发送成功 → ' + phone);
+    if (res.ok) {
+      // 回执编号
+      var bizId = res.bizId || '';
+      localStorage.setItem('test_sms_last_bizid', bizId || '已受理');
+      var sent = getSmsSent() + 1;
+      localStorage.setItem('test_sms_sent', String(sent));
+      var remain = Math.max(0, getSmsQuota() - sent);
+      updateSmsStatus();
+      showMsg('验证码已发送至 ' + phone.slice(0,3) + '****' + phone.slice(7) + '，回执：' + (bizId || '已受理'), 'success');
+      addLog('发送成功 → ' + phone + ' 回执:' + (bizId || '已受理') + ' 剩余:' + remain);
       // 倒计时
       var sec = 60;
       sendTimer = setInterval(function() {
         btn.textContent = sec + 's';
-        if (sec <= 0) { clearInterval(sendTimer); btn.disabled = false; btn.textContent = '获取验证码'; }
+        if (sec <= 0) { clearInterval(sendTimer); sendTimer = null; if (smsEnabled()) { btn.disabled = false; } btn.textContent = '获取验证码'; }
         sec--;
       }, 1000);
     } else {
-      showMsg(data.message || '发送失败', 'error');
-      addLog('发送失败 → ' + (data.error || ''));
+      showMsg(res.message || '发送失败', 'error');
+      addLog('发送失败 → ' + (res.error || res.message || ''));
+      btn.disabled = smsEnabled() ? false : true;
+      btn.textContent = '获取验证码';
     }
   } catch(e) {
     showMsg('网络错误: ' + e.message, 'error');
     addLog('网络错误 → ' + e.message);
-  } finally {
-    if (!sendTimer) { btn.disabled = false; btn.textContent = '获取验证码'; }
+    btn.disabled = smsEnabled() ? false : true;
+    btn.textContent = '获取验证码';
   }
 }
 
 // ===== 登录 & 注册 =====
 function doLogin() {
+  if (!smsEnabled()) { showMsg('短信模块已停用，无法登录', 'error'); return; }
   var phone = document.getElementById('phoneInput').value.trim();
   var code = document.getElementById('codeInput').value.trim();
   if (!phone || !code) { showMsg('请填写手机号和验证码', 'error'); return; }
@@ -309,7 +960,7 @@ function doLogin() {
   document.getElementById('codeInput').value = '';
 }
 
-// ===== 用户列表 =====
+// ===== 本地用户列表 =====
 function renderUsers() {
   var users = JSON.parse(localStorage.getItem('test_users') || '[]');
   var tbody = document.getElementById('userBody');
@@ -319,6 +970,235 @@ function renderUsers() {
   tbody.innerHTML = users.map(function(u, i) {
     return '<tr><td>' + (i+1) + '</td><td>' + escHtml(u.phone) + '</td><td>' + escHtml(u.password) + '</td><td>' + escHtml(u.time) + '</td></tr>';
   }).join('');
+}
+
+// ===== 访客实时管控（超管） =====
+function adminHeaders() {
+  var pwd = localStorage.getItem('test_admin_pwd') || '';
+  var h = {};
+  if (pwd) { h['X-Admin-Token'] = pwd; h['Authorization'] = 'Bearer ' + pwd; }
+  return h;
+}
+function getViolations() { try { return JSON.parse(localStorage.getItem('test_violations') || '{}'); } catch(e) { return {}; } }
+function markViolation(hash) {
+  var v = getViolations();
+  v[hash] = (v[hash] || 0) + 1;
+  localStorage.setItem('test_violations', JSON.stringify(v));
+  addLog('标记违规 → ' + hash);
+  loadVisitors();
+}
+function loadVisitors() {
+  var pwd = localStorage.getItem('test_admin_pwd') || '';
+  if (!pwd) { alert('请先进入超管模式'); return; }
+  document.getElementById('visitorTableWrap').innerHTML = '<div class="loading-tip">加载中...</div>';
+  fetchJson('/api/admin/control?action=list-visitors&limit=100', { headers: { 'X-Admin-Token': pwd, 'Authorization': 'Bearer ' + pwd } })
+    .then(function(data) {
+      if (data && data.ok) {
+        var rows = data.visitors || [];
+        document.getElementById('visitorMeta').textContent = '共 ' + rows.length + ' 位访客 · 全局受限:' + (data.globalRestricted ? '是' : '否');
+        var violations = getViolations();
+        if (!rows.length) {
+          document.getElementById('visitorTableWrap').innerHTML = '<div class="empty-tip">暂无访客记录</div>';
+          return;
+        }
+        var html = '<table class="user-table"><thead><tr><th>访客标识</th><th>访问次数</th><th>地区</th><th>IP前缀</th><th>最近访问</th><th>状态</th><th>违规</th><th>操作</th></tr></thead><tbody>';
+        rows.forEach(function(v) {
+          var vCount = violations[v.hash] || 0;
+          var statusTag = v.restricted ? '<span class="tag red">受限</span>' : '<span class="tag green">正常</span>';
+          if (v.level === 3) statusTag += '<span class="tag orange">全体受限</span>';
+          var act = v.restricted
+            ? '<button class="btn btn-ghost btn-sm" onclick="visitorOp(\'unrestrict\',\'' + v.hash + '\')">解封</button>'
+            : '<button class="btn btn-danger btn-sm" onclick="visitorOp(\'restrict\',\'' + v.hash + '\')">禁言</button>';
+          html += '<tr><td><span class="visitor-hash" title="' + escHtml(v.hash) + '">' + escHtml((v.hash || '').slice(0, 16)) + '</span></td>' +
+            '<td>' + fmtNum(v.visits) + '</td><td>' + escHtml(v.country || '-') + '</td><td>' + escHtml(v.ipPrefix || '-') + '</td>' +
+            '<td>' + fmtTime(v.lastVisit) + '</td><td>' + statusTag + '</td>' +
+            '<td>' + (vCount ? '<span class="tag orange">违规x' + vCount + '</span>' : '-') + '</td>' +
+            '<td class="ops">' + act + ' <button class="btn btn-ghost btn-sm" onclick="markViolation(\'' + jsStr(v.hash) + '\')">标记违规</button></td></tr>';
+        });
+        html += '</tbody></table>';
+        document.getElementById('visitorTableWrap').innerHTML = html;
+      } else if (data && data._status === 401) {
+        document.getElementById('visitorTableWrap').innerHTML = '<div class="loading-tip">口令失效（401），请重新进入超管模式</div>';
+      } else {
+        document.getElementById('visitorTableWrap').innerHTML = '<div class="loading-tip">加载失败：' + ((data && data.message) || '接口异常') + '</div>';
+      }
+    })
+    .catch(function(e) {
+      document.getElementById('visitorTableWrap').innerHTML = '<div class="loading-tip">网络错误：' + escHtml(e.message) + '</div>';
+    });
+}
+function visitorOp(action, hash) {
+  var pwd = localStorage.getItem('test_admin_pwd') || '';
+  if (!pwd) { alert('请先进入超管模式'); return; }
+  fetchJson('/api/admin/control?action=' + action, {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, { 'X-Admin-Token': pwd, 'Authorization': 'Bearer ' + pwd }),
+    body: JSON.stringify({ scope: 'user', target: hash, reason: action === 'restrict' ? '管理员操作（测试后台）' : '', note: action === 'restrict' ? '由测试后台标记' : '' })
+  }).then(function(data) {
+    if (data && data.ok) {
+      addLog((action === 'restrict' ? '禁言' : '解封') + ' → ' + hash);
+      loadVisitors();
+    } else {
+      alert('操作失败：' + ((data && data.message) || '接口异常'));
+    }
+  }).catch(function(e) { alert('网络错误：' + e.message); });
+}
+
+// ===== Kimi 用量面板（超管） =====
+function kimiHeaders() {
+  var pwd = localStorage.getItem('test_admin_pwd') || '';
+  var h = {};
+  if (pwd) { h['X-Admin-Token'] = pwd; h['Authorization'] = 'Bearer ' + pwd; }
+  return h;
+}
+function renderKimiError(data, el) {
+  if (data && data._status === 401) {
+    el.innerHTML = '<div class="loading-tip">口令错误或未配置管理员口令（401），请重新进入超管模式</div>';
+  } else {
+    el.innerHTML = '<div class="loading-tip">加载失败：' + escHtml((data && data.message) || '接口异常') + '</div>';
+  }
+}
+function loadKimiStats() {
+  var pwd = localStorage.getItem('test_admin_pwd') || '';
+  if (!isAdmin()) return;
+  document.getElementById('kimiSummary').innerHTML = '<div class="loading-tip">加载中...</div>';
+  fetchJson('/api/admin/stats?days=7', { headers: kimiHeaders() })
+    .then(function(data) {
+      if (data && data.ok) {
+        var u = data.usage || {};
+        var calls = Number(u.calls) || 0;
+        var byModel = data.byModel || [];
+        // 平均耗时：按调用量加权
+        var latSum = 0, latCalls = 0;
+        byModel.forEach(function(m) {
+          var c = Number(m.calls) || 0;
+          latSum += c * (Number(m.avg_latency_ms) || 0);
+          latCalls += c;
+        });
+        var avgLat = latCalls ? Math.round(latSum / latCalls) : 0;
+        var flags = data.flags || {};
+        var flagHtml = '<span class="tag ' + (flags.ai_enabled ? 'green' : 'red') + '">AI总开关:' + (flags.ai_enabled ? '开' : '关') + '</span>' +
+          '<span class="tag ' + (flags.ai_chat ? 'green' : 'red') + '">对话:' + (flags.ai_chat ? '开' : '关') + '</span>' +
+          '<span class="tag ' + (flags.ai_cache ? 'green' : 'red') + '">缓存:' + (flags.ai_cache ? '开' : '关') + '</span>' +
+          '<span class="tag ' + (flags.ai_rag ? 'green' : 'red') + '">RAG:' + (flags.ai_rag ? '开' : '关') + '</span>' +
+          '<span class="tag ' + (flags.ai_admin ? 'green' : 'red') + '">管理端:' + (flags.ai_admin ? '开' : '关') + '</span>';
+        var html = '<div class="stat-grid">' +
+          '<div class="stat-card"><div class="sc-label">总调用量</div><div class="sc-value">' + fmtNum(calls) + '</div><div class="sc-sub">近 7 天</div></div>' +
+          '<div class="stat-card"><div class="sc-label">总 Token（合计）</div><div class="sc-value">' + fmtNum(u.totalTokens) + '</div><div class="sc-sub">输入 ' + fmtNum(u.promptTokens) + ' / 输出 ' + fmtNum(u.completionTokens) + '</div></div>' +
+          '<div class="stat-card"><div class="sc-label">总成本</div><div class="sc-value">' + escHtml(u.costFormatted || '0 元') + '</div><div class="sc-sub">' + fmtNum(u.costMicro || 0) + ' 微元</div></div>' +
+          '<div class="stat-card"><div class="sc-label">缓存命中率</div><div class="sc-value">' + (Number(u.cacheHitRatio) || 0) + '%</div><div class="sc-sub">缓存 ' + fmtNum(u.cachedCalls) + ' 次</div></div>' +
+          '<div class="stat-card"><div class="sc-label">降级率</div><div class="sc-value">' + (Number(u.degradeRatio) || 0) + '%</div><div class="sc-sub">降级 ' + fmtNum(u.degradedCalls) + ' 次</div></div>' +
+          '<div class="stat-card"><div class="sc-label">平均耗时</div><div class="sc-value">' + fmtNum(avgLat) + ' ms</div><div class="sc-sub">按调用加权</div></div>' +
+        '</div>';
+        html += '<div class="section-title">AI 开关状态</div><div>' + flagHtml + '</div>';
+        // 按天明细
+        var byDay = data.byDay || [];
+        if (byDay.length) {
+          html += '<div class="section-title">按天明细</div><table class="user-table"><thead><tr><th>日期</th><th>调用量</th><th>Token</th><th>成本</th><th>缓存</th><th>降级</th></tr></thead><tbody>';
+          byDay.forEach(function(r) {
+            html += '<tr><td>' + escHtml(r.day || '-') + '</td><td>' + fmtNum(r.calls) + '</td><td>' + fmtNum(r.total_tokens) + '</td><td>' + fmtNum(r.cost_micro || 0) + ' 微元</td><td>' + fmtNum(r.cached_calls) + '</td><td>' + fmtNum(r.degraded_calls) + '</td></tr>';
+          });
+          html += '</tbody></table>';
+        }
+        // 按模型明细
+        if (byModel.length) {
+          html += '<div class="section-title">按模型明细</div><table class="user-table"><thead><tr><th>模型</th><th>调用量</th><th>Token</th><th>成本</th><th>平均耗时</th><th>缓存率</th><th>降级率</th></tr></thead><tbody>';
+          byModel.forEach(function(r) {
+            html += '<tr><td>' + escHtml(r.model || '-') + '</td><td>' + fmtNum(r.calls) + '</td><td>' + fmtNum(r.total_tokens) + '</td><td>' + fmtNum(r.cost_micro || 0) + ' 微元</td><td>' + fmtNum(r.avg_latency_ms) + ' ms</td><td>' + (Number(r.cached_ratio) || 0) + '%</td><td>' + (Number(r.degraded_ratio) || 0) + '%</td></tr>';
+          });
+          html += '</tbody></table>';
+        }
+        var gen = data.generatedAt ? ' · 生成于 ' + fmtTime(data.generatedAt) : '';
+        document.getElementById('kimiMeta').textContent = '存储:' + (data.storage || '-') + gen;
+        document.getElementById('kimiSummary').innerHTML = html;
+        document.getElementById('kimiDetails').style.display = 'none';
+      } else {
+        renderKimiError(data, document.getElementById('kimiSummary'));
+      }
+    })
+    .catch(function(e) {
+      document.getElementById('kimiSummary').innerHTML = '<div class="loading-tip">网络错误：' + escHtml(e.message) + '</div>';
+    });
+}
+function loadKimiCalls() {
+  if (!isAdmin()) return;
+  document.getElementById('kimiDetails').style.display = '';
+  document.getElementById('kimiDetailsTitle').textContent = '调用明细';
+  document.getElementById('kimiDetailsBody').innerHTML = '<div class="loading-tip">加载中...</div>';
+  fetchJson('/api/admin/logs?view=calls&limit=100', { headers: kimiHeaders() })
+    .then(function(data) {
+      if (data && data.ok) {
+        var items = data.items || [];
+        if (!items.length) { document.getElementById('kimiDetailsBody').innerHTML = '<div class="empty-tip">暂无调用记录</div>'; return; }
+        var html = '<table class="user-table"><thead><tr><th>时间</th><th>模型</th><th>功能</th><th>Token(入/出/合)</th><th>成本(微元)</th><th>状态</th><th>耗时</th></tr></thead><tbody>';
+        items.forEach(function(r) {
+          var status = [];
+          if (r.cached) status.push('<span class="tag green">缓存</span>');
+          if (r.degraded) status.push('<span class="tag orange">降级</span>');
+          if (!status.length) status.push('<span class="tag green">正常</span>');
+          html += '<tr><td>' + fmtTime(r.ts != null ? r.ts : r.time) + '</td><td>' + escHtml(r.model || '-') + '</td><td>' + escHtml(r.feature || '-') + '</td>' +
+            '<td>' + fmtNum(r.prompt_tokens) + ' / ' + fmtNum(r.completion_tokens) + ' / ' + fmtNum(r.total_tokens != null ? r.total_tokens : (Number(r.prompt_tokens || 0) + Number(r.completion_tokens || 0))) + '</td>' +
+            '<td>' + fmtNum(r.cost_micro || 0) + '</td><td>' + status.join('') + '</td><td>' + fmtNum(r.latency_ms) + ' ms</td></tr>';
+        });
+        html += '</tbody></table>';
+        document.getElementById('kimiDetailsBody').innerHTML = html;
+      } else {
+        document.getElementById('kimiDetailsBody').innerHTML = '<div class="loading-tip">加载失败：' + escHtml((data && data.message) || '401 口令错误或未配置') + '</div>';
+      }
+    })
+    .catch(function(e) {
+      document.getElementById('kimiDetailsBody').innerHTML = '<div class="loading-tip">网络错误：' + escHtml(e.message) + '</div>';
+    });
+}
+function loadKimiPricing() {
+  if (!isAdmin()) return;
+  document.getElementById('kimiDetails').style.display = '';
+  document.getElementById('kimiDetailsTitle').textContent = '计价表';
+  document.getElementById('kimiDetailsBody').innerHTML = '<div class="loading-tip">加载中...</div>';
+  fetchJson('/api/admin/logs?view=pricing', { headers: kimiHeaders() })
+    .then(function(data) {
+      if (data && data.ok) {
+        var table = data.table || {};
+        var keys = Object.keys(table);
+        if (!keys.length) { document.getElementById('kimiDetailsBody').innerHTML = '<div class="empty-tip">暂无计价数据</div>'; return; }
+        var html = '<table class="user-table"><thead><tr><th>模型</th><th>输入单价(元/M)</th><th>输出单价(元/M)</th><th>备注</th></tr></thead><tbody>';
+        keys.forEach(function(k) {
+          var p = table[k] || {};
+          html += '<tr><td>' + escHtml(k) + '</td><td>' + (p.in == null ? '-' : p.in) + '</td><td>' + (p.out == null ? '-' : p.out) + '</td><td>' + escHtml(p.note || '-') + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        html += '<p style="font-size:12px;color:#999;margin-top:8px;">' + escHtml(data.units || '') + '</p>';
+        document.getElementById('kimiDetailsBody').innerHTML = html;
+      } else {
+        document.getElementById('kimiDetailsBody').innerHTML = '<div class="loading-tip">加载失败：' + escHtml((data && data.message) || '401 口令错误或未配置') + '</div>';
+      }
+    })
+    .catch(function(e) {
+      document.getElementById('kimiDetailsBody').innerHTML = '<div class="loading-tip">网络错误：' + escHtml(e.message) + '</div>';
+    });
+}
+
+// ===== 总览 =====
+function updateOverview() {
+  var on = smsEnabled();
+  var sent = getSmsSent();
+  var quota = getSmsQuota();
+  document.getElementById('ovSmsStatus').textContent = on ? '启用' : '停用';
+  document.getElementById('ovSmsDetail').textContent = '已发送 ' + sent + ' 次 · 剩余 ' + Math.max(0, quota - sent);
+  var smsFlag = document.getElementById('ovSmsFlag');
+  smsFlag.textContent = on ? '运行中' : '已停用';
+  smsFlag.className = 'ov-flag ' + (on ? 'ok' : 'off');
+  var mOn = maintOn();
+  document.getElementById('ovMaint').textContent = mOn ? '开启' : '关闭';
+  var mFlag = document.getElementById('ovMaintFlag');
+  mFlag.textContent = mOn ? '维护中' : '未开启';
+  mFlag.className = 'ov-flag ' + (mOn ? 'warn' : 'off');
+  var adm = isAdmin();
+  document.getElementById('ovAdmin').textContent = adm ? '已授权' : '未授权';
+  var aFlag = document.getElementById('ovAdminFlag');
+  aFlag.textContent = adm ? '超管在线' : '未授权';
+  aFlag.className = 'ov-flag ' + (adm ? 'ok' : 'off');
+  document.getElementById('ovInbox').textContent = getInbox().length + ' 条';
 }
 
 // ===== 小恐龙游戏 =====
@@ -426,8 +1306,14 @@ function initDino() {
 }
 
 // ===== 初始化 =====
-renderUsers();
-initDino();
+(function init() {
+  renderUsers();
+  renderInbox();
+  updateSmsStatus();
+  showMaintOverlay();
+  applyAdminUI();
+  initDino();
+})();
 </script>
 </body>
 </html>
