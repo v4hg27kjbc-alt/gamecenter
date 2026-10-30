@@ -686,7 +686,18 @@ body.theme-minimal {
   }
   var skipBtn = document.getElementById('gcLogoSkip');
   if (skipBtn) skipBtn.addEventListener('click', finish);
-  setTimeout(finish, 3100);
+  function tryFinishWhenReady() {
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      finish();
+    } else {
+      setTimeout(tryFinishWhenReady, 150);
+    }
+  }
+  setTimeout(tryFinishWhenReady, 3100);
+  document.addEventListener('DOMContentLoaded', function () {
+    if (Date.now() - window.__gcLogoIntroStart >= 3100) finish();
+  });
+  window.__gcLogoIntroStart = Date.now();
 })();
 </script>
 
@@ -5789,7 +5800,7 @@ body.light-mode .rec-ask-aircraft { background: var(--c-sky-300-a080); color: va
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <style id="dlg-system">
 /* =====================================================================
@@ -6353,6 +6364,7 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
     <button class="theme-toggle-btn letter-btn" id="letterBtn" aria-label="一封信" title="一封信"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg> 一封信</button>
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
+    <button class="theme-toggle-btn" id="gcAdminTrigger" aria-label="管理后台" title="管理后台"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 2.4L17 4l.6 2.6L20 9l-1 3 1 3-2.4 2.4L17 20l-2.6-.6L12 22l-2.4-2.4L7 20l-.6-2.6L4 15l1-3-1-3 2.4-2.4L7 4l2.6.6L12 2z"/><path d="M9 12l2 2 4-4"/></svg> 管理后台</button>
     
     <div class="theme-dropdown" id="themeDropdown">
       <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
@@ -20386,12 +20398,10 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 })();
 </script>
 <!-- 今日执飞：html2canvas 长图导出（CDN 按需加载，不影响既有功能） -->
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style id="gcAdminStyle">
 #gcAdminPanel{position:fixed;inset:0;z-index:99999;display:none;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#1f2937;}
-#gcAdminTrigger{position:fixed;right:18px;bottom:18px;z-index:9980;width:42px;height:42px;border-radius:50%;border:1px solid rgba(37,99,235,.2);background:rgba(255,255,255,.75);backdrop-filter:blur(4px);color:#1d4ed8;font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.12);opacity:.75;transition:.2s;}
-#gcAdminTrigger:hover{opacity:1;transform:scale(1.06);}
 #gcAdminPanel.open{display:block;}
 .gca-wrap{display:flex;flex-direction:column;height:100%;}
 .gca-top{display:flex;align-items:center;gap:10px;padding:0 16px;height:52px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25);}
@@ -20460,7 +20470,6 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 @media (max-width:640px){.gca-input{width:100%;}.gca-top h2{font-size:14px;}.gca-tab{padding:10px 10px;font-size:13px;}}
 </style>
 
-<button id="gcAdminTrigger" title="管理入口" aria-label="管理入口">&#9881;</button>
 <div id="gcAdminPanel" aria-hidden="true">
   <div class="gca-wrap">
     <div class="gca-top">
