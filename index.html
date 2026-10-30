@@ -641,7 +641,56 @@ body.theme-minimal {
       thick 22 / chrome 40px），保证与阶段①收敛结果视觉一致；
    —— 新增的 d/e/f/g 四要素默认只在 .glass-material 上生效（opt-in）。
    —— 启用：① 元素级 —— class="glass-material gm-l2"；
-            ② 全站级 —— 给 <body> 加 class="mat-on" 后按映射表逐组件挂类。
+            ② 全站级 —— 给 <body>
+<style id="gcLogoIntroStyle">
+#gcLogoIntro{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#0b1220 0%,#14213d 55%,#1d4ed8 130%);overflow:hidden;transition:opacity .5s ease;}
+#gcLogoIntro.gc-done{opacity:0;pointer-events:none;}
+#gcLogoIntro .gc-li-mark{position:relative;width:132px;height:132px;border-radius:28px;background:linear-gradient(145deg,#3b82f6,#1d4ed8);box-shadow:0 18px 44px rgba(37,99,235,.45),inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;animation:gcLiPop .7s cubic-bezier(.2,1.4,.4,1) both;}
+#gcLogoIntro .gc-li-mark svg{width:84px;height:84px;overflow:visible;}
+#gcLogoIntro .gc-li-mark .gc-plane-path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:260;stroke-dashoffset:260;animation:gcLiDraw 1.15s .12s ease forwards;}
+#gcLogoIntro .gc-li-mark .gc-trail{fill:none;stroke:#bfdbfe;stroke-width:3;stroke-linecap:round;stroke-dasharray:200;stroke-dashoffset:200;animation:gcLiDraw 1.15s .05s ease forwards;}
+#gcLogoIntro .gc-li-name{margin-top:22px;font-size:24px;font-weight:800;letter-spacing:2px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.35);animation:gcLiFadeUp .6s .5s ease both;}
+#gcLogoIntro .gc-li-sub{margin-top:8px;font-size:13px;letter-spacing:3px;color:#93c5fd;animation:gcLiFadeUp .6s .7s ease both;}
+#gcLogoIntro .gc-li-skip{position:absolute;right:20px;bottom:20px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#e0e7ff;font-size:13px;cursor:pointer;transition:.2s;}
+#gcLogoIntro .gc-li-skip:hover{background:rgba(255,255,255,.2);}
+@keyframes gcLiPop{0%{transform:scale(.5);opacity:0;}100%{transform:scale(1);opacity:1;}}
+@keyframes gcLiFadeUp{0%{transform:translateY(14px);opacity:0;}100%{transform:translateY(0);opacity:1;}}
+@keyframes gcLiDraw{to{stroke-dashoffset:0;}}
+@media (max-width:600px){#gcLogoIntro .gc-li-name{font-size:19px;}#gcLogoIntro .gc-li-mark{width:104px;height:104px;border-radius:22px;}}
+</style>
+
+<div id="gcLogoIntro" role="dialog" aria-label="欢迎">
+  <div class="gc-li-mark">
+    <svg viewBox="0 0 96 96" aria-hidden="true">
+      <path class="gc-trail" d="M8 78 C 30 70, 42 62, 58 46"/>
+      <path class="gc-plane-path" d="M60 20 L88 14 L66 46 L78 76 L58 66 L44 84 L38 64 L14 58 L34 38 L60 20 Z"/>
+    </svg>
+  </div>
+  <div class="gc-li-name">民航客机收藏馆</div>
+  <div class="gc-li-sub">HENRY AVIATION MUSEUM</div>
+  <button class="gc-li-skip" id="gcLogoSkip">跳过动画</button>
+</div>
+<script id="gcLogoIntroScript">
+(function () {
+  'use strict';
+  if (window.__gcLogoIntroLoaded) return;
+  window.__gcLogoIntroLoaded = true;
+  var box = document.getElementById('gcLogoIntro');
+  if (!box) return;
+  var done = false;
+  function finish() {
+    if (done) return;
+    done = true;
+    box.classList.add('gc-done');
+    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 550);
+  }
+  var skipBtn = document.getElementById('gcLogoSkip');
+  if (skipBtn) skipBtn.addEventListener('click', finish);
+  setTimeout(finish, 3100);
+})();
+</script>
+
+ 加 class="mat-on" 后按映射表逐组件挂类。
    ===================================================================== */
 :root {
   /* ---- 四档材质变量（a 模糊沿用阶段①标定，b/c/d/e/f/g 为阶段③新增） ---- */
@@ -16240,6 +16289,50 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
 
 </script>
 
+
+<style id="gcPromoSocialStyle">
+#gcPromoSection{margin:28px auto;max-width:1100px;padding:0 20px;}
+#gcPromoSection .gc-promo-inner{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center;background:linear-gradient(135deg,#f8fafc,#eff6ff);border:1px solid #dbeafe;border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(37,99,235,.08);}
+#gcPromoSection .gc-promo-media{position:relative;border-radius:14px;overflow:hidden;background:#0b1220;box-shadow:0 6px 18px rgba(0,0,0,.25);}
+#gcPromoSection video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#0b1220;}
+#gcPromoSection .gc-promo-info{padding:4px 6px;}
+#gcPromoSection .gc-promo-info h3{margin:0 0 10px;font-size:22px;font-weight:700;color:#1d4ed8;letter-spacing:.5px;}
+#gcPromoSection .gc-promo-info p{margin:0 0 16px;font-size:14px;line-height:1.8;color:#475569;}
+#gcSocialSection{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px;}
+#gcSocialSection .gc-social-title{width:100%;font-size:15px;font-weight:700;color:#1e293b;margin:0 0 2px;}
+#gcSocialSection a.gc-social-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;text-decoration:none;font-size:14px;font-weight:600;transition:transform .15s,box-shadow .15s;border:1px solid;}
+#gcSocialSection a.gc-social-btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.12);}
+#gcSocialSection a.gc-social-btn .gc-soc-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;font-size:12px;font-weight:800;color:#fff;}
+a.gc-social-bili{background:#00a1d6;border-color:#00a1d6;color:#fff;}
+a.gc-social-bili .gc-soc-icon{background:rgba(255,255,255,.2);}
+a.gc-social-afd{background:#fff;border-color:#f97316;color:#ea580c;}
+a.gc-social-afd .gc-soc-icon{background:#f97316;color:#fff;}
+a.gc-social-gh{background:#0f172a;border-color:#0f172a;color:#fff;}
+a.gc-social-gh .gc-soc-icon{background:rgba(255,255,255,.16);}
+@media (max-width:760px){#gcPromoSection .gc-promo-inner{grid-template-columns:1fr;padding:18px;}#gcPromoSection .gc-promo-info h3{font-size:18px;}}
+</style>
+
+<section id="gcPromoSection">
+  <div class="gc-promo-inner">
+    <div class="gc-promo-media">
+      <video controls preload="metadata" poster="/assets/cover-promo.png">
+        <source src="/assets/promo.mp4" type="video/mp4">
+        您的浏览器不支持视频播放
+      </video>
+    </div>
+    <div class="gc-promo-info">
+      <h3>民航客机收藏馆 · 宣传片</h3>
+      <p>一镜到底的星空机库：从客机巡航到逐架收藏，带你俯瞰这座云端博物馆的每一个细节。47 秒，认识民航客机收藏馆。</p>
+      <div id="gcSocialSection">
+        <div class="gc-social-title">官方账号</div>
+        <a class="gc-social-btn gc-social-bili" href="https://space.bilibili.com/3546381555862428" target="_blank" rel="noopener"><span class="gc-soc-icon">B</span>B站</a>
+        <a class="gc-social-btn gc-social-afd" href="https://afdian.com/a/aircol" target="_blank" rel="noopener"><span class="gc-soc-icon">电</span>爱发电</a>
+        <a class="gc-social-btn gc-social-gh" href="https://github.com/v4hg27kjbc-alt/gamecenter" target="_blank" rel="noopener"><span class="gc-soc-icon">GH</span>GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer class="site-footer">
   <div class="footer-watermark">Aviation Collection © 2026</div>
   <button class="footer-policy-btn" onclick="openPrivacyPolicy()">协议政策</button>
@@ -20294,5 +20387,741 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 </script>
 <!-- 今日执飞：html2canvas 长图导出（CDN 按需加载，不影响既有功能） -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style id="gcAdminStyle">
+#gcAdminPanel{position:fixed;inset:0;z-index:99999;display:none;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#1f2937;}
+#gcAdminTrigger{position:fixed;right:18px;bottom:18px;z-index:9980;width:42px;height:42px;border-radius:50%;border:1px solid rgba(37,99,235,.2);background:rgba(255,255,255,.75);backdrop-filter:blur(4px);color:#1d4ed8;font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.12);opacity:.75;transition:.2s;}
+#gcAdminTrigger:hover{opacity:1;transform:scale(1.06);}
+#gcAdminPanel.open{display:block;}
+.gca-wrap{display:flex;flex-direction:column;height:100%;}
+.gca-top{display:flex;align-items:center;gap:10px;padding:0 16px;height:52px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25);}
+.gca-top h2{margin:0;font-size:16px;font-weight:600;letter-spacing:.5px;}
+.gca-top .gca-brand{margin-left:auto;font-size:12px;opacity:.85;}
+.gca-close{margin-left:8px;background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer;line-height:1;}
+.gca-close:hover{background:rgba(255,255,255,.32);}
+.gca-nav{display:flex;gap:4px;padding:0 12px;background:#fff;border-bottom:1px solid #e5e7eb;}
+.gca-tab{padding:12px 18px;border:none;background:none;font-size:14px;color:#6b7280;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;}
+.gca-tab:hover{color:#2563eb;}
+.gca-tab.active{color:#2563eb;border-bottom-color:#2563eb;font-weight:600;}
+.gca-body{flex:1;overflow:auto;padding:18px;background:#f8fafc;}
+.gca-page{display:none;max-width:960px;margin:0 auto;}
+.gca-page.active{display:block;}
+.gca-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.gca-card h3{margin:0 0 12px;font-size:15px;color:#111827;}
+.gca-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px;}
+.gca-field{display:flex;flex-direction:column;gap:4px;}
+.gca-field label{font-size:12px;color:#6b7280;}
+.gca-input,.gca-select,.gca-textarea{padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;background:#fff;color:#111827;}
+.gca-input:focus,.gca-select:focus,.gca-textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.gca-input{width:180px;}
+.gca-input.gca-wide{width:320px;}
+.gca-textarea{width:100%;min-height:70px;font-family:ui-monospace,Menlo,Consolas,monospace;}
+.gca-btn{padding:8px 16px;border-radius:8px;border:none;font-size:13px;cursor:pointer;background:#e5e7eb;color:#374151;transition:.15s;}
+.gca-btn:hover{background:#d1d5db;}
+.gca-btn.gca-primary{background:#2563eb;color:#fff;}
+.gca-btn.gca-primary:hover{background:#1d4ed8;}
+.gca-btn.gca-danger{background:#ef4444;color:#fff;}
+.gca-btn.gca-danger:hover{background:#dc2626;}
+.gca-btn.gca-ghost{background:transparent;color:#2563eb;border:1px solid #bfdbfe;}
+.gca-btn.gca-ghost:hover{background:#eff6ff;}
+.gca-btn:disabled{opacity:.55;cursor:not-allowed;}
+.gca-status{margin:8px 0 0;font-size:13px;color:#6b7280;}
+.gca-status.err{color:#dc2626;}
+.gca-status.good{color:#16a34a;}
+.gca-table{width:100%;border-collapse:collapse;font-size:13px;}
+.gca-table th,.gca-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9;text-align:left;vertical-align:middle;}
+.gca-table th{background:#f8fafc;color:#6b7280;font-weight:600;font-size:12px;}
+.gca-table tr:hover td{background:#f8fafc;}
+.gca-mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;}
+.gca-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;}
+.gca-badge.ok{background:#dcfce7;color:#16a34a;}
+.gca-badge.warn{background:#fef3c7;color:#d97706;}
+.gca-badge.bad{background:#fee2e2;color:#dc2626;}
+.gca-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;}
+.gca-stat{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;}
+.gca-stat .num{font-size:22px;font-weight:700;color:#2563eb;}
+.gca-stat .lbl{font-size:12px;color:#6b7280;margin-top:4px;}
+.gca-login-banner{padding:12px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.gca-login-banner .txt{font-size:13px;color:#1d4ed8;}
+.gca-check-col{width:30px;}
+.gca-emoji-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.gca-emoji-opt{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;font-size:20px;background:#fff;}
+.gca-emoji-opt.active{border-color:#2563eb;background:#eff6ff;box-shadow:0 0 0 2px rgba(37,99,235,.25);}
+.gca-switch{position:relative;display:inline-block;width:44px;height:24px;}
+.gca-switch input{opacity:0;width:0;height:0;}
+.gca-switch .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:.2s;cursor:pointer;}
+.gca-switch .slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.gca-switch input:checked+.slider{background:#2563eb;}
+.gca-switch input:checked+.slider:before{transform:translateX(20px);}
+.gca-hint{font-size:12px;color:#9ca3af;margin-top:4px;}
+.gca-empty{color:#9ca3af;text-align:center;padding:18px 0;}
+.gca-sub-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;font-size:13px;cursor:pointer;text-decoration:none;}
+.gca-sub-btn:hover{background:#dbeafe;}
+@media (max-width:640px){.gca-input{width:100%;}.gca-top h2{font-size:14px;}.gca-tab{padding:10px 10px;font-size:13px;}}
+</style>
+
+<button id="gcAdminTrigger" title="管理入口" aria-label="管理入口">&#9881;</button>
+<div id="gcAdminPanel" aria-hidden="true">
+  <div class="gca-wrap">
+    <div class="gca-top">
+      <h2>管理中枢</h2>
+      <span class="gca-brand">GC Admin Console</span>
+      <button class="gca-close" id="gcAdminClose" title="关闭">&#10005;</button>
+    </div>
+    <div class="gca-nav" id="gcAdminNav">
+      <button class="gca-tab active" data-page="sms">收发</button>
+      <button class="gca-tab" data-page="token">Token用量</button>
+      <button class="gca-tab" data-page="users">用户管理</button>
+      <button class="gca-tab" data-page="maint">维护控制</button>
+    </div>
+    <div class="gca-body">
+      <div class="gca-login-banner" id="gcAdminLoginBar">
+        <span class="txt">管理操作需要鉴权：</span>
+        <input type="password" class="gca-input" id="gcAdminTokenInput" placeholder="输入管理员令牌 X-Admin-Token" autocomplete="off">
+        <button class="gca-btn gca-primary" id="gcAdminTokenSave">解锁</button>
+        <button class="gca-btn gca-ghost" id="gcAdminTokenClear" style="display:none">清除令牌</button>
+      </div>
+
+      <!-- 收发 -->
+      <div class="gca-page active" id="gcPageSms">
+        <div class="gca-card">
+          <h3>短信验证码发送</h3>
+          <div class="gca-row">
+            <div class="gca-field"><label>手机号</label><input type="text" class="gca-input" id="gcSmsPhone" placeholder="11 位手机号" autocomplete="off"></div>
+            <div class="gca-field"><label>模板</label><select class="gca-select" id="gcSmsTemplate"><option value="auto">自动模板</option><option value="manual">手动模板</option></select></div>
+            <div class="gca-field" id="gcSmsManualWrap" style="display:none"><label>模板 Code</label><input type="text" class="gca-input" id="gcSmsTemplateCustom" placeholder="5~8 位数字" autocomplete="off"></div>
+            <button class="gca-btn gca-primary" id="gcSmsSend">发送验证码</button>
+          </div>
+          <div class="gca-hint">发送成功将返回唯一 BizId 回执并扣减 1 条余额；记录保留在本机，可独立开关追踪。</div>
+          <p class="gca-status" id="gcSmsStatus"></p>
+        </div>
+        <div class="gca-card">
+          <h3>余额与费用 <span class="gca-badge ok" id="gcSmsQuotaNum">1000</span><span class="gca-hint" style="margin-left:8px">当前可用余额（条）</span></h3>
+          <div class="gca-stats" style="margin-top:8px">
+            <div class="gca-stat"><div class="num" id="gcSmsCostNum">0.00</div><div class="lbl">累计费用（元，估）</div></div>
+            <div class="gca-stat"><div class="num" id="gcSmsSentNum">0</div><div class="lbl">已发送条数</div></div>
+          </div>
+        </div>
+        <div class="gca-card">
+          <h3>发送时间线历史 <span class="gca-hint" id="gcSmsRecCount">0 条</span></h3>
+          <table class="gca-table"><thead><tr><th>时间</th><th>手机号</th><th>模板</th><th>BizId</th><th>状态</th><th>追踪</th></tr></thead><tbody id="gcSmsTbody"></tbody></table>
+          <div class="gca-empty" id="gcSmsEmpty">暂无发送记录</div>
+        </div>
+      </div>
+
+      <!-- Token用量 -->
+      <div class="gca-page" id="gcPageToken">
+        <div class="gca-card">
+          <h3>Kimi Token 消耗统计看板</h3>
+          <div class="gca-row">
+            <button class="gca-btn gca-primary" id="gcTokenReload">刷新用量</button>
+            <a class="gca-sub-btn" id="gcTokenKimi" href="https://kimi.moonshot.cn/" target="_blank" rel="noopener">进入 Kimi 知识库问答区 &#8599;</a>
+          </div>
+          <p class="gca-status" id="gcTokenStatus"></p>
+          <div class="gca-stats">
+            <div class="gca-stat"><div class="num" id="gcTokCalls">—</div><div class="lbl">调用次数</div></div>
+            <div class="gca-stat"><div class="num" id="gcTokTokens">—</div><div class="lbl">总 Token</div></div>
+            <div class="gca-stat"><div class="num" id="gcTokCost">—</div><div class="lbl">费用（元）</div></div>
+            <div class="gca-stat"><div class="num" id="gcTokAvg">—</div><div class="lbl">平均 Token/次</div></div>
+          </div>
+        </div>
+        <div class="gca-card">
+          <h3>近 7 日趋势</h3>
+          <table class="gca-table"><thead><tr><th>日期</th><th>调用</th><th>Token</th><th>费用（元）</th></tr></thead><tbody id="gcTokenTbody"></tbody></table>
+          <div class="gca-empty" id="gcTokenEmpty">暂无趋势数据</div>
+        </div>
+      </div>
+
+      <!-- 用户管理 -->
+      <div class="gca-page" id="gcPageUsers">
+        <div class="gca-card">
+          <h3>创建用户</h3>
+          <div class="gca-row">
+            <div class="gca-field"><label>用户名</label><input type="text" class="gca-input" id="gcUserCreateName" placeholder="用户名" autocomplete="off"></div>
+            <div class="gca-field"><label>手机号（选填）</label><input type="text" class="gca-input" id="gcUserCreatePhone" placeholder="11 位手机号" autocomplete="off"></div>
+            <div class="gca-field"><label>密码</label><input type="password" class="gca-input" id="gcUserCreatePass" placeholder="留空则不设密码" autocomplete="off"></div>
+            <button class="gca-btn gca-primary" id="gcUserCreateBtn">创建</button>
+          </div>
+          <p class="gca-status" id="gcUsersStatus"></p>
+        </div>
+        <div class="gca-card">
+          <h3>用户列表 <span class="gca-hint" id="gcUsersCount">0 人</span></h3>
+          <div class="gca-row">
+            <button class="gca-btn gca-ghost" data-batch="mute">批量禁言</button>
+            <button class="gca-btn gca-ghost" data-batch="unmute">批量解封</button>
+            <button class="gca-btn gca-ghost" data-batch="flag">批量标记违规</button>
+            <button class="gca-btn gca-primary" id="gcUsersReload">刷新</button>
+          </div>
+          <table class="gca-table"><thead><tr><th class="gca-check-col"><input type="checkbox" id="gcUsersCheckAll"></th><th>用户名</th><th>手机号</th><th>密码 Hash</th><th>注册时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="gcUsersTbody"></tbody></table>
+          <div class="gca-empty" id="gcUsersEmpty">暂无用户</div>
+        </div>
+      </div>
+
+      <!-- 维护控制 -->
+      <div class="gca-page" id="gcPageMaint">
+        <div class="gca-card">
+          <h3>维护模式总开关（联动访问控制遮罩）</h3>
+          <div class="gca-row" style="align-items:center">
+            <label class="gca-switch"><input type="checkbox" id="gcMaintEnabled"><span class="slider"></span></label>
+            <span class="gca-hint">开启后全站显示维护遮罩，AI 功能同步灰置</span>
+          </div>
+          <div class="gca-row">
+            <div class="gca-field"><label>维护文案</label><input type="text" class="gca-input gca-wide" id="gcMaintMessage" placeholder="站点维护中"></div>
+          </div>
+          <div class="gca-field"><label>Emoji / GIF 自定义</label><input type="text" class="gca-input gca-wide" id="gcMaintAsset" placeholder="输入 Emoji 或图片 URL" autocomplete="off"><div class="gca-emoji-grid" id="gcMaintEmojiPicker"></div></div>
+          <div class="gca-row">
+            <div class="gca-field"><label>超管密码</label><input type="password" class="gca-input" id="gcMaintSuperPass" placeholder="SUPER_ADMIN_PASSWORD" autocomplete="off"></div>
+            <button class="gca-btn gca-primary" id="gcMaintSaveConfig">保存维护配置</button>
+          </div>
+          <p class="gca-status" id="gcMaintStatus"></p>
+        </div>
+        <div class="gca-card">
+          <h3>黑名单推送（封锁名单）</h3>
+          <div class="gca-field"><label>每行一个访客 ID（visitor id）</label><textarea class="gca-textarea" id="gcMaintBlocklistInput" placeholder="例如：&#10;ai_vid_xxxxxxxx"></textarea></div>
+          <div class="gca-row" style="margin-top:10px">
+            <div class="gca-field"><label>超管密码</label><input type="password" class="gca-input" id="gcMaintSuperPassBlk" placeholder="SUPER_ADMIN_PASSWORD" autocomplete="off"></div>
+            <button class="gca-btn gca-primary" id="gcMaintSaveBlocklist">推送黑名单</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script id="gcAdminScript">
+(function () {
+  'use strict';
+  if (window.__gcAdminLoaded) return;
+  window.__gcAdminLoaded = true;
+
+  var TOKEN_KEY = 'gcAdminToken';
+  var SMS_KEY = 'gcSmsRecords';
+  var DB_KEY = 'gcAdminLocal';
+  var PANEL = document.getElementById('gcAdminPanel');
+  if (!PANEL) return;
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function nowStr() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function genId() { return 'r_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function maskPhone(p) { p = String(p || ''); return p.length >= 7 ? p.slice(0, 3) + '****' + p.slice(-4) : (p || '—'); }
+  function getToken() { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
+  function setToken(t) { try { sessionStorage.setItem(TOKEN_KEY, t); } catch (e) {} }
+  function clearToken() { try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+  function loadDB() { try { return JSON.parse(localStorage.getItem(DB_KEY) || '{}'); } catch (e) { return {}; } }
+  function saveDB(db) { try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) {} }
+  function smsRecords() { try { return JSON.parse(localStorage.getItem(SMS_KEY) || '[]'); } catch (e) { return []; } }
+  function saveSmsRecords(arr) { try { localStorage.setItem(SMS_KEY, JSON.stringify(arr)); } catch (e) {} }
+
+  function recRequest(path, opts) {
+    opts = opts || {};
+    var headers = { 'Accept': 'application/json' };
+    var tk = getToken();
+    if (tk) headers['X-Admin-Token'] = tk;
+    if (opts.body) headers['Content-Type'] = 'application/json';
+    var init = { method: opts.method || 'GET', headers: headers, credentials: 'same-origin' };
+    if (opts.body) init.body = JSON.stringify(opts.body);
+    if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) init.signal = AbortSignal.timeout(15000);
+    return fetch(path, init).then(function (res) {
+      return res.text().then(function (txt) {
+        var data = null;
+        try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = null; }
+        if (!res.ok) {
+          var em = (data && (data.error || data.message)) ? (data.error || data.message) : ('HTTP ' + res.status);
+          var err = new Error(em);
+          err.status = res.status;
+          throw err;
+        }
+        if (data === null) throw new Error('返回数据格式异常');
+        return data;
+      });
+    });
+  }
+
+  function status(id, msg, cls) {
+    var el = $(id);
+    if (!el) return;
+    el.textContent = msg || '';
+    el.className = 'gca-status' + (cls ? ' ' + cls : '');
+  }
+
+  /* ---- 打开 / 关闭 / Tab ---- */
+  function openPanel() {
+    PANEL.classList.add('open');
+    PANEL.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    var tk = getToken();
+    var bar = $('gcAdminLoginBar');
+    if (bar && tk) {
+      var input = $('gcAdminTokenInput');
+      var saveBtn = $('gcAdminTokenSave');
+      var clearBtn = $('gcAdminTokenClear');
+      if (input) input.value = tk;
+      if (saveBtn) saveBtn.style.display = 'none';
+      if (clearBtn) clearBtn.style.display = '';
+    }
+    loadTokenUsage();
+    loadMaintConfig();
+    loadUsers();
+    renderSmsQuota();
+    renderSmsRecords();
+  }
+  function closePanel() {
+    PANEL.classList.remove('open');
+    PANEL.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (window.location.hash === '#admin' && history.replaceState) {
+      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) {}
+    }
+  }
+  function switchPage(name) {
+    var pages = ['sms', 'token', 'users', 'maint'];
+    pages.forEach(function (p) {
+      var page = $('gcPage' + p.charAt(0).toUpperCase() + p.slice(1));
+      if (page) page.classList.toggle('active', p === name);
+    });
+    var tabs = document.querySelectorAll('#gcAdminNav .gca-tab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-page') === name);
+    if (name === 'token') loadTokenUsage();
+    if (name === 'users') loadUsers();
+    if (name === 'maint') loadMaintConfig();
+  }
+
+  /* ---- 鉴权 ---- */
+  function unlockAdmin() {
+    var input = $('gcAdminTokenInput');
+    var tk = (input ? input.value : '').trim();
+    if (!tk) { status('gcSmsStatus', '请输入管理员令牌', 'err'); return; }
+    setToken(tk);
+    var saveBtn = $('gcAdminTokenSave');
+    var clearBtn = $('gcAdminTokenClear');
+    if (saveBtn) saveBtn.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = '';
+    loadTokenUsage();
+    loadMaintConfig();
+    loadUsers();
+    status('gcSmsStatus', '令牌已解锁，管理操作可用', 'good');
+  }
+  function clearAdmin() {
+    clearToken();
+    var saveBtn = $('gcAdminTokenSave');
+    var clearBtn = $('gcAdminTokenClear');
+    var input = $('gcAdminTokenInput');
+    if (saveBtn) saveBtn.style.display = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (input) input.value = '';
+    status('gcSmsStatus', '已清除令牌，管理操作锁定', '');
+  }
+
+  /* ---- 短信收发 ---- */
+  function smsQuota() {
+    var db = loadDB();
+    if (db.smsQuota === undefined || db.smsQuota === null) db.smsQuota = 1000;
+    return Number(db.smsQuota) || 0;
+  }
+  function renderSmsQuota() {
+    var db = loadDB();
+    var q = smsQuota();
+    var el = $('gcSmsQuotaNum'); if (el) el.textContent = q;
+    var cost = Number(db.smsLastCost || 0);
+    var sent = Number(db.smsSent || 0);
+    var el2 = $('gcSmsCostNum'); if (el2) el2.textContent = (cost * 0.045).toFixed(2);
+    var el3 = $('gcSmsSentNum'); if (el3) el3.textContent = sent;
+  }
+  function renderSmsRecords() {
+    var tbody = $('gcSmsTbody');
+    if (!tbody) return;
+    var arr = smsRecords();
+    tbody.innerHTML = '';
+    var empty = $('gcSmsEmpty'); if (empty) empty.style.display = arr.length ? 'none' : '';
+    var cnt = $('gcSmsRecCount'); if (cnt) cnt.textContent = arr.length + ' 条';
+    arr.slice().sort(function (a, b) { return String(b.time).localeCompare(String(a.time)); }).forEach(function (r) {
+      var tr = document.createElement('tr');
+      var c1 = document.createElement('td'); c1.textContent = r.time || '';
+      var c2 = document.createElement('td'); c2.textContent = maskPhone(r.phone);
+      var c3 = document.createElement('td'); c3.textContent = r.templateCode || '';
+      var c4 = document.createElement('td'); c4.className = 'gca-mono'; c4.textContent = r.bizId || '—';
+      var c5 = document.createElement('td');
+      c5.textContent = r.status || '已发送';
+      c5.style.color = (r.status === '成功' || r.status === '已发送') ? '#16a34a' : (r.status === '失败' ? '#dc2626' : '#d97706');
+      var c6 = document.createElement('td');
+      var tb = document.createElement('button');
+      tb.className = 'gca-btn gca-ghost';
+      tb.style.padding = '2px 10px'; tb.style.fontSize = '12px';
+      tb.textContent = r.tracking === false ? '已归档 · 开启追踪' : '追踪中 · 关闭追踪';
+      tb.setAttribute('data-sms-id', r.id);
+      c6.appendChild(tb);
+      tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4); tr.appendChild(c5); tr.appendChild(c6);
+      tbody.appendChild(tr);
+    });
+  }
+  function toggleSmsTracking(id) {
+    var arr = smsRecords();
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) { arr[i].tracking = (arr[i].tracking === false) ? true : false; break; }
+    }
+    saveSmsRecords(arr);
+    renderSmsRecords();
+  }
+  function smsSend() {
+    var phone = ($('gcSmsPhone') ? $('gcSmsPhone').value : '').trim();
+    var tpl = $('gcSmsTemplate') ? $('gcSmsTemplate').value : 'auto';
+    var tplCode = tpl;
+    if (tpl === 'manual') {
+      tplCode = ($('gcSmsTemplateCustom') ? $('gcSmsTemplateCustom').value : '').trim();
+      if (!/^[0-9]{5,8}$/.test(tplCode)) { status('gcSmsStatus', '请填写有效的短信模板 Code（5~8 位数字）', 'err'); return; }
+    }
+    if (!/^1[3-9]\d{9}$/.test(phone)) { status('gcSmsStatus', '请输入有效的 11 位手机号', 'err'); return; }
+    var btn = $('gcSmsSend'); if (btn) btn.disabled = true;
+    status('gcSmsStatus', '正在发送…', '');
+    recRequest('/api/sms-verify', { method: 'POST', body: { phoneNumber: phone } }).then(function (data) {
+      var bizId = (data && data.bizId) ? String(data.bizId) : '';
+      var arr = smsRecords();
+      arr.unshift({ id: genId(), phone: phone, time: nowStr(), templateCode: tplCode, bizId: bizId, status: bizId ? '已发送' : '待回执', tracking: true });
+      saveSmsRecords(arr);
+      var db = loadDB();
+      var q = smsQuota();
+      if (q > 0) db.smsQuota = q - 1;
+      db.smsLastCost = Number(db.smsLastCost || 0) + 1;
+      db.smsSent = Number(db.smsSent || 0) + 1;
+      saveDB(db);
+      renderSmsQuota(); renderSmsRecords();
+      status('gcSmsStatus', '发送成功：' + ((data && data.message) ? data.message : '验证码已下发') + (bizId ? '，BizId=' + bizId : ''), 'good');
+      if (btn) btn.disabled = false;
+    }).catch(function (err) {
+      var arr = smsRecords();
+      arr.unshift({ id: genId(), phone: phone, time: nowStr(), templateCode: tplCode, bizId: '', status: '失败', tracking: true });
+      saveSmsRecords(arr);
+      renderSmsRecords();
+      status('gcSmsStatus', '发送失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+      if (btn) btn.disabled = false;
+    });
+  }
+
+  /* ---- Token 用量 ---- */
+  var TOKEN_STATE = { loading: false };
+  function loadTokenUsage() {
+    if (TOKEN_STATE.loading) return;
+    TOKEN_STATE.loading = true;
+    status('gcTokenStatus', '正在拉取 Token 用量…', '');
+    recRequest('/api/token-usage?days=7', { method: 'GET' }).then(function (data) {
+      var dd = (data && data.data && typeof data.data === 'object') ? data.data : data;
+      var usage = (dd && dd.usage) || {};
+      var el;
+      el = $('gcTokCalls'); if (el) el.textContent = (usage.calls != null) ? usage.calls : '—';
+      el = $('gcTokTokens'); if (el) el.textContent = (usage.totalTokens != null) ? usage.totalTokens : '—';
+      el = $('gcTokCost'); if (el) el.textContent = (usage.costYuan != null) ? Number(usage.costYuan).toFixed(2) : '—';
+      var avg = (usage.calls && usage.totalTokens) ? Math.round(usage.totalTokens / usage.calls) : '—';
+      el = $('gcTokAvg'); if (el) el.textContent = avg;
+      var byDay = (dd && dd.byDay && Array.isArray(dd.byDay)) ? dd.byDay : [];
+      var tbody = $('gcTokenTbody');
+      var empty = $('gcTokenEmpty');
+      if (tbody) {
+        tbody.innerHTML = '';
+        byDay.slice().sort(function (a, b) { return String(a.date || '').localeCompare(String(b.date || '')); }).forEach(function (r) {
+          var tr = document.createElement('tr');
+          var c1 = document.createElement('td'); c1.textContent = r.date || '';
+          var c2 = document.createElement('td'); c2.textContent = (r.calls != null) ? r.calls : 0;
+          var c3 = document.createElement('td'); c3.textContent = (r.totalTokens != null) ? r.totalTokens : 0;
+          var c4 = document.createElement('td'); c4.textContent = (r.costYuan != null) ? Number(r.costYuan).toFixed(2) : '0.00';
+          tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4);
+          tbody.appendChild(tr);
+        });
+      }
+      if (empty) empty.style.display = byDay.length ? 'none' : '';
+      status('gcTokenStatus', '用量已更新', 'good');
+    }).catch(function (err) {
+      status('gcTokenStatus', 'Token 用量拉取失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+    }).finally(function () { TOKEN_STATE.loading = false; });
+  }
+
+  /* ---- 用户管理 ---- */
+  function sha256Hex(str) {
+    if (window.crypto && crypto.subtle && crypto.subtle.digest) {
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(function (buf) {
+        var bytes = new Uint8Array(buf);
+        var hex = '';
+        for (var i = 0; i < bytes.length; i++) hex += ('0' + bytes[i].toString(16)).slice(-2);
+        return hex;
+      });
+    }
+    return Promise.resolve('');
+  }
+  var USERS_STATE = { loading: false, data: [] };
+  function loadUsers() {
+    if (USERS_STATE.loading) return;
+    USERS_STATE.loading = true;
+    status('gcUsersStatus', '正在加载用户列表…', '');
+    recRequest('/api/users', { method: 'GET' }).then(function (data) {
+      var dd = (data && data.data && typeof data.data === 'object') ? data.data : data;
+      var arr = (dd && (dd.users || dd.list || dd.items)) ? (dd.users || dd.list || dd.items) : [];
+      USERS_STATE.data = Array.isArray(arr) ? arr : [];
+      status('gcUsersStatus', '用户列表已加载（' + USERS_STATE.data.length + ' 人）', 'good');
+      renderUsersTable();
+    }).catch(function (err) {
+      USERS_STATE.data = [];
+      status('gcUsersStatus', '用户列表加载失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+      renderUsersTable();
+    }).finally(function () { USERS_STATE.loading = false; });
+  }
+  function renderUsersTable() {
+    var tbody = $('gcUsersTbody');
+    if (!tbody) return;
+    var arr = USERS_STATE.data.slice().sort(function (a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')); });
+    tbody.innerHTML = '';
+    var empty = $('gcUsersEmpty'); if (empty) empty.style.display = arr.length ? 'none' : '';
+    var cnt = $('gcUsersCount'); if (cnt) cnt.textContent = arr.length + ' 人';
+    arr.forEach(function (u) {
+      var st = u.status || 'active';
+      var tr = document.createElement('tr');
+      var c0 = document.createElement('td'); c0.className = 'gca-check-col';
+      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'gc-user-check'; cb.setAttribute('data-uid', u.id || u.username || u.phone || '');
+      c0.appendChild(cb);
+      var c1 = document.createElement('td'); c1.textContent = u.username || '—';
+      var c2 = document.createElement('td'); c2.textContent = maskPhone(u.phone);
+      var c3 = document.createElement('td');
+      var ph = (u.passwordHash || u.password || '').toString();
+      c3.className = 'gca-mono'; c3.textContent = ph ? ph.slice(0, 12) + '…' : '—'; c3.title = ph;
+      var c4 = document.createElement('td'); c4.textContent = u.createdAt || '';
+      var c5 = document.createElement('td');
+      var flags = [];
+      if (st === 'muted') flags.push('禁言');
+      if (st === 'flagged') flags.push('违规');
+      if (st === 'banned') flags.push('封锁');
+      c5.textContent = flags.length ? flags.join(' / ') : '正常';
+      c5.style.color = flags.length ? '#dc2626' : '#16a34a';
+      var c6 = document.createElement('td');
+      var acts = [
+        { act: st === 'muted' ? 'unmute' : 'mute', label: st === 'muted' ? '解封' : '禁言' },
+        { act: 'flag', label: st === 'flagged' ? '再标记违规' : '标记违规' },
+        { act: (st === 'banned' || st === 'flagged') ? 'unban' : 'ban', label: (st === 'banned' || st === 'flagged') ? '解除封锁' : '封锁' }
+      ];
+      for (var k = 0; k < acts.length; k++) {
+        var b = document.createElement('button');
+        b.className = 'gca-btn gca-ghost'; b.style.padding = '2px 8px'; b.style.fontSize = '12px'; b.style.marginRight = '4px';
+        b.textContent = acts[k].label;
+        b.setAttribute('data-uid', u.id || u.username || u.phone || '');
+        b.setAttribute('data-act', acts[k].act);
+        c6.appendChild(b);
+      }
+      tr.appendChild(c0); tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4); tr.appendChild(c5); tr.appendChild(c6);
+      tbody.appendChild(tr);
+    });
+  }
+  function selectedUserIds() {
+    var ids = [];
+    var cbs = document.querySelectorAll('#gcUsersTbody .gc-user-check:checked');
+    for (var i = 0; i < cbs.length; i++) ids.push(cbs[i].getAttribute('data-uid'));
+    return ids;
+  }
+  function usersBatchAction(action) {
+    var ids = selectedUserIds();
+    if (!ids.length) { status('gcUsersStatus', '请先勾选要处理的用户', 'err'); return; }
+    if (action === 'flag' && !window.confirm('确认对 ' + ids.length + ' 个用户标记违规？')) return;
+    status('gcUsersStatus', '正在批量' + ({ mute: '禁言', unmute: '解封', flag: '标记违规' }[action] || action) + '…', '');
+    recRequest('/api/users', { method: 'POST', body: { action: 'batch', op: action, ids: ids } }).then(function () {
+      status('gcUsersStatus', '批量操作成功', 'good');
+      loadUsers();
+    }).catch(function (err) {
+      status('gcUsersStatus', '批量操作失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+    });
+  }
+  function usersSingleAction(id, action) {
+    if (action === 'flag' && !window.confirm('确认将用户「' + id + '」标记违规？')) return;
+    status('gcUsersStatus', '正在操作…', '');
+    recRequest('/api/users', { method: 'POST', body: { action: 'single', id: id, op: action } }).then(function () {
+      status('gcUsersStatus', '操作成功：' + id, 'good');
+      loadUsers();
+    }).catch(function (err) {
+      status('gcUsersStatus', '操作失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+    });
+  }
+  function createUser() {
+    var name = ($('gcUserCreateName') ? $('gcUserCreateName').value : '').trim();
+    var phone = ($('gcUserCreatePhone') ? $('gcUserCreatePhone').value : '').trim();
+    var pass = $('gcUserCreatePass') ? $('gcUserCreatePass').value : '';
+    if (!name) { status('gcUsersStatus', '请输入用户名', 'err'); return; }
+    if (phone && !/^1[3-9]\d{9}$/.test(phone)) { status('gcUsersStatus', '手机号格式不正确', 'err'); return; }
+    status('gcUsersStatus', '正在创建用户…', '');
+    var payload = { username: name, phone: phone };
+    if (pass) {
+      sha256Hex(pass).then(function (hash) {
+        payload.passwordHash = hash;
+        return recRequest('/api/users', { method: 'POST', body: payload });
+      }).then(function () {
+        status('gcUsersStatus', '用户创建成功', 'good');
+        if ($('gcUserCreateName')) $('gcUserCreateName').value = '';
+        if ($('gcUserCreatePhone')) $('gcUserCreatePhone').value = '';
+        if ($('gcUserCreatePass')) $('gcUserCreatePass').value = '';
+        loadUsers();
+      }).catch(function (err) {
+        status('gcUsersStatus', '创建失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+      });
+    } else {
+      recRequest('/api/users', { method: 'POST', body: payload }).then(function () {
+        status('gcUsersStatus', '用户创建成功', 'good');
+        if ($('gcUserCreateName')) $('gcUserCreateName').value = '';
+        if ($('gcUserCreatePhone')) $('gcUserCreatePhone').value = '';
+        if ($('gcUserCreatePass')) $('gcUserCreatePass').value = '';
+        loadUsers();
+      }).catch(function (err) {
+        status('gcUsersStatus', '创建失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+      });
+    }
+  }
+
+  /* ---- 维护控制（适配主站 /api/maintenance 契约） ---- */
+  var MAINT_STATE = { loading: false };
+  var EMOJI_LIST = ['🔧', '🛠', '⏳', '🚧', '☁️', '✈️', '🛫', '🛬', '🧰', '💤'];
+  function renderMaintEmojiPicker(active) {
+    var wrap = $('gcMaintEmojiPicker');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    EMOJI_LIST.forEach(function (e) {
+      var b = document.createElement('div');
+      b.className = 'gca-emoji-opt' + (e === active ? ' active' : '');
+      b.textContent = e;
+      b.setAttribute('data-emoji', e);
+      wrap.appendChild(b);
+    });
+  }
+  function maintSelectedEmoji() {
+    var wrap = $('gcMaintEmojiPicker');
+    if (!wrap) return '';
+    var act = wrap.querySelector('.gca-emoji-opt.active');
+    return act ? act.getAttribute('data-emoji') : '';
+  }
+  function loadMaintConfig() {
+    if (MAINT_STATE.loading) return;
+    MAINT_STATE.loading = true;
+    status('gcMaintStatus', '正在读取主站维护状态…', '');
+    recRequest('/api/maintenance', { method: 'GET' }).then(function (data) {
+      var d = data || {};
+      var maint = d.maintenance || {};
+      var el;
+      el = $('gcMaintEnabled'); if (el) el.checked = !!maint.enabled;
+      el = $('gcMaintMessage'); if (el) el.value = maint.message || '';
+      el = $('gcMaintAsset'); if (el) el.value = maint.assetUrl || '';
+      var emoji = (maint.assetUrl && String(maint.assetUrl).length <= 4) ? String(maint.assetUrl) : '';
+      renderMaintEmojiPicker(emoji);
+      var bl = (d.blocklist && Array.isArray(d.blocklist)) ? d.blocklist : [];
+      el = $('gcMaintBlocklistInput'); if (el) el.value = bl.join('\n');
+      status('gcMaintStatus', '维护状态已同步（当前：' + (maint.enabled ? '维护中' : '正常') + '）', 'good');
+    }).catch(function (err) {
+      status('gcMaintStatus', '维护状态读取失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+    }).finally(function () { MAINT_STATE.loading = false; });
+  }
+  function maintBuildPayload() {
+    var msg = $('gcMaintMessage');
+    var asset = $('gcMaintAsset');
+    var manualAsset = asset ? asset.value.trim() : '';
+    var emoji = maintSelectedEmoji();
+    var assetUrl = manualAsset || emoji || '🛠';
+    return {
+      enabled: !!($('gcMaintEnabled') && $('gcMaintEnabled').checked),
+      aiGate: !!($('gcMaintEnabled') && $('gcMaintEnabled').checked),
+      message: msg ? msg.value.trim() : '站点维护中，请稍后再来',
+      assetUrl: assetUrl
+    };
+  }
+  function saveMaintConfig() {
+    var pass = $('gcMaintSuperPass') ? $('gcMaintSuperPass').value : '';
+    if (!pass) { status('gcMaintStatus', '请先输入超管密码', 'err'); return; }
+    status('gcMaintStatus', '正在保存维护配置…', '');
+    recRequest('/api/maintenance', { method: 'POST', body: { action: 'save-config', superPassword: pass, config: maintBuildPayload() } }).then(function (data) {
+      status('gcMaintStatus', (data && data.message) ? data.message : '维护配置已保存', 'good');
+      if ($('gcMaintSuperPass')) $('gcMaintSuperPass').value = '';
+      loadMaintConfig();
+    }).catch(function (err) {
+      status('gcMaintStatus', '保存失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+    });
+  }
+  function saveMaintBlocklist() {
+    var pass = $('gcMaintSuperPassBlk') ? $('gcMaintSuperPassBlk').value : '';
+    if (!pass) { status('gcMaintStatus', '请先输入超管密码', 'err'); return; }
+    var ta = $('gcMaintBlocklistInput');
+    var lines = ta ? ta.value.split('\n') : [];
+    var blocklist = [];
+    for (var i = 0; i < lines.length; i++) { var p = lines[i].trim(); if (p) blocklist.push(p); }
+    status('gcMaintStatus', '正在推送黑名单…', '');
+    recRequest('/api/maintenance', { method: 'POST', body: { action: 'save-blocklist', superPassword: pass, items: blocklist } }).then(function (data) {
+      status('gcMaintStatus', (data && data.message) ? data.message : '黑名单已推送', 'good');
+      if ($('gcMaintSuperPassBlk')) $('gcMaintSuperPassBlk').value = '';
+      loadMaintConfig();
+    }).catch(function (err) {
+      status('gcMaintStatus', '推送失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+    });
+  }
+
+  /* ---- 事件绑定 ---- */
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t && t.id === 'gcAdminClose') { closePanel(); return; }
+    if (t && t.id === 'gcAdminTokenSave') { unlockAdmin(); return; }
+    if (t && t.id === 'gcAdminTokenClear') { clearAdmin(); return; }
+    if (t && t.id === 'gcSmsSend') { smsSend(); return; }
+    if (t && t.id === 'gcTokenReload') { loadTokenUsage(); return; }
+    if (t && t.id === 'gcUsersReload') { loadUsers(); return; }
+    if (t && t.id === 'gcUsersCheckAll') {
+      var checked = t.checked;
+      var cbs = document.querySelectorAll('#gcUsersTbody .gc-user-check');
+      for (var i = 0; i < cbs.length; i++) cbs[i].checked = checked;
+      return;
+    }
+    if (t && t.id === 'gcUserCreateBtn') { createUser(); return; }
+    if (t && t.id === 'gcMaintSaveConfig') { saveMaintConfig(); return; }
+    if (t && t.id === 'gcMaintSaveBlocklist') { saveMaintBlocklist(); return; }
+    if (t && t.getAttribute && t.getAttribute('data-batch')) { usersBatchAction(t.getAttribute('data-batch')); return; }
+    if (t && t.getAttribute && t.getAttribute('data-act') && t.getAttribute('data-uid')) {
+      usersSingleAction(t.getAttribute('data-uid'), t.getAttribute('data-act'));
+      return;
+    }
+    if (t && t.getAttribute && t.getAttribute('data-sms-id')) { toggleSmsTracking(t.getAttribute('data-sms-id')); return; }
+    if (t && t.classList && t.classList.contains('gca-emoji-opt')) {
+      var wrap = $('gcMaintEmojiPicker');
+      if (wrap) {
+        var opts = wrap.querySelectorAll('.gca-emoji-opt');
+        for (var i = 0; i < opts.length; i++) opts[i].classList.toggle('active', opts[i] === t);
+      }
+      var asset = $('gcMaintAsset');
+      if (asset) asset.value = t.getAttribute('data-emoji');
+      return;
+    }
+    if (t && t.classList && t.classList.contains('gca-tab') && t.getAttribute('data-page')) {
+      switchPage(t.getAttribute('data-page'));
+      return;
+    }
+    if (t && t.id === 'gcAdminTrigger') { openPanel(); return; }
+    if (t && t.id === 'gcSmsTemplate') { return; }
+  });
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t && t.id === 'gcSmsTemplate') {
+      var wrap = $('gcSmsManualWrap');
+      if (wrap) wrap.style.display = t.value === 'manual' ? '' : 'none';
+    }
+    if (t && t.id === 'gcMaintEnabled') {
+      var asset = $('gcMaintAsset');
+      if (asset && !asset.value) asset.value = '🛠';
+    }
+  });
+
+  function checkHash() {
+    if (window.location.hash === '#admin') openPanel();
+  }
+  window.addEventListener('hashchange', checkHash);
+  checkHash();
+})();
+</script>
+
 </body>
 </html>
