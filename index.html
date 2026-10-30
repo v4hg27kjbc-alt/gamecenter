@@ -6179,9 +6179,97 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
   }
   body.dlg-sys .dlg-new > .dlg-panel > .dlg-handle { display: block; }
 }
+
+/* ===== 访问控制层：维护遮罩 / 封锁卡片 / AI 灰置 ===== */
+#siteMaintenanceOverlay {
+  position: fixed; inset: 0; z-index: 999999;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 14, 30, 0.55);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+  opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s ease;
+  pointer-events: none;
+}
+#siteMaintenanceOverlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+#siteMaintenanceOverlay .mnt-inner {
+  text-align: center; color: #fff; padding: 24px; max-width: 520px; width: 90%;
+  animation: mntFadeUp .6s ease both;
+}
+#siteMaintenanceOverlay .mnt-emoji {
+  font-size: 76px; line-height: 1; margin-bottom: 18px;
+  display: inline-block; animation: mntFloat 2.6s ease-in-out infinite;
+}
+#siteMaintenanceOverlay .mnt-emoji img.mnt-gif {
+  width: 140px; height: 140px; object-fit: contain; border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.35);
+}
+#siteMaintenanceOverlay .mnt-title {
+  font-size: 30px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px;
+  text-shadow: 0 4px 18px rgba(0,0,0,.3);
+}
+#siteMaintenanceOverlay .mnt-sub { font-size: 15px; opacity: .78; line-height: 1.7; }
+#siteMaintenanceOverlay .mnt-badge {
+  display: inline-block; margin-top: 18px; font-size: 12px; letter-spacing: 1px;
+  padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.85);
+}
+@keyframes mntFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+@keyframes mntFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+#siteBlockCard {
+  position: fixed; inset: 0; z-index: 999999;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 14, 30, 0.5);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s ease;
+  pointer-events: none;
+}
+#siteBlockCard.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+#siteBlockCard .blk-card {
+  width: 92%; max-width: 420px; background: #fff; border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.4); overflow: hidden; text-align: center;
+  animation: mntFadeUp .45s ease both;
+}
+#siteBlockCard .blk-head {
+  padding: 26px 20px 18px; color: #b3261e;
+  font-size: 52px; line-height: 1; background: #fdeceb;
+}
+#siteBlockCard .blk-body { padding: 20px 22px 26px; }
+#siteBlockCard .blk-title { font-size: 20px; font-weight: 700; color: #1c2540; margin-bottom: 10px; }
+#siteBlockCard .blk-text { font-size: 14px; line-height: 1.7; color: #55607a; margin-bottom: 20px; }
+#siteBlockCard .blk-btn {
+  display: inline-block; padding: 11px 26px; border-radius: 10px; border: none;
+  background: #2f5bff; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease; text-decoration: none;
+}
+#siteBlockCard .blk-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(47,91,255,.35); }
+
+.ai-gated { opacity: .45 !important; filter: grayscale(.7); pointer-events: none !important; cursor: not-allowed !important; }
+.ai-gated-tip { font-size: 11px; color: #8a94a8; margin-top: 2px; }
 </style>
 </head>
 <body class="mat-on" data-version="20261001-v70">
+
+<!-- 访问控制层容器（服务端 /api/maintenance 控制） -->
+<div id="siteMaintenanceOverlay" aria-hidden="true">
+  <div class="mnt-inner">
+    <div class="mnt-emoji" id="mntEmoji">&#128295;</div>
+    <div class="mnt-title" id="mntTitle">站点维护中</div>
+    <div class="mnt-sub" id="mntSub">我们正在对系统进行例行维护与升级，请稍后再试。感谢您的理解与支持。</div>
+    <div><span class="mnt-badge">&#9992; HENRY AVIATION MUSEUM</span></div>
+  </div>
+</div>
+
+<div id="siteBlockCard" aria-hidden="true">
+  <div class="blk-card">
+    <div class="blk-head">&#9888;&#65039;</div>
+    <div class="blk-body">
+      <div class="blk-title">访问受限</div>
+      <div class="blk-text" id="blkText">您的账号因违反平台规则已被限制访问。</div>
+      <button class="blk-btn" id="blkAppealBtn" type="button">去后台申诉 / 输入验证</button>
+    </div>
+  </div>
+</div>
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
@@ -20102,6 +20190,106 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   } else {
     init();
   }
+})();
+</script>
+<!-- ===== 访问控制层：维护遮罩 / 封锁卡片 / AI 灰置（服务端 /api/maintenance） ===== -->
+<script>
+(function () {
+  'use strict';
+  var ACCESS_KEY = 'aviation_ai_unlocked';
+  function getVisitorId() {
+    try {
+      var v = localStorage.getItem('aviation_visitor_id');
+      if (v) return v;
+      v = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem('aviation_visitor_id', v);
+      return v;
+    } catch (e) { return ''; }
+  }
+  function isAiUnlocked() {
+    try { return localStorage.getItem(ACCESS_KEY) === '1'; } catch (e) { return false; }
+  }
+  function setAiUnlocked() {
+    try { localStorage.setItem(ACCESS_KEY, '1'); } catch (e) {}
+  }
+  function showMaintenance(cfg) {
+    var ov = document.getElementById('siteMaintenanceOverlay');
+    if (!ov) return;
+    var emojiEl = document.getElementById('mntEmoji');
+    if (emojiEl) {
+      if (cfg && cfg.assetUrl) {
+        emojiEl.innerHTML = '<img class="mnt-gif" src="' + cfg.assetUrl + '" alt="maintenance">';
+      } else {
+        emojiEl.textContent = (cfg && cfg.emoji) || '\uD83D\uDD27';
+      }
+    }
+    var titleEl = document.getElementById('mntTitle');
+    if (titleEl) titleEl.textContent = (cfg && cfg.message) || '站点维护中';
+    var subEl = document.getElementById('mntSub');
+    if (subEl) subEl.textContent = (cfg && cfg.subMessage) || '我们正在对系统进行例行维护与升级，请稍后再试。感谢您的理解与支持。';
+    ov.classList.add('visible');
+    ov.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function showBlockCard(cfg) {
+    var card = document.getElementById('siteBlockCard');
+    if (!card) return;
+    var txt = document.getElementById('blkText');
+    if (txt) txt.textContent = (cfg && cfg.reason) || '您的账号因违反平台规则已被限制访问。';
+    var btn = document.getElementById('blkAppealBtn');
+    if (btn) {
+      btn.onclick = function () {
+        window.open((cfg && cfg.appealUrl) || 'https://henry126923-admincenter.pages.dev', '_blank', 'noopener');
+      };
+    }
+    card.classList.add('visible');
+    card.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function applyAiGate(gated) {
+    var btn = document.getElementById('aiChatBtn');
+    if (!btn) return;
+    if (gated && !isAiUnlocked()) {
+      btn.classList.add('ai-gated');
+      var span = document.getElementById('aiChatBtnText');
+      if (span) {
+        var txt = span.textContent;
+        if (txt.indexOf('问 AI') !== -1) span.textContent = txt.replace('问 AI', 'AI 未解锁');
+        else if (txt.indexOf('Ask AI') !== -1) span.textContent = txt.replace('Ask AI', 'AI locked');
+      }
+    }
+    if (window.__origOpenAiChat) return;
+    window.__origOpenAiChat = window.openAiChat;
+    window.openAiChat = function () {
+      if (gated && !isAiUnlocked()) return;
+      return window.__origOpenAiChat.apply(this, arguments);
+    };
+  }
+  function init() {
+    fetch('/api/maintenance', {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'X-Visitor-Id': getVisitorId() }
+    }).then(function (res) {
+      if (!res.ok) return null;
+      return res.json();
+    }).then(function (data) {
+      if (!data || data.ok !== true) return;
+      if (data.status === 'maintenance') {
+        showMaintenance(data.maintenance || {});
+      } else if (data.status === 'blocked') {
+        showBlockCard(data.blocked || {});
+      } else {
+        applyAiGate(data.aiGate === true);
+      }
+    }).catch(function () { /* 接口不可用默认放行 */ });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  window.__accessControlUnlock = setAiUnlocked;
 })();
 </script>
 <!-- 今日执飞：html2canvas 长图导出（CDN 按需加载，不影响既有功能） -->
