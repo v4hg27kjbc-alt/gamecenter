@@ -20482,6 +20482,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       <button class="gca-tab" data-page="token">Token用量</button>
       <button class="gca-tab" data-page="users">用户管理</button>
       <button class="gca-tab" data-page="maint">维护控制</button>
+      <button class="gca-tab" data-page="settings">设置</button>
     </div>
     <div class="gca-body">
       <div class="gca-login-banner" id="gcAdminLoginBar">
@@ -20492,7 +20493,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       </div>
 
       <!-- 收发 -->
-      <div class="gca-page active" id="gcPageSms">
+      <div class="gca-page active" id="gcPageSms" data-gc-part="page-sms">
         <div class="gca-card">
           <h3>短信验证码发送</h3>
           <div class="gca-row">
@@ -20519,7 +20520,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       </div>
 
       <!-- Token用量 -->
-      <div class="gca-page" id="gcPageToken">
+      <div class="gca-page" id="gcPageToken" data-gc-part="page-token">
         <div class="gca-card">
           <h3>Kimi Token 消耗统计看板</h3>
           <div class="gca-row">
@@ -20542,7 +20543,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       </div>
 
       <!-- 用户管理 -->
-      <div class="gca-page" id="gcPageUsers">
+      <div class="gca-page" id="gcPageUsers" data-gc-part="page-users">
         <div class="gca-card">
           <h3>创建用户</h3>
           <div class="gca-row">
@@ -20567,7 +20568,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       </div>
 
       <!-- 维护控制 -->
-      <div class="gca-page" id="gcPageMaint">
+      <div class="gca-page" id="gcPageMaint" data-gc-part="page-maint">
         <div class="gca-card">
           <h3>维护模式总开关（联动访问控制遮罩）</h3>
           <div class="gca-row" style="align-items:center">
@@ -20591,6 +20592,40 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
             <div class="gca-field"><label>超管密码</label><input type="password" class="gca-input" id="gcMaintSuperPassBlk" placeholder="SUPER_ADMIN_PASSWORD" autocomplete="off"></div>
             <button class="gca-btn gca-primary" id="gcMaintSaveBlocklist">推送黑名单</button>
           </div>
+        </div>
+      <!-- 设置 -->
+      <div class="gca-page" id="gcPageSettings" data-gc-part="page-settings">
+        <div class="gca-card">
+          <h3>管理员令牌</h3>
+          <p class="gca-hint">所有管理接口均以 <code>X-Admin-Token</code> 请求头鉴权，令牌仅保存在本次会话，不会写入本地存储或页面源码。</p>
+          <div class="gca-row">
+            <div class="gca-field"><label>令牌状态</label><span class="gca-badge" id="gcSettingsTokenState">未解锁</span></div>
+            <div class="gca-field"><label>当前令牌</label><input type="password" class="gca-input" id="gcSettingsTokenInput" placeholder="输入管理员令牌" autocomplete="off"></div>
+            <button class="gca-btn gca-primary" id="gcSettingsTokenSave">解锁</button>
+            <button class="gca-btn gca-ghost" id="gcSettingsTokenClear" style="display:none">清除令牌</button>
+          </div>
+          <p class="gca-status" id="gcSettingsStatus"></p>
+        </div>
+        <div class="gca-card">
+          <h3>本地数据管理 <span class="gca-hint" id="gcSettingsDataCount">0 条短信记录</span></h3>
+          <p class="gca-hint">短信发送记录与余额费用保存在本机浏览器（localStorage），导出后可作为台账备份。</p>
+          <div class="gca-row">
+            <button class="gca-btn gca-ghost" id="gcSettingsExport">导出短信记录 JSON</button>
+            <button class="gca-btn gca-ghost" id="gcSettingsClearSms">清空短信记录</button>
+            <button class="gca-btn gca-ghost" id="gcSettingsResetQuota">重置本地余额为 1000</button>
+          </div>
+        </div>
+        <div class="gca-card">
+          <h3>接口说明</h3>
+          <table class="gca-table">
+            <thead><tr><th>分区</th><th>调用接口</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>收发</td><td class="gca-mono">POST /api/sms-verify</td><td>验证码下发，返回唯一 BizId 回执</td></tr>
+              <tr><td>Token用量</td><td class="gca-mono">GET /api/token-usage?days=7</td><td>用量汇总 + 近 7 日趋势</td></tr>
+              <tr><td>用户管理</td><td class="gca-mono">GET/POST /api/users</td><td>用户列表 / 创建 / 批量操作</td></tr>
+              <tr><td>维护控制</td><td class="gca-mono">GET/POST /api/maintenance</td><td>维护开关（enabled）/ 文案 / 黑名单</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -20683,6 +20718,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     loadUsers();
     renderSmsQuota();
     renderSmsRecords();
+    renderSettingsPage();
   }
   function closePanel() {
     PANEL.classList.remove('open');
@@ -20693,7 +20729,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     }
   }
   function switchPage(name) {
-    var pages = ['sms', 'token', 'users', 'maint'];
+    var pages = ['sms', 'token', 'users', 'maint', 'settings'];
     pages.forEach(function (p) {
       var page = $('gcPage' + p.charAt(0).toUpperCase() + p.slice(1));
       if (page) page.classList.toggle('active', p === name);
@@ -20703,6 +20739,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     if (name === 'token') loadTokenUsage();
     if (name === 'users') loadUsers();
     if (name === 'maint') loadMaintConfig();
+    if (name === 'settings') renderSettingsPage();
   }
 
   /* ---- 鉴权 ---- */
@@ -21044,19 +21081,21 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   }
   function saveMaintConfig() {
     var pass = $('gcMaintSuperPass') ? $('gcMaintSuperPass').value : '';
-    if (!pass) { status('gcMaintStatus', '请先输入超管密码', 'err'); return; }
     status('gcMaintStatus', '正在保存维护配置…', '');
     recRequest('/api/maintenance', { method: 'POST', body: { action: 'save-config', superPassword: pass, config: maintBuildPayload() } }).then(function (data) {
       status('gcMaintStatus', (data && data.message) ? data.message : '维护配置已保存', 'good');
       if ($('gcMaintSuperPass')) $('gcMaintSuperPass').value = '';
       loadMaintConfig();
     }).catch(function (err) {
-      status('gcMaintStatus', '保存失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+      var em = (err && err.message) ? err.message : '未知错误';
+      if (pass === '' && /super_password_required|超管密码/i.test(em)) {
+        em = '服务端需要超管密码，请在上方输入 SUPER_ADMIN_PASSWORD 后重试';
+      }
+      status('gcMaintStatus', '保存失败：' + em, 'err');
     });
   }
   function saveMaintBlocklist() {
     var pass = $('gcMaintSuperPassBlk') ? $('gcMaintSuperPassBlk').value : '';
-    if (!pass) { status('gcMaintStatus', '请先输入超管密码', 'err'); return; }
     var ta = $('gcMaintBlocklistInput');
     var lines = ta ? ta.value.split('\n') : [];
     var blocklist = [];
@@ -21067,8 +21106,70 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       if ($('gcMaintSuperPassBlk')) $('gcMaintSuperPassBlk').value = '';
       loadMaintConfig();
     }).catch(function (err) {
-      status('gcMaintStatus', '推送失败：' + ((err && err.message) ? err.message : '未知错误'), 'err');
+      var em = (err && err.message) ? err.message : '未知错误';
+      if (pass === '' && /super_password_required|超管密码/i.test(em)) {
+        em = '服务端需要超管密码，请在上方输入 SUPER_ADMIN_PASSWORD 后重试';
+      }
+      status('gcMaintStatus', '推送失败：' + em, 'err');
     });
+  }
+
+  /* ---- 设置分区 ---- */
+  function renderSettingsPage() {
+    var has = !!getToken();
+    var st = $('gcSettingsTokenState');
+    if (st) { st.textContent = has ? '已解锁' : '未解锁'; st.className = 'gca-badge' + (has ? ' ok' : ''); }
+    var inp = $('gcSettingsTokenInput');
+    if (inp && has) inp.value = getToken();
+    var clearBtn = $('gcSettingsTokenClear');
+    var saveBtn = $('gcSettingsTokenSave');
+    if (saveBtn) saveBtn.style.display = has ? 'none' : '';
+    if (clearBtn) clearBtn.style.display = has ? '' : 'none';
+    var cnt = $('gcSettingsDataCount');
+    if (cnt) cnt.textContent = smsRecords().length + ' 条短信记录';
+  }
+  function unlockSettingsToken() {
+    var input = $('gcSettingsTokenInput');
+    var tk = (input ? input.value : '').trim();
+    if (!tk) { status('gcSettingsStatus', '请输入管理员令牌', 'err'); return; }
+    setToken(tk);
+    status('gcSettingsStatus', '令牌已解锁，管理操作可用', 'good');
+    renderSettingsPage();
+  }
+  function clearSettingsToken() {
+    clearToken();
+    var input = $('gcSettingsTokenInput');
+    if (input) input.value = '';
+    status('gcSettingsStatus', '已清除令牌，管理操作锁定', '');
+    renderSettingsPage();
+  }
+  function exportSmsRecords() {
+    var arr = smsRecords();
+    var blob = new Blob([JSON.stringify(arr, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'gc-sms-records-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    status('gcSettingsStatus', '已导出 ' + arr.length + ' 条短信记录', 'good');
+  }
+  function clearSmsRecords() {
+    if (!window.confirm('确认清空全部短信发送记录？此操作仅影响本机记录，不影响服务端。')) return;
+    saveSmsRecords([]);
+    renderSmsRecords();
+    renderSettingsPage();
+    status('gcSettingsStatus', '短信记录已清空', 'good');
+  }
+  function resetSmsQuota() {
+    var db = loadDB();
+    db.smsQuota = 1000;
+    saveDB(db);
+    renderSmsQuota();
+    renderSettingsPage();
+    status('gcSettingsStatus', '本地余额已重置为 1000', 'good');
   }
 
   /* ---- 事件绑定 ---- */
@@ -21089,6 +21190,11 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     if (t && t.id === 'gcUserCreateBtn') { createUser(); return; }
     if (t && t.id === 'gcMaintSaveConfig') { saveMaintConfig(); return; }
     if (t && t.id === 'gcMaintSaveBlocklist') { saveMaintBlocklist(); return; }
+    if (t && t.id === 'gcSettingsTokenSave') { unlockSettingsToken(); return; }
+    if (t && t.id === 'gcSettingsTokenClear') { clearSettingsToken(); return; }
+    if (t && t.id === 'gcSettingsExport') { exportSmsRecords(); return; }
+    if (t && t.id === 'gcSettingsClearSms') { clearSmsRecords(); return; }
+    if (t && t.id === 'gcSettingsResetQuota') { resetSmsQuota(); return; }
     if (t && t.getAttribute && t.getAttribute('data-batch')) { usersBatchAction(t.getAttribute('data-batch')); return; }
     if (t && t.getAttribute && t.getAttribute('data-act') && t.getAttribute('data-uid')) {
       usersSingleAction(t.getAttribute('data-uid'), t.getAttribute('data-act'));
