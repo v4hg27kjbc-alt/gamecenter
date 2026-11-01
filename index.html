@@ -6273,6 +6273,17 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
   padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35);
   background: rgba(255,255,255,.08); color: rgba(255,255,255,.85);
 }
+#siteMaintenanceOverlay .mnt-migrate-btn {
+  display: inline-block; margin-top: 18px;
+  padding: 9px 18px; border-radius: 999px;
+  border: 1px solid rgba(120, 140, 220, .45);
+  font-size: 13px; color: #cdd8ff; text-decoration: none; transition: .15s;
+}
+#siteMaintenanceOverlay .mnt-migrate-btn:hover {
+  background: rgba(120, 140, 220, .16);
+  border-color: rgba(120, 140, 220, .75);
+  color: #fff;
+}
 @keyframes mntFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
 @keyframes mntFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -6316,6 +6327,7 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
     <div class="mnt-emoji" id="mntEmoji">&#128295;</div>
     <div class="mnt-title" id="mntTitle">站点维护中</div>
     <div class="mnt-sub" id="mntSub">我们正在对系统进行例行维护与升级，请稍后再试。感谢您的理解与支持。</div>
+    <div><a class="mnt-migrate-btn" href="/migrate.html" target="_blank" rel="noopener">临时账户绑定迁移 &rarr;</a></div>
     <div><span class="mnt-badge">&#9992; HENRY AVIATION MUSEUM</span></div>
   </div>
 </div>
