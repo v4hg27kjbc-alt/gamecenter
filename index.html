@@ -6407,31 +6407,58 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
 </script>
 
 
+
+<!-- 独立账户入口（从顶栏拆出，单独位置窗口，避免与其它按钮重叠） -->
+<div id="gcAcctDock" aria-label="账户入口">
+  <a class="gc-dock-trial" id="gcTrialBtn" href="/trial.html" title="免费试运营 · 深度研读"><span class="gc-dock-dot"></span>试运营</a>
+  <button class="gc-dock-acct" id="gcAcctBtn" type="button" aria-label="登录或个人中心" title="登录 / 个人中心">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="gc-acct-name" id="gcAcctBtnText">登录</span>
+  </button>
+</div>
+
 <div id="gcAcctMask" aria-hidden="true">
   <div class="gc-acct-card" role="dialog" aria-modal="true" aria-labelledby="gcAcctTitle">
     <button class="gc-acct-close" id="gcAcctClose" type="button" aria-label="关闭">&#10005;</button>
     <div id="gcAcctAuth">
       <h3 class="gc-acct-title" id="gcAcctTitle">登录 / 注册</h3>
-      <p class="gc-acct-sub">登录后可收藏机型、保存笔记、解锁深度飞行家特权。账号密码仅用于本站，不做任何第三方共享。</p>
+      <p class="gc-acct-sub">登录后可收藏机型、保存笔记、解锁深度飞行家特权。账号与手机号仅用于本站，不做任何第三方共享。</p>
+      <div class="gc-acct-gate" id="gcAcctGate" style="display:none"></div>
       <div class="gc-acct-tabs">
         <button class="gc-acct-tab on" id="gcTabLogin" type="button">登录</button>
         <button class="gc-acct-tab" id="gcTabRegister" type="button">注册</button>
       </div>
-      <div class="gc-acct-field">
-        <label id="gcNameLabel">用户名 或 UID</label>
+      <div class="gc-acct-ways" id="gcWayWrap">
+        <button class="gc-acct-way on" id="gcWayPwd" type="button">密码登录</button>
+        <button class="gc-acct-way" id="gcWayCode" type="button">验证码登录</button>
+      </div>
+      <div class="gc-acct-field" id="gcPhoneWrap" style="display:none">
+        <label>手机号</label>
+        <input class="gc-acct-input" id="gcAcctPhone" type="tel" inputmode="numeric" maxlength="11" autocomplete="tel" placeholder="11 位手机号">
+      </div>
+      <div class="gc-acct-field" id="gcCodeWrap" style="display:none">
+        <label>短信验证码</label>
+        <div class="gc-acct-coderow">
+          <input class="gc-acct-input" id="gcAcctCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码">
+          <button class="gc-acct-send" id="gcSendCode" type="button">获取验证码</button>
+        </div>
+      </div>
+      <div class="gc-acct-field" id="gcNameWrap">
+        <label id="gcNameLabel">用户名 或 手机号</label>
         <input class="gc-acct-input" id="gcAcctName" autocomplete="username" placeholder="例如 henry 或 GC261106-001">
       </div>
-      <div class="gc-acct-field">
-        <label>密码</label>
+      <div class="gc-acct-field" id="gcPassWrap">
+        <label id="gcPassLabel">密码</label>
         <input class="gc-acct-input" id="gcAcctPass" type="password" autocomplete="current-password" placeholder="至少 6 位">
       </div>
       <div class="gc-acct-field" id="gcAcctPass2Wrap" style="display:none">
         <label>确认密码</label>
         <input class="gc-acct-input" id="gcAcctPass2" type="password" autocomplete="new-password" placeholder="再输入一次">
+        <p class="gc-acct-tipline">默认密码 12345678，不改可直接注册，登录后可在个人中心修改</p>
       </div>
       <button class="gc-acct-btn-main" id="gcAcctSubmit" type="button">登录</button>
       <div class="gc-acct-msg" id="gcAcctMsg"></div>
-      <p class="gc-acct-hint">注册即生成专属 UID（注册日期 + 序号，如 GC261106-001）。试运营期间所有功能免费。</p>
+      <p class="gc-acct-hint">注册需短信验证码校验，成功后自动生成专属 UID（注册日期 + 序号，如 GC261106-001）。试运营期间所有功能免费。</p>
     </div>
     <div id="gcAcctProfile" style="display:none">
       <div class="gc-pf-trial"><div class="gc-pf-trial-t"><b>深度研读 · 免费试运营</b><span>已开放全文在线阅读与带溯源码下载</span></div><a class="gc-pf-trial-a" href="/trial.html">进入</a></div>
@@ -6465,6 +6492,14 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
             <li>专属 UID 身份，可参与内测与选题投票</li>
           </ul>
         </div>
+      </div>
+      <div class="gc-pf-sec">
+        <div class="gc-pf-sec-title">登录密码</div>
+        <div class="gc-pf-pwd">
+          <input class="gc-pf-pwd-input" id="gcPwdNew" type="password" autocomplete="new-password" placeholder="新密码，至少 6 位">
+          <button class="gc-pf-btn primary" id="gcPfPwdSave" type="button">保存密码</button>
+        </div>
+        <p class="gc-pf-tip">注册默认密码 12345678，可在此修改；忘了密码也能用手机验证码登录。</p>
       </div>
       <div class="gc-pf-actions">
         <button class="gc-pf-btn primary" id="gcPfMigrate" type="button">一键迁移临时账户数据</button>
@@ -6533,11 +6568,6 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
     <button class="theme-toggle-btn letter-btn" id="letterBtn" aria-label="一封信" title="一封信"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg> 一封信</button>
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
     <button class="theme-toggle-btn" id="gcAdminTrigger" aria-label="管理后台" title="管理后台"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 2.4L17 4l.6 2.6L20 9l-1 3 1 3-2.4 2.4L17 20l-2.6-.6L12 22l-2.4-2.4L7 20l-.6-2.6L4 15l1-3-1-3 2.4-2.4L7 4l2.6.6L12 2z"/><path d="M9 12l2 2 4-4"/></svg> 管理后台</button>
-    <a class="theme-toggle-btn gc-trial-btn" href="/trial.html" aria-label="免费试运营" title="免费试运营 · 深度研读"><span class="gc-trial-dot"></span>试运营</a>
-    <button class="theme-toggle-btn gc-acct-btn" id="gcAcctBtn" aria-label="登录或个人中心" title="登录 / 个人中心">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span class="gc-acct-name" id="gcAcctBtnText">登录</span>
-    </button>
     
     <div class="theme-dropdown" id="themeDropdown">
       <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
@@ -20637,6 +20667,28 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
  .gc-fav-btn span{display:none;}
 }
 @media (prefers-reduced-motion:reduce){.gc-acct-card *{transition:none!important;animation:none!important;}}
+/* 独立账户入口坞（右下角，与顶栏解耦） */
+#gcAcctDock{position:fixed;right:16px;bottom:18px;z-index:2147482000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.gc-dock-trial{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.92);color:#1f6feb!important;text-decoration:none!important;box-shadow:0 6px 18px rgba(2,8,23,.18);border:1px solid rgba(31,111,235,.22);font-weight:600;backdrop-filter:blur(8px);}
+.gc-dock-dot{width:6px;height:6px;border-radius:50%;background:#1f6feb;box-shadow:0 0 0 3px rgba(31,111,235,.16);}
+.gc-dock-acct{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 10px 26px rgba(43,78,204,.35);transition:.2s;}
+.gc-dock-acct:hover{transform:translateY(-2px);filter:brightness(1.06);}
+.gc-dock-acct .gc-acct-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.7);}
+.gc-dock-acct .gc-acct-name{font-size:12.5px;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media (max-width:640px){#gcAcctDock{right:12px;bottom:14px;}.gc-dock-acct{padding:8px 13px;font-size:12.5px;}}
+/* 登录方式切换 / 验证码行 */
+.gc-acct-ways{display:flex;gap:8px;margin:-6px 0 14px;}
+.gc-acct-way{flex:1;padding:8px 0;border-radius:10px;border:1px solid rgba(15,23,42,.12);background:#fff;font-size:12.5px;color:#475569;cursor:pointer;font-weight:600;}
+.gc-acct-way.on{background:rgba(102,126,234,.12);border-color:rgba(102,126,234,.5);color:#2b4ecc;}
+.gc-acct-coderow{display:flex;gap:8px;}
+.gc-acct-coderow .gc-acct-input{flex:1;min-width:0;}
+.gc-acct-send{flex:none;padding:0 13px;border-radius:11px;border:1px solid rgba(102,126,234,.45);background:rgba(102,126,234,.1);color:#2b4ecc;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.gc-acct-send[disabled]{opacity:.55;cursor:default;}
+.gc-acct-tipline{font-size:11.5px;color:#94a3b8;margin:6px 0 0;line-height:1.6;}
+.gc-acct-gate{padding:10px 12px;border-radius:11px;background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.25);color:#1d4ed8;font-size:12.5px;line-height:1.6;margin:0 0 14px;}
+.gc-pf-pwd{display:flex;gap:8px;align-items:center;}
+.gc-pf-pwd-input{flex:1;min-width:0;padding:9px 12px;border-radius:10px;border:1px solid rgba(15,23,42,.14);font-size:13px;}
+.gc-pf-tip{font-size:11.5px;color:#94a3b8;margin:8px 0 0;line-height:1.6;}
 </style>
 
 <style id="gcAdminStyle">
@@ -21482,7 +21534,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   'use strict';
   var API = '/api/account';
   var TK = 'gc_acct_token';
-  var st = { token: null, profile: null, mode: 'login' };
+  var st = { token: null, profile: null, mode: 'login', way: 'password' };
 
   function $(id) { return document.getElementById(id); }
   function ls(k, v) {
@@ -21555,13 +21607,28 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     el.className = 'gc-acct-msg' + (ok ? ' ok' : '');
   }
 
-  function openMask(view) {
+  function openMask(view, reason) {
     var mask = $('gcAcctMask');
     if (!mask) return;
     mask.classList.add('on');
     mask.setAttribute('aria-hidden', 'false');
-    if (view === 'profile' && st.profile) { $('gcAcctAuth').style.display = 'none'; $('gcAcctProfile').style.display = 'block'; renderProfile(); }
-    else { $('gcAcctAuth').style.display = 'block'; $('gcAcctProfile').style.display = 'none'; setMsg(sessionStorage.getItem('gc_acct_bad') || ''); sessionStorage.removeItem('gc_acct_bad'); }
+    var g = $('gcAcctGate');
+    if (g) { g.style.display = 'none'; g.textContent = ''; }
+    if (view === 'profile' && st.profile) {
+      $('gcAcctAuth').style.display = 'none';
+      $('gcAcctProfile').style.display = 'block';
+      renderProfile();
+    } else {
+      $('gcAcctAuth').style.display = 'block';
+      $('gcAcctProfile').style.display = 'none';
+      setMode(st.mode);
+      setMsg(sessionStorage.getItem('gc_acct_bad') || '');
+      sessionStorage.removeItem('gc_acct_bad');
+      if (reason && g) {
+        g.style.display = 'block';
+        g.textContent = '「' + reason + '」需登录后使用：登录或注册即可解锁收藏同步、笔记保存与深度研读';
+      }
+    }
   }
   function closeMask() {
     var mask = $('gcAcctMask');
@@ -21569,49 +21636,128 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     mask.classList.remove('on');
     mask.setAttribute('aria-hidden', 'true');
     setMsg('');
+    var g = $('gcAcctGate');
+    if (g) { g.style.display = 'none'; g.textContent = ''; }
   }
 
   function setMode(mode) {
     st.mode = mode === 'register' ? 'register' : 'login';
+    if (st.mode === 'register' && !st.way) st.way = 'code';
     var isReg = st.mode === 'register';
-    $('gcTabLogin').classList.toggle('on', !isReg);
-    $('gcTabRegister').classList.toggle('on', isReg);
-    $('gcAcctPass2Wrap').style.display = isReg ? 'block' : 'none';
-    $('gcAcctSubmit').textContent = isReg ? '注册并登录' : '登录';
-    $('gcNameLabel').textContent = isReg ? '用户名（可中文，2-16 位）' : '用户名 或 UID';
-    $('gcAcctName').placeholder = isReg ? '给自己起个名字' : '例如 henry 或 GC261106-001';
-    $('gcAcctPass').setAttribute('autocomplete', isReg ? 'new-password' : 'current-password');
+    var isCode = st.way === 'code';
+    if ($('gcTabLogin')) $('gcTabLogin').classList.toggle('on', !isReg);
+    if ($('gcTabRegister')) $('gcTabRegister').classList.toggle('on', isReg);
+    if ($('gcWayWrap')) $('gcWayWrap').style.display = isReg ? 'none' : 'flex';
+    if ($('gcWayPwd')) $('gcWayPwd').classList.toggle('on', st.way === 'password');
+    if ($('gcWayCode')) $('gcWayCode').classList.toggle('on', isCode);
+    if ($('gcPhoneWrap')) $('gcPhoneWrap').style.display = (isReg || isCode) ? 'block' : 'none';
+    if ($('gcCodeWrap')) $('gcCodeWrap').style.display = (isReg || isCode) ? 'block' : 'none';
+    if ($('gcNameWrap')) $('gcNameWrap').style.display = (isReg || !isCode) ? 'block' : 'none';
+    if ($('gcPassWrap')) $('gcPassWrap').style.display = (isReg || !isCode) ? 'block' : 'none';
+    if ($('gcAcctPass2Wrap')) $('gcAcctPass2Wrap').style.display = isReg ? 'block' : 'none';
+    if ($('gcAcctSubmit')) $('gcAcctSubmit').textContent = isReg ? '注册并登录' : (isCode ? '验证码登录' : '密码登录');
+    if ($('gcNameLabel')) $('gcNameLabel').textContent = isReg ? '用户名（可中文，2-16 位）' : '用户名 / UID / 手机号';
+    if ($('gcAcctName')) $('gcAcctName').placeholder = isReg ? '给自己起个名字' : '例如 henry 或 13800000000';
+    if ($('gcPassLabel')) $('gcPassLabel').textContent = isReg ? '密码（默认 12345678）' : '密码';
+    if ($('gcAcctPass')) {
+      $('gcAcctPass').setAttribute('autocomplete', isReg ? 'new-password' : 'current-password');
+      if (isReg && !$('gcAcctPass').value) $('gcAcctPass').value = '12345678';
+    }
+    if ($('gcAcctPass2') && isReg && !$('gcAcctPass2').value) $('gcAcctPass2').value = '12345678';
     setMsg('');
   }
 
   function submitAuth() {
-    var name = ($('gcAcctName').value || '').trim();
-    var pass = $('gcAcctPass').value || '';
+    var isReg = st.mode === 'register';
+    var isCode = st.way === 'code';
+    var phone = (($('gcAcctPhone') || {}).value || '').replace(/\s/g, '');
+    var code = (($('gcAcctCode') || {}).value || '').replace(/\s/g, '');
+    var name = (($('gcAcctName') || {}).value || '').trim();
+    var pass = (($('gcAcctPass') || {}).value) || '';
     var btn = $('gcAcctSubmit');
-    if (!name || !pass) { setMsg('请填写完整的用户名和密码'); return; }
-    if (st.mode === 'register') {
+    if (!btn) return;
+
+    if (isReg) {
+      if (!/^1[3-9]\d{9}$/.test(phone)) { setMsg('请输入正确的 11 位手机号'); return; }
+      if (!/^\d{4,8}$/.test(code)) { setMsg('请输入收到的短信验证码'); return; }
+      if (!name) { setMsg('请填写用户名（2-16 位，可中文）'); return; }
       var p2 = $('gcAcctPass2').value || '';
+      if (!pass) pass = '12345678';
       if (pass.length < 6) { setMsg('密码至少 6 位'); return; }
       if (pass !== p2) { setMsg('两次输入的密码不一致'); return; }
+    } else if (isCode) {
+      if (!/^1[3-9]\d{9}$/.test(phone)) { setMsg('请输入正确的 11 位手机号'); return; }
+      if (!/^\d{4,8}$/.test(code)) { setMsg('请输入收到的短信验证码'); return; }
+    } else if (!name || !pass) {
+      setMsg('请填写账号和密码');
+      return;
     }
+
     btn.disabled = true;
-    btn.textContent = st.mode === 'register' ? '注册中…' : '登录中…';
-    api(st.mode, { username: name, password: pass }).then(function (res) {
+    btn.textContent = isReg ? '注册中…' : '登录中…';
+    var req;
+    if (isReg) req = api('register', { username: name, password: pass, phone: phone, code: code });
+    else if (isCode) req = api('login', { mode: 'code', phone: phone, code: code });
+    else req = api('login', { mode: 'password', username: name, password: pass });
+
+    req.then(function (res) {
       btn.disabled = false;
-      btn.textContent = st.mode === 'register' ? '注册并登录' : '登录';
-      if (!res || !res.ok) { setMsg(msgOf(res && res.error) + (res && res.hint ? '（' + res.hint + '）' : '')); return; }
+      setMode(st.mode);
+      if (!res || !res.ok) {
+        var em = (res && (res.hint || res.message)) || '';
+        setMsg(em || msgOf(res && res.error));
+        return;
+      }
       st.token = res.token;
       st.profile = res.profile;
       ls(TK, res.token);
       applyProfile();
       openMask('profile');
+      var nick = (res.profile && (res.profile.displayName || res.profile.username)) || '';
+      toast((isReg ? '注册成功，已自动登录：' : '登录成功，欢迎回来 ') + nick);
       var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
-      if (pending > 0) setMsg('检测到 ' + pending + ' 条临时数据，点下方「一键迁移临时账户数据」并入本账号', true);
+      if (pending > 0) setTimeout(function () { toast('检测到 ' + pending + ' 条临时数据，可在个人中心一键迁移'); }, 900);
     }).catch(function () {
       btn.disabled = false;
-      btn.textContent = st.mode === 'register' ? '注册并登录' : '登录';
+      setMode(st.mode);
       setMsg('网络异常，请稍后重试');
     });
+  }
+
+  var codeTimer = null;
+  function sendCode() {
+    var el = $('gcAcctPhone');
+    var phone = ((el && el.value) || '').replace(/\s/g, '');
+    if (!/^1[3-9]\d{9}$/.test(phone)) { setMsg('请先填写正确的 11 位手机号'); if (el) el.focus(); return; }
+    var b = $('gcSendCode');
+    if (!b || b.disabled) return;
+    b.disabled = true;
+    b.textContent = '发送中…';
+    fetch('/api/sms-verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ phoneNumber: phone }) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'bad_response' }; }); })
+      .then(function (res) {
+        if (!res || !res.ok) {
+          b.disabled = false;
+          b.textContent = '重新获取';
+          setMsg('验证码发送失败：' + ((res && (res.message || res.hint || res.error)) || '请稍后再试'));
+          return;
+        }
+        setMsg('验证码已发送至 ' + ((res && res.phone) || phone) + '，5 分钟内有效', true);
+        var left = 60;
+        b.textContent = left + 's';
+        if (codeTimer) clearInterval(codeTimer);
+        codeTimer = setInterval(function () {
+          left--;
+          if (left <= 0) { clearInterval(codeTimer); codeTimer = null; b.disabled = false; b.textContent = '重新获取'; }
+          else b.textContent = left + 's';
+        }, 1000);
+      })
+      .catch(function () { b.disabled = false; b.textContent = '重新获取'; setMsg('网络异常，验证码发送失败'); });
+  }
+
+  function gcGate(reason) {
+    st.mode = 'login';
+    openMask('auth', reason);
   }
 
   function applyProfile() {
@@ -21739,6 +21885,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       if (i >= 0) arr.splice(i, 1); else arr.push(id);
       jset(lk, arr);
       toast(i >= 0 ? '已从临时保存移除（登录后可迁移）' : '已暂存本地，登录后可一键迁移');
+      gcGate(kind === 'save' ? '保存笔记' : '收藏机型');
       return;
     }
     var op = forceRemove ? 'remove' : 'toggle';
@@ -21823,6 +21970,22 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   document.addEventListener('DOMContentLoaded', function () {
     var btn = $('gcAcctBtn');
     if (btn) btn.addEventListener('click', function () { openMask(st.profile ? 'profile' : 'auth'); });
+    if ($('gcWayPwd')) $('gcWayPwd').addEventListener('click', function () { st.way = 'password'; setMode('login'); });
+    if ($('gcWayCode')) $('gcWayCode').addEventListener('click', function () { st.way = 'code'; setMode('login'); });
+    if ($('gcSendCode')) $('gcSendCode').addEventListener('click', sendCode);
+    if ($('gcPfPwdSave')) $('gcPfPwdSave').addEventListener('click', function () {
+      var np = (($('gcPwdNew') || {}).value || '').trim();
+      if (np.length < 6) { toast('新密码至少 6 位'); return; }
+      var b = $('gcPfPwdSave');
+      b.disabled = true;
+      api('update', { password: np }).then(function (res) {
+        b.disabled = false;
+        if (res && res.ok) { if ($('gcPwdNew')) $('gcPwdNew').value = ''; toast('密码已更新，下次可用新密码登录'); }
+        else toast((res && (res.hint || res.message)) || '密码修改失败');
+      }).catch(function () { b.disabled = false; toast('网络异常，请稍后重试'); });
+    });
+    if ($('gcAcctCode')) $('gcAcctCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') submitAuth(); });
+    if ($('gcAcctPhone')) $('gcAcctPhone').addEventListener('keydown', function (e) { if (e.key === 'Enter') { if ($('gcAcctCode')) $('gcAcctCode').focus(); } });
     if ($('gcAcctClose')) $('gcAcctClose').addEventListener('click', closeMask);
     if ($('gcAcctMask')) $('gcAcctMask').addEventListener('click', function (e) { if (e.target.id === 'gcAcctMask') closeMask(); });
     if ($('gcTabLogin')) $('gcTabLogin').addEventListener('click', function () { setMode('login'); });

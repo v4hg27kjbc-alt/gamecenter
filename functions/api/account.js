@@ -19,6 +19,27 @@ const SEQ_KEY = 'acct:seq';
 const MAX_FAV = 300;
 const MAX_AVATAR = 60000;
 const PASS_MIN = 6;
+const DEFAULT_PASS = '12345678';
+
+function normPhone(v) {
+  const s = String(v || '').replace(/[\s-]/g, '');
+  return /^1[3-9]\d{9}$/.test(s) ? s : '';
+}
+
+/** 校验并消耗短信验证码（与 /api/sms-verify 共用 sms:code:<phone> 存储） */
+async function consumeSmsCode(kv, phone, code) {
+  const c = String(code || '').trim();
+  if (!/^\d{4,8}$/.test(c)) return { ok: false, error: 'code_invalid', hint: '请输入短信验证码' };
+  let raw = null;
+  try { raw = await kv.get('sms:code:' + phone); } catch (e) { raw = null; }
+  if (!raw) return { ok: false, error: 'code_expired', hint: '验证码已过期，请重新获取' };
+  let rec = null;
+  try { rec = JSON.parse(raw); } catch (e) { rec = null; }
+  const stored = rec && rec.code ? String(rec.code) : String(raw);
+  if (stored !== c) return { ok: false, error: 'code_wrong', hint: '验证码不正确' };
+  try { await kv.delete('sms:code:' + phone); } catch (e) {}
+  return { ok: true };
+}
 
 const ERR = {
   kv: 'KV_UNAVAILABLE',
@@ -169,46 +190,76 @@ export async function onRequest(context) {
 
   const action = String(body.action);
 
-  // ---- 注册 ----
+  // ---- 注册（手机号 + 短信验证码）----
   if (action === 'register') {
     const username = String(body.username || '').trim();
-    const password = String(body.password || '');
+    const password = String(body.password || '') || DEFAULT_PASS;
+    const phone = normPhone(body.phone);
+    const code = String(body.code || '').trim();
+
+    if (!phone) return bad('phone_invalid', origin, { hint: '请输入正确的 11 位手机号' });
+    const check = await consumeSmsCode(kv, phone, code);
+    if (!check.ok) return bad(check.error, origin, { hint: check.hint });
     if (!validName(username)) return bad('username_invalid', origin, { hint: '用户名 2-16 位，中文/字母/数字/下划线/短横线' });
     if (password.length < PASS_MIN) return bad('password_too_short', origin, { hint: '密码至少 6 位' });
 
     const lower = normName(username);
     const dup = await kv.get('acct:n:' + lower);
     if (dup) return bad(ERR.exists, origin, null, 409);
+    const phoneHolder = await kv.get('acct:p:' + phone);
+    if (phoneHolder) return bad('phone_taken', origin, { hint: '该手机号已注册，请直接登录' }, 409);
 
     const uid = await nextUid(kv);
     const salt = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
     const pass = await hashPassword(password, salt);
     const now = new Date().toISOString();
     const user = {
-      uid, username, displayName: username, salt, pass,
+      uid, username, displayName: username, salt, pass, phone,
       avatar: String(body.avatar || '').slice(0, MAX_AVATAR),
       createdAt: now, favorites: [], saved: [], tier: 'member', migrated: false,
     };
     await kv.put('acct:u:' + uid, JSON.stringify(user));
     await kv.put('acct:n:' + lower, uid);
+    await kv.put('acct:p:' + phone, uid);
     const token = await issueToken(env, uid);
     return ok({ token, profile: publicProfile(user) }, origin);
   }
 
-  // ---- 登录 ----
+  // ---- 登录（mode: 'password' 密码登录 | 'code' 验证码登录）----
   if (action === 'login') {
-    const username = String(body.username || '').trim();
-    const password = String(body.password || '');
-    if (!username || !password) return bad(ERR.bad, origin, { hint: '请输入用户名和密码' });
-    const lower = normName(username);
-    let uid = await kv.get('acct:n:' + lower);
-    if (!uid && /^GC\d{6}-\d{3}$/i.test(username)) uid = username.toUpperCase();
-    if (!uid) return bad(ERR.noUser, origin, null, 404);
+    const mode = String(body.mode || 'password');
+    let uid = '';
+
+    if (mode === 'code') {
+      const phone = normPhone(body.phone);
+      const code = String(body.code || '').trim();
+      if (!phone) return bad('phone_invalid', origin, { hint: '请输入正确的 11 位手机号' });
+      const check = await consumeSmsCode(kv, phone, code);
+      if (!check.ok) return bad(check.error, origin, { hint: check.hint });
+      uid = (await kv.get('acct:p:' + phone)) || '';
+      if (!uid) return bad('phone_not_registered', origin, { hint: '该手机号还没有注册，请先注册' }, 404);
+    } else {
+      const account = String(body.username || body.phone || '').trim();
+      const password = String(body.password || '');
+      if (!account || !password) return bad(ERR.bad, origin, { hint: '请输入账号和密码' });
+      const lower = normName(account);
+      uid = (await kv.get('acct:n:' + lower)) || '';
+      if (!uid) {
+        const p = normPhone(account);
+        if (p) uid = (await kv.get('acct:p:' + p)) || '';
+      }
+      if (!uid && /^GC\d{6}-\d{3}$/i.test(account)) uid = account.toUpperCase();
+      if (!uid) return bad(ERR.noUser, origin, null, 404);
+      const rawPwd = await kv.get('acct:u:' + uid);
+      if (!rawPwd) return bad(ERR.noUser, origin, null, 404);
+      const u0 = JSON.parse(rawPwd);
+      const pass0 = await hashPassword(password, u0.salt);
+      if (pass0 !== u0.pass) return bad(ERR.badPass, origin, null, 401);
+    }
+
     const raw = await kv.get('acct:u:' + uid);
     if (!raw) return bad(ERR.noUser, origin, null, 404);
     const user = JSON.parse(raw);
-    const pass = await hashPassword(password, user.salt);
-    if (pass !== user.pass) return bad(ERR.badPass, origin, null, 401);
     user.lastLoginAt = new Date().toISOString();
     await kv.put('acct:u:' + user.uid, JSON.stringify(user));
     const token = await issueToken(env, user.uid);
@@ -243,6 +294,16 @@ export async function onRequest(context) {
       }
       user.username = nu;
       if (!body.displayName && !user.displayName) user.displayName = nu;
+    }
+    if (body.password !== undefined) {
+      const np = String(body.password || '');
+      if (np.length < 6) return bad('password_too_short', origin, { hint: '密码至少 6 位' });
+      if (body.oldPassword !== undefined) {
+        const oldHash = await hashPassword(String(body.oldPassword || ''), user.salt);
+        if (oldHash !== user.pass) return bad(ERR.badPass, origin, { hint: '原密码不正确' }, 401);
+      }
+      user.pass = await hashPassword(np, user.salt);
+      user.passUpdatedAt = new Date().toISOString();
     }
     if (body.avatar !== undefined) {
       const av = String(body.avatar || '');
