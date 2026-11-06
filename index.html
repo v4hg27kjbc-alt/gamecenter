@@ -6270,15 +6270,20 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
 #gcLogoIntro .gc-li-halo.d2{animation-delay:.6s;}
 #gcLogoIntro .gc-li-halo.d3{animation-delay:1.2s;}
 #gcLogoIntro .gc-li-stage{position:relative;display:flex;flex-direction:column;align-items:center;animation:gcLiSettle .5s 2.5s cubic-bezier(.4,0,.2,1) both;}
-#gcLogoIntro .gc-li-mark{position:relative;width:132px;height:132px;border-radius:30px;background:linear-gradient(145deg,#3b82f6,#1d4ed8 62%,#1e40af);box-shadow:0 18px 48px rgba(37,99,235,.5),inset 0 1px 0 rgba(255,255,255,.3),0 0 0 1px rgba(191,219,254,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:gcLiPop .78s .15s cubic-bezier(.18,1.5,.4,1) both;}
+#gcLogoIntro .gc-li-mark{position:relative;width:136px;height:136px;border-radius:32px;background:#fff;box-shadow:0 18px 52px rgba(37,99,235,.55),0 0 0 1px rgba(191,219,254,.4),0 0 42px rgba(96,165,250,.35);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:gcLiPop .78s .15s cubic-bezier(.18,1.5,.4,1) both;}
+#gcLogoIntro .gc-li-img{width:100%;height:100%;object-fit:cover;display:block;}
 #gcLogoIntro .gc-li-shine{position:absolute;top:-10%;left:-70%;width:48%;height:120%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-18deg);animation:gcLiShine 1.05s 1.55s ease-in-out both;}
-#gcLogoIntro .gc-li-mark svg{width:84px;height:84px;overflow:visible;}
-#gcLogoIntro .gc-li-mark .gc-plane-path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:260;stroke-dashoffset:260;animation:gcLiDraw 1.25s .3s ease forwards;}
-#gcLogoIntro .gc-li-mark .gc-trail{fill:none;stroke:#bfdbfe;stroke-width:3;stroke-linecap:round;stroke-dasharray:200;stroke-dashoffset:200;animation:gcLiDraw 1.05s .22s ease forwards;}
+
+
+
 #gcLogoIntro .gc-li-name{margin-top:24px;font-size:24px;font-weight:800;letter-spacing:3px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.4);animation:gcLiFadeUp .62s 1.3s ease both;}
 #gcLogoIntro .gc-li-sub{margin-top:9px;font-size:12px;letter-spacing:8px;color:#93c5fd;animation:gcLiSub .72s 1.65s cubic-bezier(.2,.9,.3,1) both;}
 #gcLogoIntro .gc-li-line{margin-top:20px;height:1px;width:0;background:linear-gradient(90deg,transparent,rgba(147,197,253,.85),transparent);animation:gcLiLine .55s 2s ease forwards;}
-#gcLogoIntro .gc-li-skip{position:absolute;right:22px;bottom:22px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.07);color:#e0e7ff;font-size:13px;cursor:pointer;transition:.2s;backdrop-filter:blur(6px);}
+#gcLogoIntro .gc-li-skipbar{position:absolute;right:22px;bottom:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+#gcLogoIntro .gc-li-hint{font-size:11px;letter-spacing:1px;color:rgba(226,232,240,.5);}
+#gcLogoIntro .gc-li-off{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(226,232,240,.75);cursor:pointer;user-select:none;}
+#gcLogoIntro .gc-li-off input{width:13px;height:13px;accent-color:#3b82f6;cursor:pointer;}
+#gcLogoIntro .gc-li-skip{padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.07);color:#e0e7ff;font-size:13px;cursor:pointer;transition:.2s;backdrop-filter:blur(6px);}
 #gcLogoIntro .gc-li-skip:hover{background:rgba(255,255,255,.18);transform:translateY(-1px);}
 @keyframes gcLiAura{0%{opacity:0;transform:scale(.55);}22%{opacity:1;transform:scale(1);}100%{opacity:.92;transform:scale(1.16);}}
 @keyframes gcLiHalo{0%{opacity:0;transform:scale(.5);}18%{opacity:.95;}100%{opacity:0;transform:scale(2.5);}}
@@ -6295,6 +6300,19 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
 @media (max-width:600px){#gcLogoIntro .gc-li-name{font-size:19px;}#gcLogoIntro .gc-li-mark{width:106px;height:106px;border-radius:24px;}#gcLogoIntro .gc-li-aura{width:420px;height:420px;}}
 </style>
 
+<script>
+(function () {
+  try {
+    if (localStorage.getItem('gc_logo_anim_off') === '1') {
+      var box = document.getElementById('gcLogoIntro');
+      if (box) { box.style.display = 'none'; box.setAttribute('data-gc-skip', '1'); }
+      window.__gcLogoIntroLoaded = true;
+      var app = document.querySelector('.app-container');
+      if (app) { app.classList.add('gc-pop'); setTimeout(function(){ app.classList.remove('gc-pop'); }, 900); }
+    }
+  } catch (e) {}
+})();
+</script>
 <div id="gcLogoIntro" role="dialog" aria-label="欢迎">
   <div class="gc-li-aura"></div>
   <div class="gc-li-halo"></div>
@@ -6302,17 +6320,18 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
   <div class="gc-li-halo d3"></div>
   <div class="gc-li-stage">
     <div class="gc-li-mark">
+      <img class="gc-li-img" src="data:image/webp;base64,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" alt="民航客机收藏馆">
       <div class="gc-li-shine"></div>
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <path class="gc-trail" d="M8 78 C 30 70, 42 62, 58 46"/>
-        <path class="gc-plane-path" d="M60 20 L88 14 L66 46 L78 76 L58 66 L44 84 L38 64 L14 58 L34 38 L60 20 Z"/>
-      </svg>
     </div>
     <div class="gc-li-name">民航客机收藏馆</div>
     <div class="gc-li-sub">HENRY AVIATION MUSEUM</div>
     <div class="gc-li-line"></div>
   </div>
-  <button class="gc-li-skip" id="gcLogoSkip">跳过动画</button>
+  <div class="gc-li-skipbar">
+    <span class="gc-li-hint">长按屏幕可跳过</span>
+    <button class="gc-li-skip" id="gcLogoSkip">跳过动画</button>
+    <label class="gc-li-off"><input type="checkbox" id="gcLogoOff"> 以后不再显示</label>
+  </div>
 </div>
 <script id="gcLogoIntroScript">
 (function () {
@@ -6338,6 +6357,17 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
   }
   var skipBtn = document.getElementById('gcLogoSkip');
   if (skipBtn) skipBtn.addEventListener('click', finish);
+  var offBox = document.getElementById('gcLogoOff');
+  if (offBox) offBox.addEventListener('change', function () {
+    try { localStorage.setItem('gc_logo_anim_off', offBox.checked ? '1' : '0'); } catch (e) {}
+  });
+  var pressTimer = null;
+  function pressStart() { pressTimer = setTimeout(finish, 620); }
+  function pressEnd() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
+  box.addEventListener('pointerdown', pressStart);
+  box.addEventListener('pointerup', pressEnd);
+  box.addEventListener('pointercancel', pressEnd);
+  box.addEventListener('pointerleave', pressEnd);
   setTimeout(finish, 3000);
   window.addEventListener('load', function () {
     if (!done && Date.now() - start >= 3000) finish();
@@ -6367,6 +6397,75 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
 })();
 </script>
 
+
+<div id="gcAcctMask" aria-hidden="true">
+  <div class="gc-acct-card" role="dialog" aria-modal="true" aria-labelledby="gcAcctTitle">
+    <button class="gc-acct-close" id="gcAcctClose" type="button" aria-label="关闭">&#10005;</button>
+    <div id="gcAcctAuth">
+      <h3 class="gc-acct-title" id="gcAcctTitle">登录 / 注册</h3>
+      <p class="gc-acct-sub">登录后可收藏机型、保存笔记、解锁深度飞行家特权。账号密码仅用于本站，不做任何第三方共享。</p>
+      <div class="gc-acct-tabs">
+        <button class="gc-acct-tab on" id="gcTabLogin" type="button">登录</button>
+        <button class="gc-acct-tab" id="gcTabRegister" type="button">注册</button>
+      </div>
+      <div class="gc-acct-field">
+        <label id="gcNameLabel">用户名 或 UID</label>
+        <input class="gc-acct-input" id="gcAcctName" autocomplete="username" placeholder="例如 henry 或 GC261106-001">
+      </div>
+      <div class="gc-acct-field">
+        <label>密码</label>
+        <input class="gc-acct-input" id="gcAcctPass" type="password" autocomplete="current-password" placeholder="至少 6 位">
+      </div>
+      <div class="gc-acct-field" id="gcAcctPass2Wrap" style="display:none">
+        <label>确认密码</label>
+        <input class="gc-acct-input" id="gcAcctPass2" type="password" autocomplete="new-password" placeholder="再输入一次">
+      </div>
+      <button class="gc-acct-btn-main" id="gcAcctSubmit" type="button">登录</button>
+      <div class="gc-acct-msg" id="gcAcctMsg"></div>
+      <p class="gc-acct-hint">注册即生成专属 UID（注册日期 + 序号，如 GC261106-001）。试运营期间所有功能免费。</p>
+    </div>
+    <div id="gcAcctProfile" style="display:none">
+      <div class="gc-pf-head">
+        <img class="gc-pf-avatar" id="gcPfAvatar" alt="头像" title="点击更换头像">
+        <div>
+          <div class="gc-pf-name" id="gcPfName">—</div>
+          <div class="gc-pf-uid" id="gcPfUid">UID —</div>
+          <span class="gc-pf-badge" id="gcPfBadge">试运营 · 免费解锁</span>
+        </div>
+      </div>
+      <div class="gc-avatar-grid" id="gcAvatarGrid"></div>
+      <div class="gc-pf-actions">
+        <button class="gc-pf-btn" id="gcPfUpload" type="button">上传自定义头像</button>
+        <button class="gc-pf-btn" id="gcPfRename" type="button">修改用户名</button>
+      </div>
+      <div class="gc-pf-sec">
+        <div class="gc-pf-sec-title">我的收藏 <span id="gcFavCount" style="color:#4338ca">0</span></div>
+        <div class="gc-pf-list" id="gcFavList"><span class="gc-pf-empty">还没有收藏，打开任意机型点右上角 ♥ 收藏</span></div>
+      </div>
+      <div class="gc-pf-sec">
+        <div class="gc-pf-sec-title">我的保存 <span id="gcSaveCount" style="color:#b45309">0</span></div>
+        <div class="gc-pf-list" id="gcSaveList"><span class="gc-pf-empty">还没有保存，打开任意机型点 ☆ 保存</span></div>
+      </div>
+      <div class="gc-pf-sec">
+        <div class="gc-priv">
+          <h4>深度飞行家 · 试运营免费解锁</h4>
+          <ul>
+            <li>全机型深度参数与历史沿革全文</li>
+            <li>收藏与保存云端同步，换设备不丢</li>
+            <li>专属 UID 身份，可参与内测与选题投票</li>
+          </ul>
+        </div>
+      </div>
+      <div class="gc-pf-actions">
+        <button class="gc-pf-btn primary" id="gcPfMigrate" type="button">一键迁移临时账户数据</button>
+      </div>
+      <div class="gc-pf-actions">
+        <button class="gc-pf-btn danger" id="gcPfLogout" type="button">退出登录</button>
+      </div>
+      <input type="file" id="gcAvatarFile" accept="image/*" style="display:none">
+    </div>
+  </div>
+</div>
 
 <!-- 访问控制层容器（服务端 /api/maintenance 控制） -->
 <div id="siteMaintenanceOverlay" aria-hidden="true">
@@ -6424,6 +6523,10 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
     <button class="theme-toggle-btn letter-btn" id="letterBtn" aria-label="一封信" title="一封信"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg> 一封信</button>
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
     <button class="theme-toggle-btn" id="gcAdminTrigger" aria-label="管理后台" title="管理后台"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 2.4L17 4l.6 2.6L20 9l-1 3 1 3-2.4 2.4L17 20l-2.6-.6L12 22l-2.4-2.4L7 20l-.6-2.6L4 15l1-3-1-3 2.4-2.4L7 4l2.6.6L12 2z"/><path d="M9 12l2 2 4-4"/></svg> 管理后台</button>
+    <button class="theme-toggle-btn gc-acct-btn" id="gcAcctBtn" aria-label="登录或个人中心" title="登录 / 个人中心">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="gc-acct-name" id="gcAcctBtnText">登录</span>
+    </button>
     
     <div class="theme-dropdown" id="themeDropdown">
       <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
@@ -20458,6 +20561,73 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 <!-- 今日执飞：html2canvas 长图导出（CDN 按需加载，不影响既有功能） -->
 <!-- html2canvas 改为空闲注入，导出时按需可用 -->
 
+<style id="gcAccountStyle">
+.gc-acct-btn{display:inline-flex;align-items:center;gap:6px;width:auto!important;padding:0 12px!important;border-radius:999px!important;}
+.gc-acct-btn .gc-acct-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.5);}
+.gc-acct-btn .gc-acct-name{font-size:12px;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#gcAcctMask{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;background:rgba(6,12,24,.62);backdrop-filter:blur(10px);padding:18px;}
+#gcAcctMask.on{display:flex;}
+.gc-acct-card{width:100%;max-width:430px;max-height:88vh;overflow:auto;background:rgba(255,255,255,.97);border-radius:22px;box-shadow:0 30px 70px rgba(2,8,23,.45),0 0 0 1px rgba(255,255,255,.5);padding:26px 24px 22px;color:#1f2937;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;position:relative;}
+.gc-acct-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(15,23,42,.06);color:#475569;font-size:17px;cursor:pointer;line-height:1;}
+.gc-acct-close:hover{background:rgba(15,23,42,.12);}
+.gc-acct-title{font-size:19px;font-weight:700;margin:0 0 4px;letter-spacing:.3px;}
+.gc-acct-sub{font-size:12.5px;color:#64748b;margin:0 0 18px;line-height:1.6;}
+.gc-acct-tabs{display:flex;gap:6px;background:rgba(15,23,42,.05);border-radius:12px;padding:4px;margin-bottom:16px;}
+.gc-acct-tab{flex:1;padding:9px 0;border:none;background:transparent;border-radius:9px;font-size:13.5px;color:#475569;cursor:pointer;font-weight:600;transition:.18s;}
+.gc-acct-tab.on{background:#fff;color:#2b4ecc;box-shadow:0 2px 8px rgba(15,23,42,.12);}
+.gc-acct-field{margin-bottom:12px;}
+.gc-acct-field label{display:block;font-size:12.5px;color:#475569;margin-bottom:6px;font-weight:600;}
+.gc-acct-input{width:100%;padding:11px 13px;border-radius:11px;border:1px solid rgba(15,23,42,.14);font-size:14px;background:#fff;outline:none;transition:.18s;color:#0f172a;}
+.gc-acct-input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.16);}
+.gc-acct-btn-main{width:100%;padding:12px 0;border:none;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;letter-spacing:.4px;transition:.2s;margin-top:6px;}
+.gc-acct-btn-main:hover{filter:brightness(1.07);transform:translateY(-1px);}
+.gc-acct-btn-main:active{transform:translateY(1px);}
+.gc-acct-btn-main[disabled]{opacity:.6;cursor:default;transform:none;}
+.gc-acct-msg{font-size:12.5px;margin-top:10px;min-height:17px;color:#dc2626;}
+.gc-acct-msg.ok{color:#059669;}
+.gc-acct-hint{font-size:11.5px;color:#94a3b8;margin-top:14px;line-height:1.7;}
+.gc-pf-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.gc-pf-avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#667eea,#764ba2);border:2px solid #fff;box-shadow:0 6px 18px rgba(102,126,234,.35);cursor:pointer;}
+.gc-pf-name{font-size:16.5px;font-weight:700;}
+.gc-pf-uid{font-size:12px;color:#64748b;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:3px;letter-spacing:.6px;}
+.gc-pf-badge{display:inline-block;margin-top:6px;font-size:11px;padding:2px 9px;border-radius:999px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;font-weight:700;}
+.gc-pf-sec{border-top:1px solid rgba(15,23,42,.08);padding-top:14px;margin-top:14px;}
+.gc-pf-sec-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.gc-pf-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.gc-pf-stat{background:rgba(102,126,234,.07);border-radius:13px;padding:12px;text-align:center;}
+.gc-pf-stat b{display:block;font-size:19px;color:#4338ca;}
+.gc-pf-stat span{font-size:11.5px;color:#64748b;}
+.gc-pf-list{display:flex;flex-wrap:wrap;gap:8px;}
+.gc-pf-chip{font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(15,23,42,.05);color:#334155;display:inline-flex;gap:6px;align-items:center;}
+.gc-pf-chip button{border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:13px;padding:0;line-height:1;}
+.gc-pf-chip button:hover{color:#dc2626;}
+.gc-pf-empty{font-size:12.5px;color:#94a3b8;}
+.gc-avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-top:10px;}
+.gc-avatar-opt{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:.16s;background:#eef2ff;}
+.gc-avatar-opt:hover{transform:scale(1.06);}
+.gc-avatar-opt.on{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.2);}
+.gc-pf-actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap;}
+.gc-pf-btn{flex:1;min-width:110px;padding:10px 0;border-radius:11px;border:1px solid rgba(15,23,42,.14);background:#fff;font-size:13px;font-weight:600;color:#334155;cursor:pointer;transition:.18s;}
+.gc-pf-btn:hover{border-color:#667eea;color:#4338ca;background:rgba(102,126,234,.06);}
+.gc-pf-btn.danger:hover{border-color:#dc2626;color:#dc2626;background:rgba(220,38,38,.06);}
+.gc-pf-btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;}
+.gc-pf-btn.primary:hover{filter:brightness(1.07);color:#fff;}
+.gc-priv{background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.08));border:1px solid rgba(102,126,234,.22);border-radius:14px;padding:13px 14px;}
+.gc-priv h4{margin:0 0 7px;font-size:13px;color:#3730a3;}
+.gc-priv ul{margin:0;padding-left:16px;font-size:12.3px;color:#475569;line-height:1.85;}
+.gc-fav-bar{position:absolute;right:52px;top:12px;display:flex;gap:7px;z-index:5;}
+.gc-fav-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.42);background:rgba(10,18,32,.42);backdrop-filter:blur(8px);color:#fff;font-size:12px;cursor:pointer;transition:.18s;}
+.gc-fav-btn:hover{background:rgba(10,18,32,.62);transform:translateY(-1px);}
+.gc-fav-btn.on{background:rgba(244,63,94,.85);border-color:rgba(255,255,255,.6);}
+.gc-fav-btn.save.on{background:rgba(245,158,11,.9);}
+@media (max-width:520px){
+ .gc-acct-card{padding:22px 17px 18px;border-radius:18px;}
+ .gc-fav-bar{right:46px;top:10px;}
+ .gc-fav-btn span{display:none;}
+}
+@media (prefers-reduced-motion:reduce){.gc-acct-card *{transition:none!important;animation:none!important;}}
+</style>
+
 <style id="gcAdminStyle">
 #gcAdminPanel{position:fixed;inset:0;z-index:99999;display:none;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#1f2937;}
 #gcAdminPanel.open{display:block;}
@@ -21293,6 +21463,421 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   }
   window.addEventListener('hashchange', checkHash);
   checkHash();
+})();
+</script>
+
+<script id="gcAccountScript">
+(function () {
+  'use strict';
+  var API = '/api/account';
+  var TK = 'gc_acct_token';
+  var st = { token: null, profile: null, mode: 'login' };
+
+  function $(id) { return document.getElementById(id); }
+  function ls(k, v) {
+    try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; }
+  }
+  function jget(k) { try { return JSON.parse(localStorage.getItem(k) || '[]') || []; } catch (e) { return []; } }
+  function jset(k, v) { try { localStorage.setItem(k, JSON.stringify(v || [])); } catch (e) {} }
+
+  function label(a) {
+    if (!a) return '';
+    try { if (typeof window.t === 'function') return window.t(a.name); } catch (e) {}
+    return typeof a.name === 'string' ? a.name : ((a.name && (a.name.zh || a.name.en)) || a.id);
+  }
+  function findAircraft(id) {
+    try { if (window.aircrafts && window.aircrafts.length) return window.aircrafts.find(function (x) { return x.id === id; }); } catch (e) {}
+    return null;
+  }
+
+  function presetAvatars() {
+    var out = [];
+    var themes = [
+      ['#3b82f6', '#1d4ed8', 'M2 12h20M12 2l7 10-7 10-7-10z'],
+      ['#667eea', '#764ba2', 'M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20.1l1.4-6.3L3 9.5l6.4-.6z'],
+      ['#0ea5e9', '#0369a1', 'M4 15c3-4 5-6 8-6s5 2 8 6M7 19c2-2.5 3.3-3.8 5-3.8s3 1.3 5 3.8'],
+      ['#f59e0b', '#b45309', 'M12 3a9 9 0 100 18 9 9 0 000-18zm0 4.5l4.5 8h-9z'],
+      ['#10b981', '#047857', 'M3 12l9-8 9 8v8a2 2 0 01-2 2H5a2 2 0 01-2-2z'],
+      ['#ec4899', '#9d174d', 'M12 21s-7-4.6-7-9.6A3.9 3.9 0 0112 8a3.9 3.9 0 017 3.4C19 16.4 12 21 12 21z']
+    ];
+    themes.forEach(function (tt) {
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="96" height="96">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" stop-color="' + tt[0] + '"/><stop offset="1" stop-color="' + tt[1] + '"/></linearGradient></defs>' +
+        '<rect width="24" height="24" fill="url(#g)"/>' +
+        '<path d="' + tt[2] + '" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>' +
+        '</svg>';
+      out.push('data:image/svg+xml,' + encodeURIComponent(svg));
+    });
+    return out;
+  }
+  var PRESETS = presetAvatars();
+
+  function api(action, extra) {
+    var payload = Object.assign({ action: action }, extra || {});
+    if (st.token && !payload.token) payload.token = st.token;
+    return fetch(API, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json().catch(function () { return { ok: false, error: 'bad_response' }; }); });
+  }
+
+  var MSG = {
+    username_taken: '这个用户名已被占用，换一个试试',
+    user_not_found: '账号不存在，请先注册',
+    bad_password: '密码不正确',
+    username_invalid: '用户名需 2-16 位，中文/字母/数字/下划线',
+    password_too_short: '密码至少 6 位',
+    display_name_invalid: '昵称 1-16 个字符',
+    avatar_too_large: '头像文件太大，换一张小一点的',
+    KV_UNAVAILABLE: '服务端存储未就绪，稍后再试',
+    unauthorized: '登录状态已失效，请重新登录',
+    list_full: '列表已满（上限 300 条）'
+  };
+  function msgOf(code) { return MSG[code] || ('操作失败：' + (code || '未知错误')); }
+
+  function setMsg(text, ok) {
+    var el = $('gcAcctMsg');
+    if (!el) return;
+    el.textContent = text || '';
+    el.className = 'gc-acct-msg' + (ok ? ' ok' : '');
+  }
+
+  function openMask(view) {
+    var mask = $('gcAcctMask');
+    if (!mask) return;
+    mask.classList.add('on');
+    mask.setAttribute('aria-hidden', 'false');
+    if (view === 'profile' && st.profile) { $('gcAcctAuth').style.display = 'none'; $('gcAcctProfile').style.display = 'block'; renderProfile(); }
+    else { $('gcAcctAuth').style.display = 'block'; $('gcAcctProfile').style.display = 'none'; setMsg(sessionStorage.getItem('gc_acct_bad') || ''); sessionStorage.removeItem('gc_acct_bad'); }
+  }
+  function closeMask() {
+    var mask = $('gcAcctMask');
+    if (!mask) return;
+    mask.classList.remove('on');
+    mask.setAttribute('aria-hidden', 'true');
+    setMsg('');
+  }
+
+  function setMode(mode) {
+    st.mode = mode === 'register' ? 'register' : 'login';
+    var isReg = st.mode === 'register';
+    $('gcTabLogin').classList.toggle('on', !isReg);
+    $('gcTabRegister').classList.toggle('on', isReg);
+    $('gcAcctPass2Wrap').style.display = isReg ? 'block' : 'none';
+    $('gcAcctSubmit').textContent = isReg ? '注册并登录' : '登录';
+    $('gcNameLabel').textContent = isReg ? '用户名（可中文，2-16 位）' : '用户名 或 UID';
+    $('gcAcctName').placeholder = isReg ? '给自己起个名字' : '例如 henry 或 GC261106-001';
+    $('gcAcctPass').setAttribute('autocomplete', isReg ? 'new-password' : 'current-password');
+    setMsg('');
+  }
+
+  function submitAuth() {
+    var name = ($('gcAcctName').value || '').trim();
+    var pass = $('gcAcctPass').value || '';
+    var btn = $('gcAcctSubmit');
+    if (!name || !pass) { setMsg('请填写完整的用户名和密码'); return; }
+    if (st.mode === 'register') {
+      var p2 = $('gcAcctPass2').value || '';
+      if (pass.length < 6) { setMsg('密码至少 6 位'); return; }
+      if (pass !== p2) { setMsg('两次输入的密码不一致'); return; }
+    }
+    btn.disabled = true;
+    btn.textContent = st.mode === 'register' ? '注册中…' : '登录中…';
+    api(st.mode, { username: name, password: pass }).then(function (res) {
+      btn.disabled = false;
+      btn.textContent = st.mode === 'register' ? '注册并登录' : '登录';
+      if (!res || !res.ok) { setMsg(msgOf(res && res.error) + (res && res.hint ? '（' + res.hint + '）' : '')); return; }
+      st.token = res.token;
+      st.profile = res.profile;
+      ls(TK, res.token);
+      applyProfile();
+      openMask('profile');
+      var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
+      if (pending > 0) setMsg('检测到 ' + pending + ' 条临时数据，点下方「一键迁移临时账户数据」并入本账号', true);
+    }).catch(function () {
+      btn.disabled = false;
+      btn.textContent = st.mode === 'register' ? '注册并登录' : '登录';
+      setMsg('网络异常，请稍后重试');
+    });
+  }
+
+  function applyProfile() {
+    var p = st.profile;
+    var btn = $('gcAcctBtn'), txt = $('gcAcctBtnText');
+    if (!btn) return;
+    if (p) {
+      txt.textContent = p.displayName || p.username;
+      var old = btn.querySelector('.gc-acct-avatar');
+      if (old) old.remove();
+      var img = document.createElement('img');
+      img.className = 'gc-acct-avatar';
+      img.alt = '';
+      img.src = p.avatar || PRESETS[0];
+      var svg = btn.querySelector('svg');
+      if (svg) svg.style.display = 'none';
+      btn.insertBefore(img, btn.firstChild);
+    } else {
+      txt.textContent = '登录';
+      var av = btn.querySelector('.gc-acct-avatar');
+      if (av) av.remove();
+      var sv2 = btn.querySelector('svg');
+      if (sv2) sv2.style.display = '';
+    }
+  }
+
+  function renderProfile() {
+    var p = st.profile;
+    if (!p) return;
+    $('gcPfAvatar').src = p.avatar || PRESETS[0];
+    $('gcPfName').textContent = p.displayName || p.username;
+    $('gcPfUid').textContent = 'UID ' + p.uid;
+    $('gcPfBadge').textContent = p.migrated ? '已迁移 · 试运营免费' : '试运营 · 免费解锁';
+
+    var grid = $('gcAvatarGrid');
+    if (grid && !grid.dataset.built) {
+      PRESETS.forEach(function (src, i) {
+        var im = document.createElement('img');
+        im.className = 'gc-avatar-opt';
+        im.src = src;
+        im.alt = '预设头像' + (i + 1);
+        im.addEventListener('click', function () { saveAvatar(src); });
+        grid.appendChild(im);
+      });
+      grid.dataset.built = '1';
+    }
+    if (grid) {
+      Array.prototype.forEach.call(grid.children, function (el) { el.classList.toggle('on', el.src === (p.avatar || PRESETS[0])); });
+    }
+
+    renderList('gcFavList', 'gcFavCount', p.favorites, 'favorites');
+    renderList('gcSaveList', 'gcSaveCount', p.saved, 'saved');
+
+    var mig = $('gcPfMigrate');
+    var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
+    if (mig) mig.style.display = (p.migrated && pending === 0) ? 'none' : '';
+  }
+
+  function renderList(listId, countId, ids, kind) {
+    var box = $(listId);
+    if (!box) return;
+    ids = ids || [];
+    var c = $(countId);
+    if (c) c.textContent = ids.length;
+    if (!ids.length) {
+      box.innerHTML = '<span class="gc-pf-empty">' + (kind === 'favorites' ? '还没有收藏，打开任意机型点右上角 ♥ 收藏' : '还没有保存，打开任意机型点 ☆ 保存') + '</span>';
+      return;
+    }
+    box.innerHTML = '';
+    ids.forEach(function (id) {
+      var a = findAircraft(id);
+      var chip = document.createElement('span');
+      chip.className = 'gc-pf-chip';
+      chip.innerHTML = '<span>' + (label(a) || id) + '</span>';
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = '✕';
+      del.title = '移除';
+      del.addEventListener('click', function () { toggleFav(id, kind === 'favorites' ? 'fav' : 'save', true); });
+      chip.appendChild(del);
+      chip.style.cursor = 'pointer';
+      chip.addEventListener('click', function (e) {
+        if (e.target === del) return;
+        closeMask();
+        if (typeof window.openDetail === 'function') window.openDetail(id);
+      });
+      box.appendChild(chip);
+    });
+  }
+
+  function saveAvatar(src) {
+    api('update', { avatar: src }).then(function (res) {
+      if (res && res.ok) { st.profile = res.profile; applyProfile(); renderProfile(); setMsg('头像已更新', true); }
+      else setMsg(msgOf(res && res.error));
+    });
+  }
+
+  function compressImage(file, cb) {
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var size = 96;
+        var cv = document.createElement('canvas');
+        cv.width = size; cv.height = size;
+        var ctx = cv.getContext('2d');
+        var s = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+        cb(cv.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = function () { cb(null); };
+      img.src = fr.result;
+    };
+    fr.onerror = function () { cb(null); };
+    fr.readAsDataURL(file);
+  }
+
+  function toggleFav(id, kind, forceRemove) {
+    if (!id) return;
+    var key = kind === 'save' ? 'saved' : 'favorites';
+    if (!st.token) {
+      var lk = kind === 'save' ? 'gc_temp_saved' : 'gc_temp_favs';
+      var arr = jget(lk);
+      var i = arr.indexOf(id);
+      if (i >= 0) arr.splice(i, 1); else arr.push(id);
+      jset(lk, arr);
+      toast(i >= 0 ? '已从临时保存移除（登录后可迁移）' : '已暂存本地，登录后可一键迁移');
+      return;
+    }
+    var op = forceRemove ? 'remove' : 'toggle';
+    api('favorite', { aircraftId: id, kind: kind === 'save' ? 'save' : 'fav', op: op }).then(function (res) {
+      if (res && res.ok) {
+        st.profile = res.profile;
+        var has = (res.profile[key] || []).indexOf(id) >= 0;
+        toast(has ? (kind === 'save' ? '已保存' : '已收藏') : '已移除');
+        renderProfile();
+        syncFavButtons(id);
+      } else toast(msgOf(res && res.error));
+    });
+  }
+
+  function toast(text) {
+    var el = document.getElementById('gcToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'gcToast';
+      el.style.cssText = 'position:fixed;left:50%;bottom:42px;transform:translateX(-50%) translateY(12px);background:rgba(15,23,42,.92);color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;z-index:2147483600;opacity:0;transition:.26s;pointer-events:none;font-family:-apple-system,"PingFang SC",sans-serif;';
+      document.body.appendChild(el);
+    }
+    el.textContent = text;
+    requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%) translateY(0)'; });
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(12px)'; }, 1900);
+  }
+
+  function currentDetailId() {
+    try {
+      var h = (location.hash || '').replace('#', '');
+      if (h && window.aircrafts) {
+        var a = window.aircrafts.find(function (x) { return x.slug === h || x.id === h; });
+        if (a) return a.id;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function injectFavBar(modal, id) {
+    if (!modal || !id || modal.querySelector('.gc-fav-bar')) return;
+    var bar = document.createElement('div');
+    bar.className = 'gc-fav-bar';
+    var fav = document.createElement('button');
+    fav.type = 'button';
+    fav.className = 'gc-fav-btn';
+    fav.innerHTML = '&#9829;<span>收藏</span>';
+    var sav = document.createElement('button');
+    sav.type = 'button';
+    sav.className = 'gc-fav-btn save';
+    sav.innerHTML = '&#9734;<span>保存</span>';
+    fav.addEventListener('click', function (e) { e.stopPropagation(); toggleFav(id, 'fav'); });
+    sav.addEventListener('click', function (e) { e.stopPropagation(); toggleFav(id, 'save'); });
+    bar.appendChild(fav); bar.appendChild(sav);
+    modal.appendChild(bar);
+    syncFavButtons(id);
+  }
+
+  function syncFavButtons(id) {
+    var modals = document.querySelectorAll('.detail-modal');
+    if (!modals.length) return;
+    var p = st.profile;
+    var favs = p ? (p.favorites || []) : jget('gc_temp_favs');
+    var saves = p ? (p.saved || []) : jget('gc_temp_saved');
+    var idv = id || currentDetailId();
+    Array.prototype.forEach.call(modals, function (m) {
+      var f = m.querySelector('.gc-fav-btn'), sv = m.querySelector('.gc-fav-btn.save');
+      if (f) f.classList.toggle('on', favs.indexOf(idv) >= 0);
+      if (sv) sv.classList.toggle('on', saves.indexOf(idv) >= 0);
+    });
+  }
+
+  var mo = new MutationObserver(function () {
+    var modals = document.querySelectorAll('.detail-modal');
+    if (!modals.length) return;
+    var id = currentDetailId();
+    Array.prototype.forEach.call(modals, function (m) { if (id) injectFavBar(m, id); });
+  });
+  mo.observe(document.body, { childList: true, subtree: true });
+
+  // 绑定事件
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = $('gcAcctBtn');
+    if (btn) btn.addEventListener('click', function () { openMask(st.profile ? 'profile' : 'auth'); });
+    if ($('gcAcctClose')) $('gcAcctClose').addEventListener('click', closeMask);
+    if ($('gcAcctMask')) $('gcAcctMask').addEventListener('click', function (e) { if (e.target.id === 'gcAcctMask') closeMask(); });
+    if ($('gcTabLogin')) $('gcTabLogin').addEventListener('click', function () { setMode('login'); });
+    if ($('gcTabRegister')) $('gcTabRegister').addEventListener('click', function () { setMode('register'); });
+    if ($('gcAcctSubmit')) $('gcAcctSubmit').addEventListener('click', submitAuth);
+    if ($('gcAcctPass2')) $('gcAcctPass2').addEventListener('keydown', function (e) { if (e.key === 'Enter') submitAuth(); });
+    if ($('gcAcctPass')) $('gcAcctPass').addEventListener('keydown', function (e) { if (e.key === 'Enter') { if (st.mode === 'register') $('gcAcctPass2').focus(); else submitAuth(); } });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMask(); });
+
+    if ($('gcPfUpload')) $('gcPfUpload').addEventListener('click', function () { $('gcAvatarFile').click(); });
+    if ($('gcAvatarFile')) $('gcAvatarFile').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) return;
+      compressImage(f, function (data) {
+        if (!data) { setMsg('图片读取失败，换一张试试'); return; }
+        saveAvatar(data);
+      });
+      e.target.value = '';
+    });
+    if ($('gcPfRename')) $('gcPfRename').addEventListener('click', function () {
+      var cur = st.profile ? (st.profile.displayName || st.profile.username) : '';
+      var nv = window.prompt('新的用户名（2-16 位，中文/字母/数字/下划线）', cur);
+      if (nv === null) return;
+      nv = nv.trim();
+      if (!nv) return;
+      api('update', { username: nv, displayName: nv }).then(function (res) {
+        if (res && res.ok) { st.profile = res.profile; applyProfile(); renderProfile(); setMsg('用户名已更新', true); }
+        else setMsg(msgOf(res && res.error));
+      });
+    });
+    if ($('gcPfLogout')) $('gcPfLogout').addEventListener('click', function () {
+      api('logout', {}).finally(function () {
+        st.token = null; st.profile = null;
+        try { localStorage.removeItem(TK); } catch (e) {}
+        applyProfile(); closeMask(); toast('已退出登录');
+      });
+    });
+    if ($('gcPfMigrate')) $('gcPfMigrate').addEventListener('click', function () {
+      var ef = jget('gc_temp_favs'), es = jget('gc_temp_saved');
+      if (!ef.length && !es.length && st.profile && st.profile.migrated) { toast('没有需要迁移的数据'); return; }
+      api('migrate', { favorites: ef, saved: es }).then(function (res) {
+        if (res && res.ok) {
+          st.profile = res.profile;
+          jset('gc_temp_favs', []); jset('gc_temp_saved', []);
+          renderProfile();
+          var d = res.migrated || {};
+          setMsg('迁移完成：新增收藏 ' + (d.favorites || 0) + ' 条、保存 ' + (d.saved || 0) + ' 条', true);
+          toast('临时账户数据已并入本账号');
+          var mig = $('gcPfMigrate');
+          if (mig) mig.style.display = 'none';
+        } else setMsg(msgOf(res && res.error));
+      });
+    });
+
+    // 恢复登录态
+    var tk = ls(TK);
+    if (tk) {
+      st.token = tk;
+      api('profile', { token: tk }).then(function (res) {
+        if (res && res.ok) { st.profile = res.profile; applyProfile(); }
+        else { st.token = null; try { localStorage.removeItem(TK); } catch (e) {} applyProfile(); }
+      }).catch(function () {});
+    } else applyProfile();
+  });
+
+  window.gcAccount = { open: openMask, state: st };
 })();
 </script>
 
