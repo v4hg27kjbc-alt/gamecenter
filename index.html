@@ -42,7 +42,7 @@
 <link rel="canonical" href="https://henry126923.pages.dev/">
 
 <!-- Umami Cloud 网站统计 -->
-<script defer src="https://cloud.umami.is/script.js" data-website-id="1b107f5a-12d4-4db7-a8bd-c1d9cd2ecbb7"></script>
+<!-- umami 统计改为空闲注入，避免第三方阻塞首屏 -->
 
 <!-- P1: JSON-LD Structured Data -->
 <script type="application/ld+json">
@@ -641,67 +641,7 @@ body.theme-minimal {
       thick 22 / chrome 40px），保证与阶段①收敛结果视觉一致；
    —— 新增的 d/e/f/g 四要素默认只在 .glass-material 上生效（opt-in）。
    —— 启用：① 元素级 —— class="glass-material gm-l2"；
-            ② 全站级 —— 给 <body>
-<style id="gcLogoIntroStyle">
-#gcLogoIntro{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#0b1220 0%,#14213d 55%,#1d4ed8 130%);overflow:hidden;transition:opacity .5s ease;}
-#gcLogoIntro.gc-done{opacity:0;pointer-events:none;}
-#gcLogoIntro .gc-li-mark{position:relative;width:132px;height:132px;border-radius:28px;background:linear-gradient(145deg,#3b82f6,#1d4ed8);box-shadow:0 18px 44px rgba(37,99,235,.45),inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;animation:gcLiPop .7s cubic-bezier(.2,1.4,.4,1) both;}
-#gcLogoIntro .gc-li-mark svg{width:84px;height:84px;overflow:visible;}
-#gcLogoIntro .gc-li-mark .gc-plane-path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:260;stroke-dashoffset:260;animation:gcLiDraw 1.15s .12s ease forwards;}
-#gcLogoIntro .gc-li-mark .gc-trail{fill:none;stroke:#bfdbfe;stroke-width:3;stroke-linecap:round;stroke-dasharray:200;stroke-dashoffset:200;animation:gcLiDraw 1.15s .05s ease forwards;}
-#gcLogoIntro .gc-li-name{margin-top:22px;font-size:24px;font-weight:800;letter-spacing:2px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.35);animation:gcLiFadeUp .6s .5s ease both;}
-#gcLogoIntro .gc-li-sub{margin-top:8px;font-size:13px;letter-spacing:3px;color:#93c5fd;animation:gcLiFadeUp .6s .7s ease both;}
-#gcLogoIntro .gc-li-skip{position:absolute;right:20px;bottom:20px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#e0e7ff;font-size:13px;cursor:pointer;transition:.2s;}
-#gcLogoIntro .gc-li-skip:hover{background:rgba(255,255,255,.2);}
-@keyframes gcLiPop{0%{transform:scale(.5);opacity:0;}100%{transform:scale(1);opacity:1;}}
-@keyframes gcLiFadeUp{0%{transform:translateY(14px);opacity:0;}100%{transform:translateY(0);opacity:1;}}
-@keyframes gcLiDraw{to{stroke-dashoffset:0;}}
-@media (max-width:600px){#gcLogoIntro .gc-li-name{font-size:19px;}#gcLogoIntro .gc-li-mark{width:104px;height:104px;border-radius:22px;}}
-</style>
-
-<div id="gcLogoIntro" role="dialog" aria-label="欢迎">
-  <div class="gc-li-mark">
-    <svg viewBox="0 0 96 96" aria-hidden="true">
-      <path class="gc-trail" d="M8 78 C 30 70, 42 62, 58 46"/>
-      <path class="gc-plane-path" d="M60 20 L88 14 L66 46 L78 76 L58 66 L44 84 L38 64 L14 58 L34 38 L60 20 Z"/>
-    </svg>
-  </div>
-  <div class="gc-li-name">民航客机收藏馆</div>
-  <div class="gc-li-sub">HENRY AVIATION MUSEUM</div>
-  <button class="gc-li-skip" id="gcLogoSkip">跳过动画</button>
-</div>
-<script id="gcLogoIntroScript">
-(function () {
-  'use strict';
-  if (window.__gcLogoIntroLoaded) return;
-  window.__gcLogoIntroLoaded = true;
-  var box = document.getElementById('gcLogoIntro');
-  if (!box) return;
-  var done = false;
-  function finish() {
-    if (done) return;
-    done = true;
-    box.classList.add('gc-done');
-    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 550);
-  }
-  var skipBtn = document.getElementById('gcLogoSkip');
-  if (skipBtn) skipBtn.addEventListener('click', finish);
-  function tryFinishWhenReady() {
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      finish();
-    } else {
-      setTimeout(tryFinishWhenReady, 150);
-    }
-  }
-  setTimeout(tryFinishWhenReady, 3100);
-  document.addEventListener('DOMContentLoaded', function () {
-    if (Date.now() - window.__gcLogoIntroStart >= 3100) finish();
-  });
-  window.__gcLogoIntroStart = Date.now();
-})();
-</script>
-
- 加 class="mat-on" 后按映射表逐组件挂类。
+            ② 全站级 —— 给 <body> 加 class="mat-on" 后按映射表逐组件挂类。
    ===================================================================== */
 :root {
   /* ---- 四档材质变量（a 模糊沿用阶段①标定，b/c/d/e/f/g 为阶段③新增） ---- */
@@ -4513,8 +4453,10 @@ body.light-mode .map-container .leaflet-tile-pane {
   box-shadow: 0 0 18px var(--c-blue-100-a400) !important;
   transform: translateY(-2px);
 }
+.livery-overlay.visible { display: flex; }
 .livery-overlay {
   position: fixed; inset: 0; z-index: 10040;
+  display: none; align-items: center; justify-content: center;
   background: rgba(4,8,18,0.82);
   backdrop-filter: var(--glass-blur-regular);
   -webkit-backdrop-filter: var(--glass-blur-regular);
@@ -5799,7 +5741,7 @@ body.light-mode .rec-ask-aircraft { background: var(--c-sky-300-a080); color: va
 
 </style>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" media="print" onload="this.media='all'"/>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <style id="dlg-system">
@@ -6320,6 +6262,111 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
 </style>
 </head>
 <body class="mat-on" data-version="20261001-v70">
+<style id="gcLogoIntroStyle">
+#gcLogoIntro{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 44%,#1e3a8a 0%,#101c38 44%,#05080f 100%);overflow:hidden;transition:opacity .5s ease,transform .62s cubic-bezier(.34,1.4,.64,1),filter .5s ease;}
+#gcLogoIntro.gc-exit{opacity:0;transform:scale(1.2);filter:blur(3px);}
+#gcLogoIntro .gc-li-aura{position:absolute;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,rgba(96,165,250,.5) 0%,rgba(37,99,235,.22) 36%,rgba(37,99,235,0) 68%);filter:blur(9px);pointer-events:none;animation:gcLiAura 3s ease-in-out both;}
+#gcLogoIntro .gc-li-halo{position:absolute;width:210px;height:210px;border-radius:50%;border:1px solid rgba(147,197,253,.5);pointer-events:none;animation:gcLiHalo 2.1s cubic-bezier(.2,.6,.2,1) both;}
+#gcLogoIntro .gc-li-halo.d2{animation-delay:.6s;}
+#gcLogoIntro .gc-li-halo.d3{animation-delay:1.2s;}
+#gcLogoIntro .gc-li-stage{position:relative;display:flex;flex-direction:column;align-items:center;animation:gcLiSettle .5s 2.5s cubic-bezier(.4,0,.2,1) both;}
+#gcLogoIntro .gc-li-mark{position:relative;width:132px;height:132px;border-radius:30px;background:linear-gradient(145deg,#3b82f6,#1d4ed8 62%,#1e40af);box-shadow:0 18px 48px rgba(37,99,235,.5),inset 0 1px 0 rgba(255,255,255,.3),0 0 0 1px rgba(191,219,254,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:gcLiPop .78s .15s cubic-bezier(.18,1.5,.4,1) both;}
+#gcLogoIntro .gc-li-shine{position:absolute;top:-10%;left:-70%;width:48%;height:120%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-18deg);animation:gcLiShine 1.05s 1.55s ease-in-out both;}
+#gcLogoIntro .gc-li-mark svg{width:84px;height:84px;overflow:visible;}
+#gcLogoIntro .gc-li-mark .gc-plane-path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:260;stroke-dashoffset:260;animation:gcLiDraw 1.25s .3s ease forwards;}
+#gcLogoIntro .gc-li-mark .gc-trail{fill:none;stroke:#bfdbfe;stroke-width:3;stroke-linecap:round;stroke-dasharray:200;stroke-dashoffset:200;animation:gcLiDraw 1.05s .22s ease forwards;}
+#gcLogoIntro .gc-li-name{margin-top:24px;font-size:24px;font-weight:800;letter-spacing:3px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.4);animation:gcLiFadeUp .62s 1.3s ease both;}
+#gcLogoIntro .gc-li-sub{margin-top:9px;font-size:12px;letter-spacing:8px;color:#93c5fd;animation:gcLiSub .72s 1.65s cubic-bezier(.2,.9,.3,1) both;}
+#gcLogoIntro .gc-li-line{margin-top:20px;height:1px;width:0;background:linear-gradient(90deg,transparent,rgba(147,197,253,.85),transparent);animation:gcLiLine .55s 2s ease forwards;}
+#gcLogoIntro .gc-li-skip{position:absolute;right:22px;bottom:22px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.07);color:#e0e7ff;font-size:13px;cursor:pointer;transition:.2s;backdrop-filter:blur(6px);}
+#gcLogoIntro .gc-li-skip:hover{background:rgba(255,255,255,.18);transform:translateY(-1px);}
+@keyframes gcLiAura{0%{opacity:0;transform:scale(.55);}22%{opacity:1;transform:scale(1);}100%{opacity:.92;transform:scale(1.16);}}
+@keyframes gcLiHalo{0%{opacity:0;transform:scale(.5);}18%{opacity:.95;}100%{opacity:0;transform:scale(2.5);}}
+@keyframes gcLiPop{0%{opacity:0;transform:scale(.34) rotate(-11deg);}60%{opacity:1;transform:scale(1.07) rotate(2deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+@keyframes gcLiShine{0%{left:-70%;}100%{left:125%;}}
+@keyframes gcLiDraw{to{stroke-dashoffset:0;}}
+@keyframes gcLiFadeUp{0%{opacity:0;transform:translateY(16px);}100%{opacity:1;transform:translateY(0);}}
+@keyframes gcLiSub{0%{opacity:0;letter-spacing:8px;transform:translateY(6px);}100%{opacity:1;letter-spacing:3px;transform:translateY(0);}}
+@keyframes gcLiLine{to{width:72px;}}
+@keyframes gcLiSettle{0%{transform:translateY(0) scale(1);}100%{transform:translateY(-8px) scale(1.035);}}
+@keyframes gcPagePop{0%{opacity:0;transform:scale(.93);}55%{opacity:1;}100%{opacity:1;transform:scale(1);}}
+body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1) both;}
+@media (prefers-reduced-motion:reduce){#gcLogoIntro *{animation-duration:.01s!important;animation-delay:0s!important;}body.gc-pop > .app-container{animation:none;}}
+@media (max-width:600px){#gcLogoIntro .gc-li-name{font-size:19px;}#gcLogoIntro .gc-li-mark{width:106px;height:106px;border-radius:24px;}#gcLogoIntro .gc-li-aura{width:420px;height:420px;}}
+</style>
+
+<div id="gcLogoIntro" role="dialog" aria-label="欢迎">
+  <div class="gc-li-aura"></div>
+  <div class="gc-li-halo"></div>
+  <div class="gc-li-halo d2"></div>
+  <div class="gc-li-halo d3"></div>
+  <div class="gc-li-stage">
+    <div class="gc-li-mark">
+      <div class="gc-li-shine"></div>
+      <svg viewBox="0 0 96 96" aria-hidden="true">
+        <path class="gc-trail" d="M8 78 C 30 70, 42 62, 58 46"/>
+        <path class="gc-plane-path" d="M60 20 L88 14 L66 46 L78 76 L58 66 L44 84 L38 64 L14 58 L34 38 L60 20 Z"/>
+      </svg>
+    </div>
+    <div class="gc-li-name">民航客机收藏馆</div>
+    <div class="gc-li-sub">HENRY AVIATION MUSEUM</div>
+    <div class="gc-li-line"></div>
+  </div>
+  <button class="gc-li-skip" id="gcLogoSkip">跳过动画</button>
+</div>
+<script id="gcLogoIntroScript">
+(function () {
+  'use strict';
+  if (window.__gcLogoIntroLoaded) return;
+  window.__gcLogoIntroLoaded = true;
+  var box = document.getElementById('gcLogoIntro');
+  if (!box) return;
+  var start = Date.now();
+  var done = false;
+  function reveal() {
+    var app = document.querySelector('.app-container');
+    if (!app) return;
+    app.classList.add('gc-pop');
+    setTimeout(function () { app.classList.remove('gc-pop'); }, 1150);
+  }
+  function finish() {
+    if (done) return;
+    done = true;
+    box.classList.add('gc-exit');
+    reveal();
+    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 540);
+  }
+  var skipBtn = document.getElementById('gcLogoSkip');
+  if (skipBtn) skipBtn.addEventListener('click', finish);
+  setTimeout(finish, 3000);
+  window.addEventListener('load', function () {
+    if (!done && Date.now() - start >= 3000) finish();
+  });
+  setTimeout(function () { if (!done) finish(); }, 4200);
+})();
+</script>
+<script id="gcIdleLoader">
+(function () {
+  'use strict';
+  function idle(fn) {
+    if (window.requestIdleCallback) { window.requestIdleCallback(fn, { timeout: 2500 }); }
+    else { setTimeout(fn, 1500); }
+  }
+  function addScript(src, attrs) {
+    var s = document.createElement('script');
+    s.src = src; s.defer = true; s.async = true;
+    if (attrs) { for (var k in attrs) { s.setAttribute(k, attrs[k]); } }
+    document.head.appendChild(s);
+  }
+  function boot() {
+    addScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
+    addScript('https://cloud.umami.is/script.js', { 'data-website-id': '1b107f5a-12d4-4db7-a8bd-c1d9cd2ecbb7' });
+  }
+  if (document.readyState === 'complete') { idle(boot); }
+  else { window.addEventListener('load', function () { idle(boot); }); }
+})();
+</script>
+
 
 <!-- 访问控制层容器（服务端 /api/maintenance 控制） -->
 <div id="siteMaintenanceOverlay" aria-hidden="true">
@@ -15317,7 +15364,6 @@ function aeLegacyCopy(text) {
 </div>
 
 <!-- 主题选择弹窗 -->
-/div>
 <!-- Auto version detection -->
 <script>
 (function() {
@@ -16339,7 +16385,7 @@ a.gc-social-gh .gc-soc-icon{background:rgba(255,255,255,.16);}
 <section id="gcPromoSection">
   <div class="gc-promo-inner">
     <div class="gc-promo-media">
-      <video controls preload="metadata" poster="/assets/cover-promo.png">
+      <video controls preload="none" poster="/assets/cover-promo.png">
         <source src="/assets/promo.mp4" type="video/mp4">
         您的浏览器不支持视频播放
       </video>
@@ -20410,7 +20456,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 })();
 </script>
 <!-- 今日执飞：html2canvas 长图导出（CDN 按需加载，不影响既有功能） -->
-<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!-- html2canvas 改为空闲注入，导出时按需可用 -->
 
 <style id="gcAdminStyle">
 #gcAdminPanel{position:fixed;inset:0;z-index:99999;display:none;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#1f2937;}
