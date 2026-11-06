@@ -71,6 +71,7 @@ export async function onRequest(context) {
 
   // ---- 校验通过，一次性删除 ----
   await kv.delete('sms:code:' + phone).catch(function () {});
+  await kv.put('sms:verified:' + phone, new Date().toISOString(), { expirationTtl: 15552000 }).catch(function () {});
   return ok({ verified: true, phone: maskPhone(phone) }, cors.headers);
 }
 

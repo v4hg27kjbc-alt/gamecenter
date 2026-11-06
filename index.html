@@ -6501,6 +6501,14 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
         </div>
       </div>
       <div class="gc-pf-sec">
+        <div class="gc-pf-sec-title">手机号</div>
+        <div class="gc-pf-actions" style="margin:0 0 8px">
+          <span id="gcPfPhoneText" style="font-size:13px;font-weight:600">未绑定手机号</span>
+          <button class="gc-pf-btn primary" id="gcPfBind" type="button">绑定手机号</button>
+        </div>
+        <p class="gc-pf-tip" id="gcPfPhoneTip">绑定后可用验证码登录、找回账号，并停止绑定提醒。</p>
+      </div>
+      <div class="gc-pf-sec">
         <div class="gc-pf-sec-title">登录密码</div>
         <div class="gc-pf-pwd">
           <input class="gc-pf-pwd-input" id="gcPwdNew" type="password" autocomplete="new-password" placeholder="新密码，至少 6 位">
@@ -6516,6 +6524,28 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
       </div>
       <input type="file" id="gcAvatarFile" accept="image/*" style="display:none">
     </div>
+  </div>
+</div>
+
+<div id="gcBindMask" aria-hidden="true">
+  <div class="gc-acct-card" role="dialog" aria-modal="true" aria-labelledby="gcBindTitle">
+    <button class="gc-acct-close" id="gcBindClose" type="button" aria-label="关闭">&#10005;</button>
+    <h3 class="gc-acct-title" id="gcBindTitle">绑定手机号</h3>
+    <p class="gc-acct-sub" id="gcBindSub">没有绑定手机号：绑定后可用验证码登录、找回账号，收藏与笔记也能跨设备同步。</p>
+    <div class="gc-acct-field">
+      <label>手机号</label>
+      <input class="gc-acct-input" id="gcBindPhone" type="tel" inputmode="numeric" maxlength="11" autocomplete="tel" placeholder="11 位手机号">
+    </div>
+    <div class="gc-acct-field">
+      <label>短信验证码</label>
+      <div class="gc-acct-coderow">
+        <input class="gc-acct-input" id="gcBindCode" type="text" inputmode="numeric" maxlength="8" placeholder="验证码">
+        <button class="gc-acct-send" id="gcBindSend" type="button">获取验证码</button>
+      </div>
+    </div>
+    <button class="gc-acct-btn-main" id="gcBindSubmit" type="button">绑定手机号</button>
+    <div class="gc-acct-msg" id="gcBindMsg"></div>
+    <p class="gc-acct-hint">绑定成功后不再提示；若该手机号已在后台完成验证，将自动识别并跳过提示。</p>
   </div>
 </div>
 
@@ -20605,8 +20635,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 .gc-acct-btn{display:inline-flex;align-items:center;gap:6px;width:auto!important;padding:0 12px!important;border-radius:999px!important;}
 .gc-acct-btn .gc-acct-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.5);}
 .gc-acct-btn .gc-acct-name{font-size:12px;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#gcAcctMask{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;background:rgba(6,12,24,.62);backdrop-filter:blur(10px);padding:18px;}
-#gcAcctMask.on{display:flex;}
+#gcAcctMask,#gcBindMask{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;background:rgba(6,12,24,.62);backdrop-filter:blur(10px);padding:18px;}
+#gcAcctMask.on,#gcBindMask.on{display:flex;}
 .gc-acct-card{width:100%;max-width:430px;max-height:88vh;overflow:auto;background:rgba(255,255,255,.97);border-radius:22px;box-shadow:0 30px 70px rgba(2,8,23,.45),0 0 0 1px rgba(255,255,255,.5);padding:26px 24px 22px;color:#1f2937;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;position:relative;}
 .gc-acct-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:none;background:rgba(15,23,42,.06);color:#475569;font-size:17px;cursor:pointer;line-height:1;}
 .gc-acct-close:hover{background:rgba(15,23,42,.12);}
@@ -21615,6 +21645,12 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     KV_UNAVAILABLE: '服务端存储未就绪，稍后再试',
     unauthorized: '登录状态已失效，请重新登录',
     account_banned: '该账号已被限制登录，请联系管理员',
+    phone_not_registered: '该手机号还没有注册，请先注册',
+    phone_invalid: '请输入正确的 11 位手机号',
+    phone_taken: '该手机号已绑定其他账号，请更换或先在原账号解绑',
+    code_invalid: '请输入短信验证码',
+    code_expired: '验证码已过期，请重新获取',
+    code_wrong: '验证码不正确',
     list_full: '列表已满（上限 300 条）'
   };
   function msgOf(code) { return MSG[code] || ('操作失败：' + (code || '未知错误')); }
@@ -21732,6 +21768,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       ls(TK, res.token);
       applyProfile();
       openMask('profile');
+      var needBind = !!(res.needBindPhone || (res.profile && res.profile.needBindPhone));
+      if (needBind) setTimeout(function () { maybeBindPrompt(res.profile); }, 420);
       var nick = (res.profile && (res.profile.displayName || res.profile.username)) || '';
       toast((isReg ? '注册成功，已自动登录：' : '登录成功，欢迎回来 ') + nick);
       var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
@@ -21772,6 +21810,103 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
         }, 1000);
       })
       .catch(function () { b.disabled = false; b.textContent = '重新获取'; setMsg('网络异常，验证码发送失败'); });
+  }
+
+  /* ===== 手机号绑定：后台用户首次登录提示 + 短信验证码绑定 ===== */
+  var bindTimer = null;
+  function bindMsg(text, ok) {
+    var el = $('gcBindMsg');
+    if (!el) return;
+    el.textContent = text || '';
+    el.className = 'gc-acct-msg' + (ok ? ' ok' : '');
+  }
+  function openBind(reason) {
+    var mask = $('gcBindMask');
+    if (!mask) return;
+    var p = st.profile || {};
+    var sub = $('gcBindSub');
+    var tip = '没有绑定手机号：绑定后可用验证码登录、找回账号，收藏与笔记也能跨设备同步。';
+    if (reason === 'phone_unverified' || (p.phone && !p.phoneVerified)) {
+      tip = '后台登记的手机号（' + (p.phone || '') + '）还没完成验证，请用短信验证码确认绑定。';
+    }
+    if (sub) sub.textContent = tip;
+    var ph = $('gcBindPhone');
+    if (ph && !ph.value && /^1[3-9]\d{9}$/.test(p.phone || '')) ph.value = p.phone;
+    bindMsg('');
+    mask.classList.add('on');
+    mask.setAttribute('aria-hidden', 'false');
+    setTimeout(function () { if (ph) ph.focus(); }, 120);
+  }
+  function closeBind() {
+    var mask = $('gcBindMask');
+    if (!mask) return;
+    mask.classList.remove('on');
+    mask.setAttribute('aria-hidden', 'true');
+    bindMsg('');
+  }
+  function maybeBindPrompt(profile) {
+    var p = profile || st.profile;
+    if (!p || !p.needBindPhone) return;
+    if (sessionStorage.getItem('gc_bind_skip') === '1') return;
+    openBind(p.bindReason || 'no_phone');
+  }
+  function sendBindCode() {
+    var el = $('gcBindPhone');
+    var phone = ((el && el.value) || '').replace(/\s/g, '');
+    if (!/^1[3-9]\d{9}$/.test(phone)) { bindMsg('请先填写正确的 11 位手机号'); if (el) el.focus(); return; }
+    var b = $('gcBindSend');
+    if (!b || b.disabled) return;
+    b.disabled = true;
+    b.textContent = '发送中…';
+    fetch('/api/sms-verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ phoneNumber: phone }) })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'bad_response' }; }); })
+      .then(function (res) {
+        if (!res || !res.ok) {
+          b.disabled = false;
+          b.textContent = '重新获取';
+          bindMsg('验证码发送失败：' + ((res && (res.message || res.hint || res.error)) || '请稍后再试'));
+          return;
+        }
+        bindMsg('验证码已发送至 ' + ((res && res.phone) || phone) + '，5 分钟内有效', true);
+        var left = 60;
+        b.textContent = left + 's';
+        if (bindTimer) clearInterval(bindTimer);
+        bindTimer = setInterval(function () {
+          left--;
+          if (left <= 0) { clearInterval(bindTimer); bindTimer = null; b.disabled = false; b.textContent = '重新获取'; }
+          else b.textContent = left + 's';
+        }, 1000);
+      })
+      .catch(function () { b.disabled = false; b.textContent = '重新获取'; bindMsg('网络异常，验证码发送失败'); });
+  }
+  function submitBind() {
+    var phone = (($('gcBindPhone') || {}).value || '').replace(/\s/g, '');
+    var code = (($('gcBindCode') || {}).value || '').replace(/\s/g, '');
+    if (!/^1[3-9]\d{9}$/.test(phone)) { bindMsg('请输入正确的 11 位手机号'); return; }
+    if (!/^\d{4,8}$/.test(code)) { bindMsg('请输入收到的短信验证码'); return; }
+    var btn = $('gcBindSubmit');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = '绑定中…';
+    api('bindphone', { phone: phone, code: code }).then(function (res) {
+      btn.disabled = false;
+      btn.textContent = '绑定手机号';
+      if (!res || !res.ok) {
+        bindMsg((res && (res.hint || res.message)) || msgOf(res && res.error));
+        return;
+      }
+      st.profile = res.profile || st.profile;
+      if ($('gcBindCode')) $('gcBindCode').value = '';
+      if ($('gcBindPhone')) $('gcBindPhone').value = '';
+      sessionStorage.removeItem('gc_bind_skip');
+      closeBind();
+      renderProfile();
+      toast('手机号绑定成功，之后不再提示绑定');
+    }).catch(function () {
+      btn.disabled = false;
+      btn.textContent = '绑定手机号';
+      bindMsg('网络异常，请稍后重试');
+    });
   }
 
   function gcGate(reason) {
@@ -21828,7 +21963,31 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     }
 
     renderList('gcFavList', 'gcFavCount', p.favorites, 'favorites');
+    renderList('gcFavList', 'gcFavCount', p.favorites, 'favorites');
     renderList('gcSaveList', 'gcSaveCount', p.saved, 'saved');
+
+    var phText = $('gcPfPhoneText');
+    if (phText) {
+      var phv = p.phone || '';
+      if (phv) {
+        phText.textContent = phv + (p.phoneVerified ? ' · 已验证' : ' · 待验证');
+        phText.style.color = p.phoneVerified ? '#16a34a' : '#b45309';
+      } else {
+        phText.textContent = '未绑定手机号';
+        phText.style.color = '#b45309';
+      }
+    }
+    var bindBtn = $('gcPfBind');
+    if (bindBtn) {
+      bindBtn.style.display = p.needBindPhone ? '' : 'none';
+      bindBtn.textContent = (p.phone && !p.phoneVerified) ? '验证手机号' : '绑定手机号';
+    }
+    var phTip = $('gcPfPhoneTip');
+    if (phTip) {
+      phTip.textContent = p.needBindPhone
+        ? '绑定后可用验证码登录、找回账号，并停止绑定提醒。'
+        : '手机号已验证，可用验证码登录与找回账号。';
+    }
 
     var mig = $('gcPfMigrate');
     var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
@@ -21992,6 +22151,18 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     if ($('gcWayPwd')) $('gcWayPwd').addEventListener('click', function () { st.way = 'password'; setMode('login'); });
     if ($('gcWayCode')) $('gcWayCode').addEventListener('click', function () { st.way = 'code'; setMode('login'); });
     if ($('gcSendCode')) $('gcSendCode').addEventListener('click', sendCode);
+    if ($('gcBindSend')) $('gcBindSend').addEventListener('click', sendBindCode);
+    if ($('gcBindSubmit')) $('gcBindSubmit').addEventListener('click', submitBind);
+    if ($('gcBindClose')) $('gcBindClose').addEventListener('click', function () {
+      sessionStorage.setItem('gc_bind_skip', '1');
+      closeBind();
+    });
+    if ($('gcBindMask')) $('gcBindMask').addEventListener('click', function (e) {
+      if (e.target.id === 'gcBindMask') { sessionStorage.setItem('gc_bind_skip', '1'); closeBind(); }
+    });
+    if ($('gcBindCode')) $('gcBindCode').addEventListener('keydown', function (e) { if (e.key === 'Enter') submitBind(); });
+    if ($('gcPfBind')) $('gcPfBind').addEventListener('click', function () { openBind((st.profile && st.profile.bindReason) || 'no_phone'); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeBind(); });
     if ($('gcPfPwdSave')) $('gcPfPwdSave').addEventListener('click', function () {
       var np = (($('gcPwdNew') || {}).value || '').trim();
       if (np.length < 6) { toast('新密码至少 6 位'); return; }
@@ -22064,7 +22235,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     if (tk) {
       st.token = tk;
       api('profile', { token: tk }).then(function (res) {
-        if (res && res.ok) { st.profile = res.profile; applyProfile(); }
+        if (res && res.ok) { st.profile = res.profile; applyProfile(); if (res.profile && res.profile.needBindPhone) sessionStorage.removeItem('gc_bind_skip'); }
         else { st.token = null; try { localStorage.removeItem(TK); } catch (e) {} applyProfile(); }
       }).catch(function () {});
     } else applyProfile();

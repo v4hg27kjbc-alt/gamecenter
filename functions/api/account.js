@@ -21,6 +21,153 @@ const MAX_AVATAR = 60000;
 const PASS_MIN = 6;
 const DEFAULT_PASS = '12345678';
 
+/* ===== 与后台登记表互通（NEWS_KV · admin:users:v1）===== */
+const ADMIN_KV_NAME = 'NEWS_KV';
+const ADMIN_USERS_KEY = 'admin:users:v1';
+const VERIFIED_KEY = 'sms:verified:';
+const VERIFIED_TTL = 15552000;
+
+function newsKv(env) {
+  const kv = env && env[ADMIN_KV_NAME];
+  return (kv && typeof kv.get === 'function' && typeof kv.put === 'function') ? kv : null;
+}
+
+async function sha256hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text || '')));
+  const bytes = new Uint8Array(buf);
+  let out = '';
+  for (let i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, '0');
+  return out;
+}
+
+async function loadAdminUsers(env) {
+  const nkv = newsKv(env);
+  if (!nkv) return [];
+  try {
+    const raw = await nkv.get(ADMIN_USERS_KEY, 'json');
+    if (Array.isArray(raw)) return raw;
+    if (raw && Array.isArray(raw.users)) return raw.users;
+    return [];
+  } catch (e) { return []; }
+}
+
+async function adminUserByAccount(env, account) {
+  const list = await loadAdminUsers(env);
+  if (!list.length) return null;
+  const lower = normName(account);
+  const phone = normPhone(account);
+  return list.find(function (x) { return normName(x.username) === lower; }) ||
+         (phone ? list.find(function (x) { return normPhone(x.phone) === phone; }) : null) || null;
+}
+
+async function adminUserByPhone(env, phone) {
+  const p = normPhone(phone);
+  if (!p) return null;
+  const list = await loadAdminUsers(env);
+  return list.find(function (x) { return normPhone(x.phone) === p; }) || null;
+}
+
+async function adminUserOf(env, user) {
+  const list = await loadAdminUsers(env);
+  if (!list.length) return null;
+  if (user && user.adminUserId) {
+    const hit = list.find(function (x) { return x.id === user.adminUserId; });
+    if (hit) return hit;
+  }
+  const lower = normName(user && user.username);
+  const hitName = list.find(function (x) { return normName(x.username) === lower; });
+  if (hitName) return hitName;
+  const phone = normPhone(user && user.phone);
+  return phone ? (list.find(function (x) { return normPhone(x.phone) === phone; }) || null) : null;
+}
+
+async function verifiedMarkOf(kv, phone) {
+  const p = normPhone(phone);
+  if (!p) return '';
+  try { return (await kv.get(VERIFIED_KEY + p)) || ''; } catch (e) { return ''; }
+}
+
+/** 把前端绑定结果回写后台登记表（best-effort，失败不影响登录） */
+async function syncAdminLink(env, user) {
+  try {
+    const nkv = newsKv(env);
+    if (!nkv || !user) return;
+    const rawList = await nkv.get(ADMIN_USERS_KEY, 'json');
+    const list = Array.isArray(rawList) ? rawList : (rawList && Array.isArray(rawList.users) ? rawList.users : null);
+    if (!list || !list.length) return;
+    const lower = normName(user.username);
+    const phone = normPhone(user.phone);
+    let idx = -1;
+    if (user.adminUserId) idx = list.findIndex(function (x) { return x.id === user.adminUserId; });
+    if (idx < 0) idx = list.findIndex(function (x) { return normName(x.username) === lower; });
+    if (idx < 0 && phone) idx = list.findIndex(function (x) { return normPhone(x.phone) === phone; });
+    if (idx < 0) return;
+    const au = list[idx] || {};
+    let dirty = false;
+    if (au.siteUid !== user.uid) { au.siteUid = user.uid; dirty = true; }
+    if (!au.siteBoundAt) { au.siteBoundAt = new Date().toISOString(); dirty = true; }
+    if (user.phoneVerified && !au.phoneVerified) {
+      au.phoneVerified = true;
+      au.phoneVerifiedAt = user.phoneBoundAt || new Date().toISOString();
+      dirty = true;
+    }
+    if (!normPhone(au.phone) && phone) { au.phone = phone; dirty = true; }
+    if (dirty) {
+      list[idx] = au;
+      await nkv.put(ADMIN_USERS_KEY, JSON.stringify({ users: list }));
+    }
+  } catch (e) {}
+}
+
+/** 后台创建的用户首次在前端登录时，自动生成主站账号 */
+async function provisionFromAdmin(env, kv, au, password) {
+  const now = new Date().toISOString();
+  const uid = await nextUid(kv);
+  const salt = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+  const pass = await hashPassword(String(password || DEFAULT_PASS), salt);
+  let phone = normPhone(au.phone);
+  let phoneVerified = false;
+  let phoneConflict = false;
+  if (phone) {
+    const holder = await kv.get('acct:p:' + phone);
+    if (holder) { phoneConflict = true; phone = ''; }
+    else {
+      phoneVerified = !!(au.phoneVerified) || !!(await verifiedMarkOf(kv, phone));
+      try { await kv.put('acct:p:' + phone, uid); } catch (e) {}
+    }
+  }
+  const user = {
+    uid: uid,
+    username: au.username,
+    displayName: au.username,
+    salt: salt,
+    pass: pass,
+    phone: phone,
+    avatar: '',
+    createdAt: now,
+    favorites: [],
+    saved: [],
+    tier: 'member',
+    migrated: false,
+    status: 'active',
+    loginCount: 0,
+    logins: [],
+    source: 'admin',
+    adminUserId: au.id || '',
+    adminLinkedAt: now,
+    phoneVerified: phoneVerified,
+    phoneSource: phone ? 'admin' : '',
+    phoneAddedAt: phone ? now : '',
+    phoneConflict: phoneConflict,
+  };
+  await kv.put('acct:u:' + uid, JSON.stringify(user));
+  const lower = normName(au.username);
+  const exist = await kv.get('acct:n:' + lower);
+  if (!exist) { try { await kv.put('acct:n:' + lower, uid); } catch (e) {} }
+  await syncAdminLink(env, user);
+  return user;
+}
+
 function normPhone(v) {
   const s = String(v || '').replace(/[\s-]/g, '');
   return /^1[3-9]\d{9}$/.test(s) ? s : '';
@@ -38,6 +185,7 @@ async function consumeSmsCode(kv, phone, code) {
   const stored = rec && rec.code ? String(rec.code) : String(raw);
   if (stored !== c) return { ok: false, error: 'code_wrong', hint: '验证码不正确' };
   try { await kv.delete('sms:code:' + phone); } catch (e) {}
+  try { await kv.put(VERIFIED_KEY + phone, new Date().toISOString(), { expirationTtl: VERIFIED_TTL }); } catch (e) {}
   return { ok: true };
 }
 
@@ -162,7 +310,28 @@ function publicProfile(u) {
     lastLoginAt: u.lastLoginAt || '',
     loginCount: Number(u.loginCount || 0) || 0,
     status: u.status || 'active',
+    phoneVerified: !!u.phoneVerified,
+    phoneSource: u.phoneSource || '',
+    source: u.source || 'site',
+    adminLinked: !!u.adminUserId,
+    phoneConflict: !!u.phoneConflict,
   };
+}
+
+/** 计算“是否需要提示绑定手机号”：已绑定/已验证 → 不再提示 */
+async function bindState(kv, user) {
+  const phone = normPhone(user && user.phone);
+  let verified = !!(user && user.phoneVerified);
+  if (phone && !verified) verified = !!(await verifiedMarkOf(kv, phone));
+  if (phone && verified) return { needBindPhone: false, phoneVerified: true, bindReason: '' };
+  if (phone) return { needBindPhone: true, phoneVerified: false, bindReason: 'phone_unverified' };
+  return { needBindPhone: true, phoneVerified: false, bindReason: 'no_phone' };
+}
+
+async function profileView(kv, user) {
+  const p = publicProfile(user);
+  const b = await bindState(kv, user);
+  return Object.assign(p, b);
 }
 
 async function readBody(request) {
@@ -226,18 +395,21 @@ export async function onRequest(context) {
       avatar: String(body.avatar || '').slice(0, MAX_AVATAR),
       createdAt: now, favorites: [], saved: [], tier: 'member', migrated: false,
       status: 'active', loginCount: 0, logins: [],
+      phoneVerified: true, phoneSource: 'sms', phoneAddedAt: now, phoneBoundAt: now,
     };
     await kv.put('acct:u:' + uid, JSON.stringify(user));
     await kv.put('acct:n:' + lower, uid);
     await kv.put('acct:p:' + phone, uid);
     const token = await issueToken(env, uid);
-    return ok({ token, profile: publicProfile(user) }, origin);
+    const pvReg = await profileView(kv, user);
+    return ok({ token, profile: pvReg, needBindPhone: pvReg.needBindPhone, bindReason: pvReg.bindReason }, origin);
   }
 
   // ---- 登录（mode: 'password' 密码登录 | 'code' 验证码登录）----
   if (action === 'login') {
     const mode = String(body.mode || 'password');
     let uid = '';
+    let user = null;
 
     if (mode === 'code') {
       const phone = normPhone(body.phone);
@@ -246,7 +418,16 @@ export async function onRequest(context) {
       const check = await consumeSmsCode(kv, phone, code);
       if (!check.ok) return bad(check.error, origin, { hint: check.hint });
       uid = (await kv.get('acct:p:' + phone)) || '';
-      if (!uid) return bad('phone_not_registered', origin, { hint: '该手机号还没有注册，请先注册' }, 404);
+      if (!uid) {
+        // 后台登记过该手机号 → 自动开通前端账号
+        const auPhone = await adminUserByPhone(env, phone);
+        if (!auPhone) return bad('phone_not_registered', origin, { hint: '该手机号还没有注册，请先注册' }, 404);
+        if (String(auPhone.status || '') === 'banned') {
+          return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+        }
+        user = await provisionFromAdmin(env, kv, auPhone, '');
+        uid = user.uid;
+      }
     } else {
       const account = String(body.username || body.phone || '').trim();
       const password = String(body.password || '');
@@ -258,20 +439,67 @@ export async function onRequest(context) {
         if (p) uid = (await kv.get('acct:p:' + p)) || '';
       }
       if (!uid && /^GC\d{6}-\d{3}$/i.test(account)) uid = account.toUpperCase();
-      if (!uid) return bad(ERR.noUser, origin, null, 404);
-      const rawPwd = await kv.get('acct:u:' + uid);
-      if (!rawPwd) return bad(ERR.noUser, origin, null, 404);
-      const u0 = JSON.parse(rawPwd);
-      const pass0 = await hashPassword(password, u0.salt);
-      if (pass0 !== u0.pass) return bad(ERR.badPass, origin, null, 401);
+      if (!uid) {
+        // 前端无此账号 → 回落后台登记表，实现“后台注册的用户可直接登录前端”
+        const au = await adminUserByAccount(env, account);
+        if (!au) return bad(ERR.noUser, origin, { hint: '账号不存在，请先注册' }, 404);
+        if (String(au.status || '') === 'banned') {
+          return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+        }
+        let passOk = false;
+        if (au.passwordHash) {
+          passOk = (await sha256hex(password)).toLowerCase() === String(au.passwordHash).toLowerCase();
+        }
+        if (!passOk) {
+          const auPhoneHint = normPhone(au.phone);
+          if (!au.passwordHash) {
+            return bad('admin_no_password', origin, {
+              hint: auPhoneHint ? '该账号由后台创建，尚未设置密码，请改用「手机验证码登录」' : '该账号尚未设置密码，请联系管理员设置后再登录',
+            }, 401);
+          }
+          return bad(ERR.badPass, origin, {
+            hint: auPhoneHint ? '密码不正确；也可用手机号 + 验证码登录' : '密码不正确',
+          }, 401);
+        }
+        user = await provisionFromAdmin(env, kv, au, password);
+        uid = user.uid;
+      } else {
+        const rawPwd = await kv.get('acct:u:' + uid);
+        if (!rawPwd) return bad(ERR.noUser, origin, null, 404);
+        const u0 = JSON.parse(rawPwd);
+        const pass0 = await hashPassword(password, u0.salt);
+        if (pass0 !== u0.pass) return bad(ERR.badPass, origin, null, 401);
+      }
     }
 
-    const raw = await kv.get('acct:u:' + uid);
-    if (!raw) return bad(ERR.noUser, origin, null, 404);
-    const user = JSON.parse(raw);
+    if (!user) {
+      const raw = await kv.get('acct:u:' + uid);
+      if (!raw) return bad(ERR.noUser, origin, null, 404);
+      user = JSON.parse(raw);
+    }
     if (String(user.status || '') === 'banned') {
       return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
     }
+
+    // 与后台登记表互认：后台封禁即时生效、后台手机号自动补全
+    const auLinked = await adminUserOf(env, user);
+    if (auLinked) {
+      if (String(auLinked.status || '') === 'banned') {
+        return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+      }
+      if (auLinked.id && user.adminUserId !== auLinked.id) user.adminUserId = auLinked.id;
+      const auPhone = normPhone(auLinked.phone);
+      if (!normPhone(user.phone) && auPhone) {
+        const holder = await kv.get('acct:p:' + auPhone);
+        if (!holder) {
+          user.phone = auPhone;
+          user.phoneSource = 'admin';
+          user.phoneAddedAt = user.phoneAddedAt || new Date().toISOString();
+          try { await kv.put('acct:p:' + auPhone, user.uid); } catch (e) {}
+        }
+      }
+    }
+
     const nowAt = new Date().toISOString();
     user.lastLoginAt = nowAt;
     user.loginCount = (Number(user.loginCount) || 0) + 1;
@@ -281,15 +509,60 @@ export async function onRequest(context) {
     hist.unshift({ at: nowAt, ip: ip, ua: ua, mode: mode });
     user.logins = hist.slice(0, 10);
     await kv.put('acct:u:' + user.uid, JSON.stringify(user));
+    await syncAdminLink(env, user);
+    const pvLogin = await profileView(kv, user);
     const token = await issueToken(env, user.uid);
-    return ok({ token, profile: publicProfile(user) }, origin);
+    return ok({
+      token: token,
+      profile: pvLogin,
+      needBindPhone: pvLogin.needBindPhone,
+      bindReason: pvLogin.bindReason,
+      adminLinked: !!user.adminUserId,
+    }, origin);
+  }
+
+  // ---- 绑定手机号（登录后凭短信验证码绑定，绑定成功不再提示）----
+  if (action === 'bindphone') {
+    const user = await userOfToken(env, kv, request, body);
+    if (!user) return bad(ERR.denied, origin, null, 401);
+    const phone = normPhone(body.phone);
+    const code = String(body.code || '').trim();
+    if (!phone) return bad('phone_invalid', origin, { hint: '请输入正确的 11 位手机号' });
+    const check = await consumeSmsCode(kv, phone, code);
+    if (!check.ok) return bad(check.error, origin, { hint: check.hint });
+    const holder = await kv.get('acct:p:' + phone);
+    if (holder && holder !== user.uid) {
+      return bad('phone_taken', origin, { hint: '该手机号已绑定其他账号，请更换或先在原账号解绑' }, 409);
+    }
+    const oldPhone = normPhone(user.phone);
+    if (oldPhone && oldPhone !== phone) {
+      try { await kv.delete('acct:p:' + oldPhone); } catch (e) {}
+    }
+    const wasBound = !!user.phoneVerified;
+    user.phone = phone;
+    user.phoneVerified = true;
+    user.phoneSource = 'sms';
+    user.phoneAddedAt = user.phoneAddedAt || new Date().toISOString();
+    user.phoneBoundAt = new Date().toISOString();
+    await kv.put('acct:p:' + phone, user.uid);
+    await kv.put('acct:u:' + user.uid, JSON.stringify(user));
+    await syncAdminLink(env, user);
+    const pvBind = await profileView(kv, user);
+    return ok({
+      profile: pvBind,
+      needBindPhone: false,
+      bindReason: '',
+      phoneBound: true,
+      alreadyBound: wasBound,
+    }, origin);
   }
 
   // ---- 资料 ----
   if (action === 'profile') {
     const user = await userOfToken(env, kv, request, body);
     if (!user) return bad(ERR.denied, origin, null, 401);
-    return ok({ profile: publicProfile(user) }, origin);
+    const pvMe = await profileView(kv, user);
+    return ok({ profile: pvMe, needBindPhone: pvMe.needBindPhone, bindReason: pvMe.bindReason }, origin);
   }
 
   // ---- 更新资料（显示名 / 头像 / 用户名）----
@@ -330,7 +603,8 @@ export async function onRequest(context) {
       user.avatar = av;
     }
     await kv.put('acct:u:' + user.uid, JSON.stringify(user));
-    return ok({ profile: publicProfile(user) }, origin);
+    const pvMe = await profileView(kv, user);
+    return ok({ profile: pvMe, needBindPhone: pvMe.needBindPhone, bindReason: pvMe.bindReason }, origin);
   }
 
   // ---- 收藏 / 保存 ----
@@ -346,7 +620,8 @@ export async function onRequest(context) {
     else if (idx < 0) { if (list.length >= MAX_FAV) return bad('list_full', origin, null, 400); list.push(id); }
     user[kind] = list;
     await kv.put('acct:u:' + user.uid, JSON.stringify(user));
-    return ok({ profile: publicProfile(user) }, origin);
+    const pvMe = await profileView(kv, user);
+    return ok({ profile: pvMe, needBindPhone: pvMe.needBindPhone, bindReason: pvMe.bindReason }, origin);
   }
 
   // ---- 临时账户一键迁移 ----
