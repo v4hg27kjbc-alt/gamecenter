@@ -262,6 +262,13 @@
       toc.appendChild(a);
     });
 
+    /* 内测文章：仅登录用户可见，未登录不展示任何正文预览 */
+    if(!state.token){
+      $('doc').innerHTML='<div class="locked" id="lockHint"><h4>内测文章 · 仅登录用户可见</h4>'
+        +'<p>请先返回主站登录或注册账号，登录后可免费阅读全文；试运营期间不收费。</p></div>';
+      return;
+    }
+
     if(d.preview && d.preview.length){
       $('doc').innerHTML=d.preview.map(function(c){
         return '<section id="ch-'+c.id+'"><h2>'+esc(c.title)+'</h2>'+md2html(c.body)+'</section>';
@@ -281,6 +288,8 @@
     $('btnUnlock').disabled=true;
     $('btnUnlock2').textContent='已解锁全文';
     $('btnUnlock2').disabled=true;
+    insertVotePanel();
+    initReadFeedback();
     toast('已免费解锁全文');
   }
 
@@ -365,12 +374,131 @@
     });
   }
 
+  /* ---------- 内测文章：下一步选题投票（登录可见，一人一票） ---------- */
+  var ARTICLE_ID='c919-deep-2026';
+  var VOTE_OPTS=[
+    {k:'useful',t:'内容有用，继续这个方向'},
+    {k:'factory',t:'更想看工厂 / 产线细节'},
+    {k:'compare',t:'更想看与 737、A320 的对比'},
+    {k:'history',t:'更想看历史与商业故事'}
+  ];
+  function insertVotePanel(){
+    if(!state.token) return;
+    if(document.getElementById('trialVote')) return;
+    var anchor=$('doc');
+    if(!anchor||!anchor.parentNode) return;
+    var box=document.createElement('div');
+    box.id='trialVote';
+    box.style.cssText='margin:0 0 18px;padding:16px 18px;border:1px solid #e4ecf6;border-radius:14px;background:#f7fafe';
+    box.innerHTML='<div style="font-weight:700;font-size:15px;margin-bottom:10px">下一步想让我们写什么？</div>'
+      +'<div id="voteOpts" style="display:flex;flex-wrap:wrap;gap:8px"></div>'
+      +'<div id="voteTip" style="font-size:12.5px;color:#7c8ea6;margin-top:9px">登录用户均可投一票，结果用于确定下一篇选题。</div>';
+    anchor.parentNode.insertBefore(box, anchor);
+    loadVote();
+  }
+  function loadVote(){
+    api(ACC,{method:'POST',token:state.token,body:{action:'articleStats',articleId:ARTICLE_ID}}).then(function(r){
+      var counts=(r&&r.counts)||{}, my=(r&&r.myVote)||'';
+      var total=0; Object.keys(counts).forEach(function(k){ total+=Number(counts[k]||0)||0; });
+      var wrap=$('voteOpts'); if(!wrap) return;
+      wrap.innerHTML='';
+      VOTE_OPTS.forEach(function(o){
+        var n=Number(counts[o.k]||0)||0;
+        var pct=total?Math.round(n*100/total):0;
+        var b=document.createElement('button');
+        b.type='button';
+        b.style.cssText='cursor:pointer;font:inherit;font-size:13px;padding:8px 12px;border-radius:10px;border:1px solid '+(my===o.k?'#1f6feb':'#dbe6f3')+';background:'+(my===o.k?'#eaf2ff':'#fff')+';color:'+(my===o.k?'#1f6feb':'#12243a');
+        b.textContent=o.t+(total?(' · '+n+' 票 '+pct+'%'):'');
+        b.onclick=function(){ castVote(o.k); };
+        wrap.appendChild(b);
+      });
+      if($('voteTip')) $('voteTip').textContent=total?('已有 '+total+' 人投票'+(my?'，你投的是「'+((VOTE_OPTS.filter(function(x){return x.k===my;})[0]||{}).t||my)+'」':'')):'登录用户均可投一票，结果用于确定下一篇选题。';
+    }).catch(function(){});
+  }
+  function castVote(opt){
+    if(!state.token){ toast('请先登录后参与投票'); return; }
+    api(ACC,{method:'POST',token:state.token,body:{action:'articleVote',articleId:ARTICLE_ID,option:opt}}).then(function(r){
+      if(r&&r.ok){ toast(r.already?'你已经投过票了':'投票成功，谢谢反馈'); loadVote(); }
+      else toast((r&&r.hint)||'投票失败，请稍后重试');
+    }).catch(function(){ toast('网络异常，请稍后重试'); });
+  }
+
+  /* ---------- 内测文章：读完一次性评价（每篇只问一次） ---------- */
+  var ASKED_KEY='trial_fb_asked_'+ARTICLE_ID;
+  var fbTimer=null;
+  function initReadFeedback(){
+    if(!state.token) return;
+    try{ if(sessionStorage.getItem(ASKED_KEY)) return; }catch(e){}
+    fbTimer=setTimeout(maybeAskFeedback,10000);
+    window.addEventListener('scroll',function(){
+      var d=document.documentElement;
+      if(d.scrollTop+d.clientHeight>=d.scrollHeight-140) maybeAskFeedback();
+    },{passive:true});
+  }
+  function maybeAskFeedback(){
+    if(state.feedbackShown) return;
+    if(document.getElementById('fbModal')) return;
+    if(!state.token){ return; }
+    try{ if(sessionStorage.getItem(ASKED_KEY)) return; }catch(e){}
+    state.feedbackShown=true;
+    if(fbTimer){ clearTimeout(fbTimer); fbTimer=null; }
+    api(ACC,{method:'POST',token:state.token,body:{action:'articleStats',articleId:ARTICLE_ID}}).then(function(r){
+      if(r&&r.myFeedback){
+        try{ sessionStorage.setItem(ASKED_KEY,'1'); }catch(e){}
+        state.feedbackShown=false;
+        return;
+      }
+      showFeedbackModal();
+    }).catch(function(){ showFeedbackModal(); });
+  }
+  function showFeedbackModal(){
+    if(document.getElementById('fbModal')) return;
+    var m=document.createElement('div');
+    m.id='fbModal';
+    m.style.cssText='position:fixed;inset:0;background:rgba(10,20,35,.42);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px';
+    m.innerHTML='<div style="width:100%;max-width:420px;background:#fff;border-radius:16px;padding:20px 20px 16px;box-shadow:0 20px 60px rgba(15,30,50,.24)">'
+      +'<div style="font-size:16px;font-weight:700;margin-bottom:6px">看完这篇，感觉如何？</div>'
+      +'<div style="font-size:12.5px;color:#7c8ea6;margin-bottom:14px">每篇文章只问这一次，结果会汇总给站长。</div>'
+      +'<div id="fbStars" style="display:flex;gap:8px;margin-bottom:12px"></div>'
+      +'<textarea id="fbText" rows="3" maxlength="300" placeholder="具体想说什么（选填）" style="width:100%;box-sizing:border-box;border:1px solid #dbe6f3;border-radius:11px;padding:10px 12px;font:inherit;font-size:13px;line-height:1.6;resize:vertical;outline:none"></textarea>'
+      +'<div style="display:flex;gap:10px;margin-top:14px">'
+      +'<button id="fbSkip" type="button" style="flex:0 0 96px;cursor:pointer;font:inherit;font-size:13.5px;padding:10px 0;border-radius:11px;border:1px solid #dbe6f3;background:#fff;color:#5b6b80">跳过</button>'
+      +'<button id="fbSend" type="button" style="flex:1;cursor:pointer;font:inherit;font-size:13.5px;padding:10px 0;border-radius:11px;border:0;background:#1f6feb;color:#fff;font-weight:600">提交评价</button>'
+      +'</div></div>';
+    document.body.appendChild(m);
+    var score=0;
+    var stars=$('fbStars');
+    for(var i=1;i<=5;i++){(function(v){
+      var s=document.createElement('span');
+      s.textContent='★'; s.dataset.v=v;
+      s.style.cssText='cursor:pointer;font-size:24px;line-height:1;color:#d7e0ec';
+      s.onclick=function(){
+        score=v;
+        Array.prototype.forEach.call(stars.children,function(el){ el.style.color=(Number(el.dataset.v)<=v)?'#f5a623':'#d7e0ec'; });
+      };
+      stars.appendChild(s);
+    })(i);}
+    function close(){ try{ m.remove(); }catch(e){} state.feedbackShown=false; }
+    function mark(){ try{ sessionStorage.setItem(ASKED_KEY,'1'); }catch(e){} }
+    $('fbSkip').onclick=function(){ mark(); close(); };
+    $('fbSend').onclick=function(){
+      var t=$('fbText')?String($('fbText').value||'').trim():'';
+      $('fbSend').disabled=true; $('fbSend').textContent='提交中…';
+      api(ACC,{method:'POST',token:state.token,body:{action:'articleFeedback',articleId:ARTICLE_ID,score:score,text:t}}).then(function(r){
+        mark(); close();
+        if(r&&r.ok) toast('感谢反馈，已记录');
+        else toast('反馈未保存，请稍后再试');
+      }).catch(function(){ $('fbSend').disabled=false; $('fbSend').textContent='提交评价'; toast('网络异常，请稍后重试'); });
+    };
+  }
+
   /* ---------- 启动 ---------- */
   function boot(){
     $('btnHome').addEventListener('click',function(){ location.href='/'; });
     $('btnUnlock').addEventListener('click',unlock);
     $('btnUnlock2').addEventListener('click',unlock);
     $('btnDownload').addEventListener('click',download);
+    state.token=findToken();
     paintWatermark();
 
     api(API+'?action=info').then(function(d){
@@ -378,7 +506,7 @@
       else{ $('lead').textContent='试运营信息加载失败，请稍后刷新重试。'; }
     }).catch(function(){ $('lead').textContent='试运营信息加载失败，请检查网络后刷新。'; });
 
-    state.token=findToken();
+    state.token=state.token||findToken();
     if(!state.token){
       setState('<b>尚未登录</b> · 请返回主站登录或注册账号，即可免费解锁全文。');
       $('btnUnlock2').textContent='去主站登录/注册';

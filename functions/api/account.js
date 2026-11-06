@@ -320,6 +320,9 @@ function publicProfile(u) {
     source: u.source || 'site',
     adminLinked: !!u.adminUserId,
     phoneConflict: !!u.phoneConflict,
+    phoneChangeCount: Number(u.phoneChangeCount || 0) || 0,
+    phoneChangeMax: 2,
+    phoneChangeRemaining: Math.max(0, 2 - (Number(u.phoneChangeCount || 0) || 0)),
   };
 }
 
@@ -337,6 +340,28 @@ async function profileView(kv, user) {
   const p = publicProfile(user);
   const b = await bindState(kv, user);
   return Object.assign(p, b);
+}
+
+/** 读取全部投票计数：{ articleId: { option: n } } */
+function blockInfoOf(src) {
+  const o = src || {};
+  const reason = String(o.bannedReason || o.banReason || o.blockReason || o.reason || '').slice(0, 120);
+  return {
+    reason: reason || '违反站内使用规则',
+    at: String(o.bannedAt || o.blockAt || '').slice(0, 40),
+    until: String(o.bannedUntil || '').slice(0, 40),
+    appealAllowed: true,
+  };
+}
+
+async function readVoteCounts(kv) {
+  let counts = {};
+  try {
+    const raw = await kv.get('vote:counts:v1');
+    counts = raw ? JSON.parse(raw) : {};
+  } catch (e) { counts = {}; }
+  if (!counts || typeof counts !== 'object' || Array.isArray(counts)) counts = {};
+  return counts;
 }
 
 async function readBody(request) {
@@ -438,7 +463,10 @@ async function handleRequest(context) {
         const auPhone = await adminUserByPhone(env, phone);
         if (!auPhone) return bad('phone_not_registered', origin, { hint: '该手机号还没有注册，请先注册' }, 404);
         if (String(auPhone.status || '') === 'banned') {
-          return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+          return bad('account_banned', origin, {
+            hint: '已拉入黑名单，服务暂停，如有异议请联系站长',
+            blocked: blockInfoOf(auPhone),
+          }, 403);
         }
         user = await provisionFromAdmin(env, kv, auPhone, '');
         uid = user.uid;
@@ -459,7 +487,10 @@ async function handleRequest(context) {
         const au = await adminUserByAccount(env, account);
         if (!au) return bad(ERR.noUser, origin, { hint: '账号不存在，请先注册' }, 404);
         if (String(au.status || '') === 'banned') {
-          return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+          return bad('account_banned', origin, {
+            hint: '已拉入黑名单，服务暂停，如有异议请联系站长',
+            blocked: blockInfoOf(au),
+          }, 403);
         }
         let passOk = false;
         if (au.passwordHash) {
@@ -493,14 +524,20 @@ async function handleRequest(context) {
       user = JSON.parse(raw);
     }
     if (String(user.status || '') === 'banned') {
-      return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+      return bad('account_banned', origin, {
+          hint: '已拉入黑名单，服务暂停，如有异议请联系站长',
+          blocked: blockInfoOf(user),
+        }, 403);
     }
 
     // 与后台登记表互认：后台封禁即时生效、后台手机号自动补全
     const auLinked = await adminUserOf(env, user);
     if (auLinked) {
       if (String(auLinked.status || '') === 'banned') {
-        return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+        return bad('account_banned', origin, {
+          hint: '已拉入黑名单，服务暂停，如有异议请联系站长',
+          blocked: blockInfoOf(auLinked),
+        }, 403);
       }
       if (auLinked.id && user.adminUserId !== auLinked.id) user.adminUserId = auLinked.id;
       const auPhone = normPhone(auLinked.phone);
@@ -550,8 +587,26 @@ async function handleRequest(context) {
       return bad('phone_taken', origin, { hint: '该手机号已绑定其他账号，请更换或先在原账号解绑' }, 409);
     }
     const oldPhone = normPhone(user.phone);
-    if (oldPhone && oldPhone !== phone) {
+    const isChange = !!(oldPhone && oldPhone !== phone);
+    /* 每个账号手机号最多更换 2 次（首次绑定不计入），达到上限需联系站长 */
+    const PHONE_CHANGE_MAX = 2;
+    let changeCount = Number(user.phoneChangeCount || 0);
+    if (!isFinite(changeCount) || changeCount < 0) changeCount = 0;
+    if (isChange) {
+      if (changeCount >= PHONE_CHANGE_MAX) {
+        return bad('phone_change_limit', origin, {
+          hint: '该账号手机号已更换 ' + PHONE_CHANGE_MAX + ' 次，达到上限，如需再次更换请联系站长',
+          changeCount: changeCount,
+          changeMax: PHONE_CHANGE_MAX,
+          remaining: 0
+        }, 403);
+      }
+      changeCount += 1;
+      user.phoneChangeCount = changeCount;
+      user.phoneChangedAt = new Date().toISOString();
       try { await kv.delete('acct:p:' + oldPhone); } catch (e) {}
+    } else if (user.phoneChangeCount === undefined) {
+      user.phoneChangeCount = 0;
     }
     const wasBound = !!user.phoneVerified;
     user.phone = phone;
@@ -569,11 +624,32 @@ async function handleRequest(context) {
       bindReason: '',
       phoneBound: true,
       alreadyBound: wasBound,
+      changed: isChange,
+      changeCount: changeCount,
+      changeMax: PHONE_CHANGE_MAX,
+      remaining: Math.max(0, PHONE_CHANGE_MAX - changeCount),
     }, origin);
   }
 
   // ---- 资料 ----
   if (action === 'profile') {
+    /* 先识别黑名单：被封禁账号返回明确错误码，前端统一弹站内通知（不做静默封禁） */
+    const authPB = request.headers.get('authorization') || '';
+    const tkPB = (authPB.replace(/^Bearer\s+/i, '') || (body && body.token) || '').trim();
+    const pPB = tkPB ? await verifyToken(env, tkPB) : null;
+    if (pPB) {
+      const rawPB = await kv.get('acct:u:' + pPB.u);
+      if (rawPB) {
+        let uPB = null;
+        try { uPB = JSON.parse(rawPB); } catch (e) { uPB = null; }
+        if (uPB && String(uPB.status || '') === 'banned') {
+          return bad('account_banned', origin, {
+            hint: '已拉入黑名单，服务暂停，如有异议请联系站长',
+            blocked: blockInfoOf(uPB),
+          }, 403);
+        }
+      }
+    }
     const user = await userOfToken(env, kv, request, body);
     if (!user) return bad(ERR.denied, origin, null, 401);
     const pvMe = await profileView(kv, user);
@@ -657,10 +733,124 @@ async function handleRequest(context) {
     user.migrated = true;
     user.migratedAt = new Date().toISOString();
     await kv.put('acct:u:' + user.uid, JSON.stringify(user));
+    const pvMig = await profileView(kv, user);
     return ok({
-      profile: publicProfile(user),
+      profile: pvMig,
+      needBindPhone: pvMig.needBindPhone,
+      bindReason: pvMig.bindReason,
       migrated: { favorites: user.favorites.length - beforeFav, saved: user.saved.length - beforeSaved },
     }, origin);
+  }
+
+  // ---- 黑名单申诉（被限制用户提交，站长在后台查看处理）----
+  if (action === 'appeal') {
+    const note = String(body.note || '').slice(0, 300);
+    const reason = String(body.reason || '').slice(0, 200);
+    const page = String(body.page || '').slice(0, 300);
+    const visitorId = String(body.visitorId || '').slice(0, 80);
+    const auth0 = request.headers.get('authorization') || '';
+    const tk0 = (auth0.replace(/^Bearer\s+/i, '') || (body && body.token) || '').trim();
+    let uid0 = '';
+    if (tk0) {
+      const p0 = await verifyToken(env, tk0);
+      if (p0) uid0 = String(p0.u || '');
+    }
+    const item = {
+      id: 'ap_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      uid: uid0,
+      visitorId: visitorId,
+      ip: request.headers.get('cf-connecting-ip') || '',
+      ua: String(request.headers.get('user-agent') || '').slice(0, 200),
+      reason: reason,
+      note: note,
+      page: page,
+      at: new Date().toISOString(),
+      done: false
+    };
+    const rawA = await kv.get('appeal:list:v1');
+    let listA = [];
+    try { listA = rawA ? JSON.parse(rawA) : []; } catch (e) { listA = []; }
+    if (!Array.isArray(listA)) listA = [];
+    listA.unshift(item);
+    if (listA.length > 500) listA = listA.slice(0, 500);
+    await kv.put('appeal:list:v1', JSON.stringify(listA));
+    return ok({ appeal: item, loggedIn: !!uid0 }, origin);
+  }
+
+  // ---- 内测文章：投票（登录用户，一人一票）----
+  if (action === 'articleVote') {
+    const user = await userOfToken(env, kv, request, body);
+    if (!user) return bad(ERR.denied, origin, { hint: '请先登录后参与投票' }, 401);
+    const aid = String(body.articleId || '').slice(0, 80);
+    const opt = String(body.option || '').slice(0, 20);
+    if (!aid || !opt) return bad(ERR.bad, origin);
+    user.votes = (user.votes && typeof user.votes === 'object') ? user.votes : {};
+    if (user.votes[aid]) {
+      return ok({ already: true, myVote: user.votes[aid], counts: (await readVoteCounts(kv))[aid] || {} }, origin);
+    }
+    user.votes[aid] = opt;
+    await kv.put('acct:u:' + user.uid, JSON.stringify(user));
+    const counts = await readVoteCounts(kv);
+    if (!counts[aid]) counts[aid] = {};
+    counts[aid][opt] = (Number(counts[aid][opt] || 0) || 0) + 1;
+    await kv.put('vote:counts:v1', JSON.stringify(counts));
+    const rawV = await kv.get('vote:list:v1');
+    let listV = [];
+    try { listV = rawV ? JSON.parse(rawV) : []; } catch (e) { listV = []; }
+    if (!Array.isArray(listV)) listV = [];
+    listV.unshift({ uid: user.uid, articleId: aid, option: opt, at: new Date().toISOString() });
+    if (listV.length > 2000) listV = listV.slice(0, 2000);
+    await kv.put('vote:list:v1', JSON.stringify(listV));
+    return ok({ myVote: opt, counts: counts[aid] || {} }, origin);
+  }
+
+  // ---- 内测文章：读后一次性评价（每篇仅记录一次）----
+  if (action === 'articleFeedback') {
+    const user = await userOfToken(env, kv, request, body);
+    if (!user) return bad(ERR.denied, origin, { hint: '请先登录后提交评价' }, 401);
+    const aid = String(body.articleId || '').slice(0, 80);
+    if (!aid) return bad(ERR.bad, origin);
+    user.feedbackSeen = (user.feedbackSeen && typeof user.feedbackSeen === 'object') ? user.feedbackSeen : {};
+    if (user.feedbackSeen[aid]) return ok({ already: true, at: user.feedbackSeen[aid] }, origin);
+    const score = Math.max(0, Math.min(5, Number(body.score || 0) || 0));
+    const text = String(body.text || '').slice(0, 300);
+    const at = new Date().toISOString();
+    user.feedbackSeen[aid] = at;
+    await kv.put('acct:u:' + user.uid, JSON.stringify(user));
+    const rawF = await kv.get('feedback:list:v1');
+    let listF = [];
+    try { listF = rawF ? JSON.parse(rawF) : []; } catch (e) { listF = []; }
+    if (!Array.isArray(listF)) listF = [];
+    listF.unshift({ uid: user.uid, username: user.username || '', articleId: aid, score: score, text: text, at: at });
+    if (listF.length > 2000) listF = listF.slice(0, 2000);
+    await kv.put('feedback:list:v1', JSON.stringify(listF));
+    return ok({ recorded: true, at: at }, origin);
+  }
+
+  // ---- 内测文章：统计（投票数 + 我是否已投/已评）----
+  if (action === 'articleStats') {
+    const aid = String((body && body.articleId) || '').slice(0, 80);
+    let uidS = '';
+    const authS = request.headers.get('authorization') || '';
+    const tkS = (authS.replace(/^Bearer\s+/i, '') || (body && body.token) || '').trim();
+    if (tkS) {
+      const pS = await verifyToken(env, tkS);
+      if (pS) uidS = String(pS.u || '');
+    }
+    let myVote = '';
+    let myFeedback = '';
+    if (uidS) {
+      const rawU = await kv.get('acct:u:' + uidS);
+      if (rawU) {
+        try {
+          const uS = JSON.parse(rawU);
+          myVote = (uS.votes && uS.votes[aid]) || '';
+          myFeedback = (uS.feedbackSeen && uS.feedbackSeen[aid]) || '';
+        } catch (e) {}
+      }
+    }
+    const counts = await readVoteCounts(kv);
+    return ok({ articleId: aid, counts: counts[aid] || {}, myVote: myVote, myFeedback: myFeedback, loggedIn: !!uidS }, origin);
   }
 
   if (action === 'logout') return ok({ loggedOut: true }, origin);

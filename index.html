@@ -6565,8 +6565,11 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
     <div class="blk-head">&#9888;&#65039;</div>
     <div class="blk-body">
       <div class="blk-title">访问受限</div>
-      <div class="blk-text" id="blkText">您的账号因违反平台规则已被限制访问。</div>
-      <button class="blk-btn" id="blkAppealBtn" type="button">去后台申诉 / 输入验证</button>
+      <div class="blk-text" id="blkText">已拉入黑名单，服务暂停，如有异议请联系站长</div>
+      <div id="blkReason" style="display:none;font-size:12.5px;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 11px;margin:-6px 0 14px;line-height:1.6"></div>
+      <textarea id="blkAppealText" rows="3" maxlength="300" placeholder="如有异议，请在此写明情况，提交后站长可在后台查看（选填）" style="width:100%;box-sizing:border-box;border:1px solid rgba(15,23,42,.14);border-radius:11px;padding:10px 12px;font-size:13px;line-height:1.6;resize:vertical;margin-bottom:12px;font-family:inherit;outline:none"></textarea>
+      <button class="blk-btn" id="blkAppealBtn" type="button">提交申诉</button>
+      <button class="blk-btn" id="blkAppealGo" type="button" style="background:#fff;color:#2b4ecc;border:1px solid rgba(43,78,204,.35);box-shadow:none;margin-top:8px">联系站长 / 后台入口</button>
     </div>
   </div>
 </div>
@@ -11307,6 +11310,18 @@ window.AIBridge = (function () {
       return rr;
     }
 
+    /* 未登录：全站 AI 功能一律不可用（登录即默认解锁全部 AI 功能） */
+    var gcTk = '';
+    try { gcTk = localStorage.getItem('gc_acct_token') || ''; } catch (e0) {}
+    if (!gcTk) {
+      if (window.gcAccount && typeof window.gcAccount.open === 'function') {
+        try { window.gcAccount.open({ reason: 'ai' }); } catch (e1) {}
+      }
+      var eNoLogin = new Error('请先登录后使用 AI 功能');
+      eNoLogin.code = 'login_required';
+      throw eNoLogin;
+    }
+
     var res, json;
     try {
       res = await doChat(body, token);
@@ -11322,7 +11337,16 @@ window.AIBridge = (function () {
         res = await doChat(body, token);
       }
       json = await res.json().catch(function () { return null; });
+      /* 黑名单：所有 AI 模式（文字问答 / 图片识别 / 机型评价 / 执飞推荐）统一弹站内通知 */
+      if (json && (json.blocked === true || json.error === 'banned' || json.error === 'blocked' || json.error === 'account_banned')) {
+        if (typeof window.__siteBlockCard === 'function') window.__siteBlockCard(json.blocked || json.block || {});
+        var eBlocked = new Error('blocked');
+        eBlocked.code = 'blocked';
+        throw eBlocked;
+      }
     } catch (err) {
+      /* 黑名单 / 未登录属于业务态，不重试直接抛出（避免重复弹卡） */
+      if (err && (err.code === 'blocked' || err.code === 'login_required')) throw err;
       /* 网络层错误（跨境网络抖动常见）：重试一次；超时/中断不重试 */
       var retried = false;
       if (isRetryableErr(err)) {
@@ -16582,66 +16606,89 @@ a.gc-social-gh .gc-soc-icon{background:rgba(255,255,255,.16);}
   <button class="footer-policy-btn" onclick="openMyFeedback()"><span id="myFbBtnText">我的反馈记录</span></button>
   <button class="footer-policy-btn" id="letterBtn" type="button" aria-label="一封信" title="一封信"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>一封信</button>
   <a class="footer-policy-btn" id="gcTrialBtn" href="/trial.html" title="免费试运营 · 深度研读" style="text-decoration:none">免费试运营</a>
-  <div class="footer-update">隐私政策更新：2026-09-19</div>
+  <div class="footer-update">隐私政策更新：2026-11-06</div>
 </footer>
 
 <div id="privacyOverlay" onclick="privacyBackdrop(event)">
   <div class="privacy-card">
     <button class="privacy-close" onclick="closePrivacyPolicy()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     <div class="privacy-title">隐私保护与网站安全说明</div>
-    <div class="privacy-date">更新日期：2026-09-19</div>
+    <div class="privacy-date">更新日期：2026-11-06</div>
     <div class="privacy-body">
-      <p><strong>一、网站性质</strong></p>
-      <p>本网站是由个人维护的民航机型收藏展示项目，采用单文件静态网页技术构建，部署于 Cloudflare Pages 全球加速网络（CDN）。网站本身不包含服务器后台程序、不维护用户数据库、不设立用户账号体系，因此不存在传统意义上的"用户注册信息"。</p>
-      <p><strong>二、数据存储与本地化原则</strong></p>
-      <p>1. 您在本网站产生的所有个性化数据，包括但不限于：收藏的机型、打卡记录、连续签到天数、成就徽章、主题偏好、页面浏览状态、本地访问行为记录（含页面浏览、收藏、点击、搜索等事件及随机访客标识）等，均仅保存在您当前设备的浏览器本地存储（localStorage）中。</p>
-      <p>2. 上述数据不会上传至本网站的任何服务器，也不会被本网站所有者、托管平台或任何第三方读取、备份或分析。</p>
-      <p>3. 清除方式：您可在浏览器设置中清除该网站的站点数据，或使用浏览器的"无痕模式"访问，关闭后本地数据即随之消失。</p>
-      <p><strong>三、第三方服务说明</strong></p>
-      <p>1. <strong>AI 智能问答（Kimi 大模型，经本站服务端代理）</strong>：当您使用「问 AI」功能并发送问题时，您输入的问题文本会先发送至本站 AI 服务端中台，再由服务端转发至第三方大模型服务商 Kimi（Moonshot）的接口，用于生成回答。传输内容仅包含您主动输入的问题文本及必要的对话上下文，不包含您的设备信息、位置信息或本网站其他本地数据。第三方服务商将按其自身隐私政策处理该内容，建议您在提问时勿输入身份证号、银行卡号、家庭住址、密码等敏感个人信息。回答内容仅用于本次对话的即时展示，本网站不存储任何问答记录。</p><p>2. <strong>照片识机（Kimi 视觉模型，经本站服务端代理）</strong>：当您使用「照片识机」功能时，您主动选择或拍摄的飞机照片会先在您设备本地完成压缩处理（最大尺寸 1024px、JPEG 格式），随后连同必要的候选机型列表一并发送至本站 AI 服务端中台，再由服务端转发至 Kimi 视觉模型用于机型判断。传输内容仅包含您主动选择的照片及机型识别所需的候选清单，不包含您的设备信息、位置信息或本网站其他本地数据。照片仅用于本次识别，识别完成后不会保存在本网站的任何存储中，刷新或关闭页面即无法再次访问；调用摄像头拍摄时，仅当您点击「拍照」按钮后才会采集当前画面，且同样仅用于本次识别。第三方服务商将按其自身隐私政策处理该内容，建议您不要拍摄或上传包含身份证件、人脸特写、家庭环境等敏感个人信息的照片。识别结果仅用于本次即时展示，本网站不存储任何照片与识别记录。</p>
-      <p>3. <strong>地图服务（本地渲染）</strong>：页面中的航线地图功能使用开源地图库 Leaflet 渲染，地图底图为内置资源并配合画布（Canvas）自绘生成，完全在本地完成渲染，不请求任何外部地图瓦片，因此不会产生第三方地图请求。</p>
-      <p>4. <strong>图片与媒体资源（维基百科等公开图源）</strong>：部分机型照片、历史图片来自维基百科等公开网络图源，并经过第三方图片代理服务（wsrv.nl）优化加载。上述资源加载时会产生第三方请求，但本网站不通过该渠道采集任何访客信息。</p>
-      <p>5. <strong>开源库与 CDN</strong>：页面引用的开源代码库（如 Leaflet、字体、图标等）可能从公共 CDN（如 unpkg、jsDelivr 等）加载，加载过程可能产生第三方网络请求。</p>
-      <p>6. <strong>航空快讯（rss2json.com）</strong>：页面中的「航空快讯」功能通过第三方 RSS 解析服务 rss2json.com 抓取公开新闻源（如 Simple Flying、Aviation Week 等）的 RSS 内容。当您浏览快讯时，您的浏览器会直接向 rss2json.com 发起请求以获取新闻数据，该服务可能按其自身政策记录标准的访问日志；本网站不通过该渠道采集任何访客信息。</p>
-      <p>7. <strong>托管平台（Cloudflare Pages）</strong>：本网站由 Cloudflare Pages 提供静态托管与 CDN 加速。Cloudflare 作为基础设施服务商，其网络边缘节点在传输过程中可能产生标准的访问日志（如 IP 地址、访问时间、请求路径），该日志属于托管平台的常规运维数据，本网站所有者不主动采集、不用于用户画像，也不向任何商业机构出售。</p>
-      <p>8. <strong>访问统计（Umami）</strong>：本网站接入 Umami 开源网站统计后台，用于了解页面访问量、来源渠道与访问趋势等宏观运行数据。Umami 为隐私友好型统计方案：不采集个人身份信息、不使用 Cookie、不进行跨站追踪、不生成用户画像，所有统计数据均为匿名聚合，仅用于网站维护者优化内容与体验，不会向任何第三方出售或共享。</p>
-      <p>9. <strong>AI 收藏分析（Kimi 大模型，经本站服务端代理）</strong>：当您使用「AI 收藏分析」功能时，本网站会将您当前设备本地存储中已收藏的机型清单（机型名称、类别、国家）及页面内置的全部机型列表先发送至本站 AI 服务端中台，再由服务端转发至 Kimi 大模型的文本生成接口，用于生成机库收藏洞察报告。传输内容仅包含上述机型清单文本，不包含您的设备信息、位置信息、浏览记录或任何其他本地数据；收藏清单始终保存在您自己的设备上，本网站不存储、不备份、不上传除上述 AI 分析请求以外的任何内容。第三方服务商将按其自身隐私政策处理该内容，生成的分析报告仅用于本次即时展示，本网站不保存任何报告记录。</p>
-      <p>10. <strong>反馈与建议（站内自营后台）</strong>：页面底部的「反馈与建议」入口用于收集访客对网站功能、内容、体验等方面的意见。您填写的反馈类型、反馈内容及选填的姓名与联系方式，将在您点击「提交反馈」后，通过本站自有的后端接口（部署于 Cloudflare Pages / Workers）直接提交并保存至本站自营后台数据库，仅网站维护者可见，不再经由任何第三方平台。同时，您的反馈内容会保存在您本机浏览器本地存储中，便于您在页面底部「我的反馈记录」中随时查看；联网时该入口会使用本机随机生成的匿名标识向站内后台查询您本人反馈的当前处理进度与站长回复（不包含姓名、电话、邮箱等联系方式）。若您填写了邮箱，受理与处理结果将通过邮件通知您。建议您不要在反馈中填写身份证号、银行账号、密码等敏感个人信息。</p>
-      <p>11. <strong>AI 机型故事（Kimi 大模型，经本站服务端代理）</strong>：当您在机型详情页点击「AI 机型故事」时，本网站会将所查看机型的名称、型号、类别、国家及页面内置的该机型百科资料（研发历史、技术特点、趣闻）先发送至本站 AI 服务端中台，再由服务端转发至 Kimi 大模型的文本生成接口，用于生成一段拟人化叙事故事。传输内容仅包含上述机型信息文本，不包含您的设备信息、位置信息、浏览记录、收藏清单或任何其他本地数据；生成的故事仅用于本次即时展示，本网站不保存任何记录。</p>
-      <p>12. <strong>机型投稿与推荐后端（Cloudflare）</strong>：当您使用「添加机型」并选择推荐时，相关机型资料会通过本网站自有的后端接口（部署于 Cloudflare Pages / Workers）提交并存储，用于站长审核与首页展示，不经由任何第三方商业平台。</p>
-      <p><strong>四、信息收集声明</strong></p>
-      <p>1. 本网站不主动收集您的任何个人信息，包括姓名、电话、邮箱、地址、位置、设备标识等。</p>
-      <p>2. 本网站不包含任何广告联盟代码、第三方统计埋点（如百度统计、Google Analytics）、Cookie 追踪、指纹识别或行为画像分析组件。页面内置一套纯本地的轻量行为记录机制：为优化浏览体验，会在您当前设备浏览器本地存储中记录访问事件（如页面浏览、收藏、点击、搜索关键词、屏幕分辨率、浏览器类型等）及一个随机生成的访客标识，该数据仅保存在您自己的设备上，不会上传至任何服务器或第三方，也不会用于跨站追踪或用户画像。</p>
-      <p>3. 您主动输入的内容（如 AI 问答问题）仅在您使用对应功能时按上文说明发生传输，本网站不保存。</p>
-      <p>4. 除「照片识机」功能需要您主动提供照片外，本网站不提供注册、登录、评论、留言等其他会采集信息的交互功能；您主动提供的照片仅按上文说明传输至 AI 服务进行本次识别，本网站不存储、不保留。</p>
-      <p>5. <strong>机型投稿与推荐（您主动提交）</strong>：当您使用「添加机型」功能并选择推荐时，本网站会收集您主动填写的机型信息（中文名称、型号、分类、国家、规格参数、中文简介）、您主动上传或填写的机型照片，以及一个在本机随机生成的匿名标识与提交时间。上述内容仅用于站长审核，审核通过后可能展示在公开首页并标注「该机型为用户添加」。</p>
-      <p>6. 上述过程不会收集您的姓名、电话、邮箱、位置等个人信息；匿名标识在本机随机生成、不含个人身份信息，仅用于您查看自己的推荐进度，您可在浏览器中清除本站点数据以删除该标识。</p>
-      <p>7. 您上传的照片仅用于机型审核与展示，不作其他用途；如您希望删除已提交的机型信息或照片，可通过页面底部「反馈与建议」联系维护者申请删除。</p>
-      <p>8. 上述投稿与推荐数据由本站托管于 Cloudflare 的后端接口接收与保存（详见第三部分第 12 条）。</p>
-      <p><strong>五、网站安全信息</strong></p>
-      <p>1. <strong>传输安全</strong>：本网站全站启用 HTTPS 加密传输（由 Cloudflare 提供证书），您与网站之间的所有数据传输均经过加密保护，可有效防止内容在传输途中被窃听、拦截或篡改。</p>
-      <p>2. <strong>托管防护</strong>：网站部署于 Cloudflare 全球网络，依托其 DDoS 防护、WAF 边缘防护与智能安全能力，持续抵御恶意攻击、爬虫与异常流量，保障网站稳定可用。</p>
-      <p>3. <strong>后台管理与访问统计（Umami）</strong>：为确保后台管理透明可控，本网站已接入 Umami 开源网站统计后台，用于了解页面访问量、来源渠道与访问趋势等宏观运行数据。Umami 是业内公认的隐私友好型统计方案：不采集个人身份信息、不使用 Cookie、不进行跨站追踪、不生成用户画像，所有统计数据均为匿名聚合，仅用于网站维护者优化内容与体验，不会向任何第三方出售或共享。</p>
-      <p>4. <strong>代码保护</strong>：本网站已实施前端代码保护措施，包括禁用右键菜单、禁用开发者工具快捷键、限制文本复制选择等，防止源码被轻易查看、复制与二次分发。需要说明的是，静态网页源码在技术层面最终可被获取，前端保护主要面向普通访客，无法绝对阻止具备专业技术的用户。</p>
-      <p>5. <strong>篡改与内容保护</strong>：本网站对线上页面实行版本化与指纹化管理，可识别页面内容是否被非授权修改。如发现冒用、篡改或仿冒本站内容的行为，网站维护者将保留通过托管平台日志、统计后台数据及法律途径追溯与追责的权利，切实维护页面内容与访客权益。</p>
-      <p>6. <strong>无后台风险面</strong>：网站无传统服务器后台、无数据库、无用户账号体系，攻击面极小；接入的 Umami 统计仅收集匿名聚合数据，不含可识别个人身份的信息，从根本上降低了数据泄露风险。</p>
-      <p>7. <strong>未来安全升级承诺</strong>：随着网络安全形势变化与技术发展，我们将持续升级网站的安全防护等级，包括但不限于：更新安全策略、强化传输加密、优化代码保护机制、升级统计与监控方案等，确保防护能力始终与风险水平相匹配。</p>
-      <p>8. <strong>个人访问安全承诺</strong>：我们郑重承诺，全力保护每一位访客的个人访问安全——您的浏览行为、本地数据与主动输入内容均受到加密传输、匿名统计与本地化存储的多重保护，本网站不以任何形式采集、留存或滥用您的个人信息，让您安心浏览、放心使用。</p>
-      <p>9. <strong>更新机制</strong>：网站功能与安全维护会持续进行，版本更新以页面顶部横幅形式告知，更新内容均为功能迭代、体验优化与安全加固。</p>
-      <p>10. <strong>浏览器安全提示</strong>：请确保您的浏览器为最新版本，以获得最佳的安全防护与浏览体验。</p>
-      <p><strong>六、未成年人保护</strong></p>
-      <p>本网站为航空文化展示类内容，内容健康向上，适合全年龄段浏览。网站不收集任何用户的年龄、身份等个人信息。</p>
-      <p><strong>七、协议确认与授权条款</strong></p>
-      <p>1. <strong>水印与版权标识</strong>：本网站页面下方展示网站英文水印及年份标识（© Aviation Collection 2026），作为网站版权与来源的识别标记。任何转载、引用本站内容时，须保留该水印标识并注明出处。</p>
-      <p>2. <strong>协议政策入口</strong>：本网站页面下方设有"协议政策"按钮，点击可随时查看本《隐私保护与网站安全说明》全文及其更新时间，便于您了解网站的数据处理与安全策略。</p>
-      <p>3. <strong>访问即同意</strong>：用户打开并访问本网站，即视为已阅读并同意上述全部条款，同时同意本网站在合理范围内进行访问统计、匿名数据分析及其他为保障网站运行与安全所必需的权限操作。如您不同意本说明中的任何条款，请停止使用本网站。</p>
-      <p>4. <strong>持续合规</strong>：本网站承诺，所有统计与分析行为均保持在"合理且必要"的范围内，绝不越界采集个人信息，并接受广大访客的监督。</p>
-      <p><strong>八、说明变更</strong></p>
-      <p>本说明可能随网站功能调整而更新，更新后将在页面中展示最新版本，更新日期以页面标注为准。若您对隐私保护有任何疑问，可通过下方联系方式与网站维护者沟通。</p>
-      <p><strong>九、意见反馈与联系方式</strong></p>
-      <p>欢迎各界朋友对本网站提出功能、内容或安全等方面的宝贵意见与建议，您的每一条反馈都是我们进步的动力。您可点击页面底部「反馈与建议」按钮在线提交（提交后内容直接进入本站自营后台，仅站长可见；您可在页面底部「我的反馈记录」中查看处理进度与站长回复），也可直接联系维护者。网站维护者微信号：<strong>15652760512</strong>。添加好友时请备注来意，以便我们及时、高效地为您服务。</p>
-      <p><strong>十、免责声明</strong></p>
-      <p>本网站展示的机型信息、历史资料及图片均来源于公开资料，仅供航空爱好者交流学习使用，不用于任何商业用途。如涉及版权问题，请联系维护者处理。</p>
+      <p><strong>一、网站性质与账号体系</strong></p>
+      <p>本网站是由个人维护的民航机型收藏展示项目，采用单文件静态网页技术构建，部署于 Cloudflare Pages 全球加速网络（CDN）。</p>
+      <p>与早期版本不同，本站现已建立<strong>用户账号体系</strong>：您可以使用「用户名 + 密码」注册登录，或使用「手机号 + 短信验证码」注册登录。账号数据存储于 Cloudflare KV 键值存储，由本站自营后端接口（部署于 Cloudflare Pages / Workers）读写，不接入任何第三方账号平台。</p>
+      <p><strong>二、账号信息（您主动提供）</strong></p>
+      <p>1. <strong>用户名</strong>：作为唯一登录标识，并可能在个人中心、阅读水印等位置展示。</p>
+      <p>2. <strong>密码</strong>：仅存储加盐哈希值（PBKDF2-SHA512），不保存明文，任何人（含站长）均无法读取您的原始密码。</p>
+      <p>3. <strong>手机号</strong>：用于短信验证码登录、账号找回与手机号变更校验。手机号为选填项，绑定后可用验证码方式登录。</p>
+      <p>4. <strong>昵称与头像</strong>：用于个人中心展示，均为选填，可随时修改。</p>
+      <p>5. <strong>您主动提交的内容</strong>：包括收藏机型、保存笔记、内测文章投票、文章读后评价、反馈与建议、机型投稿与推荐、黑名单申诉说明。</p>
+      <p><strong>三、账号行为数据</strong></p>
+      <p>为保障账号安全与站点秩序，系统会记录：注册时间、最近登录时间、登录次数、登录状态、账号状态（正常 / 限制）、手机号是否完成验证。上述数据仅用于账号安全校验、异常排查与违规处置，不用于广告投放或用户画像。</p>
+      <p><strong>四、收藏与保存数据</strong></p>
+      <p>1. <strong>登录状态下</strong>：您收藏的机型与保存的笔记保存在本站服务端，并与账号绑定，可在不同设备、不同浏览器登录同一账号后同步展示。</p>
+      <p>2. <strong>未登录状态下</strong>：收藏与保存仅写入您当前设备的浏览器本地存储（localStorage）临时键，不会上传服务器。登录成功后，系统会自动将本地临时收藏与保存合并至您的账号，合并完成后本地临时数据不再保留副本。</p>
+      <p>3. 您可随时在个人中心逐条移除收藏或保存内容，移除结果同步至服务端。</p>
+      <p><strong>五、AI 功能与记录</strong></p>
+      <p>1. 使用「问 AI」「AI 收藏分析」「AI 机型故事」「照片识机」等功能时，您输入的文本、当前收藏清单或上传的照片，会先发送至本站 AI 服务端中台，再由服务端转发至第三方大模型服务商 Kimi（Moonshot）的接口用于生成结果。传输内容不包含您的手机号、密码等账号凭据。</p>
+      <p>2. AI 功能<strong>仅对登录用户开放</strong>；未登录状态下点击相关入口会提示登录，不会发起任何模型请求。</p>
+      <p>3. 照片识机：您主动选择或拍摄的照片会先在设备本地压缩（最大 1024px、JPEG 格式），仅用于本次识别，识别完成后不长期保存。</p>
+      <p>4. 请在提问或照片中避免输入/拍摄身份证号、银行卡号、家庭住址、密码、人脸特写等敏感个人信息。</p>
+      <p><strong>六、手机号变更规则</strong></p>
+      <p>1. 已登录用户可申请绑定或更换手机号，每个账号<strong>最多变更 2 次</strong>（首次绑定不计入次数），次数用完后不再受理，如需继续变更请联系站长人工处理。</p>
+      <p>2. 每次绑定或变更均需向目标手机号发送短信验证码，校验通过后生效；个人中心会实时显示剩余可变更次数。</p>
+      <p>3. 系统会记录变更次数与最近变更时间，仅用于次数限制与安全审计。</p>
+      <p><strong>七、内测文章与读后评价</strong></p>
+      <p>1. 部分文章处于<strong>内测阶段，仅对登录用户开放</strong>；未登录访客无法查看内测正文。</p>
+      <p>2. 登录用户可参与内测文章的选题投票，每个账号每篇文章限投一票，投票结果仅用于确定后续选题方向。</p>
+      <p>3. 当您阅读完一篇文章（滚动至页面底部或停留超过 10 秒）后，会<strong>一次性</strong>弹出评价窗口，询问您对文章的看法，可打分、填写意见，也可直接跳过。该评价每个账号每篇文章仅询问一次，提交内容进入本站自营后台，用于内容质量改进，不对外公开、不用于商业用途。</p>
+      <p><strong>八、违规处置与黑名单</strong></p>
+      <p>1. 对于发布违法不良信息、恶意刷量、攻击站点、冒用他人身份、批量注册等违规行为，本站有权将相关账号或访问标识列入<strong>黑名单</strong>。</p>
+      <p>2. 被列入黑名单后，账号服务将被暂停。无论您正在进行何种操作（浏览、登录、使用 AI、发表反馈等），站内均会以明显弹窗告知：<strong>「已拉入黑名单，服务暂停，如有异议请联系站长」</strong>，并说明所涉违规类型，不存在“静默封禁”。</p>
+      <p>3. 如您对处置结果有异议，可在通知弹窗内填写申诉理由提交，申诉信息进入本站自营后台，仅站长可见，站长将人工复核。</p>
+      <p>4. 黑名单与申诉记录保留至处置结束或申诉处理完毕，用于防止恶意重复违规。</p>
+      <p><strong>九、其他本地数据与本地记录</strong></p>
+      <p>1. 除上述账号数据外，站点其他个性化数据（打卡记录、连续签到天数、成就徽章、主题偏好、页面浏览状态）仍仅保存在您当前设备的浏览器本地存储中，不上传服务器。</p>
+      <p>2. 页面内置一套纯本地的轻量行为记录机制：为优化浏览体验，会在您当前设备浏览器本地存储中记录访问事件（如页面浏览、收藏、点击、搜索关键词、屏幕分辨率、浏览器类型等）及一个随机生成的访客标识，该数据仅保存在您自己的设备上，不会上传至任何服务器或第三方，也不会用于跨站追踪或用户画像。</p>
+      <p>3. 清除方式：您可在浏览器设置中清除该网站的站点数据，或使用无痕模式访问；清除本地数据不影响已绑定账号的服务端数据。</p>
+      <p><strong>十、第三方服务说明</strong></p>
+      <p>1. <strong>AI 文本与视觉（Kimi / Moonshot，经本站服务端代理）</strong>：传输内容仅为您主动输入的问题文本、所选机型信息或压缩后的照片，第三方按其自身隐私政策处理。</p>
+      <p>2. <strong>短信服务（阿里云短信）</strong>：发送验证码时，您的手机号会提交至短信服务商用于下发短信，不用于其他用途。</p>
+      <p>3. <strong>托管、接口与账号存储（Cloudflare Pages / Workers / KV）</strong>：提供静态托管、CDN 加速、接口运行与账号数据存储。边缘节点会产生标准访问日志（IP、时间、请求路径），属平台常规运维数据，本站不用于用户画像、不向任何商业机构出售。</p>
+      <p>4. <strong>地图服务（本地渲染）</strong>：航线地图使用 Leaflet 渲染，底图为内置资源配合画布自绘，完全本地完成，不请求外部地图瓦片。</p>
+      <p>5. <strong>图片与媒体资源（维基百科等公开图源）</strong>：部分机型照片来自公开图源，并经第三方图片代理服务（wsrv.nl）优化加载；加载会产生第三方请求，本站不借此采集访客信息。</p>
+      <p>6. <strong>开源库与 CDN</strong>：Leaflet、字体、图标等可能从公共 CDN（unpkg、jsDelivr 等）加载，加载过程可能产生第三方网络请求。</p>
+      <p>7. <strong>航空快讯（rss2json.com）</strong>：由您的浏览器直接向 rss2json.com 请求公开 RSS 内容，该服务可能按其自身政策记录标准访问日志。</p>
+      <p>8. <strong>访问统计（Umami）</strong>：隐私友好型统计方案，不采集个人身份信息、不使用 Cookie、不做跨站追踪、不生成用户画像，统计数据为匿名聚合，仅用于优化内容与体验。</p>
+      <p><strong>十一、网站安全信息</strong></p>
+      <p>1. <strong>传输安全</strong>：全站启用 HTTPS 加密传输（Cloudflare 证书），防止内容在传输途中被窃听、拦截或篡改。</p>
+      <p>2. <strong>口令安全</strong>：账号密码仅以加盐哈希形式存储，登录令牌（token）具备有效期，失效后需重新登录；账号被限制或删除后令牌即时失效。</p>
+      <p>3. <strong>接口防护</strong>：后端接口需通过登录令牌校验，密钥不在前端暴露；管理权限仅站长持有。</p>
+      <p>4. <strong>托管防护</strong>：依托 Cloudflare 的 DDoS 防护、WAF 边缘防护持续抵御恶意攻击、爬虫与异常流量。</p>
+      <p>5. <strong>代码保护</strong>：前端实施了禁用右键菜单、限制开发者工具快捷键、限制文本复制等保护措施。需要说明的是，静态网页源码在技术层面最终可被获取，前端保护主要面向普通访客。</p>
+      <p>6. <strong>篡改与内容保护</strong>：线上页面实行版本化与指纹化管理，可识别页面内容是否被非授权修改。如发现冒用、篡改或仿冒本站内容，维护者保留通过托管平台日志、统计后台数据及法律途径追溯与追责的权利。</p>
+      <p>7. <strong>风险面说明</strong>：本站后端仅提供账号、收藏同步、反馈、投稿、投票、申诉等必要接口，不提供支付、实名认证等敏感能力；不要求您填写身份证、住址、银行卡等信息。</p>
+      <p>8. <strong>更新机制</strong>：网站功能与安全维护持续进行，更新以站内公告或页面顶部横幅告知。</p>
+      <p>9. <strong>浏览器安全提示</strong>：请确保浏览器为最新版本，以获得最佳安全防护与浏览体验。</p>
+      <p><strong>十二、您的权利</strong></p>
+      <p>1. <strong>查询与更正</strong>：可在个人中心查看并修改昵称、头像、用户名，绑定或更换手机号（受 2 次变更上限约束）。</p>
+      <p>2. <strong>删除</strong>：可逐条删除收藏与保存内容；如需注销账号并删除全部账号数据，可通过页面底部「反馈与建议」或站长微信提出，核实后 7 个工作日内处理。</p>
+      <p>3. <strong>撤回</strong>：可随时退出登录停止使用账号功能；清除浏览器站点数据可删除全部本地数据。</p>
+      <p>4. <strong>拒绝</strong>：除注册/登录与短信验证所必需的信息外，其余信息均为自愿提供，拒绝提供不影响基础浏览。</p>
+      <p><strong>十三、未成年人保护</strong></p>
+      <p>本网站为航空文化展示类内容，适合全年龄段浏览。未满 14 周岁的未成年人请在监护人指导下使用账号功能，不建议绑定非本人手机号。</p>
+      <p><strong>十四、协议确认与授权条款</strong></p>
+      <p>1. <strong>水印与版权标识</strong>：页面下方展示网站英文水印及年份标识（© Aviation Collection 2026），转载、引用本站内容时须保留该标识并注明出处。</p>
+      <p>2. <strong>协议政策入口</strong>：页面下方「协议政策」按钮可随时查看本说明全文及更新时间。</p>
+      <p>3. <strong>同意方式</strong>：访问本站即视为已阅读本说明；注册或登录账号，即视为同意本说明中关于账号信息、收藏同步、AI 使用、手机号校验、内容内测与黑名单处置的相关条款。如不同意，请停止使用账号功能。</p>
+      <p>4. <strong>持续合规</strong>：本站承诺所有数据处理均保持在“合理且必要”范围内，绝不越界采集个人信息，并接受访客监督。</p>
+      <p><strong>十五、说明变更</strong></p>
+      <p>本说明可能随网站功能调整而更新，更新后将在页面中展示最新版本，更新日期以页面标注为准。若您对隐私保护有任何疑问，可通过下方联系方式与维护者沟通。</p>
+      <p><strong>十六、意见反馈与联系方式</strong></p>
+      <p>您可点击页面底部「反馈与建议」在线提交（内容直达本站自营后台，仅站长可见；可在「我的反馈记录」中查看处理进度与站长回复），也可直接联系维护者。站长微信号：<strong>15652760512</strong>，添加好友时请备注来意。</p>
+      <p><strong>十七、免责声明</strong></p>
+      <p>本站展示的机型信息、历史资料及图片均来源于公开资料，仅供航空爱好者交流学习使用，不用于任何商业用途。如涉及版权问题，请联系维护者处理。</p>
     </div>
   </div>
 </div>
@@ -20567,14 +20614,54 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     ov.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   }
+  var BLOCK_TEXT = '已拉入黑名单，服务暂停，如有异议请联系站长';
+  var blockCfg = null;
   function showBlockCard(cfg) {
     var card = document.getElementById('siteBlockCard');
     if (!card) return;
+    blockCfg = cfg || {};
+    window.__siteBlocked = true;
     var txt = document.getElementById('blkText');
-    if (txt) txt.textContent = (cfg && cfg.reason) || '您的账号因违反平台规则已被限制访问。';
+    if (txt) txt.textContent = BLOCK_TEXT;
+    /* 违规原因：后台配置的 blockReason / reason 直接展示给用户 */
+    var reasonText = String((cfg && (cfg.blockReason || cfg.reason)) || '').trim();
+    var rEl = document.getElementById('blkReason');
+    if (rEl) {
+      if (reasonText) { rEl.style.display = ''; rEl.textContent = '限制原因：' + reasonText; }
+      else { rEl.style.display = 'none'; rEl.textContent = ''; }
+    }
     var btn = document.getElementById('blkAppealBtn');
     if (btn) {
       btn.onclick = function () {
+        var ta = document.getElementById('blkAppealText');
+        var note = ta ? String(ta.value || '').trim() : '';
+        btn.disabled = true;
+        btn.textContent = '提交中…';
+        fetch('/api/account', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'appeal', note: note, visitorId: getVisitorId(), page: location.href, reason: reasonText })
+        }).then(function (r) { return r.json().catch(function () { return null; }); }).then(function (res) {
+          btn.disabled = false;
+          btn.textContent = '提交申诉';
+          if (res && res.ok) {
+            btn.textContent = '已提交，等待站长处理';
+            if (ta) ta.value = '';
+            var tx = document.getElementById('blkText');
+            if (tx) tx.textContent = BLOCK_TEXT + '（申诉已收到）';
+          } else {
+            btn.textContent = '提交失败，请稍后重试';
+          }
+        }).catch(function () {
+          btn.disabled = false;
+          btn.textContent = '提交失败，请稍后重试';
+        });
+      };
+    }
+    var go = document.getElementById('blkAppealGo');
+    if (go) {
+      go.onclick = function () {
         window.open((cfg && cfg.appealUrl) || 'https://henry126923-admincenter.pages.dev', '_blank', 'noopener');
       };
     }
@@ -20582,6 +20669,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     card.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   }
+  /* 全站统一入口：任何模式（AI 各功能、登录、收藏、详情）检测到黑名单都走这里 */
+  window.__siteBlockCard = function (cfg) { try { showBlockCard(cfg || {}); } catch (e) {} };
   function applyAiGate(gated) {
     var btn = document.getElementById('aiChatBtn');
     if (!btn) return;
@@ -21761,19 +21850,30 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       if (!res || !res.ok) {
         var em = (res && (res.hint || res.message)) || '';
         setMsg(em || msgOf(res && res.error));
+        /* 黑名单账号：所有模式（含登录）统一弹站内通知 */
+        if (res && (res.error === 'account_banned' || res.error === 'banned' || res.blocked === true)) {
+          if (typeof window.__siteBlockCard === 'function') {
+            window.__siteBlockCard(res.blocked || res.block || { reason: em || msgOf(res.error) });
+          }
+        }
         return;
       }
       st.token = res.token;
       st.profile = res.profile;
       ls(TK, res.token);
+      unlockAiOnLogin();
       applyProfile();
       openMask('profile');
+      renderProfile();
+      autoMigrateTemp();
       var needBind = !!(res.needBindPhone || (res.profile && res.profile.needBindPhone));
       if (needBind) setTimeout(function () { maybeBindPrompt(res.profile); }, 420);
       var nick = (res.profile && (res.profile.displayName || res.profile.username)) || '';
       toast((isReg ? '注册成功，已自动登录：' : '登录成功，欢迎回来 ') + nick);
-      var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
-      if (pending > 0) setTimeout(function () { toast('检测到 ' + pending + ' 条临时数据，可在个人中心一键迁移'); }, 900);
+      setTimeout(function () {
+        var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
+        if (pending > 0) toast('检测到 ' + pending + ' 条临时收藏，正在同步到账号');
+      }, 600);
     }).catch(function () {
       btn.disabled = false;
       setMode(st.mode);
@@ -21893,6 +21993,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       btn.textContent = '绑定手机号';
       if (!res || !res.ok) {
         bindMsg((res && (res.hint || res.message)) || msgOf(res && res.error));
+        /* 更换次数用尽：直接告知上限，不再让用户反复尝试 */
+        if (res && res.error === 'phone_change_limit') renderProfile();
         return;
       }
       st.profile = res.profile || st.profile;
@@ -21901,7 +22003,12 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       sessionStorage.removeItem('gc_bind_skip');
       closeBind();
       renderProfile();
-      toast('手机号绑定成功，之后不再提示绑定');
+      var left = (res && res.remaining !== undefined) ? Number(res.remaining) : null;
+      if (res && res.changed) {
+        toast('手机号已更换' + (left !== null ? '，还可更换 ' + left + ' 次' : ''));
+      } else {
+        toast('手机号绑定成功，之后不再提示绑定');
+      }
     }).catch(function () {
       btn.disabled = false;
       btn.textContent = '绑定手机号';
@@ -21941,6 +22048,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   function renderProfile() {
     var p = st.profile;
     if (!p) return;
+    /* 登录后自动合并未登录期间的本地临时收藏，避免跨设备/跨会话不同步 */
+    try { autoMigrateTemp(); } catch (e) {}
     $('gcPfAvatar').src = p.avatar || PRESETS[0];
     $('gcPfName').textContent = p.displayName || p.username;
     $('gcPfUid').textContent = 'UID ' + p.uid;
@@ -21979,14 +22088,29 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     }
     var bindBtn = $('gcPfBind');
     if (bindBtn) {
-      bindBtn.style.display = p.needBindPhone ? '' : 'none';
-      bindBtn.textContent = (p.phone && !p.phoneVerified) ? '验证手机号' : '绑定手机号';
+      bindBtn.style.display = '';
+      var leftCh = Math.max(0, Number(p.phoneChangeRemaining === undefined ? 2 : p.phoneChangeRemaining));
+      if (!p.phone) {
+        bindBtn.textContent = '绑定手机号';
+        bindBtn.disabled = false;
+      } else if (!p.phoneVerified) {
+        bindBtn.textContent = '验证手机号';
+        bindBtn.disabled = false;
+      } else if (leftCh > 0) {
+        bindBtn.textContent = '更换手机号（剩 ' + leftCh + ' 次）';
+        bindBtn.disabled = false;
+      } else {
+        bindBtn.textContent = '更换次数已用尽';
+        bindBtn.disabled = true;
+      }
     }
     var phTip = $('gcPfPhoneTip');
     if (phTip) {
+      var chLeft = Math.max(0, Number(p.phoneChangeRemaining === undefined ? 2 : p.phoneChangeRemaining));
+      var chNote = p.phone ? ('手机号可更换 ' + chLeft + ' 次（每账号最多 2 次，每次需短信验证码）。') : '';
       phTip.textContent = p.needBindPhone
-        ? '绑定后可用验证码登录、找回账号，并停止绑定提醒。'
-        : '手机号已验证，可用验证码登录与找回账号。';
+        ? '绑定后可用验证码登录、找回账号，并停止绑定提醒。' + (p.phone ? ' ' + chNote : '')
+        : '手机号已验证，可用验证码登录与找回账号。' + (chNote ? ' ' + chNote : '');
     }
 
     var mig = $('gcPfMigrate');
@@ -22005,6 +22129,10 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       return;
     }
     box.innerHTML = '';
+    if (!(window.aircrafts && window.aircrafts.length)) {
+      clearTimeout(box._retry);
+      box._retry = setTimeout(function () { renderList(listId, countId, ids, kind); }, 400);
+    }
     ids.forEach(function (id) {
       var a = findAircraft(id);
       var chip = document.createElement('span');
@@ -22020,11 +22148,48 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       chip.addEventListener('click', function (e) {
         if (e.target === del) return;
         closeMask();
-        if (typeof window.openDetail === 'function') window.openDetail(id);
+        if (typeof window.openDetail === 'function') { window.openDetail(id); return; }
+        var a2 = findAircraft(id);
+        location.hash = (a2 && (a2.slug || a2.id)) || id;
       });
       box.appendChild(chip);
     });
   }
+
+  /* 登录即默认解锁全部 AI 功能：写解锁标记 + 移除按钮灰置 + 恢复按钮文案 */
+  function unlockAiOnLogin() {
+    try { if (window.__accessControlUnlock) window.__accessControlUnlock(); } catch (e) {}
+    try { localStorage.setItem('aviation_ai_unlocked', '1'); } catch (e) {}
+    var btn = document.getElementById('aiChatBtn');
+    if (btn) btn.classList.remove('ai-gated');
+    var span = document.getElementById('aiChatBtnText');
+    if (span) span.textContent = String(span.textContent || '').replace('AI 未解锁', '问 AI').replace('AI locked', 'Ask AI');
+  }
+  try { window.__unlockAiOnLogin = unlockAiOnLogin; } catch (e) {}
+  /* 退出登录：撤销解锁，AI 入口重新灰置（未登录不可用任何 AI 功能） */
+  function lockAiOnLogout() {
+    try { localStorage.removeItem('aviation_ai_unlocked'); } catch (e) {}
+    var btn = document.getElementById('aiChatBtn');
+    if (btn) btn.classList.add('ai-gated');
+    var span = document.getElementById('aiChatBtnText');
+    if (span) span.textContent = String(span.textContent || '').replace('问 AI', 'AI 未解锁').replace('Ask AI', 'AI locked');
+  }
+  /* 登录后自动把未登录期间暂存的收藏/保存并入账号，避免出现“收藏没同步” */
+  function autoMigrateTemp() {
+    if (!st.token) return;
+    var ef = jget('gc_temp_favs') || [], es = jget('gc_temp_saved') || [];
+    if (!ef.length && !es.length) return;
+    api('migrate', { favorites: ef, saved: es }).then(function (res) {
+      if (!res || !res.ok) return;
+      st.profile = res.profile;
+      jset('gc_temp_favs', []); jset('gc_temp_saved', []);
+      renderProfile();
+      var d = res.migrated || {};
+      var n = (d.favorites || 0) + (d.saved || 0);
+      if (n > 0) toast('已把 ' + n + ' 条本地收藏同步到账号');
+    }).catch(function () {});
+  }
+  try { window.__autoMigrateTemp = autoMigrateTemp; window.__renderProfile = renderProfile; } catch (e) {}
 
   function saveAvatar(src) {
     api('update', { avatar: src }).then(function (res) {
@@ -22210,6 +22375,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       api('logout', {}).finally(function () {
         st.token = null; st.profile = null;
         try { localStorage.removeItem(TK); } catch (e) {}
+        lockAiOnLogout();
         applyProfile(); closeMask(); toast('已退出登录');
       });
     });
@@ -22235,8 +22401,23 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     if (tk) {
       st.token = tk;
       api('profile', { token: tk }).then(function (res) {
-        if (res && res.ok) { st.profile = res.profile; applyProfile(); if (res.profile && res.profile.needBindPhone) sessionStorage.removeItem('gc_bind_skip'); }
-        else { st.token = null; try { localStorage.removeItem(TK); } catch (e) {} applyProfile(); }
+        if (res && res.ok) {
+          st.profile = res.profile;
+          if (typeof window.__unlockAiOnLogin === 'function') window.__unlockAiOnLogin();
+          applyProfile();
+          if (typeof window.__renderProfile === 'function') window.__renderProfile();
+          if (typeof window.__autoMigrateTemp === 'function') window.__autoMigrateTemp();
+          if (res.profile && res.profile.needBindPhone) sessionStorage.removeItem('gc_bind_skip');
+        }
+        else {
+          st.token = null; try { localStorage.removeItem(TK); } catch (e) {} applyProfile();
+          /* 打开页面即检测黑名单，避免静默封禁 */
+          if (res && (res.error === 'account_banned' || res.error === 'banned' || res.blocked === true)) {
+            if (typeof window.__siteBlockCard === 'function') {
+              window.__siteBlockCard(res.blocked || res.block || { reason: (res && (res.hint || res.message)) || '账号已被限制' });
+            }
+          }
+        }
       }).catch(function () {});
     } else applyProfile();
   });

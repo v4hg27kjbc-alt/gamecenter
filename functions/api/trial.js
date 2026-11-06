@@ -108,8 +108,13 @@ export async function onRequestGet(context) {
   const catalog = TRIAL_DOC.chapters.map(function (c) {
     return { id: c.id, title: c.title, free: !!c.free };
   });
-  const preview = TRIAL_DOC.chapters.filter(function (c) { return c.free; })
+  /* 内测阶段：文章正文仅登录用户可见，未登录不返回任何正文内容 */
+  const authG = request.headers.get('authorization') || '';
+  const tkG = (authG.replace(/^Bearer\s+/i, '') || url.searchParams.get('token') || '').trim();
+  const meG = tkG ? await verifyToken(env, tkG) : null;
+  const previewAll = TRIAL_DOC.chapters.filter(function (c) { return c.free; })
     .map(function (c) { return { id: c.id, title: c.title, body: c.body }; });
+  const preview = meG ? previewAll : [];
 
   return ok({
     ok: true,
@@ -117,8 +122,9 @@ export async function onRequestGet(context) {
     doc: { title: TRIAL_DOC.title, subtitle: TRIAL_DOC.subtitle, project: TRIAL_DOC.project, meta: TRIAL_DOC.meta },
     chapters: catalog,
     preview: preview,
+    needLogin: !meG,
     locked: catalog.filter(function (c) { return !c.free; }).length
-  }, { 'Cache-Control': 'public, max-age=60' });
+  }, { 'Cache-Control': meG ? 'private, no-store' : 'public, max-age=60' });
 }
 
 export async function onRequestPost(context) {
@@ -132,6 +138,18 @@ export async function onRequestPost(context) {
   if (action === 'content') {
     const payload = await verifyToken(env, token);
     if (!payload) return fail('login_required', '请先登录后解锁全文', 401, cors.headers);
+    try {
+      const kvB = env.SMS_KV || env.GC_USERS || env.ACCOUNT_KV || null;
+      if (kvB) {
+        const rawB = await kvB.get('acct:u:' + payload.u);
+        if (rawB) {
+          const uB = JSON.parse(rawB);
+          if (String(uB.status || '') === 'banned') {
+            return fail('account_banned', '已拉入黑名单，服务暂停，如有异议请联系站长', 403, cors.headers);
+          }
+        }
+      }
+    } catch (e) {}
     return ok({
       ok: true,
       uid: payload.u,
