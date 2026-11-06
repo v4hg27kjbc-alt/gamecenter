@@ -158,6 +158,10 @@ function publicProfile(u) {
     saved: u.saved || [],
     tier: u.tier || 'visitor',
     migrated: !!u.migrated,
+    phone: u.phone ? (String(u.phone).slice(0, 3) + '****' + String(u.phone).slice(-4)) : '',
+    lastLoginAt: u.lastLoginAt || '',
+    loginCount: Number(u.loginCount || 0) || 0,
+    status: u.status || 'active',
   };
 }
 
@@ -172,7 +176,11 @@ async function userOfToken(env, kv, request, body) {
   if (!payload) return null;
   const raw = await kv.get('acct:u:' + payload.u);
   if (!raw) return null;
-  try { return JSON.parse(raw); } catch (e) { return null; }
+  try {
+    const u = JSON.parse(raw);
+    if (u && String(u.status || '') === 'banned') return null;
+    return u;
+  } catch (e) { return null; }
 }
 
 export async function onRequest(context) {
@@ -217,6 +225,7 @@ export async function onRequest(context) {
       uid, username, displayName: username, salt, pass, phone,
       avatar: String(body.avatar || '').slice(0, MAX_AVATAR),
       createdAt: now, favorites: [], saved: [], tier: 'member', migrated: false,
+      status: 'active', loginCount: 0, logins: [],
     };
     await kv.put('acct:u:' + uid, JSON.stringify(user));
     await kv.put('acct:n:' + lower, uid);
@@ -260,7 +269,17 @@ export async function onRequest(context) {
     const raw = await kv.get('acct:u:' + uid);
     if (!raw) return bad(ERR.noUser, origin, null, 404);
     const user = JSON.parse(raw);
-    user.lastLoginAt = new Date().toISOString();
+    if (String(user.status || '') === 'banned') {
+      return bad('account_banned', origin, { hint: '该账号已被限制登录，请联系管理员' }, 403);
+    }
+    const nowAt = new Date().toISOString();
+    user.lastLoginAt = nowAt;
+    user.loginCount = (Number(user.loginCount) || 0) + 1;
+    const ip = request.headers.get('cf-connecting-ip') || '';
+    const ua = (request.headers.get('user-agent') || '').slice(0, 120);
+    const hist = Array.isArray(user.logins) ? user.logins : [];
+    hist.unshift({ at: nowAt, ip: ip, ua: ua, mode: mode });
+    user.logins = hist.slice(0, 10);
     await kv.put('acct:u:' + user.uid, JSON.stringify(user));
     const token = await issueToken(env, user.uid);
     return ok({ token, profile: publicProfile(user) }, origin);
