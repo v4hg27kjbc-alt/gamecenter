@@ -6260,6 +6260,15 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
 .ai-gated { opacity: .45 !important; filter: grayscale(.7); pointer-events: none !important; cursor: not-allowed !important; }
 .ai-gated-tip { font-size: 11px; color: #8a94a8; margin-top: 2px; }
 </style>
+<style id="gcTrialEntryStyle">.gc-trial-btn{display:inline-flex;align-items:center;gap:5px;width:auto!important;padding:0 11px!important;border-radius:999px!important;font-size:12px;text-decoration:none;}
+.gc-trial-btn .gc-trial-dot{width:6px;height:6px;border-radius:50%;background:#1f6feb;box-shadow:0 0 0 3px rgba(31,111,235,.15);}
+.gc-pf-trial{display:flex;align-items:center;gap:12px;justify-content:space-between;margin:10px 0 4px;padding:12px 14px;border:1px solid #e2edfb;background:#f4f8fe;border-radius:12px;}
+.gc-pf-trial-t{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.gc-pf-trial-t b{font-size:13.5px;color:#12243a;}
+.gc-pf-trial-t span{font-size:12px;color:#41556e;}
+.gc-pf-trial-a{flex:none;background:#1f6feb;color:#fff!important;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:9px;text-decoration:none!important;}
+.gc-pf-trial-a:hover{background:#1558c0;}
+</style>
 </head>
 <body class="mat-on" data-version="20261001-v70">
 <style id="gcLogoIntroStyle">
@@ -6425,6 +6434,7 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
       <p class="gc-acct-hint">注册即生成专属 UID（注册日期 + 序号，如 GC261106-001）。试运营期间所有功能免费。</p>
     </div>
     <div id="gcAcctProfile" style="display:none">
+      <div class="gc-pf-trial"><div class="gc-pf-trial-t"><b>深度研读 · 免费试运营</b><span>已开放全文在线阅读与带溯源码下载</span></div><a class="gc-pf-trial-a" href="/trial.html">进入</a></div>
       <div class="gc-pf-head">
         <img class="gc-pf-avatar" id="gcPfAvatar" alt="头像" title="点击更换头像">
         <div>
@@ -6523,6 +6533,7 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
     <button class="theme-toggle-btn letter-btn" id="letterBtn" aria-label="一封信" title="一封信"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg> 一封信</button>
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
     <button class="theme-toggle-btn" id="gcAdminTrigger" aria-label="管理后台" title="管理后台"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 2.4L17 4l.6 2.6L20 9l-1 3 1 3-2.4 2.4L17 20l-2.6-.6L12 22l-2.4-2.4L7 20l-.6-2.6L4 15l1-3-1-3 2.4-2.4L7 4l2.6.6L12 2z"/><path d="M9 12l2 2 4-4"/></svg> 管理后台</button>
+    <a class="theme-toggle-btn gc-trial-btn" href="/trial.html" aria-label="免费试运营" title="免费试运营 · 深度研读"><span class="gc-trial-dot"></span>试运营</a>
     <button class="theme-toggle-btn gc-acct-btn" id="gcAcctBtn" aria-label="登录或个人中心" title="登录 / 个人中心">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span class="gc-acct-name" id="gcAcctBtnText">登录</span>
