@@ -257,11 +257,16 @@ async function verifyToken(env, token) {
   } catch (e) { return null; }
 }
 
+/**
+ * 密码哈希（轻量加盐 SHA-256）
+ * 历史实现用 PBKDF2(120000 迭代)，在 Cloudflare Pages Functions 免费额度下会超出 CPU 时间限制，
+ * 直接抛异常导致接口返回 500「服务内部异常」（注册 / 登录 / 改密全部不可用）。
+ * 改为两次加盐 SHA-256：CPU 消耗可忽略，输出带 s1$ 版本前缀便于后续升级。
+ */
 async function hashPassword(password, salt) {
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: new TextEncoder().encode(salt), iterations: 120000, hash: 'SHA-256' }, key, 256);
-  return b64u(bits);
+  const first = await sha256hex('s1:' + String(password || '') + '::' + String(salt || ''));
+  const second = await sha256hex(first + '::' + String(salt || '') + ':gc-acct');
+  return 's1$' + second;
 }
 
 function normName(name) {
@@ -353,6 +358,16 @@ async function userOfToken(env, kv, request, body) {
 }
 
 export async function onRequest(context) {
+  try {
+    return await handleRequest(context);
+  } catch (e) {
+    // 未捕获异常给出可读原因，避免前端只看到笼统的“服务内部异常”无法排查
+    const msg = (e && (e.message || e.name)) ? String(e.message || e.name).slice(0, 200) : '未知错误';
+    return bad('internal_error', (context.request.headers.get('origin') || '*'), { hint: '账号服务异常：' + msg }, 500);
+  }
+}
+
+async function handleRequest(context) {
   const { request, env } = context;
   const origin = request.headers.get('origin') || '*';
 
