@@ -65,32 +65,6 @@ import { degradeJson, degradeSse, sseFromText, sseQueueEvent, sseChunk, sseDone,
 const FEATURES = ['chat', 'photo', 'compare', 'translate', 'summary', 'code', 'story', 'topic_ideas'];
 const DEGRADE_CACHE_TTL = 60;
 
-/* 解析站点账号 token（Authorization: Bearer / X-Acct-Token），返回 uid；无登录态返回 '' */
-async function acctUidOf(env, request) {
-  try {
-    var auth = request.headers.get('authorization') || '';
-    var token = (request.headers.get('x-acct-token') || auth.replace(/^Bearer\s+/i, '') || '').trim();
-    if (!token) return '';
-    var parts = token.split('.');
-    if (parts.length !== 3 || parts[0] !== 'v1') return '';
-    var secret = (env && (env.TOKEN_SECRET || env.AI_HASH_SALT)) || 'gc-account-fallback-secret-v1';
-    var key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    var sigBuf = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(parts[1]));
-    var bytes = new Uint8Array(sigBuf);
-    var str = '';
-    for (var i = 0; i < bytes.length; i++) str += String.fromCharCode(bytes[i]);
-    var expect = btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    if (expect !== parts[2]) return '';
-    var p = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    var pad = p.length % 4 ? '='.repeat(4 - (p.length % 4)) : '';
-    var payload = JSON.parse(decodeURIComponent(escape(atob(p + pad))));
-    if (!payload || !payload.u) return '';
-    if (payload.e && payload.e < Math.floor(Date.now() / 1000)) return '';
-    return String(payload.u);
-  } catch (e) { return ''; }
-}
-
-
 /**
  * 主站形态的降级响应（HTTP 200 + ok:true）。
  *
@@ -208,13 +182,6 @@ export async function handleChat(context, options) {
 
   var feature = FEATURES.indexOf(String(input.feature || '')) >= 0 ? String(input.feature) : 'chat';
 
-  /* BYOK：用户自带 API Key（仅内存透传，服务端不存储、不写入任何日志/缓存） */
-  var byokKey = '';
-  if (input.byokKey && typeof input.byokKey === 'string') {
-    var bk = input.byokKey.trim();
-    if (bk.length >= 20 && bk.length <= 200 && /^[A-Za-z0-9_\-\.]+$/.test(bk)) byokKey = bk;
-  }
-
   /* ---------- 5. 分级路由（含上游 provider 选择：缺省 kimi，向后兼容） ---------- */
   /* 全站限定 Kimi：显式请求 zhipu 时直接返回「暂不可用」，不再路由智谱上游 */
   if (input.provider && String(input.provider) === 'zhipu') {
@@ -248,10 +215,8 @@ export async function handleChat(context, options) {
    * 额度用尽 → 直接 429 + quota_exceeded，绝不静默降级到其它模型。
    * 计数时机为「上游成功返回之后」，故缓存命中 / 预生成命中 / 降级兜底都不消耗额度。
    */
-  /* BYOK：用户自带 Key 时不计站点额度、不读共享缓存（避免不同用户结果互串） */
-  var flagshipCall = !byokKey && isFlagshipRoute(route.tier, route.provider, route.model);
-  var acctUid = await acctUidOf(env, request);
-  var quotaScopeRef = await resolveQuotaScope(env, { uid: acctUid, visitorId: visitorId, ip: ipRaw, model: route.model });
+  var flagshipCall = isFlagshipRoute(route.tier, route.provider, route.model);
+  var quotaScopeRef = await resolveQuotaScope(env, { visitorId: visitorId, ip: ipRaw });
   var quotaState = await readQuota(env, quotaScopeRef);
   if (flagshipCall && quotaState.enabled && quotaState.remaining <= 0) {
     safeLog(context, {
@@ -298,7 +263,7 @@ export async function handleChat(context, options) {
   var useCache = input.useCache !== false && flags.ai_cache !== false;
   var imageHash = validated.hasImage ? await imageHashOf(validated.messages) : '';
   var fp = '';
-  var cacheEligible = !byokKey && useCache && cacheEnabled(env, validated.hasImage);
+  var cacheEligible = useCache && cacheEnabled(env, validated.hasImage);
 
   if (useCache) {
     fp = await buildFingerprint({
@@ -447,7 +412,6 @@ export async function handleChat(context, options) {
       requestId: requestId,
       visitorHash: visitorHash,
       ipHash: ipHash,
-      byokKey: byokKey,
       started: started,
       alt: alt,
       flagshipCall: flagshipCall,
@@ -456,7 +420,7 @@ export async function handleChat(context, options) {
     });
   }
 
-  var upstream = await callUpstream(env, { byokKey: byokKey,
+  var upstream = await callUpstream(env, {
     model: route.model,
     messages: upstreamMessages,
     params: params,
@@ -698,7 +662,7 @@ function streamUpstream(info) {
         var queueLog = { waitMs: 0, retried: 0, exhausted: false };
         send(sseQueueEvent({ stage: 'queued', model: info.route.model, tier: info.route.tier, provider: info.route.provider }));
 
-        var upstream = await callUpstream(info.env, { byokKey: info.byokKey,
+        var upstream = await callUpstream(info.env, {
           model: info.route.model,
           messages: info.upstreamMessages,
           params: info.params,
