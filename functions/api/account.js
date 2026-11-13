@@ -864,7 +864,7 @@ async function handleRequest(context) {
     const want = (env && (env.ADMIN_TOKEN || env.TOKEN_SECRET)) || '';
     const isAdmin = (ck && /mv_admin=/.test(ck)) || !!(want && h && h === want);
     if (!isAdmin) return bad('unauthorized', origin, null, 401);
-    const dry = url.searchParams.get('dry') === '1';
+    const dry = String(body.dry || '') === '1' || body.dry === true;
     let cursor = null;
     let scanned = 0;
     let changed = 0;
