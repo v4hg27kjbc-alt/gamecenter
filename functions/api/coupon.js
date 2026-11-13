@@ -16,6 +16,8 @@
  * 「先标记后返回」并二次校验，正常使用（人工输入券码）不会触发该场景。
  */
 
+import { normProjectKeys, couponAllowsProject, projectTitle } from './_lib/data/projects.js';
+
 const KV_NAME = 'SMS_KV';
 const MAX_COUPONS_PER_USER = 200;
 
@@ -182,7 +184,9 @@ export async function onRequest(context) {
       status: status,
       type: String(rec.type || '通用券'),
       value: String(rec.value || ''),
-      note: String(rec.note || '')
+      note: String(rec.note || ''),
+      projectKeys: Array.isArray(rec.projectKeys) ? rec.projectKeys : [],
+      projectTitles: (Array.isArray(rec.projectKeys) ? rec.projectKeys : []).map(projectTitle)
     }, origin);
   }
 
@@ -203,6 +207,18 @@ export async function onRequest(context) {
     if (String(rec.status || '') === 'used') return bad('coupon_used', origin, { hint: '该券码已被使用，如有疑问请联系站长' });
     if (isExpired(rec)) return bad('coupon_expired', origin, { hint: '该券码已过期' });
 
+    // 关联项目校验：券码配置了 projectKeys 时，只允许在关联项目内兑换
+    const projList = Array.isArray(rec.projectKeys) ? rec.projectKeys : [];
+    const reqKey = String(body.projectKey || '').trim().toLowerCase();
+    if (projList.length && !couponAllowsProject(rec, reqKey)) {
+      return bad('coupon_project_mismatch', origin, {
+        hint: reqKey
+          ? ('该券码仅可用于：' + projList.map(projectTitle).join('、') + '，与当前项目不匹配')
+          : ('该券码仅限指定项目兑换：' + projList.map(projectTitle).join('、')),
+        projectKeys: projList
+      });
+    }
+
     const mine = Array.isArray(user.coupons) ? user.coupons : [];
     const dup = mine.some(function (c) { return normCode(c && c.code) === code; });
     if (dup) return ok({ already: true, coupons: mine }, origin);
@@ -218,6 +234,7 @@ export async function onRequest(context) {
       type: String(rec.type || '通用券'),
       value: String(rec.value || ''),
       note: String(rec.note || ''),
+      projectKeys: projList,
       batch: String(rec.batch || ''),
       prefix: String(rec.prefix || ''),
       createdAt: String(rec.createdAt || ''),
