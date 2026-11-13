@@ -51,6 +51,21 @@
   a.read{display:inline-block;margin-top:12px;padding:11px 22px;border-radius:10px;background:#0f766e;color:#fff;text-decoration:none;font-size:14px}
   .foot{text-align:center;font-size:12px;color:#94a3b8;margin-top:22px;line-height:1.9}
   .foot a{color:#64748b;text-decoration:none}
+  .modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:999;backdrop-filter:blur(2px)}
+  .modal.show{display:flex}
+  .receipt{background:#fff;border-radius:18px;max-width:430px;width:100%;padding:24px 20px;box-shadow:0 24px 60px rgba(15,23,42,.32);max-height:92vh;overflow:auto}
+  .rt{text-align:center}
+  .rt h2{font-size:19px;color:#0f172a;display:block;margin:0}
+  .rt p{font-size:12.5px;color:#94a3b8;margin-top:4px}
+  .rrow{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:8px 0;border-bottom:1px dashed #e8edf6}
+  .rrow span{color:#94a3b8;flex:0 0 auto}
+  .rrow b{color:#1e293b;font-weight:600;text-align:right;word-break:break-all}
+  .codebox{margin-top:14px;background:#f8fafc;border:1.5px dashed #c7d2fe;border-radius:12px;padding:14px;text-align:center}
+  .codebox .cd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;letter-spacing:2px;color:#4338ca;font-weight:700;word-break:break-all;margin-top:4px}
+  .once{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:12.5px;border-radius:10px;padding:9px 11px;margin-top:11px;line-height:1.65}
+  .mini{display:inline-block;margin:10px 4px 0;border:0;border-radius:9px;padding:9px 16px;font-size:13px;cursor:pointer;background:#eef2ff;color:#4338ca;font-weight:600}
+  .mini.solid{background:#0f766e;color:#fff}
+  .mfoot{font-size:11.5px;color:#94a3b8;text-align:center;margin-top:12px;line-height:1.8}
 </style>
 </head>
 <body>
@@ -133,13 +148,43 @@
     <p style="font-size:13.5px;color:#475569;margin-top:8px">订单号 <span class="oid" id="orderNo">—</span></p>
     <p class="status" id="statusLine">正在核对到账状态…</p>
     <div id="readSlot"></div>
-    <button class="primary" id="refreshBtn" style="margin-top:18px;background:#eef2ff;color:#4338ca;box-shadow:none">刷新开通状态</button>
-    <p class="hint" style="margin-top:12px">到账核对通常数分钟内完成；若 30 分钟后仍未开通，请带上订单号联系站长。</p>
+    <button class="mini solid" id="receiptBtn" style="margin-top:16px">查看付款回执单</button>
+    <button class="mini" id="refreshBtn">刷新开通状态</button>
+    <p class="hint" style="margin-top:12px">到账核对通常数分钟内完成；若 30 分钟后仍未开通，请带上订单号联系站长。<br>兑换码只显示一遍，之后可在首页「我的」→「我的兑换」查看兑换记录。</p>
   </div>
 
   <div class="foot">
     民航客机收藏馆 · 报告内容为独立研究整理，与波音公司无隶属关系<br>
     <a href="/">返回首页</a> · <a href="/read/737.html">已有券码？直接阅读</a> · <a href="/privacy.html">隐私协议</a>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="receipt">
+    <div class="rt">
+      <div class="tick" id="rTick" style="width:54px;height:54px;line-height:54px;font-size:27px;margin-bottom:12px">✓</div>
+      <h2>付款回执单</h2>
+      <p id="rSub">支付已完成，并已通过到账核对</p>
+    </div>
+    <div style="margin-top:16px">
+      <div class="rrow"><span>订单号</span><b id="rNo">—</b></div>
+      <div class="rrow"><span>商品</span><b id="rProduct">—</b></div>
+      <div class="rrow"><span>金额</span><b id="rPrice">¥5</b></div>
+      <div class="rrow"><span>下单时间</span><b id="rTime">—</b></div>
+      <div class="rrow" style="border-bottom:0"><span>支付状态</span><b id="rStatus" style="color:#047857">已完成</b></div>
+    </div>
+    <div class="codebox">
+      <div style="font-size:12px;color:#94a3b8">阅读兑换码</div>
+      <div class="cd" id="codeVal">—</div>
+      <div>
+        <button class="mini solid" id="copyBtn">复制兑换码</button>
+        <button class="mini" id="readBtn">进入阅读</button>
+      </div>
+    </div>
+    <div class="once" id="onceTip">此兑换码只显示一遍，请立即复制保存。关闭回执后，可在首页「我的」→「我的兑换」查看兑换记录，凭记录联系站长可找回。</div>
+    <div class="once" id="maskedTip" style="display:none;background:#f8fafc;border-color:#e2e8f0;color:#64748b">为确保账户安全，兑换码仅首次显示，此处仅展示脱敏码。可在首页「我的」→「我的兑换」查看兑换记录。</div>
+    <button class="primary" id="closeBtn" style="margin-top:14px">我已保存，关闭回执</button>
+    <div class="mfoot">可在首页「我的」→「我的兑换」「我购买的商品」查看本笔记录<br>如有疑问，请带订单号在「我购买的商品」内联系站长反馈</div>
   </div>
 </div>
 
@@ -150,6 +195,7 @@ function afdianUrl(oid){
 }
 var $ = function (id) { return document.getElementById(id); };
 var ORDER_KEY = 'gc_pay_order_737';
+var CONTACT_KEY = 'gc_pay_contact_737';
 
 function setBtn() {
   var b = $('payBtn');
@@ -161,29 +207,100 @@ function setBtn() {
 $('agree').addEventListener('change', setBtn);
 setBtn();
 
+function fmtTime(iso) {
+  if (!iso) return '—';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  var p = function (n) { return n < 10 ? '0' + n : '' + n; };
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function curOrder() {
+  var q = new URLSearchParams(location.search);
+  return localStorage.getItem(ORDER_KEY) || q.get('order') || '';
+}
+
 function showDone(id) {
   $('buyArea').style.display = 'none';
   $('doneArea').classList.add('show');
-  $('orderNo').textContent = id || '—';
   if (id) localStorage.setItem(ORDER_KEY, id);
+  $('orderNo').textContent = id || curOrder() || '—';
   pollStatus();
 }
 
+var receiptOpen = false;
+var receiptDone = false;
+
+function copyText(t) {
+  if (!t) return;
+  var done = function () { $('copyBtn').textContent = '已复制 ✓'; };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done, function () { fallbackCopy(t); done(); });
+  } else { fallbackCopy(t); done(); }
+}
+function fallbackCopy(t) {
+  var ta = document.createElement('textarea');
+  ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) { }
+  document.body.removeChild(ta);
+}
+
+function openReceipt(d) {
+  var o = d.order || {};
+  var once = !!d.once;
+  $('rNo').textContent = o.orderNo || o.id || curOrder() || '—';
+  $('rProduct').textContent = o.product || '波音737系列综合研究报告';
+  $('rPrice').textContent = '¥' + (o.price || 5);
+  $('rTime').textContent = fmtTime(o.createdAt);
+  $('rStatus').textContent = '已完成 · 已核对到账';
+  $('rSub').textContent = once ? '支付已完成并通过核对，请保存下方兑换码' : '支付已完成并通过核对';
+  $('codeVal').textContent = d.couponCode || '—';
+  $('onceTip').style.display = once ? 'block' : 'none';
+  $('maskedTip').style.display = once ? 'none' : 'block';
+  $('copyBtn').style.display = once ? 'inline-block' : 'none';
+  $('readBtn').style.display = once ? 'inline-block' : 'none';
+  $('copyBtn').textContent = '复制兑换码';
+  $('copyBtn').onclick = function () { copyText(d.couponCode); };
+  $('readBtn').onclick = function () {
+    if (d.couponCode) window.open('/read/737.html?code=' + encodeURIComponent(d.couponCode), '_blank');
+  };
+  $('modal').classList.add('show');
+  receiptOpen = true;
+  receiptDone = true;
+}
+
+function claim(id, silent) {
+  var contact = localStorage.getItem(CONTACT_KEY) || '';
+  return fetch('/api/order', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+    body: JSON.stringify({ action: 'claim', id: id, contact: contact })
+  }).then(function (r) { return r.json(); }).then(function (d) {
+    if (!d || !d.ok) { if (!silent) alert((d && d.message) || '暂时无法获取回执，请稍后重试'); return; }
+    if (!d.ready) { if (!silent) alert('订单尚未完成核对，暂时无法生成回执'); return; }
+    openReceipt(d);
+  }).catch(function () { if (!silent) alert('网络异常，请稍后重试'); });
+}
+
 function pollStatus() {
-  var id = localStorage.getItem(ORDER_KEY);
+  var id = curOrder();
   if (!id) return;
   $('orderNo').textContent = id;
   fetch('/api/order?action=status&id=' + encodeURIComponent(id), { cache: 'no-store' })
     .then(function (r) { return r.json(); })
     .then(function (d) {
       var s = $('statusLine');
+      if (d.found === false) {
+        s.className = 'status';
+        s.textContent = '未查询到该订单，请核对订单号是否正确。';
+        return;
+      }
       if (d.status === 'confirmed') {
         s.className = 'status ok';
-        s.textContent = '已开通！您的专属券码：' + d.couponCode;
-        if (d.couponCode) {
-          $('readSlot').innerHTML = '<a class="read" href="/read/737.html?code=' + encodeURIComponent(d.couponCode) + '">立即阅读研究报告</a>';
-          localStorage.setItem('gc_b737_code', d.couponCode);
-        }
+        s.textContent = '订单已完成，兑换码已发放。' + (d.revealed ? '（兑换码已展示过，可在「我的」查看兑换记录）' : '');
+        if (d.contact && !localStorage.getItem(CONTACT_KEY)) localStorage.setItem(CONTACT_KEY, d.contact);
+        // 校验通过后自动弹出一次付款回执单
+        if (!receiptDone && !receiptOpen) claim(id, true);
       } else if (d.status === 'rejected') {
         s.className = 'status';
         s.style.color = '#b91c1c';
@@ -208,6 +325,7 @@ $('payBtn').addEventListener('click', function () {
     btn.disabled = false; btn.textContent = '去爱发电支付 ¥5';
     if (!d.ok) { alert(d.message || '订单登记失败，请稍后重试'); return; }
     localStorage.setItem(ORDER_KEY, d.id);
+    localStorage.setItem(CONTACT_KEY, contact);
     window.open(afdianUrl(d.id), '_blank');
     showDone(d.id);
   }).catch(function () {
@@ -217,11 +335,24 @@ $('payBtn').addEventListener('click', function () {
 });
 
 $('refreshBtn').addEventListener('click', pollStatus);
+$('receiptBtn').addEventListener('click', function () {
+  var id = curOrder();
+  if (!id) { alert('暂无订单信息'); return; }
+  claim(id, false);
+});
+$('closeBtn').addEventListener('click', function () {
+  $('modal').classList.remove('show');
+  receiptOpen = false;
+  pollStatus();
+});
+$('modal').addEventListener('click', function (e) {
+  if (e.target === $('modal')) { $('modal').classList.remove('show'); receiptOpen = false; }
+});
 
 // 从爱发电回跳 / 已有订单，直接展示完成态
 (function () {
-  var saved = localStorage.getItem(ORDER_KEY);
   var q = new URLSearchParams(location.search);
+  var saved = curOrder();
   if (saved || q.get('paid') === '1') showDone(saved);
 })();
 </script>

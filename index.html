@@ -6492,31 +6492,22 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
         <button class="gc-pf-btn" id="gcPfRename" type="button">修改用户名</button>
       </div>
       <div class="gc-pf-sec" id="gcCouponSec">
-        <div class="gc-pf-sec-title">我的券码 <span id="gcCouponCount" style="color:#0e7490">0</span></div>
+        <div class="gc-pf-sec-title">我的兑换 <span id="gcCouponCount" style="color:#0e7490">0</span></div>
         <div class="gc-pf-coupon-row">
           <input class="gc-pf-pwd-input" id="gcCouponInput" autocomplete="off" maxlength="40" placeholder="输入券码，如 GC-7F2K-9QMD">
           <button class="gc-pf-btn primary" id="gcCouponRedeem" type="button">立即兑换</button>
         </div>
-        <p class="gc-pf-tip" id="gcCouponTip">券码一次有效，兑换后自动绑定当前账号，手机与电脑登录同一账号即可同步查看。</p>
-        <div class="gc-pf-list" id="gcCouponList"><span class="gc-pf-empty">还没有兑换过券码</span></div>
+        <p class="gc-pf-tip" id="gcCouponTip">兑换码仅在付款回执单中显示一遍，此处为兑换记录（脱敏），可查看类型、价值与兑换时间。</p>
+        <div class="gc-pf-list" id="gcCouponList"><span class="gc-pf-empty">还没有兑换记录</span></div>
       </div>
-      <div class="gc-pf-sec">
-        <div class="gc-pf-sec-title">我的收藏 <span id="gcFavCount" style="color:#4338ca">0</span></div>
-        <div class="gc-pf-list" id="gcFavList"><span class="gc-pf-empty">还没有收藏，打开任意机型点右上角 ♥ 收藏</span></div>
-      </div>
-      <div class="gc-pf-sec">
-        <div class="gc-pf-sec-title">我的保存 <span id="gcSaveCount" style="color:#b45309">0</span></div>
-        <div class="gc-pf-list" id="gcSaveList"><span class="gc-pf-empty">还没有保存，打开任意机型点 ☆ 保存</span></div>
-      </div>
-      <div class="gc-pf-sec">
-        <div class="gc-priv">
-          <h4>深度飞行家 · 试运营免费解锁</h4>
-          <ul>
-            <li>全机型深度参数与历史沿革全文</li>
-            <li>收藏与保存云端同步，换设备不丢</li>
-            <li>专属 UID 身份，可参与内测与选题投票</li>
-          </ul>
+      <div class="gc-pf-sec" id="gcOrderSec">
+        <div class="gc-pf-sec-title">我购买的商品 <span id="gcOrderCount" style="color:#4338ca">0</span></div>
+        <div class="gc-pf-coupon-row">
+          <input class="gc-pf-pwd-input" id="gcOrderContact" autocomplete="off" maxlength="60" placeholder="下单时填写的手机号或邮箱">
+          <button class="gc-pf-btn primary" id="gcOrderQuery" type="button">查询订单</button>
         </div>
+        <p class="gc-pf-tip" id="gcOrderTip">可查看订单号、商品与支付状态；有问题可点订单内的「联系站长反馈」，站长在后台可见。</p>
+        <div class="gc-pf-list" id="gcOrderList"><span class="gc-pf-empty">还没有购买记录</span></div>
       </div>
       <div class="gc-pf-sec">
         <div class="gc-pf-sec-title">手机号</div>
@@ -22102,9 +22093,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       Array.prototype.forEach.call(grid.children, function (el) { el.classList.toggle('on', el.src === (p.avatar || PRESETS[0])); });
     }
 
-    renderList('gcFavList', 'gcFavCount', p.favorites, 'favorites');
-    renderList('gcSaveList', 'gcSaveCount', p.saved, 'saved');
     renderCoupons(p.coupons);
+    gcOrderBoot(p);
 
     var phText = $('gcPfPhoneText');
     if (phText) {
@@ -22176,25 +22166,136 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
     });
   }
+  function maskCouponCode(v) {
+    var s = String(v || '');
+    var parts = s.split('-');
+    if (parts.length >= 3) return parts[0] + '-' + parts[1] + '-••••';
+    return s ? s.slice(0, 4) + '••••' : '';
+  }
   function renderCoupons(list) {
     var box = $('gcCouponList');
     var cnt = $('gcCouponCount');
     list = list || [];
     if (cnt) cnt.textContent = list.length;
     if (!box) return;
-    if (!list.length) { box.innerHTML = '<span class="gc-pf-empty">还没有兑换过券码</span>'; return; }
+    if (!list.length) { box.innerHTML = '<span class="gc-pf-empty">还没有兑换记录</span>'; return; }
     box.innerHTML = list.map(function (c) {
       c = c || {};
       var meta = [];
       if (c.type) meta.push(couponEsc(c.type));
       if (c.value) meta.push(couponEsc(c.value));
-      if (c.note) meta.push(couponEsc(c.note));
       var at = c.at ? String(c.at).slice(0, 10) : '';
       if (at) meta.push(at);
+      var m = /ORD-\d{8}-[A-Z0-9]{6}/.exec(String(c.note || ''));
+      var btn = m ? '<button class="gc-pf-btn primary" data-coread="' + m[0] + '" type="button" style="padding:5px 11px;font-size:12px">阅读</button>' : '';
       return '<div class="gc-pf-item" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
-        '<span style="font-weight:700;letter-spacing:.6px;color:#0e7490">' + couponEsc(c.code) + '</span>' +
-        '<span style="font-size:12px;color:#64748b">' + meta.join(' · ') + '</span></div>';
+        '<span style="font-weight:700;letter-spacing:.6px;color:#0e7490">' + couponEsc(maskCouponCode(c.code)) + '</span>' +
+        '<span style="font-size:12px;color:#64748b;flex:1">' + meta.join(' · ') + '</span>' + btn + '</div>';
     }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('[data-coread]'), function (b) {
+      b.addEventListener('click', function () {
+        window.open('/read/737.html?order=' + encodeURIComponent(b.getAttribute('data-coread')), '_blank');
+      });
+    });
+  }
+
+  /* ===== 我购买的商品 ===== */
+  function orderEsc(s) { return couponEsc(s); }
+  function orderTime(v) { return v ? String(v).replace('T', ' ').slice(0, 16) : '—'; }
+
+  function renderOrders(list) {
+    var box = $('gcOrderList');
+    var cnt = $('gcOrderCount');
+    list = list || [];
+    if (cnt) cnt.textContent = list.length;
+    if (!box) return;
+    if (!list.length) { box.innerHTML = '<span class="gc-pf-empty">该联系方式下没有购买记录</span>'; return; }
+    box.innerHTML = list.map(function (o) {
+      var st = o.status === 'confirmed' ? '已完成' : (o.status === 'rejected' ? '未通过' : '待核对');
+      var color = o.status === 'confirmed' ? '#047857' : (o.status === 'rejected' ? '#b91c1c' : '#b45309');
+      var oid = o.orderNo || o.id;
+      var canRead = o.status === 'confirmed';
+      return '<div class="gc-pf-item" style="display:block">' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">' +
+        '<b style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#334155">' + orderEsc(oid) + '</b>' +
+        '<span style="font-size:12px;color:' + color + ';font-weight:700">' + st + '</span></div>' +
+        '<div style="font-size:13px;font-weight:600;margin-top:6px">' + orderEsc(o.product || o.projectTitle || '付费研究报告') + '</div>' +
+        '<div style="font-size:12px;color:#64748b;margin-top:4px;line-height:1.7">金额 ¥' + orderEsc(o.price || 5) +
+        ' · 下单 ' + orderTime(o.createdAt) +
+        (o.statusAt ? '<br>状态更新 ' + orderTime(o.statusAt) : '') +
+        (o.couponMasked ? '<br>兑换码 ' + orderEsc(o.couponMasked) + '（仅显示过一遍）' : '') +
+        (o.contact ? '<br>联系方式 ' + orderEsc(o.contact) : '') + '</div>' +
+        '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
+        (canRead ? '<button class="gc-pf-btn primary" data-read="' + orderEsc(oid) + '" type="button" style="padding:6px 12px;font-size:12.5px">进入阅读</button>' : '') +
+        '<button class="gc-pf-btn" data-fb="' + orderEsc(oid) + '" type="button" style="padding:6px 12px;font-size:12.5px">联系站长反馈</button>' +
+        '</div></div>';
+    }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('[data-read]'), function (b) {
+      b.addEventListener('click', function () {
+        window.open('/read/737.html?order=' + encodeURIComponent(b.getAttribute('data-read')), '_blank');
+      });
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-fb]'), function (b) {
+      b.addEventListener('click', function () { submitFeedback(b.getAttribute('data-fb')); });
+    });
+  }
+
+  function queryOrders(contact) {
+    var tip = $('gcOrderTip');
+    var box = $('gcOrderList');
+    if (!contact || contact.length < 3) {
+      if (tip) { tip.textContent = '请输入下单时填写的手机号或邮箱'; tip.style.color = '#b91c1c'; }
+      return;
+    }
+    if (box) box.innerHTML = '<span class="gc-pf-empty">查询中…</span>';
+    fetch('/api/order?action=myorders&contact=' + encodeURIComponent(contact), { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) {
+          if (box) box.innerHTML = '<span class="gc-pf-empty">' + orderEsc((d && d.message) || '查询失败') + '</span>';
+          return;
+        }
+        renderOrders(d.orders || []);
+        if (tip) {
+          tip.style.color = '#64748b';
+          tip.textContent = (d.orders && d.orders.length)
+            ? ('共 ' + d.orders.length + ' 笔购买记录；兑换码仅显示一遍，此处为脱敏记录，可点「进入阅读」凭订单号阅读。')
+            : '该联系方式下暂无购买记录。';
+        }
+      }).catch(function () {
+        if (box) box.innerHTML = '<span class="gc-pf-empty">网络异常，请稍后重试</span>';
+      });
+  }
+
+  function submitFeedback(orderNo) {
+    var text = window.prompt('请描述您的问题（提交至站长后台，500 字以内）', '');
+    if (text === null) return;
+    text = String(text || '').trim();
+    if (text.length < 4) { alert('请至少填写 4 个字，便于站长定位问题'); return; }
+    var contact = ($('gcOrderContact') && $('gcOrderContact').value || '').trim();
+    fetch('/api/order', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'feedback', id: orderNo, text: text, contact: contact })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.ok) alert('反馈已提交，站长会尽快处理。');
+      else alert((d && d.message) || '提交失败，请稍后重试');
+    }).catch(function () { alert('网络异常，请稍后重试'); });
+  }
+
+  var gcOrderBooted = false;
+  function gcOrderBoot(p) {
+    var inp = $('gcOrderContact');
+    var btn = $('gcOrderQuery');
+    if (inp && p && p.phone && !inp.value) inp.value = p.phone;
+    if (btn && !btn.dataset.bound) {
+      btn.dataset.bound = '1';
+      btn.addEventListener('click', function () { queryOrders((($('gcOrderContact') || {}).value || '').trim()); });
+      if (inp) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') queryOrders((inp.value || '').trim()); });
+    }
+    if (inp && inp.value && !gcOrderBooted) {
+      gcOrderBooted = true;
+      queryOrders(inp.value.trim());
+    }
   }
   function takePendingCoupon() {
     var v = '';
@@ -22392,22 +22493,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   }
 
   function injectFavBar(modal, id) {
-    if (!modal || !id || modal.querySelector('.gc-fav-bar')) return;
-    var bar = document.createElement('div');
-    bar.className = 'gc-fav-bar';
-    var fav = document.createElement('button');
-    fav.type = 'button';
-    fav.className = 'gc-fav-btn';
-    fav.innerHTML = '&#9829;<span>收藏</span>';
-    var sav = document.createElement('button');
-    sav.type = 'button';
-    sav.className = 'gc-fav-btn save';
-    sav.innerHTML = '&#9734;<span>保存</span>';
-    fav.addEventListener('click', function (e) { e.stopPropagation(); toggleFav(id, 'fav'); });
-    sav.addEventListener('click', function (e) { e.stopPropagation(); toggleFav(id, 'save'); });
-    bar.appendChild(fav); bar.appendChild(sav);
-    modal.appendChild(bar);
-    syncFavButtons(id);
+    /* 收藏 / 保存功能已下线（2026-11 改版）：不再注入收藏栏 */
+    return;
   }
 
   function syncFavButtons(id) {
@@ -22623,5 +22710,28 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 })();
 </script>
 
+<script>
+/* 收藏 / 保存功能已整体下线（2026-11 改版）：隐藏所有收藏入口与统计 */
+(function () {
+  var IDS = ['collectRecordBtn', 'collectAnalysisBtn', 'exportCollectionBtn', 'collectRecordModal', 'collectRecordPop', 'collectAnalysisPanel'];
+  function kill() {
+    IDS.forEach(function (id) {
+      var e = document.getElementById(id);
+      if (e) e.style.display = 'none';
+    });
+    var sc = document.getElementById('statCollection');
+    if (sc && sc.parentElement && sc.parentElement.classList.contains('stat-card')) {
+      sc.parentElement.style.display = 'none';
+    }
+    var bars = document.querySelectorAll('.gc-fav-bar');
+    for (var i = 0; i < bars.length; i++) bars[i].parentNode && bars[i].parentNode.removeChild(bars[i]);
+  }
+  kill();
+  document.addEventListener('DOMContentLoaded', kill);
+  setTimeout(kill, 600);
+  setTimeout(kill, 2000);
+  setTimeout(kill, 5000);
+})();
+</script>
 </body>
 </html>

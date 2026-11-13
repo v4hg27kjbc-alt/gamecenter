@@ -43,8 +43,21 @@ export async function onRequestPost({ request, env }) {
   if (!kv) return bad('kv_missing', '存储未配置');
   let body = {};
   try { body = await request.json(); } catch (e) { }
-  const code = normCode(body.code);
-  const reqProject = (normProjectKeys([body.project || 'b737'])[0]) || 'b737';
+  let code = normCode(body.code);
+  let reqProject = (normProjectKeys([body.project || 'b737'])[0]) || 'b737';
+
+  // 订单模式：兑换码只展示一次，事后可凭订单号取回阅读权限
+  const orderId = String(body.order || '').trim();
+  if (orderId && code.length < 6) {
+    const o = await kv.get('order:item:' + orderId, { type: 'json' });
+    if (!o) return bad('order_not_found', '订单不存在，请核对订单号');
+    if (o.status !== 'confirmed') return bad('order_pending', '订单尚未完成核对，请稍后再试');
+    const cc = normCode(o.couponCode);
+    if (!cc) return bad('no_coupon', '订单尚未发券，请联系站长');
+    code = cc;
+    reqProject = (normProjectKeys([o.project || reqProject])[0]) || reqProject;
+  }
+
   if (code.length < 6) return bad('coupon_invalid', '请输入完整的券码');
 
   const rec = await kv.get('coupon:code:' + code, { type: 'json' });

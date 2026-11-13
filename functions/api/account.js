@@ -857,5 +857,37 @@ async function handleRequest(context) {
 
   if (action === 'logout') return ok({ loggedOut: true }, origin);
 
+  // ---- 收藏功能下线：管理员批量清空所有用户的收藏 / 保存 ----
+  if (action === 'purgefavorites') {
+    const h = request.headers.get('X-Admin-Token') || '';
+    const ck = request.headers.get('Cookie') || '';
+    const want = (env && (env.ADMIN_TOKEN || env.TOKEN_SECRET)) || '';
+    const isAdmin = (ck && /mv_admin=/.test(ck)) || !!(want && h && h === want);
+    if (!isAdmin) return bad('unauthorized', origin, null, 401);
+    let cursor = null;
+    let scanned = 0;
+    let changed = 0;
+    for (let round = 0; round < 10; round++) {
+      const page = await kv.list({ prefix: 'acct:u:', limit: 500, cursor: cursor || undefined });
+      for (const k of (page.keys || [])) {
+        scanned++;
+        const raw = await kv.get(k.name);
+        if (!raw) continue;
+        let u = null;
+        try { u = JSON.parse(raw); } catch (e) { continue; }
+        const hasFav = (Array.isArray(u.favorites) && u.favorites.length) || (Array.isArray(u.saved) && u.saved.length);
+        if (!hasFav) continue;
+        u.favorites = [];
+        u.saved = [];
+        u.favPurgedAt = new Date().toISOString();
+        await kv.put(k.name, JSON.stringify(u));
+        changed++;
+      }
+      if (page.list_complete) break;
+      cursor = page.cursor;
+    }
+    return ok({ scanned: scanned, changed: changed, message: '收藏数据已清空' }, origin);
+  }
+
   return bad('unknown_action', origin, null, 400);
 }

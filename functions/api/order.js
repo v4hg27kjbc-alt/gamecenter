@@ -85,6 +85,58 @@ function brief(o) {
   };
 }
 
+// 联系方式归一化：去空格/横线，手机号或邮箱
+function contactKey(v) {
+  return String(v || '').toLowerCase().replace(/[\s\-()]/g, '');
+}
+
+// 券码脱敏：GC-3K7P-9Q2M → GC-3K7P-••••
+function maskCode(code) {
+  const s = String(code || '');
+  const parts = s.split('-');
+  if (parts.length >= 3) return parts[0] + '-' + parts[1] + '-••••';
+  return s ? s.slice(0, 4) + '••••' : '';
+}
+
+const STATUS_TEXT = { pending: '待确认', confirmed: '已完成', rejected: '未通过' };
+
+// 面向用户的订单视图（不含明文券码）
+function orderView(o) {
+  return {
+    id: o.id,
+    orderNo: o.id,
+    project: o.project || '',
+    projectTitle: projectTitle(o.project || '') || o.product || '',
+    product: o.product || '',
+    price: Number(o.price || PRICE),
+    contact: o.contact || '',
+    afdianOrder: o.afdianOrder || '',
+    status: o.status,
+    statusText: STATUS_TEXT[o.status] || o.status,
+    createdAt: o.createdAt,
+    statusAt: o.statusAt || '',
+    note: o.note || '',
+    couponMasked: maskCode(o.couponCode),
+    couponStatus: o.couponCode ? (o.usedAt ? 'used' : 'active') : '',
+    couponUsedAt: o.usedAt || '',
+    revealed: !!o.revealedAt,
+    revealedAt: o.revealedAt || ''
+  };
+}
+
+// 同步更新索引中的对应订单
+async function patchIndex(kv, id, patch) {
+  const idx = await readJson(kv, INDEX_KEY, []);
+  const list = Array.isArray(idx) ? idx : [];
+  let hit = false;
+  const next = list.map((o) => {
+    if (String(o.id || '') !== id) return o;
+    hit = true;
+    return Object.assign({}, o, patch);
+  });
+  if (hit) await kv.put(INDEX_KEY, JSON.stringify(next.slice(0, MAX_INDEX)));
+}
+
 // 生成关联商品的券码（与后台 /api/coupons 记录结构保持一致）
 async function issueCoupon(kv, project, orderIdv, contact) {
   const prefix = 'GC';
@@ -127,7 +179,43 @@ export async function onRequestGet({ request, env }) {
     if (!id) return bad('bad_id', '缺少订单号');
     const o = await readJson(kv, 'order:item:' + id, null);
     if (!o) return ok({ found: false, status: 'not_found' });
-    return ok({ found: true, status: o.status, couponCode: o.couponCode || '', project: o.project });
+    return ok({
+      found: true, status: o.status, project: o.project,
+      product: o.product || '', price: Number(o.price || PRICE),
+      createdAt: o.createdAt || '', statusAt: o.statusAt || '',
+      couponMasked: maskCode(o.couponCode), revealed: !!o.revealedAt,
+      contact: o.contact || ''
+    });
+  }
+
+  // 我的订单：?action=myorders&contact=手机号/邮箱，或 &id=订单号
+  if (action === 'myorders') {
+    const contact = String(url.searchParams.get('contact') || '').trim();
+    const id = String(url.searchParams.get('id') || '').trim();
+    if (!id && contact.length < 3) return bad('bad_contact', '请输入下单时填写的手机号或邮箱');
+    const idx = await readJson(kv, INDEX_KEY, []);
+    const list = Array.isArray(idx) ? idx : [];
+    let sel = list;
+    if (id) {
+      sel = list.filter((o) => String(o.id || '') === id);
+    } else {
+      const key = contactKey(contact);
+      sel = list.filter((o) => contactKey(o.contact) === key);
+    }
+    const orders = [];
+    for (const o of sel.slice(0, 100)) {
+      const full = await readJson(kv, 'order:item:' + o.id, null);
+      orders.push(orderView(full || o));
+    }
+    orders.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    return ok({ total: orders.length, orders });
+  }
+
+  if (action === 'feedbacklist') {
+    if (!isAdmin(request, env)) return bad('unauthorized', '需要管理员令牌', null, 401);
+    const list = await readJson(kv, 'order:feedback:v1', []);
+    const arr = Array.isArray(list) ? list : [];
+    return ok({ total: arr.length, feedbacks: arr.slice(0, 200) });
   }
 
   if (action === 'list') {
@@ -178,6 +266,58 @@ export async function onRequestPost({ request, env }) {
     for (let i = 0; i < list0.length; i++) if (list0[i].id === id) list0[i] = brief(o);
     await kv.put(INDEX_KEY, JSON.stringify(list0.slice(0, MAX_INDEX)));
     return json({ ec: 200, em: 'confirmed ' + id }, 200);
+  }
+
+  // ── 领取券码：仅首次返回明文，之后只返回脱敏码 ──────────────────────
+  if (action === 'claim') {
+    const id = String(body.id || '').trim();
+    const contact = String(body.contact || '').trim();
+    if (!id) return bad('bad_id', '缺少订单号');
+    const o = await readJson(kv, 'order:item:' + id, null);
+    if (!o) return bad('not_found', '订单不存在', null, 404);
+    if (contact && o.contact && contactKey(contact) !== contactKey(o.contact)) {
+      return bad('contact_mismatch', '联系方式与订单不匹配', null, 403);
+    }
+    if (o.status !== 'confirmed') {
+      return ok({ ready: false, status: o.status, statusText: STATUS_TEXT[o.status] || o.status, order: orderView(o) });
+    }
+    if (!o.couponCode) return bad('no_coupon', '该订单尚未生成券码，请联系站长', null, 409);
+    if (o.revealedAt) {
+      return ok({
+        ready: true, once: false, alreadyRevealed: true,
+        couponCode: maskCode(o.couponCode), revealedAt: o.revealedAt,
+        order: orderView(o)
+      });
+    }
+    o.revealedAt = new Date().toISOString();
+    o.revealCount = 1;
+    await kv.put('order:item:' + id, JSON.stringify(o));
+    await patchIndex(kv, id, { revealedAt: o.revealedAt });
+    return ok({
+      ready: true, once: true, couponCode: o.couponCode, revealedAt: o.revealedAt,
+      order: orderView(Object.assign({}, o, { couponCode: '' }))
+    });
+  }
+
+  // ── 购买反馈：用户带订单号向站长提交问题 ──────────────────────────
+  if (action === 'feedback') {
+    const id = String(body.id || '').trim();
+    const text = String(body.text || '').slice(0, 500).trim();
+    const contact = String(body.contact || '').slice(0, 100).trim();
+    if (!id) return bad('bad_id', '缺少订单号');
+    if (text.length < 4) return bad('bad_text', '请描述您的问题（至少 4 个字）');
+    const o = await readJson(kv, 'order:item:' + id, null);
+    if (!o) return bad('not_found', '订单不存在', null, 404);
+    const fb = {
+      id: 'FB-' + Date.now().toString(36).toUpperCase(),
+      orderId: id, text: text, contact: contact || o.contact || '',
+      createdAt: new Date().toISOString(), status: 'open'
+    };
+    const list = await readJson(kv, 'order:feedback:v1', []);
+    const arr = Array.isArray(list) ? list : [];
+    arr.unshift(fb);
+    await kv.put('order:feedback:v1', JSON.stringify(arr.slice(0, 1000)));
+    return ok({ feedback: fb, message: '反馈已提交，站长会尽快处理' });
   }
 
   if (action === 'create') {

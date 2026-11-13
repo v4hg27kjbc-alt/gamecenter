@@ -39,12 +39,13 @@
 <body>
 <div class="wrap">
   <div id="gateView" class="gate">
-    <h1>输入券码开始阅读</h1>
+    <h1>输入券码或订单号开始阅读</h1>
     <p>波音 737 系列综合研究报告 · 付费文档（含追踪码）</p>
-    <input id="code" placeholder="GC-XXXX-XXXX" autocomplete="off">
+    <input id="code" placeholder="GC-XXXX-XXXX 或 ORD-YYYYMMDD-XXXXXX" autocomplete="off">
     <button id="go">验证并阅读</button>
     <div class="err" id="err"></div>
-    <p style="margin-top:16px;font-size:12.5px"><a href="/pay/737.html" style="color:#4f46e5;text-decoration:none">还没有券码？¥5 购买 →</a></p>
+    <p style="margin-top:16px;font-size:12.5px">兑换码只显示一遍，忘记也没关系：登录后到「我的 → 我购买的商品」点「进入阅读」即可。</p>
+    <p style="margin-top:8px;font-size:12.5px"><a href="/pay/737.html" style="color:#4f46e5;text-decoration:none">还没有券码？¥5 购买 →</a></p>
   </div>
 
   <div id="docView" style="display:none">
@@ -117,13 +118,13 @@ function md(src) {
   return out.join('\n');
 }
 
-function load(code) {
+function load(code, order) {
   $('err').textContent = '';
   var btn = $('go');
   btn.disabled = true; btn.textContent = '验证中…';
   fetch('/api/project-doc', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code, project: 'b737' })
+    body: JSON.stringify({ code: code || '', order: order || '', project: 'b737' })
   }).then(function (r) { return r.json(); }).then(function (d) {
     btn.disabled = false; btn.textContent = '验证并阅读';
     if (!d.ok) { $('err').textContent = d.message || '验证失败'; return; }
@@ -140,17 +141,19 @@ function load(code) {
 }
 
 $('go').addEventListener('click', function () {
-  var c = ($('code').value || '').trim().toUpperCase();
-  if (c.length < 6) { $('err').textContent = '请输入完整的券码'; return; }
-  localStorage.setItem('gc_b737_code', c);
-  load(c);
+  var c = ($('code').value || '').trim().toUpperCase().replace(/\s/g, '');
+  if (c.length < 6) { $('err').textContent = '请输入完整的券码或订单号'; return; }
+  if (/^ORD-/i.test(c)) load('', c);
+  else load(c);
 });
 $('code').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('go').click(); });
 
 (function () {
   var q = new URLSearchParams(location.search);
-  var c = q.get('code') || localStorage.getItem('gc_b737_code');
-  if (c) { $('code').value = c; load(c); }
+  var od = q.get('order');
+  if (od) { $('code').value = od; load('', od.toUpperCase()); return; }
+  var c = q.get('code');
+  if (c) { $('code').value = c; load(c.toUpperCase()); }
 })();
 </script>
 </body>
