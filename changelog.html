@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>更新日志 | 民航客机收藏馆</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",Arial,sans-serif;background:#f6f8fc;color:#1f2937;line-height:1.85}
+  .wrap{max-width:820px;margin:0 auto;padding:30px 18px 70px}
+  h1{font-size:23px;color:#0f172a;margin-bottom:6px}
+  .sub{font-size:12.5px;color:#94a3b8;margin-bottom:24px}
+  .item{background:#fff;border:1px solid #e5eaf3;border-radius:16px;padding:22px 24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(15,23,42,.04)}
+  .ver{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .ver b{font-size:17px;color:#1e293b}
+  .tag{background:#eef2ff;color:#4338ca;border-radius:20px;padding:2px 11px;font-size:11.5px}
+  .tag.new{background:#ecfdf5;color:#047857}
+  h3{font-size:14px;color:#334155;margin:14px 0 6px}
+  ul{padding-left:22px}
+  li{font-size:13.5px;color:#334155;margin-bottom:5px}
+  code{background:#eef2f7;border-radius:5px;padding:1px 5px;font-size:12.5px}
+  a{color:#4f46e5;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>更新日志</h1>
+  <p class="sub">记录本站功能变更 · 最新在前</p>
+
+  <div class="item">
+    <div class="ver"><b>v3.0　正式收费版上线</b><span class="tag new">2026-11-13</span></div>
+    <h3>新增</h3>
+    <ul>
+      <li><strong>737 报告付费阅读</strong>：¥5 解锁《波音 737 系列综合研究报告》完整版，含开篇导引。入口 <a href="/pay/737.html">/pay/737.html</a>。</li>
+      <li><strong>支付端口</strong>：接入爱发电下单页，支付前展示金额核对与安全提示，明确本站不接触支付密码与验证码。</li>
+      <li><strong>订单系统</strong>：下单生成唯一订单号（<code>ORD-日期-序号</code>），支持状态查询、到账核对、自动发券。</li>
+      <li><strong>券码阅读</strong>：凭 12 位券码在 <a href="/read/737.html">/read/737.html</a> 在线阅读，文档内嵌<strong>唯一追踪码</strong>，泄露可溯源。</li>
+      <li><strong>后台订单面板</strong>：后台新增「付费订单」页，待确认订单实时提示，一键确认开通自动发券、可驳回并填写原因。</li>
+      <li><strong>法律合规</strong>：新增<a href="/privacy.html">《付费阅读服务条款与隐私协议》</a>，覆盖商品性质、退款政策、授权范围、追踪溯源、知识产权、内容免责、个人信息处理与用户权利。</li>
+    </ul>
+    <h3>调整</h3>
+    <ul>
+      <li><strong>关闭全部测试版入口</strong>：<code>trial.html</code>、<code>alpha-beta-test.html</code>、<code>test-login.html</code>、<code>test-admin.html</code>、<code>test-sms-sim.html</code> 统一 301 跳转至付费页，不再提供免费试用通道。</li>
+      <li><strong>券码关联项目</strong>：券码可绑定具体机型项目（c919 / a320 / b737），兑换与阅读时校验项目归属，仅允许在授权项目内使用。</li>
+      <li><strong>站点图标</strong>：统一为开启动画同款客机图标，覆盖浏览器标签页、桌面快捷方式与 PWA 安装图标。</li>
+    </ul>
+    <h3>说明</h3>
+    <ul>
+      <li>C919 报告继续<strong>免费开放</strong>；A320 报告内容后续继续打磨。</li>
+      <li>已购买用户凭券码长期可读，无次数限制。</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="ver"><b>v2.x　账号与后台体系</b><span class="tag">历史版本</span></div>
+    <ul>
+      <li>主站与后台账号体系打通：收藏同步、AI 解锁、券码兑换、保险柜加密存储。</li>
+      <li>券码系统：后台批量生成 / 作废 / 导出，主站一键兑换，跨设备同步。</li>
+      <li>AI 统一门控与真实余额面板，模型调用配额按登录用户维度控制。</li>
+      <li>扫码登录与跨设备照片分享、隐私协议重写、黑名单通知等运维能力。</li>
+    </ul>
+  </div>
+
+  <p style="font-size:12.5px;color:#94a3b8;margin-top:22px">
+    <a href="/">返回首页</a>　·　<a href="/pay/737.html">737 报告付费阅读</a>　·　<a href="/privacy.html">条款与隐私</a>
+  </p>
+</div>
+</body>
+</html>

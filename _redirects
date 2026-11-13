@@ -1,0 +1,6 @@
+# 测试版下线：全部重定向到付费阅读页（2026-11-13）
+/trial.html            /pay/737.html   301
+/alpha-beta-test.html  /pay/737.html   301
+/test-login.html       /pay/737.html   301
+/test-admin.html       /pay/737.html   301
+/test-sms-sim.html     /pay/737.html   301
