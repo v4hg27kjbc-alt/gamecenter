@@ -165,7 +165,7 @@ export function modelAllowlist(env) {
     PROVIDERS.forEach(function (p) { base.push(tierConfig(env, t, p).model); });
   });
   // Kimi 全系实测可用模型一律放行，便于前端按功能显式指定档位
-  base.push('kimi-k3', 'kimi-k2.6', 'kimi-k2.7-code', 'kimi-k2.7-code-highspeed');
+  base.push('kimi-k3', 'kimi-k3.1-pro', 'kimi-k2.6', 'kimi-k2.7-code', 'kimi-k2.7-code-highspeed');
   // 智谱仅保留「智谱 4」= glm-4.5-air（免费兜底档）与视觉档 glm-4.5v，其余智谱模型一律不放行
   base.push('glm-4.5-air', 'glm-4.5v');
   var extra = parseList(env && env.AI_MODEL_ALLOWLIST).concat(parseList(env && env.ZHIPU_MODEL_ALLOWLIST));

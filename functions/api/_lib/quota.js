@@ -39,6 +39,11 @@ export const FLAGSHIP_TIER = 'flagship';
 export const FLAGSHIP_PROVIDER = 'kimi';
 export const FLAGSHIP_MODEL_LABEL = 'kimi-k3';
 export const DEFAULT_FLAGSHIP_DAILY_LIMIT = 5;
+/** K3.1 Pro 档：独立日配额，默认每登录用户 2 次 */
+export const PRO_MODEL = 'kimi-k3.1-pro';
+export const PRO_BUCKET = 'pro';
+export const K3_BUCKET = 'k3';
+export const DEFAULT_PRO_DAILY_LIMIT = 2;
 
 /** 主存储：D1（强一致、原子计数） */
 export function quotaDb(env) {
@@ -76,23 +81,39 @@ export function isFlagshipRoute(tier, provider, model) {
   var p = String(provider === undefined || provider === null || provider === '' ? FLAGSHIP_PROVIDER : provider).toLowerCase();
   if (t !== FLAGSHIP_TIER || p !== FLAGSHIP_PROVIDER) return false;
   var m = String(model || '').trim().toLowerCase();
-  return m === 'kimi-k3';
+  return m === 'kimi-k3' || m === PRO_MODEL;
+}
+
+/** 模型 → 配额桶：K3.1 Pro 独立计桶（每天 2 次），其余旗舰模型走 k3 桶（每天 5 次） */
+export function quotaBucketOf(model) {
+  return String(model || '').trim().toLowerCase() === PRO_MODEL ? PRO_BUCKET : K3_BUCKET;
+}
+
+export function proDailyLimit(env) {
+  var n = toInt(env && env.AI_PRO_DAILY_LIMIT, DEFAULT_PRO_DAILY_LIMIT);
+  return Math.max(1, n);
 }
 
 /** 访客维度：ai_vid 哈希优先，缺失时用 IP 哈希兜底 */
 export async function resolveQuotaScope(env, opts) {
   var o = opts || {};
-  if (o.visitorId) return { dim: 'vid', id: await hashId(o.visitorId, env) };
-  return { dim: 'ip', id: await hashId(o.ip || '0.0.0.0', env) };
+  var bucket = quotaBucketOf(o.model);
+  if (o.uid) return { dim: 'uid', id: await hashId('uid:' + String(o.uid), env), bucket: bucket };
+  if (o.visitorId) return { dim: 'vid', id: await hashId(o.visitorId, env), bucket: bucket };
+  return { dim: 'ip', id: await hashId(o.ip || '0.0.0.0', env), bucket: bucket };
 }
 
 function quotaKey(scope, day) {
-  return QUOTA_KEY_PREFIX + scope.dim + ':' + scope.id + ':' + day;
+  return QUOTA_KEY_PREFIX + bucketOf(scope) + ':' + scope.dim + ':' + scope.id + ':' + day;
+}
+
+function bucketOf(scope) {
+  return scope && scope.bucket === PRO_BUCKET ? PRO_BUCKET : K3_BUCKET;
 }
 
 /** 落库用的维度键（不存明文访客 ID / IP） */
 function scopeKey(scope, day) {
-  return scope.dim + ':' + scope.id + ':' + day;
+  return bucketOf(scope) + ':' + scope.dim + ':' + scope.id + ':' + day;
 }
 
 /** 距次日（UTC）零点的秒数，用于 Retry-After 与 KV TTL */
@@ -104,10 +125,12 @@ function secondsToNextUtcDay(nowMs) {
 }
 
 function baseQuota(env, scope, now) {
-  var limit = flagshipDailyLimit(env);
+  var pro = scope && scope.bucket === PRO_BUCKET;
+  var limit = pro ? proDailyLimit(env) : flagshipDailyLimit(env);
   return {
     tier: FLAGSHIP_TIER,
-    model: FLAGSHIP_MODEL_LABEL,
+    bucket: pro ? PRO_BUCKET : K3_BUCKET,
+    model: pro ? PRO_MODEL : FLAGSHIP_MODEL_LABEL,
     limit: limit,
     used: 0,
     remaining: limit,
@@ -269,10 +292,15 @@ export function quotaHeaders(quota) {
 export function quotaExceededText(quota) {
   var limit = quota && quota.limit ? quota.limit : DEFAULT_FLAGSHIP_DAILY_LIMIT;
   var mins = quota && quota.resetInSec ? Math.max(1, Math.round(quota.resetInSec / 60)) : 0;
+  var model = (quota && quota.model) ? quota.model : FLAGSHIP_MODEL_LABEL;
+  var isPro = !!(quota && quota.bucket === PRO_BUCKET);
+  var who = (quota && quota.scope === 'uid') ? '每个登录用户' : '每个访客';
   return (
-    '今日旗舰模式（kimi-k3）额度已用完：每个访客每天最多 ' + limit + ' 次，' +
+    '今日旗舰模式（' + model + '）额度已用完：' + who + '每天最多 ' + limit + ' 次，' +
     '约 ' + mins + ' 分钟后（次日 00:00 UTC）自动重置。' +
-    '现在可改用「快速回答」或「深度思考」，或明天再来体验旗舰模式。'
+    (isPro
+      ? 'K3.1 Pro 为高阶模型，额度较少；可改用「深度思考」或 kimi-k3，明天再来体验 Pro。'
+      : '现在可改用「快速回答」或「深度思考」，或明天再来体验旗舰模式。')
   );
 }
 

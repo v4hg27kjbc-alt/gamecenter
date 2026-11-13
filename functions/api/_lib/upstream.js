@@ -487,7 +487,9 @@ export async function callUpstream(env, options) {
 /** 单次上游调用（不含跨上游兜底） */
 async function callUpstreamOnce(env, o, provider) {
   var spec = providerSpec(provider);
-  var key = providerKey(env, provider);
+  // BYOK：用户自带密钥优先（仅在本次请求内存中使用，绝不落库 / 不写日志）
+  var byok = (o.byokKey && typeof o.byokKey === 'string') ? o.byokKey.trim() : '';
+  var key = byok || providerKey(env, provider);
 
   if (!key) {
     return {
