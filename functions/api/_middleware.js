@@ -22,6 +22,8 @@
  *   AI_ADMIN_TOKEN           【Secret】管理端口令（仅做存在性预检）
  */
 
+import { getFlags } from './_lib/flags.js';
+
 const STRICT_PATHS = [
   '/api/ai',
   '/api/chat',
@@ -31,6 +33,12 @@ const STRICT_PATHS = [
   '/api/chat/',
   '/api/token/',
   '/api/prewarm/'
+];
+
+// AI 相关能力路径：ai_enabled 总闸关闭时必须全部不可用（不止对话）
+const AI_GATED_PREFIXES = [
+  '/api/ai', '/api/chat', '/api/token', '/api/prewarm',
+  '/api/glossary', '/api/qa-logs'
 ];
 
 const ADMIN_PREFIX = '/api/admin/';
@@ -166,6 +174,32 @@ function readAdminToken(request) {
   return t;
 }
 
+var aiGateCache = { value: null, at: 0 };
+
+function matchAiGatedPath(path) {
+  var p = String(path || '').toLowerCase();
+  for (var i = 0; i < AI_GATED_PREFIXES.length; i++) {
+    var f = AI_GATED_PREFIXES[i];
+    if (p === f || p.indexOf(f + '/') === 0) return true;
+  }
+  return false;
+}
+
+async function aiGateOpen(env) {
+  var now = Date.now();
+  if (aiGateCache.value !== null && now - aiGateCache.at < 5000) return aiGateCache.value;
+  var open = true;
+  try {
+    var flags = await getFlags(env);
+    open = !!flags.ai_enabled;
+  } catch (e) {
+    open = true; // 读取失败不误伤，交由业务层各自兜底
+  }
+  aiGateCache.value = open;
+  aiGateCache.at = now;
+  return open;
+}
+
 export async function onRequest(context) {
   var request = context.request;
   var env = context.env || {};
@@ -199,6 +233,22 @@ export async function onRequest(context) {
     var blocked = UA_BLOCKLIST.some(function (token) { return uaLower.indexOf(token) >= 0; });
     if (!uaRaw || blocked) {
       return jsonResponse({ ok: false, error: 'forbidden_client', message: '客户端不受支持' }, 403, jsonBase);
+    }
+  }
+
+  // ---- 2.5 AI 总闸门控 ----
+  // ai_enabled 关闭时，所有 AI 相关能力（对话 / 令牌 / 预热 / 术语 / 问答 / AI 账户）一律不可用，
+  // 且此处在业务层之前拦截，确保不会消耗任何额度。
+  if (matchAiGatedPath(path)) {
+    var gateOpen = await aiGateOpen(env);
+    if (!gateOpen) {
+      return jsonResponse({
+        ok: false,
+        error: 'ai_disabled',
+        code: 'AI_GATE_CLOSED',
+        message: 'AI 功能当前未开放（站长已关闭）',
+        gate: 'ai_enabled'
+      }, 503, jsonBase);
     }
   }
 
