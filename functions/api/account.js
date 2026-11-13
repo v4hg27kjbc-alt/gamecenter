@@ -339,6 +339,8 @@ async function bindState(kv, user) {
 async function profileView(kv, user) {
   const p = publicProfile(user);
   const b = await bindState(kv, user);
+  /* 券码：兑换后写回 acct:u:<uid>.coupons，登录 / 换设备即可同步看到 */
+  p.coupons = Array.isArray(user.coupons) ? user.coupons.slice(0, 200) : [];
   return Object.assign(p, b);
 }
 

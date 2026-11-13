@@ -6482,6 +6482,15 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
         <button class="gc-pf-btn" id="gcPfUpload" type="button">上传自定义头像</button>
         <button class="gc-pf-btn" id="gcPfRename" type="button">修改用户名</button>
       </div>
+      <div class="gc-pf-sec" id="gcCouponSec">
+        <div class="gc-pf-sec-title">我的券码 <span id="gcCouponCount" style="color:#0e7490">0</span></div>
+        <div class="gc-pf-coupon-row">
+          <input class="gc-pf-pwd-input" id="gcCouponInput" autocomplete="off" maxlength="40" placeholder="输入券码，如 GC-7F2K-9QMD">
+          <button class="gc-pf-btn primary" id="gcCouponRedeem" type="button">立即兑换</button>
+        </div>
+        <p class="gc-pf-tip" id="gcCouponTip">券码一次有效，兑换后自动绑定当前账号，手机与电脑登录同一账号即可同步查看。</p>
+        <div class="gc-pf-list" id="gcCouponList"><span class="gc-pf-empty">还没有兑换过券码</span></div>
+      </div>
       <div class="gc-pf-sec">
         <div class="gc-pf-sec-title">我的收藏 <span id="gcFavCount" style="color:#4338ca">0</span></div>
         <div class="gc-pf-list" id="gcFavList"><span class="gc-pf-empty">还没有收藏，打开任意机型点右上角 ♥ 收藏</span></div>
@@ -20752,6 +20761,9 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 .gc-pf-badge{display:inline-block;margin-top:6px;font-size:11px;padding:2px 9px;border-radius:999px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;font-weight:700;}
 .gc-pf-sec{border-top:1px solid rgba(15,23,42,.08);padding-top:14px;margin-top:14px;}
 .gc-pf-sec-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.gc-pf-coupon-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.gc-pf-coupon-row .gc-pf-pwd-input{flex:1 1 auto;min-width:0;}
+.gc-pf-item{padding:8px 10px;border:1px solid rgba(14,116,144,.18);border-radius:10px;background:rgba(14,116,144,.05);margin-bottom:6px;}
 .gc-pf-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .gc-pf-stat{background:rgba(102,126,234,.07);border-radius:13px;padding:12px;text-align:center;}
 .gc-pf-stat b{display:block;font-size:19px;color:#4338ca;}
@@ -22050,6 +22062,16 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     if (!p) return;
     /* 登录后自动合并未登录期间的本地临时收藏，避免跨设备/跨会话不同步 */
     try { autoMigrateTemp(); } catch (e) {}
+    /* 扫码/链接带入的券码：自动填入输入框，等待用户点击兑换 */
+    try {
+      var pc = takePendingCoupon();
+      var ci = $('gcCouponInput');
+      if (pc && ci && !ci.value) {
+        ci.value = pc;
+        var ctip = $('gcCouponTip');
+        if (ctip) { ctip.textContent = '已带入券码 ' + pc + '，点击「立即兑换」完成核销'; ctip.style.color = '#0e7490'; }
+      }
+    } catch (e) {}
     $('gcPfAvatar').src = p.avatar || PRESETS[0];
     $('gcPfName').textContent = p.displayName || p.username;
     $('gcPfUid').textContent = 'UID ' + p.uid;
@@ -22072,8 +22094,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     }
 
     renderList('gcFavList', 'gcFavCount', p.favorites, 'favorites');
-    renderList('gcFavList', 'gcFavCount', p.favorites, 'favorites');
     renderList('gcSaveList', 'gcSaveCount', p.saved, 'saved');
+    renderCoupons(p.coupons);
 
     var phText = $('gcPfPhoneText');
     if (phText) {
@@ -22116,6 +22138,98 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     var mig = $('gcPfMigrate');
     var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
     if (mig) mig.style.display = (p.migrated && pending === 0) ? 'none' : '';
+  }
+
+  /* ===== 券码兑换 ===== */
+  function couponNorm(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function couponApi(action, extra) {
+    var payload = Object.assign({ action: action }, extra || {});
+    if (st.token && !payload.token) payload.token = st.token;
+    return fetch('/api/coupon', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json().catch(function () { return { ok: false, error: 'bad_response' }; }); });
+  }
+  var COUPON_MSG = {
+    unauthorized: '请先登录后再兑换券码',
+    coupon_not_found: '券码不存在，请核对后重试',
+    coupon_used: '该券码已被使用，如有疑问请联系站长',
+    coupon_revoked: '该券码已被作废，如有疑问请联系站长',
+    coupon_expired: '该券码已过期',
+    coupon_invalid: '请输入完整的券码',
+    list_full: '券码数量已达上限',
+    KV_UNAVAILABLE: '服务端存储未就绪，稍后再试'
+  };
+  function couponMsg(code) { return COUPON_MSG[code] || ('兑换失败：' + (code || '未知错误')); }
+  function couponEsc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+  function renderCoupons(list) {
+    var box = $('gcCouponList');
+    var cnt = $('gcCouponCount');
+    list = list || [];
+    if (cnt) cnt.textContent = list.length;
+    if (!box) return;
+    if (!list.length) { box.innerHTML = '<span class="gc-pf-empty">还没有兑换过券码</span>'; return; }
+    box.innerHTML = list.map(function (c) {
+      c = c || {};
+      var meta = [];
+      if (c.type) meta.push(couponEsc(c.type));
+      if (c.value) meta.push(couponEsc(c.value));
+      if (c.note) meta.push(couponEsc(c.note));
+      var at = c.at ? String(c.at).slice(0, 10) : '';
+      if (at) meta.push(at);
+      return '<div class="gc-pf-item" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<span style="font-weight:700;letter-spacing:.6px;color:#0e7490">' + couponEsc(c.code) + '</span>' +
+        '<span style="font-size:12px;color:#64748b">' + meta.join(' · ') + '</span></div>';
+    }).join('');
+  }
+  function takePendingCoupon() {
+    var v = '';
+    try {
+      var m = /[?&]coupon=([^&]+)/.exec(location.search || '');
+      if (m) v = decodeURIComponent(m[1]);
+    } catch (e) {}
+    if (!v) { try { v = localStorage.getItem('gc_coupon_pending') || ''; } catch (e) {} }
+    if (v) { try { localStorage.removeItem('gc_coupon_pending'); } catch (e) {} }
+    return couponNorm(v);
+  }
+  function redeemCoupon() {
+    var input = $('gcCouponInput');
+    var tip = $('gcCouponTip');
+    function say(t, isErr) {
+      if (!tip) return;
+      tip.textContent = t;
+      tip.style.color = isErr ? '#b91c1c' : '#16a34a';
+    }
+    var code = couponNorm(input && input.value);
+    if (!code || code.length < 6) { say('请输入完整的券码', true); return; }
+    if (!st.token) { say('请先登录后再兑换券码', true); openMask('auth', '券码兑换'); return; }
+    var btn = $('gcCouponRedeem');
+    if (btn) { btn.disabled = true; btn.textContent = '兑换中…'; }
+    couponApi('redeem', { code: code }).then(function (res) {
+      if (btn) { btn.disabled = false; btn.textContent = '立即兑换'; }
+      if (res && res.ok) {
+        if (res.coupons) {
+          if (!st.profile) st.profile = {};
+          st.profile.coupons = res.coupons;
+          renderCoupons(res.coupons);
+        }
+        if (input) input.value = '';
+        if (res.already) { say('这张券码已经兑换过了，可在下方查看', true); return; }
+        var c = res.coupon || {};
+        say('兑换成功：' + (c.type || '券码') + (c.value ? ' ' + c.value : '') + '（该券码已核销）', false);
+        try { toast('兑换成功：' + (c.code || code)); } catch (e) {}
+      } else {
+        say(couponMsg(res && res.error), true);
+      }
+    }).catch(function () {
+      if (btn) { btn.disabled = false; btn.textContent = '立即兑换'; }
+      say('网络异常，请稍后重试', true);
+    });
   }
 
   function renderList(listId, countId, ids, kind) {
@@ -22395,6 +22509,20 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
         } else setMsg(msgOf(res && res.error));
       });
     });
+
+    // ---- 券码兑换 ----
+    if ($('gcCouponRedeem')) $('gcCouponRedeem').addEventListener('click', redeemCoupon);
+    if ($('gcCouponInput')) $('gcCouponInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); redeemCoupon(); }
+    });
+    // 扫码/链接携带 ?coupon=XXXX：先落地到本地，登录后再自动带入
+    try {
+      var cm0 = /[?&]coupon=([^&]+)/.exec(location.search || '');
+      if (cm0) {
+        var cv0 = couponNorm(decodeURIComponent(cm0[1]));
+        if (cv0) localStorage.setItem('gc_coupon_pending', cv0);
+      }
+    } catch (e) {}
 
     // 恢复登录态
     var tk = ls(TK);
