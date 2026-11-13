@@ -31,6 +31,21 @@
   <p class="sub">记录本站功能变更 · 最新在前</p>
 
   <div class="item">
+    <div class="ver"><b>v3.2　AI 能力补齐</b><span class="tag new">2026-11-13</span></div>
+    <h3>新增</h3>
+    <ul>
+      <li><strong>K3.1 Pro 接入</strong>：旗舰档新增 <code>kimi-k3.1-pro</code>，按<strong>登录用户</strong>每天 2 次配额独立计量（与 kimi-k3 的每日 5 次互不占用），用尽后返回明确提示，不静默降级。</li>
+      <li><strong>自带 API Key（BYOK）</strong>：可在「我的 → AI 高级设置」填入自己在 Kimi 平台申请的 Key，之后的 AI 调用优先使用您的 Key，不消耗本站额度；保存前会提示「有可能会泄露，请注意隐私防护安全」，并承诺本站绝不泄露您的 API Key（不落库、不写日志）。</li>
+      <li><strong>云端聊天记录</strong>：登录用户可把当前对话保存到云端，跨设备在「我的 → AI 高级设置」查看、载入或删除，最多保留 200 条会话。</li>
+      <li><strong>管理后台 Kimi 余额面板</strong>：后台「Token 用量」页新增 Kimi 账户真实余额（可用余额、代金券、现金、账户状态）与模型可用性探测。</li>
+    </ul>
+    <h3>说明</h3>
+    <ul>
+      <li>BYOK 模式下不读取本站共享缓存，避免不同用户的结果互相串用；密钥仅随当次请求透传，关闭页面后不会留在服务器。</li>
+    </ul>
+  </div>
+
+  <div class="item">
     <div class="ver"><b>v3.1　付款回执与个人中心精简</b><span class="tag new">2026-11-13</span></div>
     <h3>新增</h3>
     <ul>

@@ -6509,6 +6509,32 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
         <p class="gc-pf-tip" id="gcOrderTip">可查看订单号、商品与支付状态；有问题可点订单内的「联系站长反馈」，站长在后台可见。</p>
         <div class="gc-pf-list" id="gcOrderList"><span class="gc-pf-empty">还没有购买记录</span></div>
       </div>
+      <details class="gc-pf-sec" id="gcAiAdvSec" style="padding:12px 14px">
+        <summary style="cursor:pointer;font-weight:700;font-size:13.5px;color:#334155">AI 高级设置（自带密钥 · 云端聊天记录）</summary>
+        <div style="margin-top:12px">
+      <div class="gc-pf-sec" id="gcChatSec" style="border:0;padding:0 0 12px">
+        <div class="gc-pf-sec-title">云端聊天记录 <span id="gcChatCount" style="color:#7c3aed">0</span></div>
+        <div class="gc-pf-actions" style="margin:0 0 8px">
+          <button class="gc-pf-btn primary" id="gcChatSave" type="button">保存当前对话到云端</button>
+          <button class="gc-pf-btn" id="gcChatRefresh" type="button">刷新列表</button>
+        </div>
+        <p class="gc-pf-tip" id="gcChatTip">登录后才会保存；仅您本人可见，可随时删除（最多保留 200 条会话）。</p>
+        <div class="gc-pf-list" id="gcChatList"><span class="gc-pf-empty">还没有云端会话</span></div>
+      </div>
+      <div class="gc-pf-sec" id="gcByokSec">
+        <div class="gc-pf-sec-title">自带 API Key（BYOK）</div>
+        <div class="gc-pf-coupon-row">
+          <input class="gc-pf-pwd-input" id="gcByokInput" type="password" autocomplete="off" maxlength="200" placeholder="sk-...（在 Kimi 开放平台自行申请的 Key）">
+          <button class="gc-pf-btn primary" id="gcByokSave" type="button">保存</button>
+        </div>
+        <p class="gc-pf-tip" id="gcByokTip">本站绝不泄露您的 API Key：它只保存在您本机浏览器，随请求发送后仅用于当次调用，服务端不落库、不写日志。若在公共电脑使用，请留意本地明文存储风险，用完后可点下方清除。</p>
+        <div class="gc-pf-actions" style="margin:0">
+          <span id="gcByokState" style="font-size:12.5px;color:#64748b">未设置</span>
+          <button class="gc-pf-btn" id="gcByokClear" type="button">清除已保存的 Key</button>
+        </div>
+      </div>
+        </div>
+      </details>
       <div class="gc-pf-sec">
         <div class="gc-pf-sec-title">手机号</div>
         <div class="gc-pf-actions" style="margin:0 0 8px">
@@ -11309,10 +11335,19 @@ window.AIBridge = (function () {
       return true; // 网络层错误（TypeError: fetch failed / IncompleteRead / SSL 等）
     }
     async function doChat(body2, token2) {
+      /* 登录令牌：服务端据此把旗舰额度按「登录用户」计量（未登录走访客维度） */
+      var acctTk = '';
+      try { acctTk = localStorage.getItem('gc_acct_token') || ''; } catch (e2) {}
+      /* BYOK：用户自带 Kimi API Key，仅随本次请求透传，服务端不存储 */
+      var byok = '';
+      try { byok = localStorage.getItem('gc_byok_key') || ''; } catch (e3) {}
+      if (byok && body2 && typeof body2 === 'object') body2.byokKey = byok;
+      var hdrs = { 'Content-Type': 'application/json', 'X-AI-Token': token2 };
+      if (acctTk) hdrs['X-Acct-Token'] = acctTk;
       var rr = await fetch('/api/chat', {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'X-AI-Token': token2 },
+        headers: hdrs,
         body: JSON.stringify(body2),
         signal: o.signal || controller.signal
       });
@@ -22711,18 +22746,163 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 </script>
 
 <script>
+/* ===== 云端聊天记录 + BYOK（自带 API Key）===== */
+(function () {
+  var BYOK_LS = 'gc_byok_key';
+  function $(id) { return document.getElementById(id); }
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function tk() { try { return localStorage.getItem('gc_acct_token') || ''; } catch (e) { return ''; } }
+  function fmt(v) { return v ? String(v).replace('T', ' ').slice(0, 16) : '—'; }
+
+  /* ---------- BYOK ---------- */
+  function refreshByok() {
+    var v = '';
+    try { v = localStorage.getItem(BYOK_LS) || ''; } catch (e) {}
+    var st = $('gcByokState');
+    if (st) st.textContent = v ? ('已设置（' + v.slice(0, 5) + '…' + v.slice(-4) + '）') : '未设置';
+    var inp = $('gcByokInput');
+    if (inp && v) inp.value = v;
+  }
+  function bindByok() {
+    if (document.body.dataset.gcByokBound === '1') return;
+    document.body.dataset.gcByokBound = '1';
+    var save = $('gcByokSave');
+    if (save) save.addEventListener('click', function () {
+      var v = (($('gcByokInput') || {}).value || '').trim();
+      if (v.length < 20) { alert('Key 长度不正确，请粘贴完整的 API Key'); return; }
+      if (!/^[A-Za-z0-9_\-\.]+$/.test(v)) { alert('Key 含有不支持的字符，请只粘贴申请到的 Key 本体'); return; }
+      var warn = '请注意：API Key 保存在本机浏览器中，有可能会泄露，请注意隐私防护安全。\n\n本站绝不泄露您的 API Key：服务端仅在本次请求中透传使用，不写入数据库、不写入日志、不会用于其他用户。\n\n确认保存吗？';
+      if (!window.confirm(warn)) return;
+      try { localStorage.setItem(BYOK_LS, v); } catch (e) { alert('浏览器本地存储不可用，保存失败'); return; }
+      refreshByok();
+      alert('已保存。之后使用 AI 时将优先使用您自己的 Key，不再消耗本站额度。');
+    });
+    var clr = $('gcByokClear');
+    if (clr) clr.addEventListener('click', function () {
+      try { localStorage.removeItem(BYOK_LS); } catch (e) {}
+      var inp = $('gcByokInput');
+      if (inp) inp.value = '';
+      refreshByok();
+      alert('已清除本机保存的 API Key。');
+    });
+    refreshByok();
+  }
+
+  /* ---------- 云端聊天记录 ---------- */
+  function api(body) {
+    var t = tk();
+    if (!t) return Promise.reject(new Error('login_required'));
+    return fetch('/api/chat-store', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'X-Acct-Token': t },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); });
+  }
+  function renderChats(sessions) {
+    var box = $('gcChatList');
+    var cnt = $('gcChatCount');
+    sessions = sessions || [];
+    if (cnt) cnt.textContent = sessions.length;
+    if (!box) return;
+    if (!sessions.length) { box.innerHTML = '<span class="gc-pf-empty">还没有云端会话</span>'; return; }
+    box.innerHTML = sessions.map(function (x) {
+      return '<div class="gc-pf-item" style="display:block">' +
+        '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">' +
+        '<b style="font-size:13px">' + esc(x.title || '未命名对话') + '</b>' +
+        '<span style="font-size:12px;color:#64748b">' + esc(fmt(x.updatedAt)) + '</span></div>' +
+        '<div style="font-size:12px;color:#64748b;margin-top:4px">' + esc(x.count || 0) + ' 条消息 · ' + esc(x.convId || '') + '</div>' +
+        '<div style="margin-top:8px;display:flex;gap:8px"><button class="gc-pf-btn primary" data-load="' + esc(x.convId) + '" type="button" style="padding:6px 12px;font-size:12.5px">载入到对话</button>' +
+        '<button class="gc-pf-btn" data-del="' + esc(x.convId) + '" type="button" style="padding:6px 12px;font-size:12.5px">删除</button></div></div>';
+    }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('[data-del]'), function (b) {
+      b.addEventListener('click', function () {
+        if (!confirm('删除后不可恢复，确认删除这条云端会话？')) return;
+        api({ action: 'del', convId: b.getAttribute('data-del') }).then(loadChats).catch(function () { alert('删除失败，请稍后重试'); });
+      });
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-load]'), function (b) {
+      b.addEventListener('click', function () {
+        var cid = b.getAttribute('data-load');
+        api({ action: 'get', convId: cid }).then(function (d) {
+          if (!d || !d.messages) { alert('会话不存在或已删除'); return; }
+          try { window.aiConversationHistory = d.messages.slice(-40); } catch (e) {}
+          var tip = $('gcChatTip');
+          if (tip) { tip.style.color = '#047857'; tip.textContent = '已载入「' + (d.title || '未命名对话') + '」（' + d.messages.length + ' 条），回到 AI 对话即可继续提问。'; }
+        }).catch(function () { alert('载入失败，请稍后重试'); });
+      });
+    });
+  }
+  function loadChats() {
+    if (!tk()) {
+      var box = $('gcChatList');
+      if (box) box.innerHTML = '<span class="gc-pf-empty">登录后可使用云端聊天记录</span>';
+      return;
+    }
+    api({ action: 'list' }).then(function (d) {
+      if (d && d.ok) renderChats(d.sessions || []);
+    }).catch(function () {});
+  }
+  function bindChat() {
+    if (document.body.dataset.gcChatBound === '1') return;
+    document.body.dataset.gcChatBound = '1';
+    var save = $('gcChatSave');
+    if (save) save.addEventListener('click', function () {
+      var hist = [];
+      try { hist = (window.aiConversationHistory || []).slice(-100); } catch (e) { hist = []; }
+      if (!hist.length) { alert('当前还没有可保存的对话内容，先去和 AI 聊几句吧'); return; }
+      var title = '未命名对话';
+      for (var i = hist.length - 1; i >= 0; i--) {
+        if (hist[i] && hist[i].role === 'user') { title = String(hist[i].content || '').slice(0, 20) || title; break; }
+      }
+      var tip = $('gcChatTip');
+      api({ action: 'save', title: title, messages: hist }).then(function (d) {
+        if (d && d.ok) {
+          if (tip) { tip.style.color = '#047857'; tip.textContent = '已保存到云端（' + d.total + ' 条会话）。'; }
+          loadChats();
+        } else {
+          alert((d && d.message) || '保存失败，请稍后重试');
+        }
+      }).catch(function (e) {
+        alert(e && e.message === 'login_required' ? '请先登录后再保存到云端' : '保存失败，请稍后重试');
+      });
+    });
+    var rf = $('gcChatRefresh');
+    if (rf) rf.addEventListener('click', loadChats);
+    loadChats();
+  }
+
+  function boot() {
+    bindByok();
+    bindChat();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  setTimeout(boot, 1200);
+})();
+</script>
+
+<script>
 /* 收藏 / 保存功能已整体下线（2026-11 改版）：隐藏所有收藏入口与统计 */
 (function () {
   var IDS = ['collectRecordBtn', 'collectAnalysisBtn', 'exportCollectionBtn', 'collectRecordModal', 'collectRecordPop', 'collectAnalysisPanel'];
   function kill() {
     IDS.forEach(function (id) {
       var e = document.getElementById(id);
-      if (e) e.style.display = 'none';
+      if (e && e.parentNode) e.parentNode.removeChild(e);
+      else if (e) e.style.display = 'none';
     });
     var sc = document.getElementById('statCollection');
-    if (sc && sc.parentElement && sc.parentElement.classList.contains('stat-card')) {
-      sc.parentElement.style.display = 'none';
+    if (sc) {
+      var card = (sc.parentElement && sc.parentElement.classList.contains('stat-card')) ? sc.parentElement : sc;
+      if (card.parentNode) card.parentNode.removeChild(card);
     }
+    /* 收藏相关本地缓存一并清理，避免旧数据在界面上复活 */
+    try {
+      localStorage.removeItem('gc_temp_favs');
+    } catch (e1) {}
     var bars = document.querySelectorAll('.gc-fav-bar');
     for (var i = 0; i < bars.length; i++) bars[i].parentNode && bars[i].parentNode.removeChild(bars[i]);
   }
