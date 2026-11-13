@@ -864,6 +864,7 @@ async function handleRequest(context) {
     const want = (env && (env.ADMIN_TOKEN || env.TOKEN_SECRET)) || '';
     const isAdmin = (ck && /mv_admin=/.test(ck)) || !!(want && h && h === want);
     if (!isAdmin) return bad('unauthorized', origin, null, 401);
+    const dry = url.searchParams.get('dry') === '1';
     let cursor = null;
     let scanned = 0;
     let changed = 0;
@@ -877,6 +878,7 @@ async function handleRequest(context) {
         try { u = JSON.parse(raw); } catch (e) { continue; }
         const hasFav = (Array.isArray(u.favorites) && u.favorites.length) || (Array.isArray(u.saved) && u.saved.length);
         if (!hasFav) continue;
+        if (dry) { changed++; continue; }
         u.favorites = [];
         u.saved = [];
         u.favPurgedAt = new Date().toISOString();
@@ -886,7 +888,7 @@ async function handleRequest(context) {
       if (page.list_complete) break;
       cursor = page.cursor;
     }
-    return ok({ scanned: scanned, changed: changed, message: '收藏数据已清空' }, origin);
+    return ok({ dry: dry, scanned: scanned, changed: changed, message: dry ? '统计完成（未修改）' : '收藏数据已清空' }, origin);
   }
 
   return bad('unknown_action', origin, null, 400);
