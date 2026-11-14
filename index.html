@@ -6477,7 +6477,7 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
       <p class="gc-acct-hint">注册需短信验证码校验，成功后自动生成专属 UID（注册日期 + 序号，如 GC261106-001）。试运营期间所有功能免费。</p>
     </div>
     <div id="gcAcctProfile" style="display:none">
-      <div class="gc-pf-trial"><div class="gc-pf-trial-t"><b>深度研读 · 波音 737 系列综合研究报告</b><span>¥5 一次购买，券码长期可读 · 文档内嵌唯一追踪码 · 条款与隐私说明见详情页</span></div><a class="gc-pf-trial-a" href="/pay/737.html">¥5 购买阅读</a></div>
+      <div class="gc-pf-trial"><div class="gc-pf-trial-t"><b>深度研读 · 波音 737 系列综合研究报告</b><span>¥5 一次购买，券码长期可读 · 文档内嵌唯一追踪码 · 条款与隐私说明见详情页</span></div><a class="gc-pf-trial-a" href="/activity.html">限时 ¥5 · 参加活动</a></div>
       <div class="gc-pf-head">
         <img class="gc-pf-avatar" id="gcPfAvatar" alt="头像" title="点击更换头像">
         <div>
@@ -6874,7 +6874,7 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
   <div class="av-ai-badges" id="avAiBadges">
     <span class="av-ai-badge" id="avAiBadgeModel">模型：Kimi K2.6</span>
     <span class="av-ai-badge mode-deep" id="avAiBadgeMode">深度思考</span>
-    <span class="av-ai-badge" id="avAiBadgeQuota">今日剩余深度思考 5/5</span>
+    <span class="av-ai-badge" id="avAiBadgeQuota">今日剩余 K3.1 Pro 2/2</span>
     <button type="button" class="av-ai-badge mode-text" id="avAiImageModeBtn" aria-pressed="false" title="当前：纯文字问答 · 点击切换到识图问答" onclick="avAiToggleImageMode(event)"></button>
   </div>
   <div class="ai-chat-messages" id="aiChatMessages"></div>
@@ -16649,7 +16649,7 @@ a.gc-social-gh .gc-soc-icon{background:rgba(255,255,255,.16);}
   <button class="footer-policy-btn" onclick="openFeedback()"><span id="feedbackBtnText">反馈与建议</span></button>
   <button class="footer-policy-btn" onclick="openMyFeedback()"><span id="myFbBtnText">我的反馈记录</span></button>
   <button class="footer-policy-btn" id="letterBtn" type="button" aria-label="一封信" title="一封信"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>一封信</button>
-  <a class="footer-policy-btn" id="gcTrialBtn" href="/trial.html" title="免费试运营 · 深度研读" style="text-decoration:none">免费试运营</a>
+  <a class="footer-policy-btn" id="gcTrialBtn" href="/activity.html" title="限时 ¥5 · 解锁深度研读" style="text-decoration:none">¥5 深度研读</a>
   <div class="footer-update">隐私政策更新：2026-11-06</div>
 <div style="text-align:center;font-size:12px;padding:14px 10px"><a href="/privacy.html" style="color:#94a3b8;text-decoration:none">服务条款与隐私协议</a>　·　<a href="/changelog.html" style="color:#94a3b8;text-decoration:none">更新日志</a>　·　<a href="/read/737.html" style="color:#94a3b8;text-decoration:none">券码阅读</a></div></footer>
 
@@ -20181,12 +20181,12 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 (function () {
   'use strict';
 
-  var DEEP_LIMIT = 5;
+  var DEEP_LIMIT = 2;
   var LS_QUOTA_PREFIX = 'av_ai_deep_quota_';
   var LS_PREF = 'av_ai_model_pref';
   var FAST_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
   var DEEP_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
-  var DEGRADE_TEXT = '今日 Kimi K3 深度思考次数已用完，已自动切换 Kimi K2.6 继续回答';
+  var DEGRADE_TEXT = '今日 Kimi K3.1 Pro 次数已用完（每日 2 次），已自动切换 Kimi K2.6 继续回答';
 
   /* ---------------- 模型目录（全站仅 Kimi；智谱已全部下线） ---------------- */
   var CATALOG = [
@@ -20194,8 +20194,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       provider: 'kimi', name: 'Kimi（全站统一默认）', mode: 'deep',
       items: [
         { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '默认 · 全站统一' },
-        { id: 'kimi-k3', label: 'Kimi K3', sub: '深度 · 每日限次' },
-        { id: 'kimi-k2.7-code', label: 'Kimi K2.7-Code', sub: '代码' }
+        { id: 'kimi-k3.1-pro', label: 'Kimi K3.1 Pro', sub: '高阶 · 每日 2 次' }
       ]
     }
   ];
@@ -20354,7 +20353,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     var model = state.model;
     var mode = modeOf(provider);
     var degraded = false;
-    if (provider === 'kimi' && model === 'kimi-k3') {
+    if (provider === 'kimi' && model === 'kimi-k3.1-pro') {
       if (!consumeDeep()) {
         /* 第 6 次起：K3 深度额度用完，自动降级 Kimi K2.6，并预约一条提示（插入到本次回答气泡上方） */
         degraded = true;
@@ -22913,5 +22912,504 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   setTimeout(kill, 5000);
 })();
 </script>
+
+<!-- v3.3 活动弹窗横幅：每次进入提示「只需 ¥5」 -->
+<style id="gcPromo5Style">
+#gcPromo5{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:9998;width:min(560px,calc(100vw - 32px));
+  background:linear-gradient(135deg,#ffffff,#f6f9ff);border:1px solid #dbe7fb;border-radius:18px;
+  box-shadow:0 18px 48px rgba(18,42,84,.18);padding:16px 18px;display:flex;gap:14px;align-items:center;
+  opacity:0;pointer-events:none;transition:transform .5s cubic-bezier(.22,1,.36,1),opacity .35s ease;}
+#gcPromo5.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}
+#gcPromo5 .gp-tag{flex:none;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:800;font-size:15px;letter-spacing:.5px;
+  animation:gpPulse 2.4s ease-in-out infinite;}
+@keyframes gpPulse{0%,100%{box-shadow:0 0 0 0 rgba(102,126,234,.35);}50%{box-shadow:0 0 0 10px rgba(102,126,234,0);}}
+#gcPromo5 .gp-txt{flex:1;min-width:0;}
+#gcPromo5 .gp-txt b{display:block;font-size:14.5px;color:#12243a;margin-bottom:3px;}
+#gcPromo5 .gp-txt span{font-size:12.5px;color:#54657d;line-height:1.5;}
+#gcPromo5 .gp-act{display:flex;flex-direction:column;gap:7px;flex:none;}
+#gcPromo5 a.gp-go{padding:9px 16px;border-radius:11px;text-decoration:none;color:#fff;font-size:13px;font-weight:700;white-space:nowrap;
+  background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 8px 18px rgba(102,126,234,.3);transition:transform .2s ease,box-shadow .2s ease;}
+#gcPromo5 a.gp-go:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(102,126,234,.38);}
+#gcPromo5 button.gp-close{background:none;border:0;color:#8a98ab;font-size:12px;cursor:pointer;padding:2px;}
+@media(max-width:560px){#gcPromo5{flex-wrap:wrap;}#gcPromo5 .gp-act{flex-direction:row;width:100%;justify-content:flex-end;}}
+</style>
+<div id="gcPromo5" role="dialog" aria-label="限时活动">
+  <div class="gp-tag">¥5</div>
+  <div class="gp-txt">
+    <b>限时活动 · 只需 ¥5 解锁深度研读</b>
+    <span>波音 737 系列综合研究报告全文开放，一次购买长期可读，含唯一追踪码。</span>
+  </div>
+  <div class="gp-act">
+    <a class="gp-go" href="/activity.html">去看看</a>
+    <button class="gp-close" type="button" id="gcPromo5Close">今日不再提示</button>
+  </div>
+</div>
+<script id="gcPromo5Script">
+(function(){
+  try{
+    var KEY='gc_promo5_seen';
+    var today=new Date(); var t=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    if(localStorage.getItem(KEY)===t) return;
+    var box=document.getElementById('gcPromo5');
+    if(!box) return;
+    setTimeout(function(){ box.classList.add('show'); }, 1800);
+    function hide(remember){
+      box.classList.remove('show');
+      if(remember){ try{ localStorage.setItem(KEY,t); }catch(e){} }
+    }
+    var c=document.getElementById('gcPromo5Close');
+    if(c) c.addEventListener('click',function(){ hide(true); });
+    setTimeout(function(){ if(box.classList.contains('show')) hide(true); }, 12000);
+  }catch(e){}
+})();
+</script>
+
+<!-- ===== 多端互联：扫码登录 + 图片速传（v3.3） ===== -->
+<style>
+  .gc-link-fab{position:fixed;right:18px;bottom:86px;z-index:99992;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
+    background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 10px 26px rgba(102,126,234,.42);display:flex;align-items:center;justify-content:center;
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease}
+  .gc-link-fab:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 16px 32px rgba(102,126,234,.5)}
+  .gc-link-fab::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(102,126,234,.45);animation:gcLinkPulse 2.4s ease-out infinite}
+  @keyframes gcLinkPulse{0%{transform:scale(.86);opacity:.85}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+  .gc-link-mask{position:fixed;inset:0;background:rgba(15,23,42,.44);backdrop-filter:blur(3px);z-index:99993;opacity:0;pointer-events:none;transition:opacity .24s ease}
+  .gc-link-mask.on{opacity:1;pointer-events:auto}
+  .gc-link-panel{position:fixed;right:18px;bottom:148px;width:min(374px,calc(100vw - 28px));max-height:76vh;overflow:auto;z-index:99994;border-radius:20px;background:#fff;
+    box-shadow:0 26px 60px rgba(15,23,42,.26);border:1px solid #e5e9f2;transform:translateY(18px) scale(.96);opacity:0;pointer-events:none;
+    transition:transform .28s cubic-bezier(.34,1.4,.64,1),opacity .22s ease}
+  .gc-link-panel.on{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+  .gc-lp-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #eef1f7;position:sticky;top:0;background:#fff;z-index:2}
+  .gc-lp-head b{font-size:14.5px;color:#1e293b}
+  .gc-lp-close{margin-left:auto;border:0;background:#f1f4fa;color:#64748b;width:28px;height:28px;border-radius:9px;cursor:pointer;font-size:15px;line-height:1}
+  .gc-lp-close:hover{background:#e6ebf5;color:#334155}
+  .gc-lp-tabs{display:flex;gap:6px;padding:10px 14px 0}
+  .gc-lp-tab{flex:1;border:0;background:#f5f7fc;color:#64748b;font-size:12.5px;padding:8px 4px;border-radius:10px;cursor:pointer;transition:all .18s ease}
+  .gc-lp-tab.on{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 6px 14px rgba(102,126,234,.3)}
+  .gc-lp-body{padding:14px 16px 18px}
+  .gc-lp-pane{display:none;animation:gcLpIn .26s ease}
+  .gc-lp-pane.on{display:block}
+  @keyframes gcLpIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .gc-lp-note{font-size:12px;color:#7b8798;line-height:1.65;margin:0 0 12px}
+  .gc-lp-btn{width:100%;border:0;border-radius:12px;padding:11px;font-size:13.5px;font-weight:600;color:#fff;cursor:pointer;
+    background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 8px 18px rgba(102,126,234,.3);transition:transform .16s ease,box-shadow .2s ease}
+  .gc-lp-btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(102,126,234,.36)}
+  .gc-lp-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .gc-lp-btn.ghost{background:#f4f6fb;color:#475569;box-shadow:none}
+  .gc-lp-qr{margin:12px auto 8px;width:170px;height:170px;border-radius:14px;background:#fff;border:1px solid #e8ecf5;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .gc-lp-qr canvas,.gc-lp-qr img{width:100%;height:100%}
+  .gc-lp-code{font-family:ui-monospace,Menlo,monospace;font-size:22px;letter-spacing:6px;text-align:center;color:#4338ca;font-weight:700;margin:6px 0 2px}
+  .gc-lp-input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #dbe2ee;border-radius:11px;font-size:13.5px;outline:none;transition:border-color .18s ease,box-shadow .18s ease}
+  .gc-lp-input:focus{border-color:#8b9cf7;box-shadow:0 0 0 3px rgba(102,126,234,.14)}
+  .gc-lp-row{display:flex;gap:8px;margin-top:10px}
+  .gc-lp-msg{font-size:12px;color:#64748b;margin-top:10px;min-height:16px;line-height:1.5}
+  .gc-lp-msg.ok{color:#0f9d58}
+  .gc-lp-msg.err{color:#e05252}
+  .gc-lp-preview{margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid #e8ecf5;display:none;animation:gcLpIn .3s ease}
+  .gc-lp-preview.on{display:block}
+  .gc-lp-preview img{width:100%;display:block}
+  .gc-lp-preview .txt{padding:11px;font-size:13px;color:#334155;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow:auto}
+  .gc-lp-drop{border:1.5px dashed #cfd8ea;border-radius:12px;padding:16px;text-align:center;color:#8494ab;font-size:12.5px;cursor:pointer;transition:all .2s ease}
+  .gc-lp-drop:hover,.gc-lp-drop.over{border-color:#8b9cf7;background:#f6f8ff;color:#5b6ee0}
+  .gc-lp-spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:gcLpSpin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes gcLpSpin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.gc-link-fab::after{animation:none}}
+</style>
+<button id="gcLinkFab" class="gc-link-fab" type="button" title="多端互联 · 扫码登录 / 图片速传" aria-label="多端互联">
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9.5 8.5 7 11a3.5 3.5 0 0 0 5 5l2-2"/><path d="M14.5 15.5 17 13a3.5 3.5 0 0 0-5-5l-2 2"/>
+  </svg>
+</button>
+<div id="gcLinkMask" class="gc-link-mask"></div>
+<div id="gcLinkPanel" class="gc-link-panel" role="dialog" aria-modal="true" aria-label="多端互联">
+  <div class="gc-lp-head">
+    <b>多端互联</b>
+    <span style="font-size:11.5px;color:#94a3b8">扫码登录 · 图片速传</span>
+    <button class="gc-lp-close" id="gcLpClose" type="button" aria-label="关闭">✕</button>
+  </div>
+  <div class="gc-lp-tabs">
+    <button class="gc-lp-tab on" data-lp="login" type="button">扫码登录</button>
+    <button class="gc-lp-tab" data-lp="transfer" type="button">图片速传</button>
+    <button class="gc-lp-tab" data-lp="receive" type="button">接收</button>
+  </div>
+  <div class="gc-lp-body">
+    <div class="gc-lp-pane on" id="gcLpLogin">
+      <p class="gc-lp-note">在「已登录的手机」上生成二维码，用「待登录的电脑」扫码即可免密码登录；也可反过来在电脑上生成、手机确认。</p>
+      <button class="gc-lp-btn" id="gcLpGenQr" type="button">生成登录二维码</button>
+      <div class="gc-lp-qr" id="gcLpQrBox"><span style="font-size:12px;color:#a8b3c4">二维码</span></div>
+      <div class="gc-lp-code" id="gcLpLoginCode" style="display:none"></div>
+      <div class="gc-lp-row">
+        <input class="gc-lp-input" id="gcLpApproveCode" placeholder="输入对方显示的 8 位码，确认登录" maxlength="10">
+        <button class="gc-lp-btn" id="gcLpApprove" type="button" style="width:96px;flex:0 0 96px">我确认</button>
+      </div>
+      <div class="gc-lp-msg" id="gcLpLoginMsg"></div>
+    </div>
+    <div class="gc-lp-pane" id="gcLpTransfer">
+      <p class="gc-lp-note">选中一张图片（或粘贴一段文字），生成 6 位速传码，在另一台设备的「接收」里输入即可取回。有效期 30 分钟。</p>
+      <div class="gc-lp-drop" id="gcLpDrop">点击选择图片，或把图片拖到这里</div>
+      <input type="file" id="gcLpFile" accept="image/*" style="display:none">
+      <div class="gc-lp-row">
+        <input class="gc-lp-input" id="gcLpText" placeholder="也可以直接粘贴一段文字（可选）">
+        <button class="gc-lp-btn ghost" id="gcLpSendText" type="button" style="width:84px;flex:0 0 84px">发文字</button>
+      </div>
+      <div class="gc-lp-code" id="gcLpShareCode" style="display:none"></div>
+      <div class="gc-lp-msg" id="gcLpTransferMsg"></div>
+    </div>
+    <div class="gc-lp-pane" id="gcLpReceive">
+      <p class="gc-lp-note">输入对方发给你的 6 位速传码，即可取回图片或文字。</p>
+      <div class="gc-lp-row" style="margin-top:0">
+        <input class="gc-lp-input" id="gcLpRecvCode" placeholder="6 位速传码" maxlength="8">
+        <button class="gc-lp-btn" id="gcLpRecvBtn" type="button" style="width:96px;flex:0 0 96px">取回</button>
+      </div>
+      <div class="gc-lp-preview" id="gcLpPreview"></div>
+      <div class="gc-lp-msg" id="gcLpRecvMsg"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var fab = document.getElementById('gcLinkFab');
+  var panel = document.getElementById('gcLinkPanel');
+  var mask = document.getElementById('gcLinkMask');
+  if (!fab || !panel) return;
+  function open() { panel.classList.add('on'); mask.classList.add('on'); }
+  function close() { panel.classList.remove('on'); mask.classList.remove('on'); }
+  fab.addEventListener('click', function () { panel.classList.contains('on') ? close() : open(); });
+  mask.addEventListener('click', close);
+  var cb = document.getElementById('gcLpClose'); if (cb) cb.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+  var tabs = document.querySelectorAll('.gc-lp-tab');
+  var panes = { login: 'gcLpLogin', transfer: 'gcLpTransfer', receive: 'gcLpReceive' };
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].addEventListener('click', function (e) {
+      var name = e.currentTarget.getAttribute('data-lp');
+      for (var j = 0; j < tabs.length; j++) tabs[j].classList.toggle('on', tabs[j] === e.currentTarget);
+      Object.keys(panes).forEach(function (k) {
+        var el = document.getElementById(panes[k]);
+        if (el) el.classList.toggle('on', k === name);
+      });
+    });
+  }
+
+  function msg(id, text, kind) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text || '';
+    el.className = 'gc-lp-msg' + (kind ? ' ' + kind : '');
+  }
+  function tk() { try { return localStorage.getItem('gc_acct_token') || ''; } catch (e) { return ''; } }
+
+  /* ---------- 扫码登录：电脑端生成 ---------- */
+  var pollTimer = null;
+  var qrLibLoading = null;
+  function loadQrLib() {
+    if (window.qrcode) return Promise.resolve(true);
+    if (qrLibLoading) return qrLibLoading;
+    qrLibLoading = new Promise(function (resolve) {
+      var sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+      sc.onload = function () { resolve(!!window.qrcode); };
+      sc.onerror = function () { resolve(false); };
+      document.head.appendChild(sc);
+    });
+    return qrLibLoading;
+  }
+  function drawQr(box, text) {
+    box.innerHTML = '';
+    loadQrLib().then(function (okLib) {
+      if (!okLib || !window.qrcode) {
+        box.innerHTML = '<span style="font-size:11.5px;color:#94a3b8;padding:8px;text-align:center;line-height:1.6">二维码组件加载失败<br>请让对方手动输入下方 8 位码</span>';
+        return;
+      }
+      try {
+        var qr = window.qrcode(0, 'M');
+        qr.addData(text);
+        qr.make();
+        box.innerHTML = qr.createImgTag(5, 4);
+      } catch (e) {
+        box.innerHTML = '<span style="font-size:11.5px;color:#94a3b8">二维码生成失败，请输入下方 8 位码</span>';
+      }
+    });
+  }
+
+  var genBtn = document.getElementById('gcLpGenQr');
+  if (genBtn) genBtn.addEventListener('click', function () {
+    genBtn.disabled = true;
+    genBtn.innerHTML = '<span class="gc-lp-spin"></span>生成中…';
+    msg('gcLpLoginMsg', '');
+    fetch('/api/device', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'create', device: navigator.userAgent.slice(0, 50) }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        genBtn.disabled = false; genBtn.textContent = '重新生成';
+        if (!d || !d.ok) { msg('gcLpLoginMsg', (d && d.message) || '生成失败，请稍后重试', 'err'); return; }
+        var code = d.code;
+        var codeEl = document.getElementById('gcLpLoginCode');
+        codeEl.style.display = 'block';
+        codeEl.textContent = code.slice(0, 4) + ' ' + code.slice(4);
+        drawQr(document.getElementById('gcLpQrBox'), location.origin + '/?gc_device=' + code);
+        msg('gcLpLoginMsg', '二维码 5 分钟内有效，请用已登录的设备确认');
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(function () {
+          fetch('/api/device?action=poll&code=' + encodeURIComponent(code)).then(function (r) { return r.json(); }).then(function (p) {
+            if (!p || !p.ok) return;
+            if (p.status === 'approved' && p.token) {
+              clearInterval(pollTimer); pollTimer = null;
+              try {
+                localStorage.setItem('gc_acct_token', p.token);
+                if (typeof window.gcOnToken === 'function') window.gcOnToken(p.token);
+              } catch (e) {}
+              msg('gcLpLoginMsg', '登录成功，本机已切换到该账号，正在刷新…', 'ok');
+              setTimeout(function () { location.reload(); }, 900);
+            } else if (p.status === 'expired' || p.status === 'claimed') {
+              clearInterval(pollTimer); pollTimer = null;
+              msg('gcLpLoginMsg', '二维码已失效，请重新生成', 'err');
+            }
+          }).catch(function () { });
+        }, 2500);
+      })
+      .catch(function () { genBtn.disabled = false; genBtn.textContent = '生成登录二维码'; msg('gcLpLoginMsg', '网络异常，请稍后重试', 'err'); });
+  });
+
+  /* ---------- 扫码登录：手机端确认 ---------- */
+  var apBtn = document.getElementById('gcLpApprove');
+  if (apBtn) apBtn.addEventListener('click', function () {
+    var code = (document.getElementById('gcLpApproveCode').value || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+    if (code.length < 6) { msg('gcLpLoginMsg', '请输入完整的 8 位码', 'err'); return; }
+    var token = tk();
+    if (!token) { msg('gcLpLoginMsg', '本机尚未登录，请先登录后再确认', 'err'); return; }
+    apBtn.disabled = true; apBtn.innerHTML = '<span class="gc-lp-spin"></span>';
+    fetch('/api/device', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ action: 'approve', code: code }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        apBtn.disabled = false; apBtn.textContent = '我确认';
+        if (d && d.ok) { msg('gcLpLoginMsg', '已确认，对方设备将自动登录', 'ok'); }
+        else { msg('gcLpLoginMsg', (d && d.message) || '确认失败', 'err'); }
+      })
+      .catch(function () { apBtn.disabled = false; apBtn.textContent = '我确认'; msg('gcLpLoginMsg', '网络异常', 'err'); });
+  });
+
+  /* ---------- 图片 / 文字速传 ---------- */
+  var drop = document.getElementById('gcLpDrop');
+  var fileInput = document.getElementById('gcLpFile');
+  if (drop && fileInput) {
+    drop.addEventListener('click', function () { fileInput.click(); });
+    drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', function () { drop.classList.remove('over'); });
+    drop.addEventListener('drop', function (e) {
+      e.preventDefault(); drop.classList.remove('over');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', function () { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+  }
+  function handleFile(f) {
+    if (!/^image\//.test(f.type)) { msg('gcLpTransferMsg', '请选择图片文件', 'err'); return; }
+    if (f.size > 1800000) { msg('gcLpTransferMsg', '图片过大（上限约 1.8MB），请压缩后再传', 'err'); return; }
+    var reader = new FileReader();
+    reader.onload = function () {
+      msg('gcLpTransferMsg', '正在上传…');
+      fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'upload', kind: 'image', name: f.name, dataUrl: reader.result }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || !d.ok) { msg('gcLpTransferMsg', (d && d.message) || '上传失败', 'err'); return; }
+          showShareCode(d.code);
+          msg('gcLpTransferMsg', '已生成速传码，30 分钟内有效，在另一台设备「接收」里输入即可', 'ok');
+        })
+        .catch(function () { msg('gcLpTransferMsg', '网络异常，上传失败', 'err'); });
+    };
+    reader.readAsDataURL(f);
+  }
+  var sendText = document.getElementById('gcLpSendText');
+  if (sendText) sendText.addEventListener('click', function () {
+    var t = (document.getElementById('gcLpText').value || '').trim();
+    if (!t) { msg('gcLpTransferMsg', '请先输入要传的文字', 'err'); return; }
+    sendText.disabled = true;
+    fetch('/api/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'upload', kind: 'text', text: t }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        sendText.disabled = false;
+        if (!d || !d.ok) { msg('gcLpTransferMsg', (d && d.message) || '发送失败', 'err'); return; }
+        showShareCode(d.code);
+        msg('gcLpTransferMsg', '文字已生成速传码，30 分钟内有效', 'ok');
+      })
+      .catch(function () { sendText.disabled = false; msg('gcLpTransferMsg', '网络异常', 'err'); });
+  });
+  function showShareCode(code) {
+    var el = document.getElementById('gcLpShareCode');
+    if (!el) return;
+    el.style.display = 'block';
+    el.textContent = code.slice(0, 3) + ' ' + code.slice(3);
+    el.title = '点击复制';
+    el.style.cursor = 'pointer';
+    el.onclick = function () {
+      try { navigator.clipboard.writeText(code); msg('gcLpTransferMsg', '速传码已复制', 'ok'); } catch (e) {}
+    };
+  }
+
+  /* ---------- 接收 ---------- */
+  var recvBtn = document.getElementById('gcLpRecvBtn');
+  if (recvBtn) recvBtn.addEventListener('click', function () {
+    var code = (document.getElementById('gcLpRecvCode').value || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+    if (code.length < 4) { msg('gcLpRecvMsg', '请输入速传码', 'err'); return; }
+    recvBtn.disabled = true; recvBtn.innerHTML = '<span class="gc-lp-spin"></span>';
+    fetch('/api/share?action=get&code=' + encodeURIComponent(code))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        recvBtn.disabled = false; recvBtn.textContent = '取回';
+        var box = document.getElementById('gcLpPreview');
+        if (!d || !d.ok) { box.classList.remove('on'); msg('gcLpRecvMsg', (d && d.message) || '取回失败', 'err'); return; }
+        box.classList.add('on'); box.innerHTML = '';
+        if (d.kind === 'image') {
+          var img = document.createElement('img');
+          img.src = d.dataUrl; img.alt = d.name || 'image';
+          box.appendChild(img);
+          var bar = document.createElement('div');
+          bar.style.cssText = 'display:flex;gap:8px;padding:9px;border-top:1px solid #eef1f7';
+          var a = document.createElement('a');
+          a.href = d.dataUrl; a.download = d.name || 'gc-image.png';
+          a.textContent = '保存图片';
+          a.style.cssText = 'flex:1;text-align:center;font-size:12.5px;padding:8px;border-radius:9px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none';
+          bar.appendChild(a);
+          box.appendChild(bar);
+          msg('gcLpRecvMsg', '已取回图片', 'ok');
+        } else {
+          var pre = document.createElement('div');
+          pre.className = 'txt'; pre.textContent = d.text || '';
+          box.appendChild(pre);
+          msg('gcLpRecvMsg', '已取回文字，可长按选择复制', 'ok');
+        }
+      })
+      .catch(function () { recvBtn.disabled = false; recvBtn.textContent = '取回'; msg('gcLpRecvMsg', '网络异常', 'err'); });
+  });
+})();
+</script>
+
+<!-- ===== v3.3 增强：云记录自动保存 + 门控提示 + 扫码落地 ===== -->
+<style>
+  #gcChatList .gc-pf-item{animation:gcChatIn .32s cubic-bezier(.34,1.3,.64,1) both}
+  #gcChatList .gc-pf-item:nth-child(2){animation-delay:.04s}
+  #gcChatList .gc-pf-item:nth-child(3){animation-delay:.08s}
+  #gcChatList .gc-pf-item:nth-child(4){animation-delay:.12s}
+  @keyframes gcChatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .gc-chat-auto{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#64748b;margin:0 0 8px}
+  .gc-chat-auto input{width:15px;height:15px;accent-color:#667eea}
+  .gc-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);z-index:99996;background:rgba(30,41,59,.95);color:#fff;
+    font-size:13px;padding:10px 16px;border-radius:12px;box-shadow:0 12px 30px rgba(15,23,42,.28);opacity:0;pointer-events:none;transition:all .26s ease;max-width:88vw;line-height:1.5}
+  .gc-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+<script>
+(function () {
+  function toast(text, ms) {
+    var el = document.getElementById('gcToast');
+    if (!el) { el = document.createElement('div'); el.id = 'gcToast'; el.className = 'gc-toast'; document.body.appendChild(el); }
+    el.textContent = text;
+    el.classList.add('on');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('on'); }, ms || 3200);
+  }
+  window.gcToast = toast;
+
+  /* ---------- 1. 云记录：自动保存开关 + 自动入库 ---------- */
+  function tk() { try { return localStorage.getItem('gc_acct_token') || ''; } catch (e) { return ''; } }
+  function autoOn() { try { return localStorage.getItem('gc_chat_autosave') !== '0'; } catch (e) { return true; } }
+
+  function mountAutoRow() {
+    var sec = document.getElementById('gcChatSec');
+    if (!sec || document.getElementById('gcChatAutoRow')) return;
+    var list = document.getElementById('gcChatList');
+    var row = document.createElement('div');
+    row.id = 'gcChatAutoRow';
+    row.className = 'gc-chat-auto';
+    row.innerHTML = '<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="gcChatAuto"' + (autoOn() ? ' checked' : '') + '> 对话结束后自动保存到云端（仅你本人可见）</label>';
+    if (list && list.parentNode) list.parentNode.insertBefore(row, list);
+    var cb = document.getElementById('gcChatAuto');
+    if (cb) cb.addEventListener('change', function () {
+      try { localStorage.setItem('gc_chat_autosave', cb.checked ? '1' : '0'); } catch (e) {}
+      toast(cb.checked ? '已开启自动保存对话' : '已关闭自动保存对话', 2000);
+    });
+  }
+  mountAutoRow();
+  setInterval(mountAutoRow, 2500);
+
+  var lastSavedKey = '';
+  function autoSaveTick() {
+    if (!autoOn() || !tk()) return;
+    var hist = [];
+    try { hist = (window.aiConversationHistory || []).slice(-100); } catch (e) { return; }
+    if (!hist.length || hist.length < 2) return;
+    var last = hist[hist.length - 1] || {};
+    var key = hist.length + '|' + String(last.content || '').slice(0, 40);
+    if (key === lastSavedKey) return;
+    var title = '未命名对话';
+    for (var i = hist.length - 1; i >= 0; i--) {
+      if (hist[i] && hist[i].role === 'user') { title = String(hist[i].content || '').slice(0, 20) || title; break; }
+    }
+    lastSavedKey = key;
+    fetch('/api/chat-store', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'X-Acct-Token': tk() },
+      body: JSON.stringify({ action: 'save', title: title, messages: hist })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.ok && document.getElementById('gcChatSec')) {
+        var tip = document.getElementById('gcChatTip');
+        if (tip) { tip.style.color = '#047857'; tip.textContent = '已自动保存到云端（共 ' + (d.total || 0) + ' 条会话）。'; }
+        if (typeof window.gcLoadChats === 'function') window.gcLoadChats();
+      }
+    }).catch(function () { });
+  }
+  setInterval(autoSaveTick, 12000);
+
+  /* ---------- 2. 门控提示：AI 关闭 / 未登录 不再表现为「没反应」 ---------- */
+  var rawFetch = window.fetch;
+  if (typeof rawFetch === 'function') {
+    window.fetch = function (input, init) {
+      var url = typeof input === 'string' ? input : (input && input.url) || '';
+      var isChat = url.indexOf('/api/chat') >= 0;
+      var pr = rawFetch.apply(this, arguments);
+      if (!isChat) return pr;
+      return pr.then(function (res) {
+        var ct = res.headers.get('Content-Type') || '';
+        if (ct.indexOf('application/json') >= 0 && (res.status === 503 || res.status === 403)) {
+          res.clone().json().then(function (j) {
+            if (!j) return;
+            if (j.code === 'AI_GATE_CLOSED' || j.error === 'ai_disabled') {
+              toast('AI 功能暂时维护中（站长已关闭），请稍后再试', 4200);
+            } else if (j.error === 'invalid_visitor') {
+              toast('访客标识已自动修复，正在重试…', 2500);
+            } else if (j.error === 'token_replayed' || j.error === 'token_required') {
+              toast('会话令牌已刷新，正在重试…', 2200);
+            }
+          }).catch(function () { });
+        }
+        return res;
+      });
+    };
+  }
+
+  /* ---------- 3. 扫码落地：带 ?gc_device= 打开时自动进入确认流程 ---------- */
+  try {
+    var u = new URL(location.href);
+    var dc = (u.searchParams.get('gc_device') || '').toUpperCase();
+    if (dc && dc.length >= 6) {
+      setTimeout(function () {
+        var fab = document.getElementById('gcLinkFab');
+        if (fab) fab.click();
+        var inp = document.getElementById('gcLpApproveCode');
+        if (inp) {
+          inp.value = dc;
+          if (!tk()) {
+            toast('请先在本机登录，登录后即可确认对方设备', 4200);
+          } else {
+            toast('已识别的登录码，点击「我确认」即可让对方设备登录', 4200);
+          }
+        }
+        try { u.searchParams.delete('gc_device'); history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) {}
+      }, 700);
+    }
+  } catch (e) { }
+})();
+</script>
 </body>
+
+
 </html>

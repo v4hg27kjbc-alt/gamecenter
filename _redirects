@@ -1,6 +1,12 @@
-# 测试版下线：全部重定向到付费阅读页（2026-11-13）
-/trial.html            /pay/737.html   301
-/alpha-beta-test.html  /pay/737.html   301
-/test-login.html       /pay/737.html   301
-/test-admin.html       /pay/737.html   301
-/test-sms-sim.html     /pay/737.html   301
+# 测试版 / 免费试用全面下线，改为收费（2026-11-14 v3.3）
+# 所有历史试用与测试入口统一指向 ¥5 活动页，再进入付费下单
+/trial.html            /activity.html   301
+/alpha-beta-test.html  /activity.html   301
+/test-login.html       /activity.html   301
+/test-admin.html       /activity.html   301
+/test-sms-sim.html     /activity.html   301
+# 旧免费试用直达链接（历史外链兜底）
+/trial                 /activity.html   301
+/trial/                /activity.html   301
+/free                  /activity.html   301
+/free/                 /activity.html   301

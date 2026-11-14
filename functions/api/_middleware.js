@@ -37,8 +37,9 @@ const STRICT_PATHS = [
 
 // AI 相关能力路径：ai_enabled 总闸关闭时必须全部不可用（不止对话）
 const AI_GATED_PREFIXES = [
-  '/api/ai', '/api/chat', '/api/token', '/api/prewarm',
-  '/api/glossary', '/api/qa-logs'
+  // 仅拦截「会真实消耗模型额度」的能力；只读数据接口（术语表 / 问答日志）不随 AI 总闸关闭，
+  // 否则后台诊断页与历史数据在熔断期间一并不可用，反而无法排查。
+  '/api/ai', '/api/chat', '/api/token', '/api/prewarm'
 ];
 
 const ADMIN_PREFIX = '/api/admin/';

@@ -112,8 +112,24 @@ export async function onRequestPost(context) {
   if (!flags.ai_enabled) return fail(ERR.MAINTENANCE, 'AI 服务维护中', 503, cors.headers);
 
   var visitorId = resolveVisitorId(request, context, env.AI_VISITOR_COOKIE || 'ai_vid');
+  var autoVisitorCookie = '';
   if (!visitorId) {
-    return fail(ERR.INVALID_VISITOR, '缺少有效访客标识；可先 GET /api/token?bootstrap=1 获取', 400, cors.headers);
+    /* 门控修正：首访 / 隐私模式（Cookie 被清）不应直接 400，自动补发访客标识，
+       让「取令牌」一次请求即可完成，避免前端因 invalid_visitor 反复重试导致 AI 门口假死 */
+    visitorId = generateVisitorId();
+    autoVisitorCookie =
+      (env.AI_VISITOR_COOKIE || 'ai_vid') +
+      '=' + visitorId +
+      '; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly';
+    try {
+      var nvH = await hashId(visitorId, env);
+      await recordVisit(env, {
+        visitorHash: nvH,
+        ip: getClientIp(request),
+        country: request.headers.get('cf-ipcountry') || '',
+        ua: request.headers.get('user-agent') || ''
+      });
+    } catch (e0) {}
   }
 
   var ipHash = await hashId(getClientIp(request), env);
@@ -176,12 +192,15 @@ export async function onRequestPost(context) {
       keySource: sec.source,
       keyWeak: sec.weak,
       usage: { header: 'X-AI-Token', endpoint: 'POST /api/chat' },
-      requestId: newRequestId('tok')
+      visitorId: visitorId,
+      visitorAuthed: true,
+      requestId: newRequestId('tok'),
+      visitorBootstrap: !!autoVisitorCookie
     },
     Object.assign({}, cors.headers, {
       'Cache-Control': 'no-store',
       'X-AI-Token-TTL': String(issued.expiresIn)
-    })
+    }, autoVisitorCookie ? { 'Set-Cookie': autoVisitorCookie } : {})
   );
 }
 

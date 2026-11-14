@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>限时 ¥5 · 深度研读解锁活动 | 民航客机收藏馆</title>
+<meta name="description" content="民航客机收藏馆限时活动：只需 ¥5 解锁《波音 737 系列综合研究报告》全文深度研读，一次购买长期可读，含唯一追踪码。">
+<link rel="canonical" href="https://henry126923.pages.dev/activity.html">
+<meta property="og:title" content="限时 ¥5 · 深度研读解锁活动">
+<meta property="og:description" content="只需 ¥5，解锁波音 737 系列综合研究报告全文，长期可读。">
+<meta property="og:type" content="website">
+<style>
+:root{
+  --blue:#1f6feb; --blue-deep:#1558c0; --ink:#12243a; --ink-2:#41556e; --line:#e2edfb;
+  --grad:linear-gradient(135deg,#667eea,#764ba2);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--ink);background:#f7faff;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--blue);text-decoration:none}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px}
+
+/* 顶部条 */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:920px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px;color:var(--ink)}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--grad);box-shadow:0 0 0 4px rgba(102,126,234,.16)}
+.topbar a.back{font-size:13px;color:var(--ink-2);padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:#fff;transition:.2s}
+.topbar a.back:hover{border-color:#c9dcf8;color:var(--blue)}
+
+/* 主视觉 */
+.hero{padding:52px 0 30px;text-align:center;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:-40% -20% auto;height:420px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(102,126,234,.16),transparent 62%);pointer-events:none}
+.badge-live{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:700;
+  color:#1558c0;background:#eaf2ff;border:1px solid #d3e4ff;margin-bottom:18px}
+.badge-live .pulse{width:7px;height:7px;border-radius:50%;background:#1f6feb;animation:blPulse 1.8s infinite}
+@keyframes blPulse{0%,100%{box-shadow:0 0 0 0 rgba(31,111,235,.5)}50%{box-shadow:0 0 0 7px rgba(31,111,235,0)}}
+h1{margin:0 0 14px;font-size:clamp(26px,4.4vw,40px);line-height:1.28;letter-spacing:-.5px}
+h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{margin:0 auto;max-width:600px;color:var(--ink-2);font-size:15.5px}
+
+/* 价格卡 */
+.price-card{margin:30px auto 0;max-width:520px;background:#fff;border:1px solid var(--line);border-radius:22px;
+  padding:26px 24px;box-shadow:0 16px 44px rgba(18,42,84,.09);position:relative;overflow:hidden}
+.price-card:after{content:"";position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(118,75,162,.12),transparent 70%)}
+.price-row{display:flex;align-items:baseline;justify-content:center;gap:12px;margin-bottom:8px}
+.price-now{font-size:52px;font-weight:900;letter-spacing:-2px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.price-old{font-size:19px;color:#9aa8ba;text-decoration:line-through}
+.price-note{font-size:12.5px;color:#8a98ab;text-align:center;margin-bottom:20px}
+.btn-go{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:15px 20px;border-radius:14px;
+  background:var(--grad);color:#fff!important;font-size:16px;font-weight:800;letter-spacing:.3px;
+  box-shadow:0 12px 26px rgba(102,126,234,.34);transition:transform .22s ease,box-shadow .22s ease}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 18px 34px rgba(102,126,234,.42)}
+.btn-go svg{transition:transform .22s ease}
+.btn-go:hover svg{transform:translateX(3px)}
+.price-sub{margin-top:12px;text-align:center;font-size:12.5px;color:#8a98ab}
+.price-sub b{color:#1558c0}
+
+/* 区块 */
+.section{padding:34px 0}
+.sec-h{font-size:19px;font-weight:800;margin:0 0 6px;display:flex;align-items:center;gap:9px}
+.sec-h:before{content:"";width:4px;height:18px;border-radius:3px;background:var(--grad)}
+.sec-sub{margin:0 0 20px;color:var(--ink-2);font-size:13.5px}
+
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;transition:transform .24s ease,box-shadow .24s ease}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(18,42,84,.08)}
+.card .ico{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:#eef4ff;color:#1f6feb;margin-bottom:12px;font-size:17px}
+.card h3{margin:0 0 6px;font-size:14.5px}
+.card p{margin:0;font-size:13px;color:var(--ink-2)}
+
+/* 步骤 */
+.steps{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));counter-reset:st}
+.step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 18px;position:relative}
+.step:before{counter-increment:st;content:counter(st);position:absolute;top:-13px;left:18px;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;background:var(--grad);
+  box-shadow:0 8px 16px rgba(102,126,234,.32)}
+.step h3{margin:10px 0 6px;font-size:14px}
+.step p{margin:0;font-size:12.8px;color:var(--ink-2)}
+
+/* FAQ */
+.faq{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.faq details{border-bottom:1px solid var(--line)}
+.faq details:last-child{border-bottom:0}
+.faq summary{cursor:pointer;list-style:none;padding:15px 18px;font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:10px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:after{content:"+";color:#9aa8ba;font-weight:700;transition:transform .2s}
+.faq details[open] summary:after{transform:rotate(45deg)}
+.faq .ans{padding:0 18px 15px;font-size:13px;color:var(--ink-2)}
+
+/* 规则 */
+.rules{background:#fbfdff;border:1px dashed #cfe0f7;border-radius:16px;padding:18px 20px}
+.rules ol{margin:0;padding-left:20px;font-size:13px;color:var(--ink-2)}
+.rules li{margin-bottom:8px}
+.rules li:last-child{margin-bottom:0}
+
+/* 底部固定 CTA */
+.footcta{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;
+  transform:translateY(110%);transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.footcta.show{transform:translateY(0)}
+.footcta .fc-txt{flex:1;min-width:0;font-size:12.5px;color:var(--ink-2)}
+.footcta .fc-txt b{display:block;color:var(--ink);font-size:13.5px}
+.footcta a{flex:none;padding:11px 20px;border-radius:12px;background:var(--grad);color:#fff!important;font-weight:800;font-size:13.5px;
+  box-shadow:0 10px 22px rgba(102,126,234,.3)}
+footer{padding:40px 0 110px;text-align:center;font-size:12.5px;color:#8a98ab}
+footer a{color:var(--ink-2)}
+/* 进入动画 */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.footcta{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="dot"></span>民航客机收藏馆</div>
+    <a class="back" href="/">返回首页</a>
+  </div>
+</div>
+
+<header class="hero wrap">
+  <div class="badge-live"><span class="pulse"></span>限时活动 · 进行中</div>
+  <h1>只需 <em>¥5</em>，解锁一场<br>关于波音 737 的深度研读</h1>
+  <p class="lead">从 737-100 到 MAX 的机型沿革、审定记录与公开航空史实，整理成一份可长期阅读的综合研究报告。</p>
+
+  <div class="price-card">
+    <div class="price-row"><span class="price-now">¥5</span><span class="price-old">¥29</span></div>
+    <div class="price-note">限时活动价 · 一次购买，长期可读</div>
+    <a class="btn-go" href="/pay/737.html">
+      立即解锁 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </a>
+    <div class="price-sub">通过<b>爱发电</b>完成支付 · 到账后在站内核销券码</div>
+  </div>
+</header>
+
+<section class="section wrap reveal">
+  <h2 class="sec-h">这份研读包含什么</h2>
+  <p class="sec-sub">不做堆砌，只把可核对的公开资料整理成能读下去的结构。</p>
+  <div class="grid">
+    <div class="card">
+      <div class="ico">✈</div>
+      <h3>737 全系列沿革</h3>
+      <p>Original / Classic / NG / MAX 四代机型的时间线、气动与发动机变化、运营特征对照。</p>
+    </div>
+    <div class="card">
+      <div class="ico">◍</div>
+      <h3>唯一追踪码</h3>
+      <p>每份文档内嵌唯一追踪码，用于区分阅读权限归属，也便于后续更新通知。</p>
+    </div>
+    <div class="card">
+      <div class="ico">∞</div>
+      <h3>长期可读</h3>
+      <p>券码核销后长期有效，不限单次阅读；换设备登录同一账号即可继续读。</p>
+    </div>
+    <div class="card">
+      <div class="ico">⌘</div>
+      <h3>站内一体</h3>
+      <p>与收藏、笔记、AI 研读助手打通：看到哪、记到哪，都在同一个账号里。</p>
+    </div>
+  </div>
+</section>
+
+<section class="section wrap reveal">
+  <h2 class="sec-h">三步完成</h2>
+  <p class="sec-sub">下单 → 支付 → 领券，全程站内可查。</p>
+  <div class="steps">
+    <div class="step"><h3>创建订单</h3><p>在付费页填写联系方式，生成订单号（ORD- 开头），备注会自动带上订单号。</p></div>
+    <div class="step"><h3>爱发电支付 ¥5</h3><p>核对金额与收款方后完成支付，不要清空备注，便于快速核对开通。</p></div>
+    <div class="step"><h3>回站领券核销</h3><p>回到付费页确认开通状态，领取一次性券码，在任意兑换窗口核销即可阅读。</p></div>
+  </div>
+</section>
+
+<section class="section wrap reveal">
+  <h2 class="sec-h">活动规则</h2>
+  <div class="rules">
+    <ol>
+      <li>活动价 <b>¥5</b>（原价 ¥29），限时进行，结束时间以本页与付费页显示为准。</li>
+      <li>一次购买对应一份阅读权限；券码仅展示一次，请及时妥善保存。</li>
+      <li>券码在站内任意兑换入口均可核销，不再限制具体项目窗口。</li>
+      <li>支付全程在爱发电完成，本站不收集、不存储任何支付卡信息。</li>
+      <li>若支付成功但未自动开通，请携带订单号联系站长人工核对，核实后补开或原路退款。</li>
+    </ol>
+  </div>
+</section>
+
+<section class="section wrap reveal">
+  <h2 class="sec-h">常见问题</h2>
+  <div class="faq">
+    <details><summary>¥5 是永久价格吗？</summary><div class="ans">不是。¥5 为限时活动价，活动结束后恢复原价 ¥29。已购用户不受影响。</div></details>
+    <details><summary>券码在哪里兑换？会不会兑不了？</summary><div class="ans">登录后进入个人中心的券码区块，输入券码即可核销。所有兑换入口共用同一套校验，只要券码有效且未使用，任何窗口都能正常兑换。</div></details>
+    <details><summary>券码没保存下来怎么办？</summary><div class="ans">券码明文仅展示一次，出于安全考虑不再二次显示。若确实遗失，请用订单号联系站长核对购买记录后处理。</div></details>
+    <details><summary>可以退款吗？</summary><div class="ans">数字内容一经核销不支持无理由退款；若出现支付成功未开通、重复扣款等情况，联系站长核实后原路退款。</div></details>
+    <details><summary>能开发票吗？</summary><div class="ans">目前为个人自营项目，暂不提供发票，敬请在支付前确认。</div></details>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>民航客机收藏馆 · 个人自营非商业项目</p>
+  <p><a href="/">首页</a> · <a href="/pay/737.html">付费页</a> · <a href="/privacy.html">隐私政策</a> · <a href="/changelog.html">更新日志</a></p>
+</footer>
+
+<div class="footcta" id="footCta">
+  <div class="fc-txt"><b>限时 ¥5 · 深度研读</b>原价 ¥29，活动结束恢复</div>
+  <a href="/pay/737.html">立即解锁</a>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // 滚动渐显
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    },{threshold:.12});
+    els.forEach(function(el){ io.observe(el); });
+  }else{
+    els.forEach(function(el){ el.classList.add('in'); });
+  }
+  // 底部 CTA：滚过主视觉后出现
+  var cta=document.getElementById('footCta'), shown=false;
+  function onScroll(){
+    var y=window.scrollY||document.documentElement.scrollTop;
+    if(y>320&&!shown){ shown=true; cta.classList.add('show'); }
+    else if(y<=320&&shown){ shown=false; cta.classList.remove('show'); }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+  // 页面停留埋点（仅本地，不上报）
+  window.__activityView=Date.now();
+})();
+</script>
+</body>
+</html>

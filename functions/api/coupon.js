@@ -207,17 +207,12 @@ export async function onRequest(context) {
     if (String(rec.status || '') === 'used') return bad('coupon_used', origin, { hint: '该券码已被使用，如有疑问请联系站长' });
     if (isExpired(rec)) return bad('coupon_expired', origin, { hint: '该券码已过期' });
 
-    // 关联项目校验：券码配置了 projectKeys 时，只允许在关联项目内兑换
-    const projList = Array.isArray(rec.projectKeys) ? rec.projectKeys : [];
+    // 关联项目：统一兑换（v3.3）——只要券码本身有效，任何兑换窗口都可兑换，不再因项目不匹配拒绝
+    let projList = Array.isArray(rec.projectKeys) ? rec.projectKeys : [];
     const reqKey = String(body.projectKey || '').trim().toLowerCase();
-    if (projList.length && !couponAllowsProject(rec, reqKey)) {
-      return bad('coupon_project_mismatch', origin, {
-        hint: reqKey
-          ? ('该券码仅可用于：' + projList.map(projectTitle).join('、') + '，与当前项目不匹配')
-          : ('该券码仅限指定项目兑换：' + projList.map(projectTitle).join('、')),
-        projectKeys: projList
-      });
-    }
+    if (!projList.length && reqKey) projList = [reqKey];
+    // 记录了项目但当前窗口不是该项目：仅做标记，不阻断兑换
+    const projectMismatch = !!(projList.length && reqKey && !couponAllowsProject(rec, reqKey));
 
     const mine = Array.isArray(user.coupons) ? user.coupons : [];
     const dup = mine.some(function (c) { return normCode(c && c.code) === code; });
@@ -242,7 +237,9 @@ export async function onRequest(context) {
       exp: String(rec.exp || ''),
       usedBy: String(user.uid || ''),
       usedByName: String(user.username || user.displayName || ''),
-      usedAt: now
+      usedAt: now,
+      redeemedAtProject: reqKey || '',
+      projectMismatch: projectMismatch
     };
     await kv.put(key, JSON.stringify(claimed));
 
