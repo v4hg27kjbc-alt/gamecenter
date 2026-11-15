@@ -6297,11 +6297,13 @@ body.dlg-sys .dlg-new.is-closing > .dlg-panel {
 #gcLogoIntro .gc-li-name{margin-top:24px;font-size:24px;font-weight:800;letter-spacing:3px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.4);animation:gcLiFadeUp .62s 1.3s ease both;}
 #gcLogoIntro .gc-li-sub{margin-top:9px;font-size:12px;letter-spacing:8px;color:#93c5fd;animation:gcLiSub .72s 1.65s cubic-bezier(.2,.9,.3,1) both;}
 #gcLogoIntro .gc-li-line{margin-top:20px;height:1px;width:0;background:linear-gradient(90deg,transparent,rgba(147,197,253,.85),transparent);animation:gcLiLine .55s 2s ease forwards;}
-#gcLogoIntro .gc-li-skipbar{position:absolute;right:22px;bottom:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+#gcLogoIntro{pointer-events:auto;}
+#gcLogoIntro .gc-li-skipbar{position:absolute;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:5;pointer-events:auto;}
 #gcLogoIntro .gc-li-hint{font-size:11px;letter-spacing:1px;color:rgba(226,232,240,.5);}
 #gcLogoIntro .gc-li-off{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(226,232,240,.75);cursor:pointer;user-select:none;}
 #gcLogoIntro .gc-li-off input{width:13px;height:13px;accent-color:#3b82f6;cursor:pointer;}
-#gcLogoIntro .gc-li-skip{padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.07);color:#e0e7ff;font-size:13px;cursor:pointer;transition:.2s;backdrop-filter:blur(6px);}
+#gcLogoIntro .gc-li-skip{padding:11px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.42);background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;backdrop-filter:blur(6px);min-height:44px;min-width:104px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+#gcLogoIntro .gc-li-skip:active{transform:scale(.96);background:rgba(255,255,255,.26);}
 #gcLogoIntro .gc-li-skip:hover{background:rgba(255,255,255,.18);transform:translateY(-1px);}
 @keyframes gcLiAura{0%{opacity:0;transform:scale(.55);}22%{opacity:1;transform:scale(1);}100%{opacity:.92;transform:scale(1.16);}}
 @keyframes gcLiHalo{0%{opacity:0;transform:scale(.5);}18%{opacity:.95;}100%{opacity:0;transform:scale(2.5);}}
@@ -6323,7 +6325,8 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
   try {
     if (localStorage.getItem('gc_logo_anim_off') === '1') {
       var box = document.getElementById('gcLogoIntro');
-      if (box) { box.style.display = 'none'; box.setAttribute('data-gc-skip', '1'); }
+      if (box) { box.style.display = 'none'; box.setAttribute('data-gc-skip', '1'); if (box.parentNode) box.parentNode.removeChild(box); }
+      try { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; } catch (e) {}
       window.__gcLogoIntroLoaded = true;
       var app = document.querySelector('.app-container');
       if (app) { app.classList.add('gc-pop'); setTimeout(function(){ app.classList.remove('gc-pop'); }, 900); }
@@ -6358,39 +6361,64 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
   window.__gcLogoIntroLoaded = true;
   var box = document.getElementById('gcLogoIntro');
   if (!box) return;
+  var LS_KEY = 'gc_logo_anim_off';
   var start = Date.now();
   var done = false;
+  function unlockBody() {
+    try { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; } catch (e) {}
+  }
   function reveal() {
-    var app = document.querySelector('.app-container');
+    var app = document.querySelector('.app-container') || document.querySelector('.app-container');
     if (!app) return;
     app.classList.add('gc-pop');
     setTimeout(function () { app.classList.remove('gc-pop'); }, 1150);
   }
-  function finish() {
+  function hardRemove() {
+    if (box && box.parentNode) box.parentNode.removeChild(box);
+    unlockBody();
+  }
+  function finish(fade) {
     if (done) return;
     done = true;
+    try { box.style.pointerEvents = 'none'; } catch (e) {}
+    if (fade === false) { box.style.display = 'none'; hardRemove(); return; }
     box.classList.add('gc-exit');
     reveal();
-    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 540);
+    box.style.display = 'none';
+    setTimeout(hardRemove, 120);
   }
+  function skipNow() { finish(false); }
+
   var skipBtn = document.getElementById('gcLogoSkip');
-  if (skipBtn) skipBtn.addEventListener('click', finish);
+  if (skipBtn) {
+    skipBtn.addEventListener('click', function (ev) { if (ev) { ev.preventDefault(); ev.stopPropagation(); } skipNow(); });
+    skipBtn.addEventListener('touchend', function (ev) { ev.preventDefault(); skipNow(); }, { passive: false });
+  }
   var offBox = document.getElementById('gcLogoOff');
-  if (offBox) offBox.addEventListener('change', function () {
-    try { localStorage.setItem('gc_logo_anim_off', offBox.checked ? '1' : '0'); } catch (e) {}
-  });
+  function readOff() { try { return localStorage.getItem(LS_KEY) === '1'; } catch (e) { return false; } }
+  if (offBox) {
+    offBox.checked = readOff();
+    offBox.addEventListener('change', function () {
+      try { localStorage.setItem(LS_KEY, offBox.checked ? '1' : '0'); } catch (e) {}
+      if (offBox.checked) skipNow();
+    });
+  }
   var pressTimer = null;
-  function pressStart() { pressTimer = setTimeout(finish, 620); }
+  function pressStart() { if (!pressTimer) pressTimer = setTimeout(skipNow, 520); }
   function pressEnd() { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } }
   box.addEventListener('pointerdown', pressStart);
   box.addEventListener('pointerup', pressEnd);
   box.addEventListener('pointercancel', pressEnd);
   box.addEventListener('pointerleave', pressEnd);
-  setTimeout(finish, 3000);
+  box.addEventListener('touchstart', pressStart, { passive: true });
+  box.addEventListener('touchend', pressEnd, { passive: true });
+  box.addEventListener('touchcancel', pressEnd, { passive: true });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') skipNow(); });
+  setTimeout(function () { finish(false); }, 3000);
   window.addEventListener('load', function () {
-    if (!done && Date.now() - start >= 3000) finish();
+    if (!done && Date.now() - start >= 2800) finish(false);
   });
-  setTimeout(function () { if (!done) finish(); }, 4200);
+  setTimeout(function () { if (!done) finish(false); }, 4200);
 })();
 </script>
 <script id="gcIdleLoader">
@@ -6491,23 +6519,23 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
         <button class="gc-pf-btn" id="gcPfUpload" type="button">上传自定义头像</button>
         <button class="gc-pf-btn" id="gcPfRename" type="button">修改用户名</button>
       </div>
-      <div class="gc-pf-sec" id="gcCouponSec">
-        <div class="gc-pf-sec-title">我的兑换 <span id="gcCouponCount" style="color:#0e7490">0</span></div>
+      <div class="gc-pf-sec" id="gcMySec">
+        <div class="gc-pf-sec-title">我的订单 <span id="gcOrderCount" style="color:#4338ca">0</span></div>
         <div class="gc-pf-coupon-row">
-          <input class="gc-pf-pwd-input" id="gcCouponInput" autocomplete="off" maxlength="40" placeholder="输入券码，如 GC-7F2K-9QMD">
-          <button class="gc-pf-btn primary" id="gcCouponRedeem" type="button">立即兑换</button>
+          <input class="gc-pf-pwd-input" id="gcOrderContact" autocomplete="off" maxlength="60" placeholder="手机号 / 邮箱，或直接粘贴券码">
+          <button class="gc-pf-btn primary" id="gcOrderQuery" type="button">查询</button>
         </div>
-        <p class="gc-pf-tip" id="gcCouponTip">兑换码仅在付款回执单中显示一遍，此处为兑换记录（脱敏），可查看类型、价值与兑换时间。</p>
-        <div class="gc-pf-list" id="gcCouponList"><span class="gc-pf-empty">还没有兑换记录</span></div>
-      </div>
-      <div class="gc-pf-sec" id="gcOrderSec">
-        <div class="gc-pf-sec-title">我购买的商品 <span id="gcOrderCount" style="color:#4338ca">0</span></div>
-        <div class="gc-pf-coupon-row">
-          <input class="gc-pf-pwd-input" id="gcOrderContact" autocomplete="off" maxlength="60" placeholder="下单时填写的手机号或邮箱">
-          <button class="gc-pf-btn primary" id="gcOrderQuery" type="button">查询订单</button>
-        </div>
-        <p class="gc-pf-tip" id="gcOrderTip">可查看订单号、商品与支付状态；有问题可点订单内的「联系站长反馈」，站长在后台可见。</p>
+        <p class="gc-pf-tip" id="gcOrderTip">一个入口查全部：输入下单手机号或邮箱可看订单与券码详情；输入券码（如 GC-7F2K-9QMD）可追踪使用次数与关联项目。</p>
         <div class="gc-pf-list" id="gcOrderList"><span class="gc-pf-empty">还没有购买记录</span></div>
+        <details id="gcCouponSec" style="margin-top:10px;border-top:1px dashed #e2e8f0;padding-top:10px">
+          <summary style="cursor:pointer;font-weight:700;font-size:13px;color:#334155">手动兑换券码 · 我的兑换记录 <span id="gcCouponCount" style="color:#0e7490">0</span></summary>
+          <div class="gc-pf-coupon-row" style="margin-top:8px">
+            <input class="gc-pf-pwd-input" id="gcCouponInput" autocomplete="off" maxlength="40" placeholder="输入券码，如 GC-7F2K-9QMD">
+            <button class="gc-pf-btn primary" id="gcCouponRedeem" type="button">立即兑换</button>
+          </div>
+          <p class="gc-pf-tip" id="gcCouponTip">一张券码可用 2 次，两次用完自动失效；这里显示兑换记录（可查看类型、价值与兑换时间）。</p>
+          <div class="gc-pf-list" id="gcCouponList"><span class="gc-pf-empty">还没有兑换记录</span></div>
+        </details>
       </div>
       <details class="gc-pf-sec" id="gcAiAdvSec" style="padding:12px 14px">
         <summary style="cursor:pointer;font-weight:700;font-size:13.5px;color:#334155">AI 高级设置（自带密钥 · 云端聊天记录）</summary>
@@ -6640,7 +6668,21 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
   <div class="header">
     <h1 id="headerTitle" class="title-fade-in" style="animation-delay:0.1s">民航客机收藏馆</h1>
     <p class="subtitle title-fade-in" id="headerSubtitle" style="animation-delay:0.35s">作者 Marvis &amp; Henry</p>
+    <div class="gc-my-bar">
+      <button type="button" class="gc-my-entry" id="gcMyEntry" aria-label="我的：订单与券码详情">我的</button>
+      <span class="gc-my-sep">·</span>
+      <button type="button" class="gc-my-entry" id="gcMyOrderEntry">我的订单</button>
     </div>
+    </div>
+    <style id="gcMyEntryStyle">
+      .gc-my-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
+      .gc-my-entry{border:1px solid #dbe4f3;background:#f5f8ff;color:#2f6fd0;font-size:13px;font-weight:600;
+        padding:7px 16px;border-radius:999px;cursor:pointer;transition:.16s;line-height:1;-webkit-tap-highlight-color:transparent}
+      .gc-my-entry:hover{background:#eaf1ff;border-color:#bfd3f5;color:#1e4fa3}
+      .gc-my-entry:active{transform:scale(.97)}
+      .gc-my-sep{color:#c3cede;font-size:12px}
+      @media (max-width:520px){ .gc-my-entry{font-size:12.5px;padding:7px 14px} }
+    </style>
 
   <!-- 游戏预告 · 无应答（独立入口） -->
         <div class="rln-card rln-card-game" data-rln-sheet="game" tabindex="0" role="button" aria-label="游戏预告详情，长按查看" style="margin: var(--space-24, 24px) auto 0;">
@@ -6874,7 +6916,7 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
   <div class="av-ai-badges" id="avAiBadges">
     <span class="av-ai-badge" id="avAiBadgeModel">模型：Kimi K2.6</span>
     <span class="av-ai-badge mode-deep" id="avAiBadgeMode">深度思考</span>
-    <span class="av-ai-badge" id="avAiBadgeQuota">今日剩余 K3.1 Pro 2/2</span>
+    <span class="av-ai-badge" id="avAiBadgeQuota">今日剩余 K3 5/5</span>
     <button type="button" class="av-ai-badge mode-text" id="avAiImageModeBtn" aria-pressed="false" title="当前：纯文字问答 · 点击切换到识图问答" onclick="avAiToggleImageMode(event)"></button>
   </div>
   <div class="ai-chat-messages" id="aiChatMessages"></div>
@@ -15020,14 +15062,24 @@ function renderNewsContent(content, items) {
   if (!document.getElementById('newsFadeStyle')) {
     var st = document.createElement('style');
     st.id = 'newsFadeStyle';
-    st.textContent = '.news-fade{animation:newsFadeIn .32s ease}@keyframes newsFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}';
+    st.textContent = '.news-fade{animation:newsFadeIn .32s ease}@keyframes newsFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}'
+      + '.news-rank{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 5px;margin-right:8px;border-radius:7px;background:rgba(148,163,184,.22);color:#64748b;font-size:.78rem;font-weight:800;line-height:1;vertical-align:1px}'
+      + '.news-rank-top{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 2px 8px rgba(102,126,234,.35)}'
+      + '.news-boom{display:inline-block;margin-right:8px;padding:1px 6px;border-radius:6px;background:#e11d48;color:#fff;font-size:.7rem;font-weight:800;line-height:1.5;vertical-align:1px;letter-spacing:.5px}'
+      + '.news-title-hot{color:#e11d48 !important}'
+      + '.news-heatbar{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:9px;background:rgba(225,29,72,.1);color:#e11d48;font-size:.68rem;font-weight:700;vertical-align:1px}';
     document.head.appendChild(st);
   }
   var paragraph = items.map(function(item, i) {
     var dateStr = item.pubDate ? new Date(item.pubDate).toLocaleDateString('zh-CN') : '';
     var src = (item.link && item.link !== '#') ? newsSourceLabel(item.link) : '';
     var srcHtml = src ? ' <a href="' + escapeHtml(item.link) + '" target="_blank" rel="noopener" style="color:var(--accent);font-size:0.72rem;text-decoration:none;opacity:.85;">来源：' + escapeHtml(src) + '</a>' : '';
-    return '<div style="margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--glass-border);"><p style="margin:0 0 8px 0;"><strong style="color:var(--accent);font-size:1.05rem;">' + (i + 1) + '. ' + escapeHtml(item.title) + '</strong>' + (dateStr ? ' <span style="color:var(--text-dim);font-size:0.75rem;">' + dateStr + '</span>' : '') + srcHtml + '</p><p style="margin:0;color:var(--text-dim);font-size:0.9rem;line-height:1.8;">' + escapeHtml(item.snippet || '暂无摘要') + '</p></div>';
+    var rank = (typeof item.rank === 'number' && item.rank > 0) ? item.rank : (i + 1);
+    var isHot = !!item.hot;
+    var rankHtml = '<span class="news-rank' + (rank <= 3 ? ' news-rank-top' : '') + '">' + rank + '</span>';
+    var boomHtml = isHot ? '<span class="news-boom">爆</span>' : '';
+    var heatHtml = (typeof item.heat === 'number' && item.heat > 0) ? '<span class="news-heatbar">热度 ' + item.heat + '</span>' : '';
+    return '<div style="margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--glass-border);"><p style="margin:0 0 8px 0;">' + rankHtml + boomHtml + '<strong class="' + (isHot ? 'news-title-hot' : '') + '" style="font-size:1.05rem;' + (isHot ? '' : 'color:var(--accent);') + '">' + escapeHtml(item.title) + '</strong>' + heatHtml + (dateStr ? ' <span style="color:var(--text-dim);font-size:0.75rem;">' + dateStr + '</span>' : '') + srcHtml + '</p><p style="margin:0;color:var(--text-dim);font-size:0.9rem;line-height:1.8;">' + escapeHtml(item.snippet || '暂无摘要') + '</p></div>';
   }).join('');
   content.innerHTML = '<div style="line-height:1.8;padding:10px 0;">' + paragraph + '</div>';
   content.classList.remove('news-fade');
@@ -16573,7 +16625,10 @@ function p3TryBackendNews(content, today, shownTitles, shownUrls) {
         title: it.title || '',
         snippet: it.snippet || it.summary || it.desc || it.content || '',
         pubDate: it.pubDate || it.date || today,
-        link: it.link || it.url || '#'
+        link: it.link || it.url || '#',
+        heat: (typeof it.heat === 'number') ? it.heat : 0,
+        hot: !!it.hot,
+        rank: (typeof it.rank === 'number') ? it.rank : 0
       };
     }).filter(function(it) { return !!it.title; });
     // 按已展示标题去重，避免「换一换」拿到同一批内容
@@ -17888,6 +17943,9 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 .av-ai-item.active { background: var(--card-bg-hover); color: var(--accent); font-weight: 600; }
 .av-ai-item-sub { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
 .av-ai-item.active .av-ai-item-sub { color: var(--accent); }
+.av-ai-item-off { opacity: .45; cursor: not-allowed; }
+.av-ai-item-off:hover { background: transparent; }
+.av-ai-item-off .av-ai-item-sub { color: #b91c1c; }
 .av-ai-quota {
   margin: 8px 6px 4px; padding: 8px 10px; border-radius: 10px;
   background: var(--card-bg-hover); font-size: 11.5px; color: var(--text-dim); line-height: 1.5;
@@ -20186,18 +20244,16 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   var LS_PREF = 'av_ai_model_pref';
   var FAST_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
   var DEEP_MODEL = { provider: 'kimi', model: 'kimi-k2.6' };
-  var DEGRADE_TEXT = '今日 Kimi K3.1 Pro 次数已用完（每日 2 次），已自动切换 Kimi K2.6 继续回答';
+  var DEGRADE_TEXT = '今日 Kimi K3 次数已用完（每日 5 次），已自动切换 Kimi K2.6 继续回答';
 
   /* ---------------- 模型目录（全站仅 Kimi；智谱已全部下线） ---------------- */
-  var CATALOG = [
-    {
-      provider: 'kimi', name: 'Kimi（全站统一默认）', mode: 'deep',
-      items: [
-        { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '默认 · 全站统一' },
-        { id: 'kimi-k3.1-pro', label: 'Kimi K3.1 Pro', sub: '高阶 · 每日 2 次' }
-      ]
-    }
-  ];
+var CATALOG = [
+  { provider: 'kimi', name: 'Kimi（全站统一默认）', mode: 'deep', items: [
+    { id: 'kimi-k2.6', label: 'Kimi K2.6', sub: '唯一可用 · 全站统一' },
+    { id: 'kimi-k3', label: 'Kimi K3', sub: '暂不可用', disabled: true },
+    { id: 'kimi-k3.1-pro', label: 'Kimi K3.1 Pro', sub: '暂不可用', disabled: true }
+  ] }
+];
 
   var state = {
     provider: 'kimi',
@@ -20272,9 +20328,11 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       for (var j = 0; j < g.items.length; j++) {
         var it = g.items[j];
         var active = (it.id === state.model) ? ' active' : '';
-        html += '<button type="button" class="av-ai-item' + active + '" role="menuitemradio" ' +
+        var off = !!it.disabled;
+        html += '<button type="button" class="av-ai-item' + active + (off ? ' av-ai-item-off' : '') + '" role="menuitemradio" ' +
+          (off ? 'disabled aria-disabled="true" ' : '') +
           'aria-checked="' + (active ? 'true' : 'false') + '" ' +
-          'onclick="avAiSelectModel(\'' + it.id + '\')">' +
+          (off ? 'onclick="return false"' : 'onclick="avAiSelectModel(\'' + it.id + '\')"') + '>' +
           '<span>' + it.label + '</span>' +
           '<span class="av-ai-item-sub">' + it.sub + '</span>' +
           '</button>';
@@ -20336,6 +20394,10 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   window.avAiSelectModel = function (modelId) {
     var f = findItem(modelId);
     if (!f) return;
+    if (f.item && f.item.disabled) {
+      if (window.avAiClosePicker) window.avAiClosePicker();
+      return false;
+    }
     state.provider = f.provider;
     state.model = f.item.id;
     savePref();
@@ -20353,7 +20415,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     var model = state.model;
     var mode = modeOf(provider);
     var degraded = false;
-    if (provider === 'kimi' && model === 'kimi-k3.1-pro') {
+    if (provider === 'kimi' && (model === 'kimi-k3' || model === 'kimi-k3.1-pro')) {
       if (!consumeDeep()) {
         /* 第 6 次起：K3 深度额度用完，自动降级 Kimi K2.6，并预约一条提示（插入到本次回答气泡上方） */
         degraded = true;
@@ -21797,6 +21859,71 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     el.className = 'gc-acct-msg' + (ok ? ' ok' : '');
   }
 
+  /* v3.6 AI 模型可用性：每次访问都提示（带时间）+ 后台记录 */
+  (function initModelHealth() {
+    var AVAIL = ['kimi-k2.6'];
+    var UNAVAIL = ['kimi-k3', 'kimi-k3.1-pro'];
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function nowText() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+        + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+    function renderBar(notice, atText) {
+      if (document.getElementById('gcMhBar')) return;
+      var bar = document.createElement('div');
+      bar.id = 'gcMhBar';
+      bar.style.cssText = 'position:relative;z-index:9998;display:flex;align-items:center;gap:8px;flex-wrap:wrap;'
+        + 'padding:9px 14px;background:#fffbeb;border-bottom:1px solid #fde68a;color:#92400e;'
+        + 'font-size:12.5px;line-height:1.6;font-family:inherit;text-align:left';
+      bar.innerHTML = '<b style="flex:0 0 auto;color:#b45309">AI 模型提示</b>'
+        + '<span style="flex:1 1 220px">' + (notice || '当前仅 kimi-k2.6 可用，其余模型暂不可用') + '</span>'
+        + '<span style="flex:0 0 auto;color:#a16207">时间：' + (atText || nowText()) + '</span>'
+        + '<button type="button" aria-label="收起提示" style="flex:0 0 auto;border:0;background:none;color:#a16207;'
+        + 'font-size:15px;cursor:pointer;line-height:1;padding:0 2px">×</button>';
+      bar.querySelector('button').addEventListener('click', function () { bar.remove(); });
+      var body = document.body;
+      body.insertBefore(bar, body.firstChild);
+    }
+    function report() {
+      try {
+        fetch('/api/model-health', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'report', available: AVAIL, unavailable: UNAVAIL, ua: navigator.userAgent || '' })
+        }).catch(function () { });
+      } catch (e) { }
+    }
+    setTimeout(function () {
+      fetch('/api/model-health', { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.ok) renderBar(d.notice, d.atText || nowText());
+          else renderBar('', nowText());
+          report();
+        })
+        .catch(function () { renderBar('', nowText()); report(); });
+    }, 600);
+  })();
+
+  /* v3.6 手机端「我的」入口：直接打开账号面板（未登录先进登录页） */
+  function gcMyOpen(tab) {
+    try {
+      if (typeof st !== 'undefined' && st && st.profile) { openMask('profile'); }
+      else { openMask('auth', '我的'); }
+    } catch (e) { try { openMask('profile'); } catch (e2) {} }
+    setTimeout(function () {
+      var sec = document.getElementById('gcMySec');
+      if (sec && sec.scrollIntoView) { try { sec.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }
+      var inp = document.getElementById('gcOrderContact');
+      if (tab !== 'no-focus' && inp) { try { inp.focus({ preventScroll: true }); } catch (e) {} }
+    }, 320);
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.id) return;
+    if (t.id === 'gcMyEntry' || t.id === 'gcMyOrderEntry') { e.preventDefault(); gcMyOpen(); }
+  }, true);
+
   function openMask(view, reason) {
     var mask = $('gcAcctMask');
     if (!mask) return;
@@ -21916,6 +22043,22 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       if (needBind) setTimeout(function () { maybeBindPrompt(res.profile); }, 420);
       var nick = (res.profile && (res.profile.displayName || res.profile.username)) || '';
       toast((isReg ? '注册成功，已自动登录：' : '登录成功，欢迎回来 ') + nick);
+      /* v3.5：注册成功 → 直接给出文档链接自动下载 → 感谢页 → 可返回主站 */
+      if (isReg) {
+        setTimeout(function () {
+          try {
+            var a = document.createElement('a');
+            a.href = '/api/project-doc?project=c919&download=1&welcome=1&t=' + Date.now();
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+              if (a.parentNode) a.parentNode.removeChild(a);
+              window.location.href = '/thanks.html?project=c919&welcome=1';
+            }, 1200);
+          } catch (e) { }
+        }, 650);
+      }
       setTimeout(function () {
         var pending = jget('gc_temp_favs').length + jget('gc_temp_saved').length;
         if (pending > 0) toast('检测到 ' + pending + ' 条临时收藏，正在同步到账号');
@@ -22207,6 +22350,7 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     return s ? s.slice(0, 4) + '••••' : '';
   }
   function renderCoupons(list) {
+    try { window.__gcRenderCoupons = renderCoupons; } catch (e) {}
     var box = $('gcCouponList');
     var cnt = $('gcCouponCount');
     list = list || [];
@@ -22245,23 +22389,58 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     if (!box) return;
     if (!list.length) { box.innerHTML = '<span class="gc-pf-empty">该联系方式下没有购买记录</span>'; return; }
     box.innerHTML = list.map(function (o) {
-      var st = o.status === 'confirmed' ? '已完成' : (o.status === 'rejected' ? '未通过' : '待核对');
-      var color = o.status === 'confirmed' ? '#047857' : (o.status === 'rejected' ? '#b91c1c' : '#b45309');
       var oid = o.orderNo || o.id;
+      var phase = o.phase || o.status;
+      var map = {
+        active: ['#b45309', '待完成支付'],
+        pending: ['#b45309', '待完成支付'],
+        confirmed: ['#047857', '已完成'],
+        rejected: ['#b91c1c', '未通过'],
+        refunded: ['#7c3aed', '已退款'],
+        cancelled: ['#64748b', '已取消']
+      };
+      var m = map[phase] || map[o.status] || ['#b45309', '待核对'];
+      var color = m[0], st = o.phaseText || m[1];
       var canRead = o.status === 'confirmed';
+      var docUrl = o.docUrl || ('/api/project-doc?project=' + encodeURIComponent(o.project || 'b737') + '&download=1&order=' + encodeURIComponent(oid));
+      var readUrl = o.readUrl || ('/read/' + (o.project === 'c919' ? 'c919' : '737') + '.html?order=' + encodeURIComponent(oid));
+      var leftTxt = '';
+      if (phase === 'active' && o.expireAt) {
+        var left = Math.max(0, Math.round((new Date(o.expireAt).getTime() - Date.now()) / 60000));
+        leftTxt = '<br><span style="color:#b45309;font-weight:600">请在 ' + left + ' 分钟内完成支付，超时订单将自动回滚</span>';
+      }
+      var notice = '';
+      if (phase === 'refunded') {
+        notice = '<div style="margin-top:8px;padding:9px 11px;border-radius:9px;background:#f5f3ff;border:1px solid #ddd6fe;color:#5b21b6;font-size:12.5px;line-height:1.7">' +
+          (o.refundNotice || '工作人员已为你安排退款，退款将在一个月内到账。') +
+          (o.refundAt ? '<br>退款时间 ' + orderTime(o.refundAt) : '') + '</div>';
+      } else if (phase === 'cancelled') {
+        notice = '<div style="margin-top:8px;padding:9px 11px;border-radius:9px;background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;font-size:12.5px;line-height:1.7">该订单超过 24 小时未完成支付，系统已自动取消。如仍需购买，可在收费页重新下单。</div>';
+      }
       return '<div class="gc-pf-item" style="display:block">' +
         '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">' +
         '<b style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#334155">' + orderEsc(oid) + '</b>' +
-        '<span style="font-size:12px;color:' + color + ';font-weight:700">' + st + '</span></div>' +
+        '<span style="font-size:12px;color:' + color + ';font-weight:700">' + orderEsc(st) + '</span></div>' +
         '<div style="font-size:13px;font-weight:600;margin-top:6px">' + orderEsc(o.product || o.projectTitle || '付费研究报告') + '</div>' +
         '<div style="font-size:12px;color:#64748b;margin-top:4px;line-height:1.7">金额 ¥' + orderEsc(o.price || 5) +
         ' · 下单 ' + orderTime(o.createdAt) +
+        (o.paidAt ? '<br>支付时间 ' + orderTime(o.paidAt) : '') +
         (o.statusAt ? '<br>状态更新 ' + orderTime(o.statusAt) : '') +
-        (o.couponMasked ? '<br>兑换码 ' + orderEsc(o.couponMasked) + '（仅显示过一遍）' : '') +
-        (o.contact ? '<br>联系方式 ' + orderEsc(o.contact) : '') + '</div>' +
+        (o.couponCode
+          ? '<div style="margin-top:8px;padding:9px 11px;border:1.5px dashed #c7d2fe;border-radius:10px;background:#f8fafc;font-size:12.5px;color:#334155;line-height:1.8">券码 <b style="font-family:ui-monospace,Menlo,monospace;font-size:14.5px;color:#4338ca;letter-spacing:.5px">' + orderEsc(o.couponCode) + '</b><br>与爱发电「配置码 / 私信码」为同一串，可对照校准；限用 ' + (o.couponUseLimit || 2) + ' 次，用完自动失效</div>'
+          : (o.couponMasked ? '<br>兑换码 ' + orderEsc(o.couponMasked) + '（支付确认后显示完整码）' : '')) +
+        (o.contact ? '<br>下单联系方式 ' + orderEsc(o.contact) : '') + leftTxt + '</div>' +
+        notice +
         '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
         (canRead ? '<button class="gc-pf-btn primary" data-read="' + orderEsc(oid) + '" type="button" style="padding:6px 12px;font-size:12.5px">进入阅读</button>' : '') +
-        '<button class="gc-pf-btn" data-fb="' + orderEsc(oid) + '" type="button" style="padding:6px 12px;font-size:12.5px">联系站长反馈</button>' +
+        (canRead ? '<a class="gc-pf-btn" href="' + orderEsc(docUrl) + '" style="padding:6px 12px;font-size:12.5px;text-decoration:none;display:inline-block">下载文档</a>' : '') +
+        (canRead ? '<a class="gc-pf-btn" href="/thanks.html?project=' + encodeURIComponent(o.project || 'b737') + '&order=' + encodeURIComponent(oid) + '" style="padding:6px 12px;font-size:12.5px;text-decoration:none;display:inline-block">凭单号重新下载</a>' : '') +
+        (phase === 'active' || phase === 'pending' ? '<a class="gc-pf-btn" href="/pay/' + encodeURIComponent(o.project === 'c919' ? '737' : (o.project || '737')) + '.html" style="padding:6px 12px;font-size:12.5px;text-decoration:none;display:inline-block">继续支付</a>' : '') +
+        (o.couponCode ? '<button class="gc-pf-btn" data-copy="' + orderEsc(o.couponCode) + '" type="button" style="padding:6px 12px;font-size:12.5px">复制券码</button>' : '') +
+        (o.couponCode ? '<button class="gc-pf-btn" data-pass="' + orderEsc(oid) + '" type="button" style="padding:6px 12px;font-size:12.5px">保存券码凭证</button>' : '') +
+        '<button class="gc-pf-btn" data-ovouch="' + orderEsc(oid) + '" type="button" style="padding:6px 12px;font-size:12.5px">保存订单凭证</button>' +
+        '<button class="gc-pf-btn" data-trace="' + orderEsc(oid) + '" data-code="' + orderEsc(o.couponCode || '') + '" type="button" style="padding:6px 12px;font-size:12.5px">追踪码查询</button>' +
+        '<button class="gc-pf-btn" data-fb="' + orderEsc(oid) + '" type="button" style="padding:6px 12px;font-size:12.5px">联系站内工作人员</button>' +
         '</div></div>';
     }).join('');
     Array.prototype.forEach.call(box.querySelectorAll('[data-read]'), function (b) {
@@ -22272,15 +22451,42 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     Array.prototype.forEach.call(box.querySelectorAll('[data-fb]'), function (b) {
       b.addEventListener('click', function () { submitFeedback(b.getAttribute('data-fb')); });
     });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-copy]'), function (b) {
+      b.addEventListener('click', function () {
+        var v = b.getAttribute('data-copy') || '';
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v);
+          else { var ta = document.createElement('textarea'); ta.value = v; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+          try { toast('券码已复制：' + v); } catch (e) {}
+        } catch (e) { window.prompt('请手动复制券码', v); }
+      });
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-pass]'), function (b) {
+      b.addEventListener('click', function () { saveCouponPass(b.getAttribute('data-pass')); });
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-ovouch]'), function (b) {
+      b.addEventListener('click', function () { saveOrderPass(b.getAttribute('data-ovouch')); });
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-trace]'), function (b) {
+      b.addEventListener('click', function () {
+        var code = b.getAttribute('data-code') || '';
+        if (!code) { var q = window.prompt('请输入要追踪的券码（如 GC-7F2K-9QMD）', ''); code = (q || '').trim(); }
+        if (code) traceCoupon(code);
+      });
+    });
   }
 
   function queryOrders(contact) {
     var tip = $('gcOrderTip');
     var box = $('gcOrderList');
+    contact = String(contact || '').trim();
     if (!contact || contact.length < 3) {
-      if (tip) { tip.textContent = '请输入下单时填写的手机号或邮箱'; tip.style.color = '#b91c1c'; }
+      if (tip) { tip.textContent = '请输入下单时填写的手机号或邮箱，或直接粘贴券码'; tip.style.color = '#b91c1c'; }
       return;
     }
+    /* 单一入口：输入券码自动切到「追踪码查询」，输入手机号/邮箱则查订单 */
+    var looksCode = /^GC[-\s]?/i.test(contact) || (/^[A-Za-z0-9-]{6,40}$/.test(contact) && /[A-Za-z]/.test(contact));
+    if (looksCode && contact.indexOf('@') < 0) { traceCoupon(contact); return; }
     if (box) box.innerHTML = '<span class="gc-pf-empty">查询中…</span>';
     fetch('/api/order?action=myorders&contact=' + encodeURIComponent(contact), { cache: 'no-store' })
       .then(function (r) { return r.json(); })
@@ -22299,6 +22505,102 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       }).catch(function () {
         if (box) box.innerHTML = '<span class="gc-pf-empty">网络异常，请稍后重试</span>';
       });
+  }
+
+  /* ===== v3.6 订单/券码：凭证保存 + 追踪查询 ===== */
+  function gcDownloadText(name, text) {
+    try {
+      var blob = new Blob(['\ufeff' + text], { type: 'text/plain;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+      try { toast('已保存：' + name); } catch (e) {}
+    } catch (e) { window.prompt('请手动复制保存内容', text); }
+  }
+  function gcOrderApi(q) {
+    return fetch('/api/order?' + q, { cache: 'no-store' }).then(function (r) { return r.json(); });
+  }
+  function saveOrderPass(oid) {
+    gcOrderApi('action=status&id=' + encodeURIComponent(oid)).then(function (d) {
+      var o = (d && (d.order || d)) || {};
+      var lines = [
+        '民航客机收藏馆 · 订单凭证',
+        '--------------------------------',
+        '订单号：' + (o.orderNo || o.id || oid),
+        '商品：' + (o.product || o.projectTitle || '付费研究报告'),
+        '金额：¥' + (o.price || 5),
+        '订单状态：' + (o.phaseText || o.statusText || o.status || ''),
+        '下单时间：' + (o.createdAt || ''),
+        (o.paidAt ? '支付时间：' + o.paidAt : ''),
+        (o.afdianOrder ? '爱发电订单号：' + o.afdianOrder : ''),
+        '联系方式：' + (o.contact || ''),
+        (o.couponCode ? '券码：' + o.couponCode : ''),
+        '--------------------------------',
+        '查询入口：' + location.origin + '/#my',
+        '导出时间：' + new Date().toLocaleString()
+      ];
+      gcDownloadText('订单凭证_' + (o.orderNo || oid) + '.txt', lines.filter(Boolean).join('\n'));
+    }).catch(function () { alert('网络异常，请稍后重试'); });
+  }
+  function saveCouponPass(oid) {
+    gcOrderApi('action=status&id=' + encodeURIComponent(oid)).then(function (d) {
+      var o = (d && (d.order || d)) || {};
+      var code = o.couponCode || '';
+      if (!code) { alert('该订单暂未生成券码'); return; }
+      var c = o.coupon || {};
+      var lines = [
+        '民航客机收藏馆 · 券码凭证',
+        '--------------------------------',
+        '券码：' + code,
+        '（与爱发电「配置码 / 私信码」是同一串，可对照校准）',
+        '订单号：' + (o.orderNo || o.id || oid),
+        '商品：' + (o.product || o.projectTitle || '付费研究报告'),
+        '可用次数：' + (c.useLimit || o.couponUseLimit || 2) + ' 次',
+        '已用次数：' + (c.usedCount || 0) + ' 次',
+        '剩余次数：' + (c.remaining === undefined ? (c.useLimit || 2) : c.remaining) + ' 次',
+        '状态：' + (c.status === 'used' ? '已用尽/已失效' : '可用'),
+        (c.expireAt ? '有效期至：' + c.expireAt : ''),
+        '--------------------------------',
+        '兑换入口：' + location.origin + '/#my',
+        '导出时间：' + new Date().toLocaleString()
+      ];
+      gcDownloadText('券码凭证_' + code + '.txt', lines.join('\n'));
+    }).catch(function () { alert('网络异常，请稍后重试'); });
+  }
+  function traceCoupon(code) {
+    var box = $('gcOrderList');
+    code = String(code || '').trim().toUpperCase();
+    if (code.length < 6) { alert('请输入完整券码'); return; }
+    if (box) box.innerHTML = '<span class="gc-pf-empty">追踪中…</span>';
+    var tip = $('gcOrderTip');
+    gcOrderApi('action=trace&code=' + encodeURIComponent(code)).then(function (d) {
+      if (!box) return;
+      if (!d || !d.ok || !d.found) {
+        box.innerHTML = '<span class="gc-pf-empty">' + orderEsc((d && (d.hint || d.message)) || '未找到该券码') + '</span>';
+        if (tip) { tip.textContent = '没有查到这张券码，请核对（也可在爱发电「我的」→ 订单详情里对照配置码 / 私信码）'; tip.style.color = '#b91c1c'; }
+        return;
+      }
+      if (tip) { tip.style.color = '#16a34a'; tip.textContent = '已找到券码，以下为使用情况。'; }
+      var logs = (d.usedLog || []).map(function (x) {
+        return '<div style="font-size:12px;color:#64748b">· ' + orderTime(x.at) + (x.project ? '　项目 ' + orderEsc(x.project) : '') + '</div>';
+      }).join('') || '<div style="font-size:12px;color:#94a3b8">暂无核销记录</div>';
+      box.innerHTML = '<div class="gc-pf-item" style="display:block">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<b style="font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#4338ca">' + orderEsc(d.code || code) + '</b>' +
+        '<span style="font-size:12px;font-weight:700;color:' + (d.remaining > 0 ? '#047857' : '#b91c1c') + '">' +
+        (d.remaining > 0 ? '可用' : '已失效') + '</span></div>' +
+        '<div style="font-size:12.5px;color:#475569;margin-top:6px;line-height:1.9">' +
+        '可用 ' + (d.useLimit || 0) + ' 次 · 已用 ' + (d.usedCount || 0) + ' 次 · 剩余 ' + (d.remaining || 0) + ' 次<br>' +
+        '关联项目：' + (orderEsc((d.projectTitles || []).join('、')) || '未关联（不可用于具体项目）') + '<br>' +
+        '订单号：' + (orderEsc(d.orderId) || '—') + '<br>' +
+        '订单状态：' + (orderEsc(d.orderStatus) || '—') + '</div>' +
+        '<div style="margin-top:8px;padding:9px 11px;border-radius:9px;background:#f8fafc;border:1px solid #e2e8f0">' +
+        '<div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:4px">核销记录（最近 5 条）</div>' + logs + '</div>' +
+        '</div>';
+    }).catch(function () {
+      if (box) box.innerHTML = '<span class="gc-pf-empty">网络异常，请稍后重试</span>';
+    });
   }
 
   function submitFeedback(orderNo) {
@@ -22447,7 +22749,22 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
       if (n > 0) toast('已把 ' + n + ' 条本地收藏同步到账号');
     }).catch(function () {});
   }
-  try { window.__autoMigrateTemp = autoMigrateTemp; window.__renderProfile = renderProfile; } catch (e) {}
+  try {
+    window.__autoMigrateTemp = autoMigrateTemp;
+    window.__renderProfile = renderProfile;
+    window.__gcRenderCoupons = renderCoupons;
+    /* 统一兑换成功后的列表刷新：把 coupons 灌回本地 profile 并重渲染 */
+    window.__gcApplyCoupons = function (list) {
+      try {
+        if (!st.profile) st.profile = {};
+        st.profile.coupons = list || [];
+        renderCoupons(st.profile.coupons);
+        if (typeof window.__renderProfile === 'function' && renderProfile !== window.__renderProfile) window.__renderProfile();
+      } catch (e) {}
+    };
+    window.GC = window.GC || {};
+    window.GC.redeemCode = function (code) { return (window.gcRedeemCode || function () {})(code); };
+  } catch (e) {}
 
   function saveAvatar(src) {
     api('update', { avatar: src }).then(function (res) {
@@ -22883,33 +23200,182 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
 })();
 </script>
 
-<script>
-/* 收藏 / 保存功能已整体下线（2026-11 改版）：隐藏所有收藏入口与统计 */
+<script id="gcFavSingleScript">
+/* v3.5 我的收藏（回归版）：每位用户仅允许 1 个收藏，收藏新的会自动替换旧的 */
 (function () {
-  var IDS = ['collectRecordBtn', 'collectAnalysisBtn', 'exportCollectionBtn', 'collectRecordModal', 'collectRecordPop', 'collectAnalysisPanel'];
-  function kill() {
-    IDS.forEach(function (id) {
-      var e = document.getElementById(id);
-      if (e && e.parentNode) e.parentNode.removeChild(e);
-      else if (e) e.style.display = 'none';
-    });
-    var sc = document.getElementById('statCollection');
-    if (sc) {
-      var card = (sc.parentElement && sc.parentElement.classList.contains('stat-card')) ? sc.parentElement : sc;
-      if (card.parentNode) card.parentNode.removeChild(card);
-    }
-    /* 收藏相关本地缓存一并清理，避免旧数据在界面上复活 */
+  var KEY = 'gc_fav_single_v35';
+  var LEGACY = ['gc_temp_favs', 'gc_temp_saved'];
+
+  function read() {
     try {
-      localStorage.removeItem('gc_temp_favs');
-    } catch (e1) {}
-    var bars = document.querySelectorAll('.gc-fav-bar');
-    for (var i = 0; i < bars.length; i++) bars[i].parentNode && bars[i].parentNode.removeChild(bars[i]);
+      var v = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (v && typeof v === 'object' && v.id) return v;
+    } catch (e) {}
+    return null;
   }
-  kill();
-  document.addEventListener('DOMContentLoaded', kill);
-  setTimeout(kill, 600);
-  setTimeout(kill, 2000);
-  setTimeout(kill, 5000);
+  function write(v) {
+    try {
+      if (v) localStorage.setItem(KEY, JSON.stringify(v));
+      else localStorage.removeItem(KEY);
+    } catch (e) {}
+  }
+  function cleanLegacy() {
+    try {
+      LEGACY.forEach(function (k) {
+        var arr = JSON.parse(localStorage.getItem(k) || '[]');
+        if (Array.isArray(arr) && arr.length) {
+          /* 只保留第一个，迁移到单收藏 */
+          if (!read()) write({ id: arr[0], title: '', at: new Date().toISOString() });
+        }
+        localStorage.removeItem(k);
+      });
+    } catch (e) {}
+  }
+
+  function titleOf(modal) {
+    try {
+      var h = modal.querySelector('.modal-body h2');
+      if (h) return h.textContent.trim();
+      var t = modal.querySelector('.cf-detail-title');
+      if (t) return t.textContent.trim();
+    } catch (e) {}
+    return '';
+  }
+  function currentId(modal) {
+    try {
+      var h = (location.hash || '').replace('#', '');
+      if (h) return h;
+      var m = modal && modal.querySelector('[data-aircraft-id]');
+      if (m) return m.getAttribute('data-aircraft-id');
+    } catch (e) {}
+    return '';
+  }
+
+  function toast(text) {
+    var el = document.getElementById('gcToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'gcToast';
+      el.style.cssText = 'position:fixed;left:50%;bottom:42px;transform:translateX(-50%) translateY(12px);background:rgba(15,23,42,.92);color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;z-index:2147483600;opacity:0;transition:.26s;pointer-events:none;font-family:-apple-system,"PingFang SC",sans-serif;';
+      document.body.appendChild(el);
+    }
+    el.textContent = text;
+    requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%) translateY(0)'; });
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(12px)'; }, 2200);
+  }
+
+  function renderStat() {
+    var sc = document.getElementById('statCollection');
+    if (!sc) return;
+    var cur = read();
+    sc.textContent = cur ? '1' : '0';
+    sc.setAttribute('data-target', cur ? '1' : '0');
+    var host = sc.parentElement;
+    if (host) {
+      host.style.cursor = 'pointer';
+      host.title = cur ? ('当前收藏：' + (cur.title || cur.id) + '（点击查看）') : '还没有收藏';
+      host.onclick = function () {
+        var c = read();
+        if (!c) { toast('还没有收藏，打开任意机型详情点「收藏」即可'); return; }
+        if (c.id) { location.hash = '#' + c.id; }
+      };
+    }
+    var box = document.getElementById('gcFavOneBox');
+    if (box) {
+      var c2 = read();
+      box.innerHTML = c2
+        ? '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e4ecf7;border-radius:12px;background:#f8fbff">'
+          + '<div style="flex:1;min-width:0"><b style="display:block;font-size:13.5px;color:#12243a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+          + (c2.title || c2.id) + '</b><span style="font-size:11.5px;color:#7f8da2">收藏于 ' + String(c2.at || '').slice(0, 10) + ' · 每位用户限 1 个</span></div>'
+          + '<button type="button" id="gcFavGo" style="padding:6px 12px;border-radius:9px;border:1px solid #cfe0f7;background:#fff;color:#2f6fd0;font-size:12px;cursor:pointer">查看</button>'
+          + '<button type="button" id="gcFavClear" style="padding:6px 10px;border-radius:9px;border:1px solid #f0d7d7;background:#fff;color:#c0504d;font-size:12px;cursor:pointer">取消</button>'
+          + '</div>'
+        : '<div style="font-size:12.5px;color:#7f8da2;padding:8px 2px">暂无收藏。打开任意机型详情页点击「收藏」即可（每位用户只能收藏 1 个）。</div>';
+      var go = document.getElementById('gcFavGo');
+      if (go) go.onclick = function () { var c = read(); if (c && c.id) { location.hash = '#' + c.id; } };
+      var cl = document.getElementById('gcFavClear');
+      if (cl) cl.onclick = function () { write(null); renderStat(); syncButtons(); toast('已取消收藏'); };
+    }
+  }
+
+  function syncButtons() {
+    var cur = read();
+    var btns = document.querySelectorAll('.gc-fav-one-btn');
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      var on = cur && b.getAttribute('data-fav-id') === cur.id;
+      b.classList.toggle('on', !!on);
+      b.textContent = on ? '★ 已收藏' : '☆ 收藏';
+      b.style.color = on ? '#b8860b' : '#2f6fd0';
+      b.style.borderColor = on ? '#f0d9a8' : '#cfe0f7';
+      b.style.background = on ? '#fffaf0' : '#fff';
+    }
+  }
+
+  function inject(modal) {
+    if (!modal || modal.querySelector('.gc-fav-one-btn')) return;
+    var id = currentId(modal);
+    var host = modal.querySelector('.modal-body') || modal.querySelector('.cf-detail-panel') || modal;
+    var bar = document.createElement('div');
+    bar.className = 'gc-fav-bar';
+    bar.style.cssText = 'display:flex;justify-content:flex-end;margin:6px 0 10px';
+    bar.innerHTML = '<button type="button" class="gc-fav-one-btn" data-fav-id="' + (id || '') + '" '
+      + 'style="padding:7px 14px;border-radius:10px;border:1px solid #cfe0f7;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;color:#2f6fd0">☆ 收藏</button>';
+    var ref = host.querySelector('h2') || host.querySelector('.cf-detail-title');
+    if (ref && ref.parentNode) ref.parentNode.insertBefore(bar, ref.nextSibling);
+    else host.insertBefore(bar, host.firstChild);
+
+    bar.querySelector('.gc-fav-one-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var cur = read();
+      var tid = currentId(modal) || id;
+      var ttl = titleOf(modal);
+      if (cur && cur.id === tid) {
+        write(null);
+        toast('已取消收藏');
+      } else {
+        write({ id: tid, title: ttl, at: new Date().toISOString() });
+        toast(cur ? '每位用户只能收藏 1 个，已替换为「' + (ttl || tid) + '」' : '已收藏「' + (ttl || tid) + '」');
+      }
+      renderStat();
+      syncButtons();
+    });
+    syncButtons();
+  }
+
+  function scan() {
+    var modals = document.querySelectorAll('.detail-modal, .cf-detail-panel');
+    for (var i = 0; i < modals.length; i++) inject(modals[i]);
+  }
+
+  function boot() {
+    cleanLegacy();
+    renderStat();
+    scan();
+    var mo = new MutationObserver(function () { scan(); });
+    mo.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('hashchange', function () { setTimeout(scan, 120); });
+    /* 在「我的」面板插入收藏区块 */
+    setTimeout(function () {
+      var sec = document.getElementById('gcCouponSec');
+      if (sec && sec.parentNode && !document.getElementById('gcFavOneBox')) {
+        var wrap = document.createElement('div');
+        wrap.className = 'gc-pf-sec';
+        wrap.id = 'gcFavSec';
+        wrap.style.cssText = 'border:0;padding:0 0 12px';
+        wrap.innerHTML = '<div style="font-size:13px;font-weight:700;color:#12243a;margin:0 0 8px">我的收藏</div><div id="gcFavOneBox"></div>';
+        sec.parentNode.insertBefore(wrap, sec.nextSibling);
+        renderStat();
+      }
+    }, 1500);
+    setInterval(function () { renderStat(); syncButtons(); }, 4000);
+  }
+
+  window.GCFav = { get: read, set: write, clear: function () { write(null); renderStat(); }, render: renderStat };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 
@@ -22942,25 +23408,33 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   </div>
   <div class="gp-act">
     <a class="gp-go" href="/activity.html">去看看</a>
-    <button class="gp-close" type="button" id="gcPromo5Close">今日不再提示</button>
+    <button class="gp-close" type="button" id="gcPromo5Close">本次不再提示</button>
   </div>
 </div>
 <script id="gcPromo5Script">
 (function(){
   try{
-    var KEY='gc_promo5_seen';
-    var today=new Date(); var t=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    if(localStorage.getItem(KEY)===t) return;
-    var box=document.getElementById('gcPromo5');
-    if(!box) return;
-    setTimeout(function(){ box.classList.add('show'); }, 1800);
-    function hide(remember){
-      box.classList.remove('show');
-      if(remember){ try{ localStorage.setItem(KEY,t); }catch(e){} }
+    /* v3.4：每次进入都展示活动横幅，同一次浏览内点过关闭才不再打扰（sessionStorage 会话级） */
+    var KEY='gc_promo5_session_v34';
+    try{ if(sessionStorage.getItem(KEY)==='1'){ /* 本会话已看过 */ } }catch(e){}
+    if((function(){try{return sessionStorage.getItem(KEY)==='1';}catch(e){return false;}})()) { /* noop */ }
+    var seen=false; try{ seen = sessionStorage.getItem(KEY)==='1'; }catch(e){}
+    if(seen) { /* 本会话已关闭 */ }
+    if(!seen){
+      var box=document.getElementById('gcPromo5');
+      if(box){
+        setTimeout(function(){ box.classList.add('show'); }, 1500);
+        var hide=function(remember){
+          box.classList.remove('show');
+          if(remember){ try{ sessionStorage.setItem(KEY,'1'); }catch(e){} }
+        };
+        var c=document.getElementById('gcPromo5Close');
+        if(c) c.addEventListener('click',function(){ hide(true); });
+        var go=box.querySelector('a.gp-go');
+        if(go) go.addEventListener('click',function(){ hide(true); });
+        setTimeout(function(){ if(box.classList.contains('show')) hide(true); }, 14000);
+      }
     }
-    var c=document.getElementById('gcPromo5Close');
-    if(c) c.addEventListener('click',function(){ hide(true); });
-    setTimeout(function(){ if(box.classList.contains('show')) hide(true); }, 12000);
   }catch(e){}
 })();
 </script>
@@ -23409,7 +23883,191 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
   } catch (e) { }
 })();
 </script>
+<!-- gc-v35 前端增强包：开屏广告 / 问AI小广告 / 对话记录侧边栏 / 通知中心 / 待支付浮条 -->
+<script src="/assets/gc-v35.js?v=35" defer></script>
+<!-- gc-v35 交互新功能：机型速配对比台（右下入口 / 双槽对比 / 随机开箱） -->
+<script id="gcC919BarScript">
+/* C919 免费上线 · 顶部轻量入口条（滚动后自动隐去，不打扰阅读） */
+(function () {
+  if (window.__gcC919Bar) return;
+  window.__gcC919Bar = true;
+  var KEY = 'gc_c919_bar_off_v35';
+  function boot() {
+    try { if (localStorage.getItem(KEY) === '1') return; } catch (e) {}
+    if (document.getElementById('gcC919Bar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'gcC919Bar';
+    bar.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:99990;display:flex;align-items:center;gap:10px;' +
+      'background:linear-gradient(135deg,rgba(11,35,64,.96),rgba(22,74,138,.96));color:#fff;border-radius:999px;padding:7px 8px 7px 15px;' +
+      'font-size:12.6px;line-height:1.4;box-shadow:0 12px 30px rgba(11,35,64,.3);backdrop-filter:blur(8px);' +
+      'transition:opacity .3s,transform .3s;max-width:calc(100vw - 28px)';
+    bar.innerHTML = '<span style="flex:0 0 auto;background:rgba(255,255,255,.2);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700">NEW</span>'
+      + '<a href="/read/c919.html" style="color:#fff;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">C919 综合研究报告已免费开放 · 免费阅读 / 免费下载</a>'
+      + '<button id="gcC919BarX" aria-label="关闭" style="flex:0 0 auto;border:0;background:rgba(255,255,255,.16);color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1">&times;</button>';
+    document.body.appendChild(bar);
+    document.getElementById('gcC919BarX').onclick = function (e) {
+      e.preventDefault();
+      bar.style.opacity = '0';
+      bar.style.transform = 'translateX(-50%) translateY(-14px)';
+      setTimeout(function () { bar.parentNode && bar.parentNode.removeChild(bar); }, 300);
+      try { localStorage.setItem(KEY, '1'); } catch (e2) {}
+    };
+    var lastY = 0;
+    window.addEventListener('scroll', function () {
+      var y = window.scrollY || document.documentElement.scrollTop || 0;
+      if (y > 260) { bar.style.opacity = '0'; bar.style.pointerEvents = 'none'; }
+      else { bar.style.opacity = '1'; bar.style.pointerEvents = 'auto'; }
+      lastY = y;
+    }, { passive: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
 </body>
 
 
 </html>
+
+<!-- gc-unify-redeem v3.4 -->
+<script>
+(function () {
+  if (window.__gcRedeemV34) return;
+  window.__gcRedeemV34 = true;
+  var PENDING = 'gc_coupon_pending';
+
+  function norm(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function fmt(v) {
+    var c = norm(v);
+    if (c.length > 10) return c;
+    var a = c.slice(0, 2), b = c.slice(2, 6), d = c.slice(6, 10);
+    return [a, b, d].filter(Boolean).join('-');
+  }
+  function tk() { try { return localStorage.getItem('gc_acct_token') || ''; } catch (e) { return ''; } }
+  function tip(msg, isErr) {
+    var t = document.getElementById('gcCouponTip');
+    if (t) { t.textContent = msg; t.style.color = isErr ? '#b91c1c' : '#16a34a'; }
+    if (typeof window.gcToast === 'function') { try { window.gcToast(msg); } catch (e) {} }
+    else { try { toast(msg); } catch (e) {} }
+  }
+  function api(action, extra) {
+    var body = Object.assign({ action: action }, extra || {});
+    var t = tk(); if (t && !body.token) body.token = t;
+    return fetch('/api/coupon', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json().catch(function () { return { ok: false, error: 'bad_response' }; }); });
+  }
+  function pulse(node) {
+    if (!node || !node.animate) return;
+    try {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+      node.animate([
+        { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(22,163,74,.55)' },
+        { transform: 'scale(1.045)', boxShadow: '0 0 0 12px rgba(22,163,74,0)' },
+        { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(22,163,74,0)' }
+      ], { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)' });
+    } catch (e) {}
+  }
+  var MSG = {
+    unauthorized: '请先登录后再兑换券码', coupon_not_found: '券码不存在，请核对后重试',
+    coupon_used: '该券码已被使用，如有疑问请联系站长', coupon_revoked: '该券码已被作废',
+    coupon_expired: '该券码已过期', coupon_invalid: '请输入完整的券码',
+    list_full: '券码数量已达上限', KV_UNAVAILABLE: '服务端存储未就绪，稍后再试'
+  };
+  function msgOf(k) { return MSG[k] || ('兑换失败：' + (k || '未知错误')); }
+
+  /* 全站唯一兑换实现：任何入口（个人中心 / 扫码落地 / 链接携带 / 外部调用）都走这里 */
+  window.gcRedeemCode = function (raw, opts) {
+    opts = opts || {};
+    var btn = opts.button || document.getElementById('gcCouponRedeem');
+    var code = norm(raw);
+    if (!code || code.length < 6) { tip('请输入完整的券码', true); return Promise.resolve({ ok: false, error: 'coupon_invalid' }); }
+    if (!tk()) {
+      try { localStorage.setItem(PENDING, code); } catch (e) {}
+      tip('请先登录，登录后会自动为你兑换', true);
+      try { if (window.GC && window.GC.openMask) window.GC.openMask('auth', '券码兑换'); } catch (e) {}
+      var maskBtn = document.querySelector('[data-mask="auth"], #gcAuthOpen, #gcLoginBtn');
+      if (!maskBtn) { try { var el = document.getElementById('gcProfileBtn'); if (el) el.click(); } catch (e) {} }
+      return Promise.resolve({ ok: false, error: 'login_required', pending: true });
+    }
+    if (btn) { btn.disabled = true; btn.dataset.old = btn.textContent; btn.textContent = '兑换中…'; }
+    return api('redeem', { code: code }).then(function (res) {
+      if (btn) { btn.disabled = false; btn.textContent = btn.dataset.old || '立即兑换'; }
+      if (res && res.ok) {
+        try { localStorage.removeItem(PENDING); } catch (e) {}
+        var inp = document.getElementById('gcCouponInput'); if (inp) inp.value = '';
+        if (res.coupons && window.__gcApplyCoupons) { try { window.__gcApplyCoupons(res.coupons); } catch (e) {} }
+        var c = res.coupon || {};
+        tip(res.already ? '这张券码已经兑换过了，可在下方查看'
+          : ('兑换成功：' + (c.type || '券码') + '（该券码已核销）'), !!res.already);
+        pulse(btn);
+        try { document.dispatchEvent(new CustomEvent('gc:coupon-redeemed', { detail: res })); } catch (e) {}
+        return res;
+      }
+      if (res && res.error === 'unauthorized') {
+        try { localStorage.setItem(PENDING, code); } catch (e) {}
+      }
+      tip(msgOf(res && res.error), true);
+      return res || { ok: false };
+    }).catch(function () {
+      if (btn) { btn.disabled = false; btn.textContent = btn.dataset.old || '立即兑换'; }
+      tip('网络异常，请稍后重试', true);
+      return { ok: false, error: 'network' };
+    });
+  };
+
+  /* 登录成功后自动补兑换（未登录时落地的券码） */
+  function flushPending() {
+    var code = '';
+    try { code = localStorage.getItem(PENDING) || ''; } catch (e) {}
+    if (!code || !tk()) return;
+    setTimeout(function () { try { window.gcRedeemCode(code); } catch (e) {} }, 800);
+  }
+  try {
+    var of = window.fetch;
+    window.fetch = function (input, init) {
+      var url = (typeof input === 'string') ? input : (input && input.url) || '';
+      var pr = of.apply(this, arguments);
+      if (/\/api\/account/.test(url) && init && typeof init.body === 'string' && /"action"\s*:\s*"login"/.test(init.body)) {
+        return pr.then(function (r) {
+          try {
+            r.clone().json().then(function (d) { if (d && d.token) flushPending(); }).catch(function () {});
+          } catch (e) {}
+          return r;
+        });
+      }
+      return pr;
+    };
+  } catch (e) {}
+
+  /* 接管个人中心按钮与回车，统一走 gcRedeemCode */
+  function bind() {
+    var btn = document.getElementById('gcCouponRedeem');
+    if (btn && !btn.__gcUni) {
+      btn.__gcUni = true;
+      btn.addEventListener('click', function (ev) {
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        var inp = document.getElementById('gcCouponInput');
+        window.gcRedeemCode(inp && inp.value, { button: btn });
+      }, true);
+    }
+    var inp = document.getElementById('gcCouponInput');
+    if (inp && !inp.__gcUni) {
+      inp.__gcUni = true;
+      inp.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter') {
+          ev.preventDefault(); ev.stopImmediatePropagation();
+          window.gcRedeemCode(inp.value, { button: document.getElementById('gcCouponRedeem') });
+        }
+      }, true);
+      inp.addEventListener('blur', function () { if (inp.value) inp.value = fmt(inp.value); });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+  else bind();
+  setTimeout(bind, 1200);
+  setTimeout(flushPending, 2600);
+})();
+</script>

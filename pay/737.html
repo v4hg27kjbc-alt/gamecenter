@@ -225,7 +225,9 @@ function showDone(id) {
   $('doneArea').classList.add('show');
   if (id) localStorage.setItem(ORDER_KEY, id);
   $('orderNo').textContent = id || curOrder() || '—';
+  setVerifyHint('付款完成后会自动返回本页并核验到账，请稍候…（无需刷新）');
   pollStatus();
+  startAutoVerify(id || curOrder());
 }
 
 var receiptOpen = false;
@@ -282,6 +284,87 @@ function claim(id, silent) {
   }).catch(function () { if (!silent) alert('网络异常，请稍后重试'); });
 }
 
+/* v3.5：进入支付页即检测 —— 已持有该券则直接关闭购买窗口并提示，直到新的券关联出现才可再买 */
+(function gcPrecheckOwned() {
+  var tk = '';
+  try { tk = localStorage.getItem('gc_acct_token') || ''; } catch (e) { }
+  if (!tk) return;
+  fetch('/api/coupon?action=mine', { headers: { 'Authorization': 'Bearer ' + tk }, cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var list = (d && d.coupons) || [];
+      var hit = null;
+      for (var i = 0; i < list.length; i++) {
+        var c = list[i] || {};
+        var st = String(c.status || 'active');
+        if (st !== 'active' && st !== 'used') continue;
+        var pj = String(c.project || c.projectKey || c.sku || '');
+        if (pj && pj.toLowerCase().indexOf('b737') < 0) continue;
+        hit = c; break;
+      }
+      if (!hit) return;
+      var btn = document.getElementById('payBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '你已有该券 · 无需重复购买';
+        btn.style.opacity = '.6';
+      }
+      var m = document.getElementById('modal');
+      if (m) m.classList.remove('show');
+      showOwnedNotice({
+        couponMasked: hit.couponMasked || hit.couponCode || hit.code || '',
+        readUrl: '/read/737.html'
+      });
+    })
+    .catch(function () { });
+})();
+
+/* v3.5：已持有券提示层（不打扰式，居中卡片） */
+function showOwnedNotice(d) {
+  var old = document.getElementById('gcOwnedMask');
+  if (old) old.parentNode.removeChild(old);
+  var mask = document.createElement('div');
+  mask.id = 'gcOwnedMask';
+  mask.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(3px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  mask.innerHTML =
+    '<div style="max-width:392px;width:100%;background:#fff;border-radius:18px;padding:26px 22px 20px;text-align:center;box-shadow:0 24px 60px rgba(15,23,42,.3)">'
+    + '<div style="width:52px;height:52px;margin:0 auto 14px;border-radius:50%;background:#fff6e6;display:flex;align-items:center;justify-content:center;font-size:26px">🎟️</div>'
+    + '<h3 style="margin:0 0 8px;font-size:17px;color:#12243a">你已经有这个券了，不可以再购买</h3>'
+    + '<p style="margin:0 0 6px;font-size:13px;color:#64748b;line-height:1.7">该联系方式已持有本报告的有效阅读权限'
+    + (d && d.couponMasked ? '（券码 <b style="color:#12243a">' + d.couponMasked + '</b>）' : '')
+    + '。如需为其他人购买，请更换联系方式后再下单。</p>'
+    + (d && d.orderId ? '<p style="margin:0 0 14px;font-size:12px;color:#94a3b8">原订单号：' + d.orderId + '</p>' : '<div style="height:8px"></div>')
+    + '<div style="display:flex;gap:10px">'
+    + '<button id="gcOwnedRead" style="flex:1;padding:11px;border:0;border-radius:11px;background:linear-gradient(135deg,#2f6fd0,#1e4fa3);color:#fff;font-size:13.5px;font-weight:600;cursor:pointer">去阅读报告</button>'
+    + '<button id="gcOwnedClose" style="flex:0 0 88px;padding:11px;border:1px solid #e2e8f2;border-radius:11px;background:#fff;color:#475569;font-size:13.5px;cursor:pointer">知道了</button>'
+    + '</div></div>';
+  document.body.appendChild(mask);
+  var readBtn = document.getElementById('gcOwnedRead');
+  if (readBtn) readBtn.onclick = function () { window.location.href = (d && d.readUrl) || '/read/737.html'; };
+  document.getElementById('gcOwnedClose').onclick = function () { mask.parentNode && mask.parentNode.removeChild(mask); };
+  mask.addEventListener('click', function (e) { if (e.target === mask) mask.parentNode && mask.parentNode.removeChild(mask); });
+}
+
+/* v3.5：确认到手 → 自动下载文档 → 感谢页 */
+function gcAutoDeliver(id, d) {
+  try {
+    var done = sessionStorage.getItem('gc_delivered_' + id);
+    if (done === '1') return;
+    sessionStorage.setItem('gc_delivered_' + id, '1');
+  } catch (e) {}
+  var proj = 'b737';
+  var link = document.createElement('a');
+  link.href = '/api/project-doc?project=' + proj + '&download=1&order=' + encodeURIComponent(id) + '&t=' + Date.now();
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(function () {
+    if (link.parentNode) link.parentNode.removeChild(link);
+    window.location.href = '/thanks.html?project=' + proj + '&order=' + encodeURIComponent(id)
+      + (d && d.couponCode ? '&code=' + encodeURIComponent(d.couponCode) : '');
+  }, 1200);
+}
+
 function pollStatus() {
   var id = curOrder();
   if (!id) return;
@@ -301,16 +384,266 @@ function pollStatus() {
         if (d.contact && !localStorage.getItem(CONTACT_KEY)) localStorage.setItem(CONTACT_KEY, d.contact);
         // 校验通过后自动弹出一次付款回执单
         if (!receiptDone && !receiptOpen) claim(id, true);
+        if (!verifyPassed) { verifyPassed = true; setVerifyHint('核验通过 ✓ 券码已生成，请在下方核对并保存凭证。', 'ok'); }
+        /* 有券码时先展示核验面板（含保存/追踪），由面板里的「去阅读报告」进入交付，避免被自动跳转打断 */
+        var shown = showCodePanel(d, id);
+        if (!shown) gcAutoDeliver(id, d);
+      } else if (d.status === 'refunded') {
+        s.className = 'status';
+        s.style.color = '#b45309';
+        s.textContent = d.refundNotice || '工作人员已为你安排退款，退款将在一个月内到账。';
+      } else if (d.phase === 'cancelled' || d.status === 'cancelled') {
+        s.className = 'status';
+        s.style.color = '#94a3b8';
+        s.textContent = '该订单已超过 24 小时未支付，已自动取消。如需购买请重新下单。';
       } else if (d.status === 'rejected') {
         s.className = 'status';
         s.style.color = '#b91c1c';
         s.textContent = '订单未通过核对，请带订单号联系站长。';
       } else {
+        /* v3.5：未完成支付超过 1 小时 → 自动回滚到主页，此后仅在「我的-历史订单」显示为「待完成支付」 */
+        if (d.phase === 'history') {
+          s.className = 'status';
+          s.style.color = '#b45309';
+          s.textContent = '该订单已超过 1 小时未完成支付，正在返回主页…（可在「我的-我的订单」查看记录）';
+          if (!window.__gcRollback) {
+            window.__gcRollback = 1;
+            try { localStorage.removeItem(ORDER_KEY); } catch (e) { }
+            setTimeout(function () { location.replace('/'); }, 1800);
+          }
+          return;
+        }
         s.className = 'status pending';
         s.textContent = '订单已登记，等待到账核对（通常数分钟内完成）。';
       }
     })
     .catch(function () { });
+}
+
+
+/* ============ v3.6 支付核验链路 ============
+   流程：付款 → 自动回站内 → 自动核验订单状态 → 通过则展示券码（与爱发电同码）
+   未通过 → 引导粘贴爱发电订单号 → 绑定后再核验 → 成功则同样展示券码
+   ========================================== */
+var verifyTimer = null, verifyTries = 0, verifyPassed = false;
+
+function ensureHint() {
+  var h = document.getElementById('verifyHint');
+  if (!h) {
+    var anchor = document.getElementById('statusLine');
+    if (!anchor || !anchor.parentNode) return null;
+    h = document.createElement('div');
+    h.id = 'verifyHint';
+    h.style.cssText = 'margin-top:10px;padding:10px 12px;border-radius:10px;background:#f1f7ff;border:1px solid #d6e4ff;'
+      + 'color:#1e40af;font-size:12.5px;line-height:1.7;text-align:left';
+    anchor.parentNode.insertBefore(h, anchor.nextSibling);
+  }
+  return h;
+}
+function setVerifyHint(txt, tone) {
+  var h = ensureHint();
+  if (!h) return;
+  h.style.display = 'block';
+  h.textContent = txt;
+  if (tone === 'ok') { h.style.background = '#ecfdf5'; h.style.borderColor = '#bbf7d0'; h.style.color = '#047857'; }
+  else if (tone === 'warn') { h.style.background = '#fff7ed'; h.style.borderColor = '#fed7aa'; h.style.color = '#9a3412'; }
+  else { h.style.background = '#f1f7ff'; h.style.borderColor = '#d6e4ff'; h.style.color = '#1e40af'; }
+}
+
+function startAutoVerify(id) {
+  id = id || curOrder();
+  if (!id) return;
+  verifyTries = 0;
+  if (verifyTimer) clearInterval(verifyTimer);
+  setVerifyHint('已回到站内，正在自动核验支付状态…（最多等待 60 秒，无需刷新页面）');
+  var tick = function () {
+    verifyTries++;
+    fetch('/api/order?action=status&id=' + encodeURIComponent(id), { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.status === 'confirmed') {
+          clearInterval(verifyTimer); verifyTimer = null; verifyPassed = true;
+          setVerifyHint('核验通过 ✓ 券码已生成，请在下方核对并保存凭证。', 'ok');
+          showCodePanel(d, id);
+          if (!receiptDone && !receiptOpen) claim(id, true);
+          return;
+        }
+        if (verifyTries >= 15) {
+          clearInterval(verifyTimer); verifyTimer = null;
+          setVerifyHint('暂未核验到到账记录（可能爱发电延迟）。请粘贴爱发电订单号，提交后立即再核验。', 'warn');
+          showAfdianGuide(id);
+        }
+      })
+      .catch(function () {
+        if (verifyTries >= 15) { clearInterval(verifyTimer); verifyTimer = null; showAfdianGuide(id); }
+      });
+  };
+  tick();
+  verifyTimer = setInterval(tick, 4000);
+}
+
+function gcDl(name, text) {
+  try {
+    var blob = new Blob(['\ufeff' + text], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+  } catch (e) { window.prompt('请手动复制保存', text); }
+}
+
+function showCodePanel(d, id) {
+  d = d || {};
+  var code = d.couponCode || (d.coupon && d.coupon.code) || '';
+  if (!code) return false;
+  var old = document.getElementById('gcCodePanel');
+  if (old) old.remove();
+  var c = d.coupon || {};
+  var useLimit = c.useLimit || d.couponUseLimit || 2;
+  var used = c.usedCount || 0;
+  var remain = (c.remaining === undefined ? Math.max(0, useLimit - used) : c.remaining);
+  var box = document.createElement('div');
+  box.id = 'gcCodePanel';
+  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.45);display:flex;'
+    + 'align-items:center;justify-content:center;padding:16px';
+  box.innerHTML = ''
+    + '<div style="background:#fff;border-radius:16px;max-width:400px;width:100%;padding:22px 18px;box-shadow:0 24px 60px rgba(15,23,42,.3)">'
+    + '<div style="font-size:16px;font-weight:700;color:#0f172a;text-align:center">核验通过 · 券码已发放</div>'
+    + '<div style="margin-top:12px;padding:14px;border:1.5px dashed #c7d2fe;border-radius:12px;background:#f8fafc;text-align:center">'
+    + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:19px;font-weight:700;color:#4338ca;letter-spacing:1px">' + code + '</div>'
+    + '<div style="font-size:11.5px;color:#64748b;margin-top:6px">与爱发电「配置码 / 私信码」是同一串，可对照校准</div>'
+    + '<div style="font-size:11.5px;color:#b45309;margin-top:4px">可用 ' + useLimit + ' 次 · 已用 ' + used + ' 次 · 剩余 ' + remain + ' 次，用完自动失效</div>'
+    + '</div>'
+    + '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
+    + '<button id="gcCopyCode" style="flex:1 1 45%;padding:10px;border:0;border-radius:10px;background:#eef2ff;color:#4338ca;font-size:13px;font-weight:600;cursor:pointer">复制券码</button>'
+    + '<button id="gcSaveCoupon" style="flex:1 1 45%;padding:10px;border:0;border-radius:10px;background:#eef2ff;color:#4338ca;font-size:13px;font-weight:600;cursor:pointer">保存券码凭证</button>'
+    + '<button id="gcSaveOrder" style="flex:1 1 45%;padding:10px;border:0;border-radius:10px;background:#f1f5f9;color:#334155;font-size:13px;font-weight:600;cursor:pointer">保存订单凭证</button>'
+    + '<button id="gcTraceCode" style="flex:1 1 45%;padding:10px;border:0;border-radius:10px;background:#f1f5f9;color:#334155;font-size:13px;font-weight:600;cursor:pointer">追踪码查询</button>'
+    + '</div>'
+    + '<button id="gcCodeGo" style="width:100%;margin-top:10px;padding:12px;border:0;border-radius:11px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:14px;font-weight:600;cursor:pointer">去阅读报告</button>'
+    + '<div id="gcTraceOut" style="margin-top:10px;font-size:12px;color:#475569;line-height:1.8"></div>'
+    + '</div>';
+  document.body.appendChild(box);
+  var copy = function (t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t);
+    else { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  };
+  box.querySelector('#gcCopyCode').onclick = function () { copy(code); this.textContent = '已复制 ✓'; };
+  box.querySelector('#gcSaveCoupon').onclick = function () {
+    gcDl('券码凭证_' + code + '.txt', [
+      '民航客机收藏馆 · 券码凭证',
+      '--------------------------------',
+      '券码：' + code,
+      '（与爱发电「配置码 / 私信码」为同一串，可对照校准）',
+      '订单号：' + (id || curOrder() || ''),
+      '可用次数：' + useLimit + ' 次',
+      '已用次数：' + used + ' 次',
+      '剩余次数：' + remain + ' 次',
+      '状态：' + (remain > 0 ? '可用' : '已失效'),
+      '--------------------------------',
+      '查询与兑换：' + location.origin + '/#my',
+      '导出时间：' + new Date().toLocaleString()
+    ].join('\n'));
+  };
+  box.querySelector('#gcSaveOrder').onclick = function () {
+    gcDl('订单凭证_' + (id || curOrder()) + '.txt', [
+      '民航客机收藏馆 · 订单凭证',
+      '--------------------------------',
+      '订单号：' + (id || curOrder() || ''),
+      '商品：付费研究报告（阅读权限）',
+      '金额：¥' + (d.price || 5),
+      '订单状态：已完成',
+      (d.paidAt ? '支付时间：' + fmtTime(d.paidAt) : ''),
+      (d.afdianOrder ? '爱发电订单号：' + d.afdianOrder : ''),
+      (d.contact ? '联系方式：' + d.contact : ''),
+      '券码：' + code,
+      '--------------------------------',
+      '查询入口：' + location.origin + '/#my',
+      '导出时间：' + new Date().toLocaleString()
+    ].join('\n'));
+  };
+  box.querySelector('#gcTraceCode').onclick = function () {
+    var out = box.querySelector('#gcTraceOut');
+    out.textContent = '追踪中…';
+    fetch('/api/order?action=trace&code=' + encodeURIComponent(code), { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (t) {
+        if (!t || !t.found) { out.textContent = '未查到该券码记录'; return; }
+        out.innerHTML = '可用 ' + t.useLimit + ' 次 · 已用 ' + t.usedCount + ' 次 · 剩余 ' + t.remaining + ' 次<br>'
+          + '关联项目：' + ((t.projectTitles || []).join('、') || '未关联') + '<br>'
+          + '订单状态：' + (t.orderStatus || '—');
+      })
+      .catch(function () { out.textContent = '网络异常，请稍后重试'; });
+  };
+  box.querySelector('#gcCodeGo').onclick = function () {
+    box.remove();
+    gcAutoDeliver(id || curOrder(), d);
+  };
+  box.addEventListener('click', function (e) { if (e.target === box) box.remove(); });
+  return true;
+}
+
+function showAfdianGuide(id) {
+  id = id || curOrder();
+  if (document.getElementById('gcAfdianGuide')) return;
+  var box = document.createElement('div');
+  box.id = 'gcAfdianGuide';
+  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.45);display:flex;'
+    + 'align-items:center;justify-content:center;padding:16px';
+  box.innerHTML = ''
+    + '<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:22px 18px;box-shadow:0 24px 60px rgba(15,23,42,.3);max-height:90vh;overflow:auto">'
+    + '<div style="font-size:15.5px;font-weight:700;color:#0f172a;text-align:center">还差一步：核对爱发电订单</div>'
+    + '<div style="margin-top:10px;font-size:12.5px;color:#475569;line-height:1.9">'
+    + '<b style="color:#334155">操作步骤</b><br>'
+    + '① 打开爱发电 App 或网页 →「我的」→「我的订单」；<br>'
+    + '② 找到刚刚这一笔 ¥5 的订单，复制<b>订单号</b>（形如 20261xxxxxxxxxxxxxxxxxxx）；<br>'
+    + '③ 粘贴到下面输入框，点「提交并核验」；<br>'
+    + '④ 核对通过后，系统会给出券码，它与爱发电「配置码」和「我的私信」里的码是<b>同一串</b>，可直接对照校准。'
+    + '</div>'
+    + '<input id="gcAfInput" placeholder="粘贴爱发电订单号" autocomplete="off" style="width:100%;margin-top:12px;padding:11px 12px;border:1px solid #d7dfec;border-radius:10px;font-size:13.5px;outline:none;background:#f8fafc">'
+    + '<div id="gcAfMsg" style="margin-top:8px;font-size:12.5px;color:#b91c1c;line-height:1.7"></div>'
+    + '<button id="gcAfSubmit" style="width:100%;margin-top:12px;padding:12px;border:0;border-radius:11px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:14px;font-weight:600;cursor:pointer">提交并核验</button>'
+    + '<button id="gcAfLater" style="width:100%;margin-top:8px;padding:11px;border:1px solid #e2e8f2;border-radius:11px;background:#fff;color:#64748b;font-size:13px;cursor:pointer">稍后再说</button>'
+    + '</div>';
+  document.body.appendChild(box);
+  box.querySelector('#gcAfLater').onclick = function () { box.remove(); };
+  box.addEventListener('click', function (e) { if (e.target === box) box.remove(); });
+  box.querySelector('#gcAfSubmit').onclick = function () {
+    var v = (box.querySelector('#gcAfInput').value || '').trim();
+    var msg = box.querySelector('#gcAfMsg');
+    if (v.length < 6) { msg.textContent = '请填写完整的爱发电订单号'; return; }
+    var btn = this;
+    btn.disabled = true; btn.textContent = '核验中…';
+    fetch('/api/order', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'bind-afdian', id: id, afdianOrder: v,
+        contact: localStorage.getItem(CONTACT_KEY) || ''
+      })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      btn.disabled = false; btn.textContent = '提交并核验';
+      if (d && d.ok && d.status === 'confirmed') {
+        msg.style.color = '#047857';
+        msg.textContent = '核验通过，券码已生成。';
+        box.remove();
+        setVerifyHint('核验通过 ✓ 券码已生成，请在下方核对并保存凭证。', 'ok');
+        fetch('/api/order?action=status&id=' + encodeURIComponent(id), { cache: 'no-store' })
+          .then(function (r) { return r.json(); })
+          .then(function (x) { showCodePanel(x, id); if (!receiptDone && !receiptOpen) claim(id, true); })
+          .catch(function () { });
+        return;
+      }
+      if (d && d.ok) {
+        msg.style.color = '#b45309';
+        msg.textContent = '已提交，站长会尽快核对到账，核对完成后券码会自动出现在这里与「我的订单」中。';
+        return;
+      }
+      msg.textContent = (d && (d.hint || d.message)) || '提交失败，请核对订单号后重试';
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = '提交并核验';
+      msg.textContent = '网络异常，请稍后重试';
+    });
+  };
 }
 
 $('payBtn').addEventListener('click', function () {
@@ -321,8 +654,18 @@ $('payBtn').addEventListener('click', function () {
   fetch('/api/order', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'create', project: 'b737', contact: contact, afdianOrder: ($('afOrder').value || '').trim() })
-  }).then(function (r) { return r.json(); }).then(function (d) {
+  }).then(function (r) { return r.json().then(function (d) { d._status = r.status; return d; }); }).then(function (d) {
     btn.disabled = false; btn.textContent = '去爱发电支付 ¥5';
+    /* v3.5：已持有该券 → 关闭下单窗口并提示，直到新的券关联出现才可再买 */
+    if (d && (d.code === 'duplicate_coupon' || d.alreadyOwned)) {
+      $('modal').classList.remove('show');
+      showOwnedNotice(d);
+      return;
+    }
+    if (d && d.free) {
+      window.location.href = d.readUrl || '/projects/c919.md';
+      return;
+    }
     if (!d.ok) { alert(d.message || '订单登记失败，请稍后重试'); return; }
     localStorage.setItem(ORDER_KEY, d.id);
     localStorage.setItem(CONTACT_KEY, contact);
@@ -334,7 +677,7 @@ $('payBtn').addEventListener('click', function () {
   });
 });
 
-$('refreshBtn').addEventListener('click', pollStatus);
+$('refreshBtn').addEventListener('click', function () { pollStatus(); startAutoVerify(curOrder()); });
 $('receiptBtn').addEventListener('click', function () {
   var id = curOrder();
   if (!id) { alert('暂无订单信息'); return; }

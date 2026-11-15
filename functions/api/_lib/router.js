@@ -54,12 +54,12 @@ export const TIER_DEFAULTS = {
       kimi: { key: 'AI_MODEL_FLAGSHIP' },
       zhipu: { key: 'ZHIPU_MODEL_FLAGSHIP' }
     },
-    model: 'kimi-k3.1-pro',
-    models: { kimi: 'kimi-k3.1-pro', zhipu: 'glm-4.5-air' },
+    model: 'kimi-k3',
+    models: { kimi: 'kimi-k3', zhipu: 'glm-4.5-air' },
     label: '旗舰档',
     maxTokens: 4096,
     temperature: 0.6,
-    timeoutMs: 45000,
+    timeoutMs: 130000,
     purpose: '复杂推理 / 多机型横向对比 / 长文本分析 / 方案生成'
   },
   vision: {
@@ -163,8 +163,9 @@ export function modelAllowlist(env) {
   TIERS.forEach(function (t) {
     PROVIDERS.forEach(function (p) { base.push(tierConfig(env, t, p).model); });
   });
-  // Kimi 全系实测可用模型一律放行，便于前端按功能显式指定档位
-  base.push('kimi-k3.1-pro', 'kimi-k2.6');
+  /* 前端三个对话模型：Kimi K3.1 Pro（旗舰·每日 2 次）、Kimi K3（旗舰·每日 5 次）、Kimi K2.6（轻量默认）。
+     K3.1 Pro 恢复可用（v3.5），独立计桶，见 quota.js 的 PRO_MODEL / PRO_BUCKET。 */
+  base.push('kimi-k3.1-pro', 'kimi-k3', 'kimi-k2.6');
   // 智谱仅保留「智谱 4」= glm-4.5-air（免费兜底档）与视觉档 glm-4.5v，其余智谱模型一律不放行
   base.push('glm-4.5-air', 'glm-4.5v');
   var extra = parseList(env && env.AI_MODEL_ALLOWLIST).concat(parseList(env && env.ZHIPU_MODEL_ALLOWLIST));
@@ -431,6 +432,9 @@ export function resolveGenerationParams(body, cfg, env) {
 
   var effort = typeof b.reasoning_effort === 'string' ? b.reasoning_effort.trim().toLowerCase() : '';
   if (!effort && e.AI_REASONING_EFFORT) effort = String(e.AI_REASONING_EFFORT).trim().toLowerCase();
+  // v3.5：kimi-k3 系列为「始终思考」模型，默认 high 时首 token 常 >50s 触发上游超时降级（线上实测）。
+  // 调用方未显式指定时统一下沉到 low，保证「登录后全部 AI 功能可用不降级」。
+  if (!effort && cfg && (cfg.model === 'kimi-k3' || cfg.model === 'kimi-k3.1-pro')) effort = 'low';
   var effortOk = ['low', 'high', 'max'].indexOf(effort) >= 0;
 
   var thinking = typeof b.thinking === 'string' ? b.thinking.trim().toLowerCase() : '';

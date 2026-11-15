@@ -6,7 +6,12 @@ export const PROJECTS = [
     title: '国产大型客机 C919：研制历程、技术体系与产业化进程综合研究报告',
     short: 'C919 综合研究报告',
     file: '/projects/c919.md',
-    builtin: true
+    builtin: true,
+    free: true,          /* v3.5：C919 免费查看 + 免费下载，无需券码 */
+    freeRead: true,
+    freeDownload: true,
+    badge: '免费上线',
+    releasedAt: '2026-11-14'
   },
   {
     key: 'a320',
@@ -23,6 +28,12 @@ export const PROJECTS = [
     builtin: false
   }
 ];
+
+/** 项目是否免费（免费项目免券直接阅读/下载） */
+export function isFreeProject(key) {
+  const hit = PROJECTS.filter(function (p) { return p.key === String(key || '').toLowerCase(); })[0];
+  return !!(hit && hit.free);
+}
 
 export const PROJECT_KEYS = PROJECTS.map(function (p) { return p.key; });
 

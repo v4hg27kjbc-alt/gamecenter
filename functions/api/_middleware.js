@@ -309,8 +309,13 @@ export async function onRequest(context) {
 
   // ---- 6. 访客标识（仅严格路径强制；/api/token?bootstrap=1 为首次取号通道，须豁免，否则新访客永远拿不到 ID） ----
   var visitorId = readVisitorId(request);
+  /* 取号通道豁免：
+     - GET /api/token?bootstrap=1  首次取号
+     - POST /api/token             签发令牌时若缺访客，由 token.js 自动补发并 Set-Cookie
+     若不放行 POST，浏览器清 Cookie / 隐私模式下会永远卡在 invalid_visitor，表现为 AI 门控假死 */
   var isBootstrapEntry =
-    request.method === 'GET' && path === '/api/token' && url.searchParams.get('bootstrap') === '1';
+    path === '/api/token' &&
+    ((request.method === 'GET' && url.searchParams.get('bootstrap') === '1') || request.method === 'POST');
   if (isStrict && !isBootstrapEntry && !isValidVisitorId(visitorId)) {
     return jsonResponse(
       {

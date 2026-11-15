@@ -145,7 +145,10 @@ function briefOf(rec) {
     type: String(rec.type || '通用券'),
     value: String(rec.value || ''),
     note: String(rec.note || ''),
-    at: String(rec.usedAt || '')
+    at: String(rec.usedAt || ''),
+    useLimit: Number(rec.useLimit || 1),
+    usedCount: Number(rec.usedCount || 0),
+    remaining: Math.max(0, Number(rec.useLimit || 1) - Number(rec.usedCount || 0))
   };
 }
 
@@ -204,15 +207,27 @@ export async function onRequest(context) {
     if (!rec) return bad('coupon_not_found', origin, { hint: '券码不存在，请核对后重试' });
 
     if (String(rec.status || '') === 'revoked') return bad('coupon_revoked', origin, { hint: '该券码已被作废，如有疑问请联系站长' });
+    const useLimit = Math.max(1, Number(rec.useLimit || 1));
+    const usedCount = Math.max(0, Number(rec.usedCount || 0));
+    if (usedCount >= useLimit) return bad('coupon_used', origin, { hint: '该券码使用次数已达上限（' + useLimit + ' 次），已自动失效' });
     if (String(rec.status || '') === 'used') return bad('coupon_used', origin, { hint: '该券码已被使用，如有疑问请联系站长' });
     if (isExpired(rec)) return bad('coupon_expired', origin, { hint: '该券码已过期' });
 
-    // 关联项目：统一兑换（v3.3）——只要券码本身有效，任何兑换窗口都可兑换，不再因项目不匹配拒绝
-    let projList = Array.isArray(rec.projectKeys) ? rec.projectKeys : [];
+    // 关联项目（v3.6）：必须真实关联才可用
+    //  - 券码未关联任何项目 → 不可用于具体项目窗口（提示联系站长补关联）
+    //  - 券码关联了项目，但当前窗口不是其中之一 → 拒绝
+    const projList = Array.isArray(rec.projectKeys) ? rec.projectKeys.filter(Boolean) : [];
     const reqKey = String(body.projectKey || '').trim().toLowerCase();
-    if (!projList.length && reqKey) projList = [reqKey];
-    // 记录了项目但当前窗口不是该项目：仅做标记，不阻断兑换
-    const projectMismatch = !!(projList.length && reqKey && !couponAllowsProject(rec, reqKey));
+    if (reqKey) {
+      if (!projList.length) {
+        return bad('coupon_no_project', origin, { hint: '该券码未关联任何项目，暂不可用于此文档，请联系站长补关联' });
+      }
+      if (!couponAllowsProject(rec, reqKey)) {
+        const names = projList.map(projectTitle).join('、');
+        return bad('coupon_project_mismatch', origin, { hint: '该券码仅可用于：' + names, allowed: projList });
+      }
+    }
+    const projectMismatch = false;
 
     const mine = Array.isArray(user.coupons) ? user.coupons : [];
     const dup = mine.some(function (c) { return normCode(c && c.code) === code; });
@@ -222,10 +237,16 @@ export async function onRequest(context) {
 
     const now = new Date().toISOString();
     // 先占位标记，避免同一券码被重复兑换
+    const log = Array.isArray(rec.usedLog) ? rec.usedLog.slice(-9) : [];
+    log.push({ at: now, by: String(user.uid || ''), byName: String(user.username || user.displayName || ''), project: reqKey || '' });
+    const nextCount = usedCount + 1;
     const claimed = {
       code: code,
       couponCode: displayOf(rec),
-      status: 'used',
+      status: nextCount >= useLimit ? 'used' : 'active',
+      useLimit: useLimit,
+      usedCount: nextCount,
+      usedLog: log,
       type: String(rec.type || '通用券'),
       value: String(rec.value || ''),
       note: String(rec.note || ''),
@@ -254,7 +275,9 @@ export async function onRequest(context) {
         let hit = false;
         for (let i = 0; i < idx.length; i++) {
           if (normCode(idx[i] && idx[i].code) === code) {
-            idx[i].status = 'used';
+            idx[i].status = nextCount >= useLimit ? 'used' : 'active';
+            idx[i].useLimit = useLimit;
+            idx[i].usedCount = nextCount;
             idx[i].usedBy = claimed.usedBy;
             idx[i].usedByName = claimed.usedByName;
             idx[i].usedAt = now;
@@ -266,7 +289,11 @@ export async function onRequest(context) {
       }
     } catch (e) {}
 
-    return ok({ coupon: briefOf(claimed), coupons: user.coupons }, origin);
+    return ok({
+      coupon: briefOf(claimed), coupons: user.coupons,
+      useLimit: useLimit, usedCount: nextCount, remaining: Math.max(0, useLimit - nextCount),
+      expired: nextCount >= useLimit
+    }, origin);
   }
 
   return bad('unknown_action', origin, null, 400);

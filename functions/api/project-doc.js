@@ -99,3 +99,95 @@ export async function onRequestPost({ request, env }) {
     markdown: trace + '\n' + markdown
   });
 }
+
+/**
+ * v3.5 GET 模式：直接下载 / 阅读
+ *   /api/project-doc?project=c919&download=1              免费项目，直接给文件
+ *   /api/project-doc?project=b737&download=1&code=GCXXXX   付费项目，凭券下载
+ *   /api/project-doc?project=b737&download=1&order=GC-...  付费项目，凭订单号下载
+ *   &inline=1  → 返回 text/markdown 供阅读页渲染；默认 attachment 触发浏览器下载
+ */
+export async function onRequestGet({ request, env }) {
+  const kv = kvOf(env);
+  const u = new URL(request.url);
+  const projectKey = (normProjectKeys([u.searchParams.get('project') || 'c919'])[0]) || 'c919';
+  const inline = u.searchParams.get('inline') === '1';
+  const dl = u.searchParams.get('download') !== '0';
+
+  const hit = PROJECTS.filter((p) => p.key === projectKey)[0];
+  if (!hit) return json({ ok: false, code: 'bad_project', message: '项目不存在' }, 400);
+
+  let markdown = '';
+  try {
+    const res = await env.ASSETS.fetch(new URL(hit.file, request.url));
+    if (res.ok) markdown = await res.text();
+  } catch (e) { }
+  if (!markdown) return json({ ok: false, code: 'doc_missing', message: '文档暂不可用，请稍后重试或联系站长' }, 404);
+
+  // v3.5.1：阅读页通过 GET 拉正文，需要结构化 JSON（原实现只回 markdown 原文，导致「文档加载失败」）
+  const accept = String(request.headers.get('Accept') || '');
+  const wantJson = u.searchParams.get('json') === '1' || accept.indexOf('application/json') >= 0;
+
+  // 免费项目：无需任何鉴权
+  if (hit.free) {
+    const head = [
+      '<!-- ' + hit.title + ' -->',
+      '> 本份文档为**免费公开版本**（' + (hit.badge || '免费') + '），可自由查看与下载。',
+      ''
+    ].join('\n');
+    const body = head + markdown;
+    if (wantJson) {
+      return json({ ok: true, free: true, project: projectKey, title: hit.title, badge: hit.badge || '', markdown: body }, 200);
+    }
+    if (inline) {
+      return new Response(body, {
+        status: 200,
+        headers: Object.assign({ 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'public, max-age=300' }, CORS)
+      });
+    }
+    const fn = 'C919-CAAC-REPORT.md';
+    return new Response(body, {
+      status: 200,
+      headers: Object.assign({
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Content-Disposition': (dl ? 'attachment' : 'inline') + '; filename="' + fn + '"; filename*=UTF-8\'\'' + encodeURIComponent('C919综合研究报告.md'),
+        'Cache-Control': 'public, max-age=300'
+      }, CORS)
+    });
+  }
+
+  // 付费项目：凭券码或订单号
+  if (!kv) return json({ ok: false, code: 'kv_missing', message: '存储未配置' }, 503);
+  let code = normCode(u.searchParams.get('code'));
+  const orderId = String(u.searchParams.get('order') || '').trim();
+  if (orderId && code.length < 6) {
+    const o = await kv.get('order:item:' + orderId, { type: 'json' });
+    if (!o) return json({ ok: false, code: 'order_not_found', message: '订单不存在' }, 404);
+    if (o.status !== 'confirmed') return json({ ok: false, code: 'order_pending', message: '订单尚未完成核对' }, 403);
+    code = normCode(o.couponCode);
+  }
+  if (code.length < 6) return json({ ok: false, code: 'coupon_required', message: '需要券码或已完成订单' }, 401);
+  const rec = await kv.get('coupon:code:' + code, { type: 'json' });
+  if (!rec) return json({ ok: false, code: 'coupon_not_found', message: '券码不存在' }, 404);
+  if (String(rec.status || '') === 'revoked') return json({ ok: false, code: 'coupon_revoked', message: '该券码已作废' }, 403);
+  if (!couponAllowsProject(rec, projectKey)) return json({ ok: false, code: 'coupon_project_mismatch', message: '该券码不适用于该项目' }, 403);
+
+  const trace = [
+    '> **本份文档为付费授权副本**',
+    '> 追踪码：`' + String(rec.couponCode || code) + '`　授权项目：' + projectTitle(projectKey),
+    '> 仅供购买者本人阅读，禁止转载、转售、公开分享。',
+    ''
+  ].join('\n');
+  const out = trace + '\n' + markdown;
+  if (wantJson) {
+    return json({ ok: true, project: projectKey, title: projectTitle(projectKey), traceCode: String(rec.couponCode || code), markdown: out }, 200);
+  }
+  const fn2 = projectKey.toUpperCase() + '-REPORT.md';
+  return new Response(out, {
+    status: 200,
+    headers: Object.assign({
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Content-Disposition': (dl ? 'attachment' : 'inline') + '; filename="' + fn2 + '"'
+    }, CORS)
+  });
+}

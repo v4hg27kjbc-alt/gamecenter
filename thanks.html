@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>感谢支持 · 民航客机收藏馆</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico">
+<style>
+  :root{--ink:#12243a;--sub:#64748b;--brand:#2f6fd0;--brand2:#1e4fa3;--line:#e6ecf5}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,#eaf2ff 0%,#f7fafd 46%,#ffffff 100%);color:var(--ink)}
+  .card{width:100%;max-width:520px;background:#fff;border:1px solid var(--line);border-radius:22px;
+    box-shadow:0 30px 70px rgba(18,36,58,.12);padding:38px 30px 30px;text-align:center;position:relative;overflow:hidden;
+    animation:pop .5s cubic-bezier(.34,1.4,.64,1) both}
+  @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+  .card::before{content:'';position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,#2f6fd0,#6aa9ff,#2f6fd0)}
+  .tick{width:76px;height:76px;margin:6px auto 18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#e8f3ff,#d6e8ff);box-shadow:0 10px 26px rgba(47,111,208,.22);position:relative}
+  .tick::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(47,111,208,.22);animation:ring 2.4s ease-out infinite}
+  @keyframes ring{0%{transform:scale(.85);opacity:.9}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+  .tick svg{width:38px;height:38px;stroke:#2f6fd0;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  h1{margin:0 0 10px;font-size:22px;letter-spacing:.4px}
+  .lead{margin:0 auto 20px;max-width:400px;font-size:14px;line-height:1.8;color:var(--sub)}
+  .meta{display:flex;flex-direction:column;gap:8px;margin:0 0 22px;padding:14px 16px;border:1px dashed #dbe6f5;border-radius:14px;background:#f8fbff;text-align:left}
+  .meta .row{display:flex;justify-content:space-between;gap:12px;font-size:13px}
+  .meta .k{color:#8a99ad}
+  .meta .v{color:var(--ink);font-weight:600;word-break:break-all;text-align:right}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;cursor:pointer;
+    border-radius:13px;padding:14px;font-size:14.5px;font-weight:600;transition:transform .16s ease,box-shadow .2s ease}
+  .btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 12px 26px rgba(47,111,208,.32)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(47,111,208,.4)}
+  .btn-ghost{margin-top:10px;background:#fff;color:#476179;border:1px solid #dfe8f3}
+  .btn-ghost:hover{background:#f6f9fe;transform:translateY(-1px)}
+  .foot{margin-top:18px;font-size:12px;color:#9aa8bb;line-height:1.7}
+  .foot a{color:#2f6fd0;text-decoration:none}
+  .hint{margin-top:12px;font-size:12.5px;color:#0f766e;background:#ecfdf5;border:1px solid #c9f0e3;border-radius:10px;padding:9px 12px;display:none}
+  .hint.on{display:block}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="tick"><svg viewBox="0 0 24 24"><polyline points="4 12.5 9.5 18 20 6.5"/></svg></div>
+  <h1>感谢你的支持！</h1>
+  <p class="lead">报告已为你解锁，文档正在自动下载。如果没有自动开始，点下面的按钮手动保存即可。</p>
+
+  <div class="meta">
+    <div class="row"><span class="k">报告</span><span class="v" id="ttl">—</span></div>
+    <div class="row"><span class="k">订单号</span><span class="v" id="oid">—</span></div>
+    <div class="row" id="codeRow" style="display:none"><span class="k">兑换码</span><span class="v" id="code">—</span></div>
+  </div>
+
+  <button class="btn btn-primary" id="dl">下载报告文档</button>
+  <button class="btn btn-ghost" id="read">在线研读</button>
+  <button class="btn btn-ghost" id="home">返回主站继续浏览</button>
+
+  <div class="hint" id="hint"></div>
+
+  <p class="foot">一次购买长期可读 · 兑换码仅展示一次，请及时保存<br>有问题可到主站「我的 → 订单」联系站内工作人员</p>
+</div>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var proj = q.get('project') || 'b737';
+  var order = q.get('order') || '';
+  var code = q.get('code') || '';
+  var TITLES = { b737: '波音 737 系列综合研究报告', a320: '空客 A320 系列综合研究报告', c919: '国产 C919 综合研究报告' };
+
+  document.getElementById('ttl').textContent = TITLES[proj] || proj.toUpperCase();
+  document.getElementById('oid').textContent = order || '（未提供）';
+  /* v3.5：注册完成场景（welcome=1）—— 文案改为欢迎语，仍自动下载文档 */
+  var isWelcome = q.get('welcome') === '1';
+  if (isWelcome) {
+    try {
+      var h0 = document.querySelector('h1, .ttl, #ttl');
+      if (h0 && h0.id !== 'ttl') h0.textContent = '注册成功 · 文档已开始下载';
+      var p0 = document.querySelector('.sub, .desc, p:not(.foot)');
+      if (p0 && !document.getElementById('orderRow')) p0.textContent = '感谢注册民航客机收藏馆，为你准备了《国产 C919 综合研究报告》，免费阅读 · 免费下载。';
+      var oRow = document.getElementById('oid');
+      if (oRow && oRow.parentNode) oRow.parentNode.style.display = 'none';
+    } catch (e) { }
+    try { document.title = '注册成功 · 感谢加入 | 民航客机收藏馆'; } catch (e2) { }
+  }
+  if (code) {
+    document.getElementById('codeRow').style.display = 'flex';
+    document.getElementById('code').textContent = code;
+  }
+
+  function docUrl(download) {
+    var u = '/api/project-doc?project=' + encodeURIComponent(proj) + (download ? '&download=1' : '');
+    if (order) u += '&order=' + encodeURIComponent(order);
+    else if (code) u += '&code=' + encodeURIComponent(code);
+    return u + '&t=' + Date.now();
+  }
+
+  function download() {
+    var a = document.createElement('a');
+    a.href = docUrl(true);
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { a.parentNode && a.parentNode.removeChild(a); }, 400);
+    var h = document.getElementById('hint');
+    h.classList.add('on');
+    h.textContent = '已发起下载。若浏览器拦截了自动下载，请再点一次「下载报告文档」。';
+  }
+
+  document.getElementById('dl').addEventListener('click', download);
+  document.getElementById('read').addEventListener('click', function () {
+    window.open('/read/' + proj + '.html' + (code ? '?code=' + encodeURIComponent(code) : ''), '_blank');
+  });
+  document.getElementById('home').addEventListener('click', function () { location.href = '/'; });
+
+  // 进页自动下载一次（配合 pay 页跳转）
+  setTimeout(download, 500);
+
+  // 记录感谢页展示
+  try {
+    var seen = JSON.parse(localStorage.getItem('gc_thanks_seen') || '[]');
+    if (order && seen.indexOf(order) < 0) { seen.unshift(order); localStorage.setItem('gc_thanks_seen', JSON.stringify(seen.slice(0, 50))); }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

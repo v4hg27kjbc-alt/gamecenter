@@ -104,7 +104,10 @@ export const MODEL_CAPS = {
    * 服务端档位默认 temperature 为 0.3~0.6、top_p 0.9，若原样透传会导致全部上游调用失败
    * （表现为 /api/chat 恒返回 local-fallback，_degrade_kind=unavailable），故在此登记为硬约束，
    * 由 buildRequestBody 强制覆盖。新增 Moonshot 模型时务必先实测并在此登记。 */
-  'kimi-k3': { provider: 'kimi', vision: true, thinking: 'effort', effort: ['low', 'high', 'max'], context: 1000000, sampling: { temperature: 0.6, top_p: 0.95 }, note: '旗舰 / 原生视觉 / 1M 上下文 / 始终思考' },
+  'kimi-k3': { provider: 'kimi', vision: true, thinking: 'effort', effort: ['low', 'high', 'max'], context: 1000000, sampling: { temperature: 1, top_p: 0.95 }, note: '旗舰 / 原生视觉 / 1M 上下文 / 始终思考（temperature 实测仅接受 1）' },
+  /* kimi-k3.1-pro：实测 temperature 仅接受 1（其它值 400 invalid temperature: only 1 is allowed），
+   * 与 K3 的 0.6 约束不同；未登记时档位默认 0.3 会导致 /api/chat 恒 local-fallback。 */
+  'kimi-k3.1-pro': { provider: 'kimi', vision: true, thinking: 'effort', effort: ['low', 'high', 'max'], context: 1000000, sampling: { temperature: 1, top_p: 0.95 }, note: 'Pro 旗舰 / 深度推理 / 1M 上下文 / temperature 固定 1' },
   'kimi-k2.6': { provider: 'kimi', vision: true, thinking: 'toggle', context: 256000, sampling: { temperature: 0.6, top_p: 0.95 }, note: '视觉 + 文本 / 256k' },
   'kimi-k2.7-code': { provider: 'kimi', vision: false, thinking: 'toggle', context: 256000, sampling: { temperature: 1, top_p: 0.95 }, note: '代码专用' },
   'kimi-k2.7-code-highspeed': { provider: 'kimi', vision: false, thinking: 'toggle', context: 256000, sampling: { temperature: 1, top_p: 0.95 }, note: '代码专用（高速）' },
