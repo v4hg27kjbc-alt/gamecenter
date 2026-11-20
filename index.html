@@ -23444,16 +23444,18 @@ var CATALOG = [
 
 <!-- ===== 多端互联：一键登录 + 图片速传（v3.7，已移除扫码登录） ===== -->
 <style>
-  .gc-link-fab{position:fixed;right:18px;bottom:86px;z-index:99992;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
+  /* 浮钮：右上角、紧跟账户坞下方（桌面 top:64px；移动端由 media 查询下移避开公告条） */
+  .gc-link-fab{position:fixed;top:64px;right:20px;bottom:auto;left:auto;z-index:99995;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
     background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 10px 26px rgba(102,126,234,.42);display:flex;align-items:center;justify-content:center;
     transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease}
   .gc-link-fab:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 16px 32px rgba(102,126,234,.5)}
   .gc-link-fab::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(102,126,234,.45);animation:gcLinkPulse 2.4s ease-out infinite}
   @keyframes gcLinkPulse{0%{transform:scale(.86);opacity:.85}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
-  .gc-link-mask{position:fixed;inset:0;background:rgba(15,23,42,.44);backdrop-filter:blur(3px);z-index:99993;opacity:0;pointer-events:none;transition:opacity .24s ease}
+  .gc-link-mask{position:fixed;inset:0;background:rgba(15,23,42,.44);backdrop-filter:blur(3px);z-index:2147482600;opacity:0;pointer-events:none;transition:opacity .24s ease}
   .gc-link-mask.on{opacity:1;pointer-events:auto}
-  .gc-link-panel{position:fixed;right:18px;bottom:148px;width:min(374px,calc(100vw - 28px));max-height:76vh;overflow:auto;z-index:99994;border-radius:20px;background:#fff;
-    box-shadow:0 26px 60px rgba(15,23,42,.26);border:1px solid #e5e9f2;transform:translateY(18px) scale(.96);opacity:0;pointer-events:none;
+  /* 面板：从浮钮正下方往页面内展开（右侧对齐、向下生长），不再占用右下角与 AI 反馈按钮同区 */
+  .gc-link-panel{position:fixed;top:124px;right:20px;bottom:auto;left:auto;width:min(374px,calc(100vw - 40px));max-height:calc(100vh - 146px);overflow:auto;z-index:2147482700;border-radius:20px;background:#fff;
+    box-shadow:0 26px 60px rgba(15,23,42,.26);border:1px solid #e5e9f2;transform:translateY(-8px) scale(.97);opacity:0;pointer-events:none;
     transition:transform .28s cubic-bezier(.34,1.4,.64,1),opacity .22s ease}
   .gc-link-panel.on{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
   .gc-lp-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #eef1f7;position:sticky;top:0;background:#fff;z-index:2}
@@ -23489,6 +23491,11 @@ var CATALOG = [
   .gc-lp-spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:gcLpSpin .7s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes gcLpSpin{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion:reduce){.gc-link-fab::after{animation:none}}
+  /* 移动端：账户坞下移到公告条下方（top:84px + 安全区，高约 35px），浮钮与面板依次排在其下，统一贴右 */
+  @media (max-width:640px){
+    .gc-link-fab{top:calc(128px + env(safe-area-inset-top,0px));right:10px;width:46px;height:46px;}
+    .gc-link-panel{top:calc(184px + env(safe-area-inset-top,0px));right:10px;width:calc(100vw - 20px);max-height:calc(100vh - 204px - env(safe-area-inset-top,0px));}
+  }
 </style>
 <button id="gcLinkFab" class="gc-link-fab" type="button" title="多端互联 · 一键登录 / 图片速传" aria-label="多端互联">
   <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -23818,7 +23825,7 @@ var CATALOG = [
   #gcAcctDock{top:calc(84px + env(safe-area-inset-top,0px)) !important;right:10px !important;gap:6px !important;}
   #gcAcctDock .gc-acct-name{max-width:64px;}
 }
-/* 右下角浮钮区（AI 按钮 / 多端互联）保持原位置，与右上账户坞不再同区，互不遮挡 */
+/* 多端互联浮钮 + 面板同样收到右上角、紧跟账户坞下方依次纵向排布；右下角仅保留 AI 反馈按钮，三者互不重合 */
 
 /* P3 一键登录页签（复用面板既有按钮/输入框样式，仅新增两行中性文字） */
 .gcx-onetap-who{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #e8ecf5;border-radius:12px;background:#f8fafc;margin-bottom:10px;}
@@ -24058,8 +24065,8 @@ var CATALOG = [
       return;
     }
     if (h) {
-      /* 未登录但本设备 30 天内有登录记录：直接给出可一键登录的身份，无需重新输入 */
-      pane.innerHTML = '<p class="gc-lp-note">本设备 ' + daysAgo(h.ts) + ' 天前登录过，可直接一键登录（超过 30 天需重新输入昵称）。</p>' +
+      /* 检测到本设备 30 天内有登录记录：先给出提示，再提供一键登录（身份取自本机记录） */
+      pane.innerHTML = '<p class="gc-lp-note">已检测到本设备 ' + daysAgo(h.ts) + ' 天前的登录记录：' + esc(h.nick) + '，可直接一键登录（超过 30 天需重新登录）。</p>' +
         '<div class="gcx-onetap-who"><div class="gcx-onetap-avatar">' + esc(String(h.nick).slice(0, 1).toUpperCase()) + '</div>' +
         '<div><div class="gcx-onetap-name">' + esc(h.nick) + '</div>' +
         '<div class="gcx-onetap-sub">上次登录 ' + esc(fmtDate(h.ts)) + ' · ' + esc(h.device || deviceName()) + '</div></div></div>' +
@@ -24068,12 +24075,12 @@ var CATALOG = [
         '<div class="gc-lp-msg" id="gcxOneTapMsg"></div>';
       return;
     }
-    pane.innerHTML = '<p class="gc-lp-note">输入昵称即可建立本机会话（仅本机保存，用于接收传输，不发短信、不需要密码）。</p>' +
+    /* 无 30 天登录记录：一键登录直接禁用，只提示先去账户入口登录 */
+    pane.innerHTML = '<p class="gc-lp-note">未检测到本设备 30 天内的登录记录，一键登录已禁用。请先通过右上角账户入口登录，之后本设备 30 天内可一键登录。</p>' +
       '<div class="gc-lp-row" style="margin-top:0">' +
-        '<input class="gc-lp-input" id="gcxOneTapNick" maxlength="16" placeholder="输入昵称，例如 Henry">' +
-        '<button class="gc-lp-btn" id="gcxOneTapGo" type="button" style="width:96px;flex:0 0 96px">一键登录</button>' +
+        '<button class="gc-lp-btn" id="gcxOneTapGo" type="button" disabled>一键登录（本设备无登录记录）</button>' +
       '</div>' +
-      '<div class="gc-lp-msg" id="gcxOneTapMsg"></div>';
+      '<div class="gc-lp-msg" id="gcxOneTapMsg">仅当本设备 30 天内登录过时，一键登录才可用。</div>';
   }
   function fmtDate(ts) {
     var d = new Date(ts), p2 = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -24091,10 +24098,11 @@ var CATALOG = [
       var t = e.target;
       if (!t) return;
       if (t.id === 'gcxOneTapGo') {
+        var h = histValid() ? lastLogin() : null;
+        if (!h) { msg('gcxOneTapMsg', '未检测到本设备 30 天内的登录记录，一键登录已禁用，请先通过右上角账户入口登录', 'err'); return; }
         var inp = $('gcxOneTapNick');
         var typed = ((inp && inp.value) || '').trim();
-        var h = histValid() ? lastLogin() : null;
-        var nick = typed || (h && h.nick) || '';
+        var nick = typed || h.nick || '';
         if (!nick) { msg('gcxOneTapMsg', '请输入昵称', 'err'); return; }
         if (nick.length > 16) { msg('gcxOneTapMsg', '昵称最多 16 个字符', 'err'); return; }
         setAuth(nick);
