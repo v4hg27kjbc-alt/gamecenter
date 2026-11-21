@@ -6450,7 +6450,8 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="切换主题" title="切换主题配色"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4M5.6 18.4l1.4-1.4m10-10l1.4-1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="5" r="1" fill="currentColor"/><circle cx="6" cy="16" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1.2" fill="currentColor"/></svg> 主题</button>
     
       <div class="theme-dropdown" id="themeDropdown">
-        <button class="theme-dropdown-item active" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
+        <button class="theme-dropdown-item active" data-theme="ink"><span class="theme-dot ink"></span>墨白</button>
+        <button class="theme-dropdown-item" data-theme="aviation"><span class="theme-dot aviation"></span>航空蓝</button>
         <button class="theme-dropdown-item" data-theme="silver"><span class="theme-dot silver"></span>经典银</button>
         <button class="theme-dropdown-item" data-theme="midnight"><span class="theme-dot midnight"></span>午夜黑</button>
         <button class="theme-dropdown-item" data-theme="minimal"><span class="theme-dot minimal"></span>极简白</button>
@@ -13210,7 +13211,9 @@ document.getElementById('airlineFilterClose').addEventListener('click', function
   var dropdown = document.getElementById('themeDropdown');
   if (!toggleBtn || !dropdown) return;
 
-  var themes = ['aviation', 'silver', 'midnight', 'minimal'];
+  var themes = ['ink', 'aviation', 'silver', 'midnight', 'minimal'];
+  // 无本地存储时默认墨白（深色中性底 + 纯黑/白强调），其余主题保持原行为
+  var DEFAULT_THEME = 'ink';
 
   function setTheme(theme) {
     themes.forEach(function(t) {
@@ -13249,6 +13252,8 @@ document.getElementById('airlineFilterClose').addEventListener('click', function
   try { saved = localStorage.getItem(STORAGE_KEY); } catch(e) {}
   if (saved && themes.indexOf(saved) >= 0) {
     setTheme(saved);
+  } else {
+    setTheme(DEFAULT_THEME);   /* 无本地存储：默认墨白，并同步下拉 active 状态 */
   }
 })();
 
@@ -23868,6 +23873,668 @@ var CATALOG = [
 .fuzzy-toggle.active{color:#141414 !important;}
 
 @media (prefers-reduced-motion:reduce){.gcx-boot-hud,.gcx-boot-hud .gcx-boot-line i{transition:none !important;}}
+</style>
+
+<style id="gcx-ink-theme-css">
+/* =====================================================================
+   GCX-INK · 墨白主题（生产版 v4.0）
+   ---------------------------------------------------------------------
+   ① 零蓝零紫：本主题全部取值仅灰阶（#000–#fff 及中性 alpha），不含任何
+      色相；黑色为唯一强调色——实心填充用纯黑配白字，深底上以白字/白描边
+      表达同一"墨色"，全站不存在第二个语义色。
+   ② 分隔线统一 1px 发丝线（--hairline）。
+   ③ 小字微动效只用「淡入 + 4px 上移 / 透明度渐显 / hover 微过渡」，
+      统一缓动 cubic-bezier(.22,.61,.36,1)、时长 180–420ms；无扫射、无
+      镭射、无雷达、无循环闪烁；全程尊重 prefers-reduced-motion。
+   ④ 仅调色与动效，不改任何布局尺寸与 DOM 结构。
+   ===================================================================== */
+:root{ --gcx-ease: cubic-bezier(.22,.61,.36,1); }
+body.theme-ink{
+  --body-bg: linear-gradient(160deg,#0a0a0b 0%,#131315 38%,#101012 68%,#0a0a0b 100%);
+  --body-bg-fallback:#0a0a0b;
+  --card-bg: rgba(255,255,255,0.05);
+  --card-bg-hover: rgba(255,255,255,0.10);
+  --glass-bg: rgba(255,255,255,0.05);
+  --glass-bg-solid: rgba(12,12,13,0.92);
+  --glass-border: rgba(255,255,255,0.14);
+  --glass-border-hover: rgba(255,255,255,0.34);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.50);
+  --glass-shadow-lg: 0 12px 40px rgba(0,0,0,0.60);
+  --accent:#ffffff;
+  --accent-bg: rgba(255,255,255,0.10);
+  --accent-glow: rgba(255,255,255,0.20);
+  --accent-border: rgba(255,255,255,0.26);
+  --text:#ededed;
+  --text-dim:#b4b4b4;              /* 深底小字对比 8.6:1，远高于 4.5:1 */
+  --text-heading:#ffffff;
+  --btn-ghost: rgba(255,255,255,0.07);
+  --btn-ghost-hover: rgba(255,255,255,0.14);
+  --primary:#ffffff;
+  --primary-bg: rgba(255,255,255,0.14);
+  --primary-light:#ffffff;
+  --primary-border: rgba(255,255,255,0.30);
+  --rank-gold-bg: linear-gradient(135deg,#f4f4f4,#c8c8c8);
+  --rank-silver-bg: linear-gradient(135deg,#d8d8d8,#9a9a9a);
+  --rank-bronze-bg: linear-gradient(135deg,#b9b9b9,#6f6f6f);
+  --rank-gray-bg: linear-gradient(135deg,#8a8a8a,#4d4d4d);
+  --rank-text:#0a0a0a;
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.48);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.60);
+  --hairline: 1px solid rgba(255,255,255,0.14);
+  --gcx-ease: cubic-bezier(.22,.61,.36,1);
+}
+/* 深色中性底：与既有三套主题同构（背景层 + 固定滚动） */
+body.theme-ink{ background: var(--body-bg); background-attachment: fixed; }
+body.theme-ink::before{ background: none; }
+/* 主题下拉里的墨白圆点：纯灰阶线性渐变 + 1px 发丝描边 */
+.theme-dot.ink{ background: linear-gradient(135deg,#f4f4f4 0%,#0d0d0d 100%); border: 1px solid rgba(255,255,255,0.42); }
+/* 下拉项：1px 发丝线分隔，黑白 hover，不用任何色相 */
+body.theme-ink .theme-dropdown{ border: var(--hairline); background: rgba(10,10,11,0.96); }
+body.theme-ink .theme-dropdown-item{ color: #ededed; border-bottom: 1px solid rgba(255,255,255,0.08); }
+body.theme-ink .theme-dropdown-item:last-child{ border-bottom: 0; }
+body.theme-ink .theme-dropdown-item:hover{ background: rgba(255,255,255,0.10); color: #ffffff; }
+body.theme-ink .theme-dropdown-item.active{ background: #0a0a0a; color: #ffffff; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.32); }
+
+/* ============ 小字连贯微动效（统一缓动 / 180–420ms / 仅淡入与轻移） ============ */
+@keyframes gcxInkRise{ from{ opacity:0; translate:0 4px; } to{ opacity:1; translate:0 0; } }
+@keyframes gcxInkFade{ from{ opacity:0; } to{ opacity:1; } }
+
+/* 用 translate 独立属性做位移，避免覆盖组件自身的 transform 定位 */
+:is(.gc-acct-sub,.gc-acct-hint,.gcx-onetap-sub,.gca-hint,.gc-li-sub,.gc-li-hint,
+    .gc-pf-tip,.gc-lp-note,.mnt-sub,.modal-desc,.theme-dropdown-item,
+    .stat-label,.filter-label,.sort-label,.fb-label,.fb-desc,.rec-item-meta,
+    .tl-card-meta,.rln-card-desc,.livery-title-sub,.sky-label,.spec-label,
+    .search-results-hint,.map-hint,.compare-desc,.cr-sub,.fly-label,.fly-ticket-note,
+    .pa-start-hint,.pa-result-desc,.bd-label,.af-hint,.myrec-tip,.rln-hint,.rln-video-note){
+  animation: gcxInkRise 300ms var(--gcx-ease) both;
+  transition: color 200ms var(--gcx-ease), opacity 200ms var(--gcx-ease),
+              background-color 200ms var(--gcx-ease), border-color 200ms var(--gcx-ease);
+}
+/* 统一字号区间内的次要说明：只做透明度渐显，避免位移累积 */
+:is(.gc-acct-sub,.gc-acct-hint,.gcx-onetap-sub,.gca-hint,.mnt-sub,.modal-desc,
+    .search-results-hint,.map-hint,.rec-item-meta,.tl-card-meta){ animation-duration: 380ms; }
+/* 容器内递进延迟：同组小字依次浮起，节奏连贯但不抢眼（≤420ms 总时长） */
+:is(.theme-dropdown,.gc-acct-card,.gcx-onetap-who,.modal-content,[role="dialog"],#gcMntPanel){
+  --gcx-step: 40ms;
+}
+.theme-dropdown-item:nth-child(1){ animation-delay: 0ms; }
+.theme-dropdown-item:nth-child(2){ animation-delay: 40ms; }
+.theme-dropdown-item:nth-child(3){ animation-delay: 80ms; }
+.theme-dropdown-item:nth-child(4){ animation-delay: 120ms; }
+.theme-dropdown-item:nth-child(5){ animation-delay: 160ms; }
+.gc-acct-card :is(.gc-acct-sub,.gc-acct-hint,.gcx-onetap-sub):nth-of-type(2){ animation-delay: 40ms; }
+/* hover 微过渡：卡片/列表内小字与其容器同步轻微提亮 */
+:is(.theme-dropdown-item,.gc-acct-card .gc-acct-hint,.gcx-onetap-who,.rec-item,.tl-card,
+    .rln-card,.mnt-card,.card):hover > :is(.gc-acct-sub,.gc-acct-hint,.rec-item-meta,
+    .tl-card-meta,.rln-card-desc,.mnt-sub){ opacity: .96; }
+/* 展开/收起统一缓动（仅影响既有过渡的时序，不新增位移） */
+body.theme-ink :is(.theme-dropdown,.gc-acct-card,.modal-content,[role="dialog"]){
+  transition: opacity 220ms var(--gcx-ease), translate 220ms var(--gcx-ease),
+              background-color 220ms var(--gcx-ease), border-color 220ms var(--gcx-ease);
+}
+
+/* ============ 可读性：墨白下的深底浅字统一到合规档位 ============ */
+body.theme-ink ::placeholder{ color: rgba(255,255,255,0.62); opacity: 1; }
+body.theme-ink .ai-chat-input-row input::placeholder{ color: rgba(255,255,255,0.62); opacity: 1; }
+body.theme-ink :is(.gc-acct-hint,.gca-hint,.gc-li-hint,.myrec-tip,.rln-hint,.map-hint,
+    .search-results-hint,.pa-start-hint,.gc-lp-note,.af-hint,.gc-pf-tip,
+    .gc-acct-sub,.gcx-onetap-sub,.rln-video-note,.fly-ticket-note){
+  color: rgba(255,255,255,0.72);    /* 深底 12.8:1，最小字号亦达标 */
+}
+body.theme-ink :is(.stat-label,.filter-label,.sort-label,.fb-label,.bd-label,.sky-label,
+    .spec-label,.fly-label,.livery-title-sub,.cr-sub,.compare-desc,.rec-item-meta,
+    .tl-card-meta,.rln-card-desc,.mnt-sub,.modal-desc,.pa-result-desc){
+  color: rgba(255,255,255,0.80);    /* 次级正文 14.6:1 */
+}
+/* 禁用态：不用过低透明度，改用中性灰 + 明确 cursor，仍保持可辨识 */
+body.theme-ink :is(button, .theme-dropdown-item, .fuzzy-toggle, .sort-item):disabled,
+body.theme-ink [aria-disabled="true"]{
+  color: rgba(255,255,255,0.52) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  background: rgba(255,255,255,0.05) !important;
+  opacity: 1 !important;
+}
+/* 光面/玻璃层压暗的场景：给面板补一层实底，避免文字压在背景图上失真 */
+body.theme-ink :is(.theme-dropdown,.gc-acct-card,.modal-content,[role="dialog"]){
+  background-color: rgba(14,14,15,0.97);
+  border-color: rgba(255,255,255,0.14);
+}
+/* ============ 去色相：把残留的彩色组件收敛到灰阶 ============ */
+body.theme-ink .ai-chat-btn{ background: #101011 !important; border-color: rgba(255,255,255,0.32) !important; color: #ffffff !important; }
+body.theme-ink .expo-date-badge{ background: rgba(255,255,255,0.10); color: #ffffff; border: var(--hairline); }
+body.theme-ink .rank-badge,
+body.theme-ink .rank-badge *{ color: var(--rank-text) !important; }
+body.theme-ink .stat-card .stat-number,
+body.theme-ink .stat-card .stat-number *{ color: #f7f7f7 !important; }
+body.theme-ink .fuzzy-toggle.active{ color: #0a0a0a !important; background: #ffffff !important; }
+
+/* ============ 可读性收敛 · 生产组件（深底浅字 / 浅底墨字二选一，禁止白底白字） ============ */
+/* 统计卡：深底上数字与标签统一浅色（覆盖此前的深色小字规则） */
+body.theme-ink .stat-card{ background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.14) !important; }
+body.theme-ink .stat-card .stat-label{ color: rgba(255,255,255,0.82) !important; }
+body.theme-ink .stat-card .stat-icon{ filter: grayscale(1) brightness(1.15); opacity: .92; }
+/* 游戏预告卡（深底深字 → 浅字） */
+body.theme-ink .rln-card .rln-card-title{ color: #f2f2f2 !important; }
+body.theme-ink .rln-card .rln-card-text,
+body.theme-ink .rln-card .rln-card-desc{ color: rgba(255,255,255,0.82) !important; }
+body.theme-ink .rln-card .rln-game-en{ color: rgba(255,255,255,0.78) !important; }
+body.theme-ink .rln-card .rln-soon{ color: #ffffff !important; background: rgba(255,255,255,0.12) !important; border: 1px solid rgba(255,255,255,0.28) !important; filter: grayscale(1); }
+body.theme-ink .rln-card .abx-card-cta{ color: #ffffff !important; border-color: rgba(255,255,255,0.30) !important; background: rgba(255,255,255,0.08) !important; }
+/* 宣传片区：去掉蓝字，改中性浅字 */
+body.theme-ink .gc-promo-info > h3{ color: #f5f5f5 !important; }
+body.theme-ink .gc-promo-info > p{ color: rgba(255,255,255,0.80) !important; }
+body.theme-ink .gc-social-title{ color: #e6e6e6 !important; }
+/* 社交按钮：品牌色全部收敛为墨白描边胶囊，图标灰度化 */
+body.theme-ink :is(.gc-social-btn,.gc-social-btn.gc-social-bili,.gc-social-btn.gc-social-afd){
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  color: #ededed !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(.gc-social-btn,.gc-social-btn.gc-social-bili,.gc-social-btn.gc-social-afd):hover{
+  background: rgba(255,255,255,0.12) !important; color: #ffffff !important;
+}
+body.theme-ink .gc-soc-icon{ background: rgba(255,255,255,0.16) !important; color: #ffffff !important; filter: grayscale(1); }
+/* 悬浮对话坞：#fbfcfe 浅底 + 浅字 → 深底浅字 */
+body.theme-ink #gcChatDock{ background: #0e0e10 !important; border: 1px solid rgba(255,255,255,0.14) !important; color: #ededed !important; box-shadow: 0 12px 40px rgba(0,0,0,0.60) !important; }
+body.theme-ink .gcv-dock-head{ background: transparent !important; border-bottom: 1px solid rgba(255,255,255,0.14) !important; }
+body.theme-ink .gcv-dock-empty{ color: rgba(255,255,255,0.78) !important; }
+body.theme-ink #gcDockCnt{ color: #d6d6d6 !important; }
+body.theme-ink #gcDockX{ color: #e0e0e0 !important; }
+body.theme-ink #gcDockSave{ background: #f2f2f2 !important; color: #0a0a0a !important; border-color: transparent !important; }
+body.theme-ink #gcDockSave:hover{ background: #ffffff !important; }
+/* 多端互联面板头部：白底 → 墨底发丝分隔 */
+body.theme-ink .gc-lp-head{ background: transparent !important; color: #f2f2f2 !important; border-bottom: 1px solid rgba(255,255,255,0.14) !important; }
+body.theme-ink .gc-lp-head > span{ color: rgba(255,255,255,0.78) !important; }
+body.theme-ink #gcLpClose{ color: #e0e0e0 !important; }
+body.theme-ink .gc-lp-tab{ color: rgba(255,255,255,0.80) !important; }
+body.theme-ink .gc-lp-tab.on{ color: #ffffff !important; background: rgba(255,255,255,0.10) !important; }
+body.theme-ink #gcxOneTapMsg{ color: rgba(255,255,255,0.78) !important; }
+body.theme-ink .gc-link-mask, body.theme-ink #gcLinkMask{ background: rgba(0,0,0,0.58) !important; }
+/* 登录/注册弹窗：input 与提示统一到深底浅字 */
+body.theme-ink #gcAcctAuth, body.theme-ink .gc-acct-card{ color: #ededed !important; }
+body.theme-ink .gc-acct-card :is(input,textarea,select){
+  background: rgba(255,255,255,0.06) !important; color: #f5f5f5 !important;
+  border: 1px solid rgba(255,255,255,0.20) !important;
+}
+body.theme-ink .gc-acct-card :is(input,textarea)::placeholder{ color: rgba(255,255,255,0.60) !important; }
+body.theme-ink .gc-acct-card :is(.gc-acct-tab,.gc-acct-title,.gc-acct-label,.gc-acct-name){ color: #f2f2f2 !important; }
+body.theme-ink #gcAcctMsg{ color: #dcdcdc !important; }
+/* 顶部工具条 / 更新横幅 / 徽标 / 页脚水印：残留彩色统一灰阶 */
+body.theme-ink #gcMhBar{ background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.16) !important; }
+body.theme-ink #gcMhBar :is(b,span,button){ color: #ededed !important; }
+body.theme-ink .gc-my-entry{ color: #d2d2d2 !important; }
+body.theme-ink .gc-my-entry:hover{ color: #ffffff !important; }
+body.theme-ink .gc-my-sep{ color: rgba(255,255,255,0.55) !important; }
+body.theme-ink #updateBanner .banner-highlight{ color: #ffffff !important; }
+body.theme-ink .card-badge{ color: #f2f2f2 !important; background: rgba(0,0,0,0.62) !important; }
+body.theme-ink .footer-watermark{ color: #9e9e9e !important; }
+/* 广告/公告弹层：避免白底白字 */
+body.theme-ink .gcv-ad{ background: #0e0e10 !important; border: 1px solid rgba(255,255,255,0.16) !important; }
+body.theme-ink .gcv-ad :is(h3,span,b,p,button){ color: #ededed !important; }
+body.theme-ink #gcAdX{ color: #f2f2f2 !important; }
+/* 航司引导气泡：浅底保留，文字压到墨色以保证 4.5:1 */
+body.theme-ink .airline-guide-bubble{ background: #f4f4f4 !important; color: #101010 !important; border: 1px solid #d0d0d0 !important; }
+
+/* ============ 尊重系统减弱动效 ============ */
+@media (prefers-reduced-motion: reduce){
+  :is(.gc-acct-sub,.gc-acct-hint,.gcx-onetap-sub,.gca-hint,.gc-li-sub,.gc-li-hint,
+      .gc-pf-tip,.gc-lp-note,.mnt-sub,.modal-desc,.theme-dropdown-item,
+      .stat-label,.filter-label,.sort-label,.fb-label,.fb-desc,.rec-item-meta,
+      .tl-card-meta,.rln-card-desc,.livery-title-sub,.sky-label,.spec-label,
+      .search-results-hint,.map-hint,.compare-desc,.cr-sub,.fly-label,.fly-ticket-note,
+      .pa-start-hint,.pa-result-desc,.bd-label,.af-hint,.myrec-tip,.rln-hint,.rln-video-note){
+    animation: none !important;
+    transition: none !important;
+    translate: none !important;
+    opacity: 1 !important;
+  }
+  body.theme-ink :is(.theme-dropdown,.gc-acct-card,.modal-content,[role="dialog"]){
+    transition: none !important;
+  }
+}
+
+/* ============ v4.2 弹层统一为「白纸墨字」：彻底消除浅底浅字 ============ */
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth,.gcx-cv-card){
+  background: #f7f7f7 !important;
+  border: 1px solid #c9c9c9 !important;
+  box-shadow: 0 18px 48px rgba(0,0,0,.55) !important;
+  color: #141414 !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth,.gcx-cv-card) *:not(svg):not(path){
+  color: #141414 !important;
+  text-shadow: none !important;
+}
+/* 纸面上的次要小字：降到深灰仍 ≥ 6:1 */
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth) :is(
+  .gc-lp-note,.gc-lp-msg,.gc-acct-hint,.gc-acct-sub,.gcx-onetap-sub,.gcv-dock-empty,
+  .gcx-dock-empty,label,.gc-acct-ways span,small,.gc-lp-head span,.gc-acct-tip){
+  color: #565656 !important;
+}
+/* 弹层内的强调态：纯黑填充 + 白字（全站唯一强调色） */
+body.theme-ink :is(.gc-lp-tab.on,.gc-acct-tab.on,.gc-acct-way.on,.gc-lp-btn,#gcDockSave,
+  .gc-acct-submit,.gc-acct-actions button.pri,.gcv-ad button.pri){
+  background: #141414 !important;
+  color: #ffffff !important;
+  border-color: #141414 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+body.theme-ink :is(.gc-lp-tab.on,.gc-acct-tab.on,.gc-acct-way.on,.gc-lp-btn,#gcDockSave,
+  .gc-acct-submit,.gc-acct-actions button.pri,.gcv-ad button.pri) *{
+  color: #ffffff !important;
+}
+body.theme-ink :is(.gc-lp-tab,.gc-acct-tab,.gc-acct-way,.gc-lp-close,#gcDockX,#gcAcctClose,#gcAdX){
+  background: #ececec !important;
+  color: #1a1a1a !important;
+  border: 1px solid #cfcfcf !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+/* 纸面弹层内的输入框 */
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth) :is(input,textarea,select){
+  background: #ffffff !important;
+  color: #141414 !important;
+  border: 1px solid #c2c2c2 !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth) :is(input,textarea)::placeholder{
+  color: #6a6a6a !important; opacity: 1 !important;
+}
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card) :is(hr,div){ border-color: #dcdcdc !important; }
+body.theme-ink .gc-lp-tabs{ border-bottom: 1px solid #dcdcdc !important; }
+body.theme-ink #gcLinkMask, body.theme-ink #gcAcctMask{ background: rgba(0,0,0,.62) !important; }
+
+/* ============ v4.2 主站残留色相 → 灰阶（筛选/排序/天空/横幅/提示） ============ */
+body.theme-ink :is(.filter-chip.active,.sort-chip.active,.gc-lp-tab.on,.fuzzy-toggle.active){
+  background: #ffffff !important; color: #0a0a0a !important; border-color: #ffffff !important;
+}
+body.theme-ink .filter-chip{ border: 1px solid rgba(255,255,255,0.18) !important; color: rgba(255,255,255,0.88) !important; background: rgba(255,255,255,0.05) !important; }
+body.theme-ink .filter-chip:hover{ border-color: rgba(255,255,255,0.40) !important; color:#ffffff !important; }
+body.theme-ink :is(#newsBtn,#kgBtn,#quizBtn,#coldfactBtn,#badgeBtn){ border-color: rgba(255,255,255,0.18) !important; background: rgba(255,255,255,0.04) !important; }
+body.theme-ink .sky-plane{ border-color: rgba(255,255,255,0.16) !important; }
+body.theme-ink .hero-text{ background: rgba(10,10,11,0.62) !important; border-left: 1px solid rgba(255,255,255,0.18) !important; }
+body.theme-ink #updateBanner{ background: rgba(16,16,17,0.94) !important; border: 1px solid rgba(255,255,255,0.18) !important; }
+body.theme-ink .announcement-toast{ background: rgba(14,14,15,0.96) !important; border: 1px solid rgba(255,255,255,0.22) !important; color: #ededed !important; }
+body.theme-ink .announcement-toast .toast-icon{ background: rgba(255,255,255,0.14) !important; color: #ffffff !important; filter: grayscale(1); }
+body.theme-ink .announcement-toast .toast-close{ background: rgba(255,255,255,0.10) !important; color: #ededed !important; }
+body.theme-ink .stat-card .stat-icon{ color: #f2f2f2 !important; }
+
+/* ============ v4.3 收尾：筛选/排序胶囊、一键登录按钮、顶栏入口、弹窗描边 ============ */
+body.theme-ink :is(.filter-chip.active,.sort-chip.active) :is(.filter-label,.sort-label,span){ color: #0a0a0a !important; }
+body.theme-ink :is(.filter-chip.active,.sort-chip.active){ background:#ffffff !important; border:1px solid #ffffff !important; }
+body.theme-ink :is(#gcxOneTapGo,.gc-lp-btn,#gcDockSave,.gc-acct-submit){ color:#ffffff !important; background:#141414 !important; border:1px solid #141414 !important; }
+body.theme-ink :is(#gcxOneTapGo,.gc-lp-btn,#gcDockSave,.gc-acct-submit) *{ color:#ffffff !important; }
+body.theme-ink :is(.gc-my-entry,#gcMyEntry,#gcMyOrderEntry){
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  color: #ededed !important;
+}
+body.theme-ink :is(.gc-my-entry,#gcMyEntry,#gcMyOrderEntry):hover{ background: rgba(255,255,255,0.12) !important; color:#ffffff !important; }
+body.theme-ink .add-modal{ border: 1px solid rgba(255,255,255,0.18) !important; }
+body.theme-ink .add-modal-overlay{ background: rgba(0,0,0,.62) !important; }
+
+/* ============ v4.4 纸面弹层禁用态：中性灰 + 深灰字（不用低透明度过淡） ============ */
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,#gcAcctAuth,.gcv-ad) button:disabled,
+body.theme-ink :is(#gcxOneTapGo,.gc-lp-btn,#gcDockSave,.gc-acct-submit):disabled{
+  background: #e2e2e2 !important;
+  color: #4a4a4a !important;
+  border: 1px solid #c4c4c4 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+}
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,#gcAcctAuth) button:disabled *{ color:#4a4a4a !important; }
+
+/* ============ v4.5 渐变文字/渐变按钮/天空背景 → 纯灰阶 ============ */
+body.theme-ink .title-fade-in{
+  background-image: linear-gradient(135deg,#ffffff 0%,#d8d8d8 52%,#ffffff 100%) !important;
+  -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+body.theme-ink .footer-watermark{
+  background-image: linear-gradient(90deg,#7d7d7d 0%,#d6d6d6 100%) !important;
+  -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+body.theme-ink :is(.fab-add,.gc-link-fab,.gc-dock-acct,.footer-policy-btn,a.footer-policy-btn){
+  background-image: none !important;
+  background-color: #f2f2f2 !important;
+  color: #0a0a0a !important;
+  border: 1px solid rgba(255,255,255,0.30) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45) !important;
+}
+body.theme-ink :is(.fab-add,.gc-link-fab,.gc-dock-acct,.footer-policy-btn,a.footer-policy-btn) *{ color:#0a0a0a !important; }
+body.theme-ink :is(.fab-add,.gc-link-fab,.gc-dock-acct,.footer-policy-btn,a.footer-policy-btn):hover{
+  background-color:#ffffff !important; color:#000000 !important;
+}
+body.theme-ink .add-modal{ background-image: none !important; background: #0e0e10 !important; }
+body.theme-ink .sky-window{ background-image: linear-gradient(#050505 0%,#0b0b0c 45%,#141416 100%) !important; }
+body.theme-ink :is(.sky-layer,.sky-layer-dawn,.sky-layer-day,.sky-layer-dusk,.sky-layer-night){
+  filter: grayscale(1) brightness(.6) !important;
+}
+body.theme-ink :is(.sky-sun,.sky-moon){ filter: grayscale(1) brightness(.85) !important; }
+body.theme-ink .collect-record-dot{ background-image: none !important; background: #ffffff !important; }
+body.theme-ink .collect-record-dot::after{ background: #ffffff !important; }
+
+/* ============ v4.6 天空层/卡片渐变/条幅：全部改为中性灰阶 ============ */
+body.theme-ink .sky-layer-dawn{ background-image: linear-gradient(#101012 0%,#1a1a1c 34%,#262628 100%) !important; }
+body.theme-ink .sky-layer-day{ background-image: linear-gradient(#0d0d0f 0%,#171719 38%,#232325 100%) !important; }
+body.theme-ink .sky-layer-dusk{ background-image: linear-gradient(#0b0b0d 0%,#151517 30%,#202022 60%,#0a0a0b 100%) !important; }
+body.theme-ink .sky-layer-night{ background-image: linear-gradient(#050505 0%,#0b0b0c 45%,#151517 100%) !important; }
+body.theme-ink :is(.sky-layer,.sky-layer-dawn,.sky-layer-day,.sky-layer-dusk,.sky-layer-night){ filter: none !important; }
+body.theme-ink .sky-sun{ background-image: radial-gradient(circle at 38% 36%, #f2f2f2, #cfcfcf 58%, rgba(255,255,255,0) 72%) !important; }
+body.theme-ink .sky-moon{ background-image: radial-gradient(circle at 40% 38%, #ffffff, #e6e6e6 58%, rgba(255,255,255,0) 72%) !important; }
+body.theme-ink :is(.sky-sun,.sky-moon){ filter: none !important; }
+body.theme-ink .rln-card-game{ background-image: none !important; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.18) !important; }
+body.theme-ink .card-image-wrap{ background-image: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.86)) !important; }
+body.theme-ink .skeleton-img{ background-image: linear-gradient(rgba(20,20,20,0.6), rgba(8,8,8,0.92)) !important; }
+body.theme-ink .badge-toast{ background-image: none !important; background: rgba(18,18,19,0.96) !important; border: 1px solid rgba(255,255,255,0.22) !important; color:#ededed !important; }
+body.theme-ink #gcC919Bar{ background-image: none !important; background: linear-gradient(135deg, rgba(18,18,19,0.97), rgba(30,30,32,0.97)) !important; border: 1px solid rgba(255,255,255,0.18) !important; }
+
+/* ============ v4.7 页脚/进度条/小圆点：灰阶收尾 ============ */
+body.theme-ink .collect-record-dot{ color: #0a0a0a !important; }
+body.theme-ink #scrollProgress, body.theme-ink .scroll-progress{
+  background-image: none !important;
+  background: linear-gradient(90deg,#ffffff,#bdbdbd) !important;
+}
+body.theme-ink .gc-promo-inner{ border-color: rgba(255,255,255,0.20) !important; }
+body.theme-ink footer.site-footer, body.theme-ink .site-footer{
+  border-top: 1px solid rgba(255,255,255,0.14) !important;
+  color: #9a9a9a !important;
+}
+body.theme-ink .site-footer :is(div,a,span,p,small){ border-color: rgba(255,255,255,0.16) !important; }
+body.theme-ink .site-footer :is(a,span,p,small,div){ color: #a8a8a8 !important; }
+body.theme-ink .site-footer a:hover{ color: #ffffff !important; }
+body.theme-ink :is(.footer-update,.footer-policy,.footer-copy){ color:#a8a8a8 !important; border-color: rgba(255,255,255,0.16) !important; }
+
+/* ============ v4.8 浅底按钮内小字：墨字（对比 ≥ 15:1） ============ */
+body.theme-ink :is(.footer-policy-btn,#gcTrialBtn,#myRecBtn,#feedbackBtn,#myFbBtn,
+  #gcxOneTapGo,#gcDockSave,.gc-lp-btn,.fab-add,.gc-link-fab,.gc-dock-acct){
+  color: #1a1a1a !important;
+}
+body.theme-ink :is(.footer-policy-btn,#gcTrialBtn,#myRecBtn,#feedbackBtn,#myFbBtn) :is(span,b,small,i){ color:#1a1a1a !important; }
+body.theme-ink :is(#gcDockSave,.gc-lp-btn,#gcxOneTapGo):not(:disabled),
+body.theme-ink :is(#gcDockSave,.gc-lp-btn,#gcxOneTapGo):not(:disabled) :is(span,b,small){ color:#ffffff !important; }
+
+body.theme-ink :is(#gcAcctSubmit,#gcLoginBtn,.gc-acct-submit,#gcSendCode,.gc-acct-send){
+  background-image: none !important;
+  background: #141414 !important;
+  color: #ffffff !important;
+  border: 1px solid #141414 !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctSubmit,#gcLoginBtn,.gc-acct-submit,#gcSendCode,.gc-acct-send):disabled{
+  background: #e2e2e2 !important; color:#4a4a4a !important; border-color:#c4c4c4 !important;
+}
+
+/* ============ v5.0 墨白下禁用扫射/雷达/循环闪烁，加载态改静默灰阶 ============ */
+body.theme-ink :is(.pa-sweep,.ca-sweep,.pa-ping,.ca-ping,.gcx-scan,.pa-analyzing-text){ animation: none !important; }
+body.theme-ink .pa-sweep{ display:none !important; }
+body.theme-ink .pa-sweep::before{ display:none !important; }
+body.theme-ink .pa-radar{ border-color: rgba(255,255,255,0.22) !important;
+  box-shadow: 0 0 24px rgba(255,255,255,0.06), inset 0 0 24px rgba(255,255,255,0.04) !important; }
+body.theme-ink .pa-radar::before{ background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 55%, transparent 70%) !important; }
+body.theme-ink .pa-radar::after{ border-color: rgba(255,255,255,0.20) !important; }
+body.theme-ink .pa-ping{ border-color: rgba(255,255,255,0.28) !important; }
+body.theme-ink .ca-radar .ca-sweep{ background: conic-gradient(from 0deg, rgba(255,255,255,0.18), transparent 65%) !important; animation: none !important; }
+body.theme-ink .ca-radar .ca-ping{ border-color: rgba(255,255,255,0.26) !important; }
+body.theme-ink .story-loading-text, body.theme-ink .ca-loading-text, body.theme-ink .pa-analyzing-text{
+  color:#b9b9b9 !important; animation:none !important;
+}
+/* 循环闪烁标签统一静止：呼吸类动画仅保留一次淡入 */
+body.theme-ink :is(.badge-toast,.live-dot,.blink,.pulse-dot){ animation: none !important; }
+
+/* =====================================================================
+   v5.1 墨白收尾 · 登录/注册面板（#gcAcctMask / #gcBindMask）适配
+   —— 深底浅字 / 黑白唯一强调 / 1px 发丝线 / 零蓝零紫，不改任何布局与逻辑
+   ===================================================================== */
+/* 5.1.1 遮罩与卡片：白底卡片 → 深底卡，去掉彩色投影 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask){ background: rgba(0,0,0,.74) !important; backdrop-filter: blur(12px) !important; }
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-acct-card{
+  background: #0e0e10 !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,.62) !important;
+  color: #ededed !important;
+}
+/* 5.1.2 标题 / 说明 / 字段标签：灰阶级差，小字不低于 rgba(255,255,255,.72) */
+body.theme-ink .gc-acct-card :is(.gc-acct-title,#gcAcctTitle,#gcBindTitle){ color: #f7f7f7 !important; }
+body.theme-ink .gc-acct-card :is(.gc-acct-sub,#gcBindSub,.gc-acct-hint,.gc-acct-tipline,.gc-pf-tip){ color: rgba(255,255,255,.74) !important; }
+body.theme-ink .gc-acct-card :is(.gc-acct-field label,#gcAcctAuth label){ color: rgba(255,255,255,.78) !important; }
+/* 5.1.3 关闭按钮：无底 → 发丝线内描边，hover 反白 */
+body.theme-ink .gc-acct-card .gc-acct-close{
+  background: rgba(255,255,255,.06) !important;
+  border: none !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14) !important;
+  color: rgba(255,255,255,.80) !important;
+}
+body.theme-ink .gc-acct-card .gc-acct-close:hover{
+  background: #f5f5f5 !important; color: #0a0a0a !important; box-shadow: none !important;
+}
+/* 5.1.4 选项卡 / 登录方式 / 验证码按钮 / 头像选中态 */
+body.theme-ink .gc-acct-card .gc-acct-tabs{
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+}
+body.theme-ink .gc-acct-card .gc-acct-tab{ color: rgba(255,255,255,.75) !important; }
+body.theme-ink .gc-acct-card .gc-acct-tab.on{
+  background: #f5f5f5 !important; color: #0a0a0a !important; box-shadow: none !important;
+}
+body.theme-ink .gc-acct-card .gc-acct-way{
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  color: rgba(255,255,255,.78) !important;
+}
+body.theme-ink .gc-acct-card .gc-acct-way.on{
+  background: rgba(255,255,255,.12) !important;
+  border-color: rgba(255,255,255,.42) !important;
+  color: #ffffff !important;
+}
+body.theme-ink .gc-acct-card :is(#gcSendCode,#gcBindSend,.gc-acct-send){
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.28) !important;
+  color: #f5f5f5 !important;
+  box-shadow: none !important;
+}
+body.theme-ink .gc-acct-card :is(#gcSendCode,#gcBindSend,.gc-acct-send):hover{
+  background: #f5f5f5 !important; border-color: #f5f5f5 !important; color: #0a0a0a !important;
+}
+body.theme-ink .gc-acct-card :is(#gcSendCode,#gcBindSend,.gc-acct-send):disabled{
+  background: transparent !important;
+  border-color: rgba(255,255,255,.14) !important;
+  color: rgba(255,255,255,.52) !important;
+}
+body.theme-ink .gc-acct-card .gc-avatar-opt{
+  background: #17171a !important;
+  border-color: rgba(255,255,255,.16) !important;
+}
+body.theme-ink .gc-acct-card .gc-avatar-opt.on{
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.85) !important;
+}
+/* 5.1.5 输入框：深底白字，focus 走白色发丝描边（去掉紫蓝光晕） */
+body.theme-ink .gc-acct-card :is(.gc-acct-input,.gc-pf-pwd-input){
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  color: #f5f5f5 !important;
+  box-shadow: none !important;
+}
+body.theme-ink .gc-acct-card :is(.gc-acct-input,.gc-pf-pwd-input)::placeholder{ color: rgba(255,255,255,.60) !important; }
+body.theme-ink .gc-acct-card :is(.gc-acct-input,.gc-pf-pwd-input):focus{
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.55) !important;
+  outline: none !important;
+}
+/* 5.1.6 提示条 / 消息 / 隐私说明 / 统计与券码块 */
+body.theme-ink .gc-acct-card .gc-acct-gate{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  color: rgba(255,255,255,.84) !important;
+}
+body.theme-ink .gc-acct-card .gc-acct-msg{ color: #f2f2f2 !important; }
+body.theme-ink .gc-acct-card .gc-acct-msg.ok{ color: rgba(255,255,255,.74) !important; }
+body.theme-ink .gc-acct-card .gc-priv{
+  background: rgba(255,255,255,.04) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+body.theme-ink .gc-acct-card .gc-priv :is(h4,strong){ color: #f2f2f2 !important; }
+body.theme-ink .gc-acct-card .gc-priv :is(ul,li,p){ color: rgba(255,255,255,.76) !important; }
+body.theme-ink .gc-acct-card :is(.gc-pf-sec-title,summary){ color: #ededed !important; }
+body.theme-ink .gc-acct-card .gc-pf-sec{ border-top-color: rgba(255,255,255,.12) !important; }
+body.theme-ink .gc-acct-card .gc-pf-uid{ color: rgba(255,255,255,.74) !important; }
+body.theme-ink .gc-acct-card .gc-pf-empty{ color: rgba(255,255,255,.72) !important; }
+body.theme-ink .gc-acct-card .gc-pf-badge{
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.28) !important;
+  color: #f0f0f0 !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-avatar{
+  background: #17171a !important;
+  border: 1px solid rgba(255,255,255,.24) !important;
+  box-shadow: none !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-stat{
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-stat b{ color: #f5f5f5 !important; }
+body.theme-ink .gc-acct-card .gc-pf-stat span{ color: rgba(255,255,255,.74) !important; }
+body.theme-ink .gc-acct-card .gc-pf-item{
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-chip{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  color: rgba(255,255,255,.82) !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-chip button{ color: rgba(255,255,255,.60) !important; }
+body.theme-ink .gc-acct-card .gc-pf-chip button:hover{ color: #ffffff !important; }
+body.theme-ink .gc-acct-card :is(#gcOrderCount,#gcCouponCount,#gcChatCount,#gcByokState,#gcPfPhoneText){
+  color: rgba(255,255,255,.78) !important;
+}
+/* 5.1.7 试用卡（浅蓝底）→ 深底发丝线 */
+body.theme-ink .gc-acct-card .gc-pf-trial{
+  background: rgba(255,255,255,.04) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-trial-t b{ color: #f4f4f4 !important; }
+body.theme-ink .gc-acct-card .gc-pf-trial-t span{ color: rgba(255,255,255,.76) !important; }
+body.theme-ink .gc-acct-card .gc-pf-trial-a{
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,.30) !important;
+  color: #ffffff !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-trial-a:hover{
+  background: #f5f5f5 !important; border-color: #f5f5f5 !important; color: #0a0a0a !important;
+}
+/* 5.1.8 按钮：主操作白底黑字，次要操作透明底 + 发丝线，危险操作改灰阶反白 */
+body.theme-ink .gc-acct-card .gc-pf-btn{
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,.20) !important;
+  color: rgba(255,255,255,.86) !important;
+}
+body.theme-ink .gc-acct-card .gc-pf-btn:hover{
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.42) !important;
+  color: #ffffff !important;
+}
+body.theme-ink .gc-acct-card :is(.gc-pf-btn.primary,.gc-pf-btn.primary:hover){
+  background: #f5f5f5 !important;
+  background-image: none !important;
+  border: 1px solid #f5f5f5 !important;
+  color: #0a0a0a !important;
+}
+body.theme-ink .gc-acct-card :is(.gc-pf-btn.primary,.gc-pf-btn.primary:hover) *{ color: #0a0a0a !important; }
+body.theme-ink .gc-acct-card .gc-pf-btn.danger{ border-color: rgba(255,255,255,.20) !important; color: rgba(255,255,255,.86) !important; }
+body.theme-ink .gc-acct-card .gc-pf-btn.danger:hover{
+  background: #f5f5f5 !important; border-color: #f5f5f5 !important; color: #0a0a0a !important;
+}
+body.theme-ink .gc-acct-card :is(#gcAcctSubmit,#gcBindSubmit,#gcLoginBtn,.gc-acct-btn-main){
+  background: #f5f5f5 !important;
+  background-image: none !important;
+  border: 1px solid #f5f5f5 !important;
+  color: #0a0a0a !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+body.theme-ink .gc-acct-card :is(#gcAcctSubmit,#gcBindSubmit,#gcLoginBtn,.gc-acct-btn-main):hover{
+  background: #ffffff !important; border-color: #ffffff !important; color: #0a0a0a !important;
+  transform: none !important; filter: none !important;
+}
+body.theme-ink .gc-acct-card :is(#gcAcctSubmit,#gcBindSubmit,#gcLoginBtn,.gc-acct-btn-main):disabled{
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.14) !important;
+  color: rgba(255,255,255,.52) !important;
+}
+
+/* =====================================================================
+   v5.2 墨白收尾 · 宣传片引导按钮 + 宣传片区（#gcPromoSection）
+   —— 淡金胶囊 / 浅蓝渐变底统一收敛为透明底 + 白描边 + 发丝线
+   ===================================================================== */
+/* 5.2.1 .abx-tpl-go（内联淡金胶囊）：透明底 + 白字白描边，hover 反白 */
+body.theme-ink .abx-tpl-go{
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.42) !important;
+  color: rgba(255,255,255,.88) !important;
+  box-shadow: none !important;
+}
+body.theme-ink .abx-tpl-go:hover{
+  background: #f5f5f5 !important;
+  border-color: #f5f5f5 !important;
+  color: #0a0a0a !important;
+}
+body.theme-ink .abx-tpl-go svg{ color: currentColor !important; stroke: currentColor !important; }
+/* 5.2.2 宣传片区容器：浅蓝渐变 → 深底 + 1px 发丝线 */
+body.theme-ink #gcPromoSection .gc-promo-inner{
+  background: rgba(255,255,255,.04) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.50) !important;
+}
+body.theme-ink #gcPromoSection .gc-promo-media{
+  background: #0a0a0b !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: none !important;
+}
+body.theme-ink #gcPromoSection video{ background: #0a0a0b !important; }
+/* 5.2.3 社交按钮（B站/爱发电/GitHub 三色）→ 灰阶玻璃，hover 反白 */
+body.theme-ink #gcSocialSection a.gc-social-btn,
+body.theme-ink #gcSocialSection a.gc-social-btn:is(.gc-social-bili,.gc-social-afd,.gc-social-gh){
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  color: #ededed !important;
+  box-shadow: none !important;
+}
+body.theme-ink #gcSocialSection a.gc-social-btn:hover{
+  background: #f5f5f5 !important;
+  border-color: #f5f5f5 !important;
+  color: #0a0a0a !important;
+  transform: none !important;
+}
+body.theme-ink #gcSocialSection a.gc-social-btn .gc-soc-icon{
+  background: rgba(255,255,255,.16) !important;
+  color: #ffffff !important;
+  filter: grayscale(1) !important;
+}
+body.theme-ink #gcSocialSection a.gc-social-btn:hover .gc-soc-icon{
+  background: rgba(10,10,10,.10) !important;
+  color: #0a0a0a !important;
+}
+body.theme-ink #gcSocialSection .gc-social-title{ color: #e6e6e6 !important; }
+
+@media (prefers-reduced-motion: reduce){
+  body.theme-ink *, body.theme-ink *::before, body.theme-ink *::after{
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important; scroll-behavior: auto !important;
+  }
+}
 </style>
 
 
