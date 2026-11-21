@@ -23635,12 +23635,21 @@ var CATALOG = [
     var code = (document.getElementById('gcLpRecvCode').value || '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
     if (code.length < 4) { msg('gcLpRecvMsg', '请输入速传码', 'err'); return; }
     recvBtn.disabled = true; recvBtn.innerHTML = '<span class="gc-lp-spin"></span>';
-    fetch('/api/share?action=get&code=' + encodeURIComponent(code))
-      .then(function (r) { return r.json(); })
+    var recvStatus = 0;
+    fetch('/api/share?action=get&code=' + encodeURIComponent(code), { cache: 'no-store' })
+      .then(function (r) { recvStatus = r.status; return r.text().then(function (t) { try { return JSON.parse(t); } catch (e) { return { ok: false, _raw: t }; } }); })
       .then(function (d) {
         recvBtn.disabled = false; recvBtn.textContent = '取回';
         var box = document.getElementById('gcLpPreview');
-        if (!d || !d.ok) { box.classList.remove('on'); msg('gcLpRecvMsg', (d && d.message) || '取回失败', 'err'); return; }
+        if (!d || !d.ok) {
+          if (box) box.classList.remove('on');
+          /* 回显后端真实错误：优先 hint → message → error → code，最后才用通用文案 */
+          var em = (d && (d.hint || d.message || d.error || d.code)) || '';
+          if (!em) em = recvStatus ? ('取回失败（HTTP ' + recvStatus + '）') : '取回失败，请稍后重试';
+          else if (recvStatus && recvStatus !== 200) em += '（HTTP ' + recvStatus + '）';
+          msg('gcLpRecvMsg', em, 'err');
+          return;
+        }
         box.classList.add('on'); box.innerHTML = '';
         if (d.kind === 'image') {
           var img = document.createElement('img');
@@ -24147,10 +24156,6 @@ var CATALOG = [
       switchTab('receive');
       var inp = $('gcLpRecvCode');
       if (inp) inp.value = code;
-      if (!isLogged()) {
-        msg('gcLpRecvMsg', '请先登录后再接收：切换到「一键登录」建立本机会话', 'err');
-        return;
-      }
       msg('gcLpRecvMsg', '正在取回传输码 ' + code + ' …');
       var btn = $('gcLpRecvBtn');
       if (btn) btn.click();

@@ -448,7 +448,8 @@ async function handleRequest(context) {
   }
 
   // ---- 登录（mode: 'password' 密码登录 | 'code' 验证码登录）----
-  if (action === 'login') {
+  // 兼容前端 gcAccountScript 的 onetap 动作名（v3.9 修复：线上曾返回 unknown_action 导致登录必失败）
+  if (action === 'login' || action === 'onetap') {
     const mode = String(body.mode || 'password');
     let uid = '';
     let user = null;
