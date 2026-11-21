@@ -7180,7 +7180,7 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
     </button>
   </div>
   <div class="badge-content">
-    <div class="badge-stats">已解锁 <strong id="badgeUnlockedCount">0</strong> / 5 枚徽章</div>
+    <div class="badge-stats" id="badgeStats">已解锁 <strong id="badgeUnlockedCount">0</strong> / 10 枚徽章</div>
     <div class="badge-grid" id="badgeGrid"></div>
   </div>
 </div>
@@ -9735,6 +9735,7 @@ function toggleCollect(id) {
   else { collection.add(id); window._track('collect', { aircraftId: id }); }
   localStorage.setItem('aviation_collection', JSON.stringify([...collection]));
   if (collection.size >= 5) unlockBadge('collector');
+  if (typeof badgeCheckAll === 'function') badgeCheckAll();
   renderCards();
   updateCollectRecordDot();
   if (document.getElementById('collectRecordOverlay') && document.getElementById('collectRecordOverlay').classList.contains('visible')) renderCollectRecord();
@@ -12812,7 +12813,13 @@ window.setLang = function(lang) {
   var cfTitleEl = document.getElementById('coldfactTitleText'); if (cfTitleEl) cfTitleEl.textContent = (lang === 'en' ? 'AI Cold Facts' : 'AI 冷知识');
   var cfSubEl = document.getElementById('coldfactSubText'); if (cfSubEl) cfSubEl.textContent = (lang === 'en' ? 'Real civil-aviation trivia worth sharing' : '真实民航小知识 · 有据可查');
   var cfNoteEl = document.getElementById('coldfactNoteText'); if (cfNoteEl) cfNoteEl.textContent = (lang === 'en' ? 'Facts compiled from public civil-aviation engineering & operations sources.' : '内容来自公开可查的民航工程与运营资料，供爱好者学习交流。');
-  var cfBtnT = document.getElementById('coldfactCloseTitle'); if (cfBtnT) cfBtnT.textContent = (lang === 'en' ? 'Close' : '关闭');
+  var cfBtnT = document.getElementById('coldfactCloseTitle'); if (cfBtnT) { cfBtnT.setAttribute('title', (lang === 'en' ? 'Close' : '关闭')); cfBtnT.setAttribute('aria-label', (lang === 'en' ? 'Close' : '关闭')); }
+  var cfShufEl = document.getElementById('coldfactShuffleText'); if (cfShufEl) cfShufEl.textContent = (lang === 'en' ? 'Show another batch' : '换一批');
+  var cfShufBtnEl = document.getElementById('coldfactShuffleBtn');
+  if (cfShufBtnEl) { var cfShufTitle = (lang === 'en' ? 'Show another batch' : '换一批'); cfShufBtnEl.title = cfShufTitle; cfShufBtnEl.setAttribute('aria-label', cfShufTitle); }
+  var badgeBtnTxt = document.getElementById('badgeBtnText'); if (badgeBtnTxt) badgeBtnTxt.textContent = (lang === 'en' ? 'Achievements' : '成就');
+  var badgeOvEl = document.getElementById('badgeOverlay');
+  if (badgeOvEl && badgeOvEl.classList.contains('visible') && typeof renderBadges === 'function') renderBadges();
   if (typeof v56RefreshSkyLabel === 'function') v56RefreshSkyLabel();
   if (typeof v56RefreshPanel === 'function') v56RefreshPanel();
   var fbBtnEl = document.getElementById('feedbackBtnText'); if (fbBtnEl) fbBtnEl.textContent = t('feedbackBtn');
@@ -14463,6 +14470,14 @@ function showQuizResult() {
   document.getElementById('quizProgressText').textContent = '完成';
   document.getElementById('quizProgressFill').style.width = '100%';
   playQuizSound('finish');
+  try {
+    var _best = parseInt(localStorage.getItem('aviation_quiz_best') || '0', 10) || 0;
+    if (quizScore > _best) localStorage.setItem('aviation_quiz_best', String(quizScore));
+    var _pf = parseInt(localStorage.getItem('aviation_quiz_perfect_streak') || '0', 10) || 0;
+    _pf = (quizScore >= 15) ? _pf + 1 : 0;
+    localStorage.setItem('aviation_quiz_perfect_streak', String(_pf));
+  } catch (e) {}
+  if (typeof badgeCheckAll === 'function') badgeCheckAll();
   var title, desc;
   if (quizScore >= 15) { unlockBadge('quiz-master'); title = '航空专家！'; desc = '对机型和首飞年份如数家珍，太强了！'; }
   else if (quizScore >= 11) { title = '资深航空迷'; desc = '眼光相当准，离专家就差一点点啦！'; }
@@ -14484,11 +14499,26 @@ function showQuizResult() {
 
 // ===== 打卡成就徽章系统 =====
 var BADGES = [
-  { id: 'first-flight', name: '首航纪念', icon: '✈️', color: 'linear-gradient(135deg,#f59e0b,#fbbf24)', desc: '首次打开收藏馆', intro: '第一次踏上收藏馆的跑道，属于你的航空之旅就此启航。' },
-  { id: 'collector',    name: '收藏新秀', icon: '⭐', color: 'linear-gradient(135deg,#10b981,#34d399)', desc: '收藏 5 款机型', intro: '机库渐丰，眼光独到。收藏 5 款心仪机型，你就是收藏新秀。' },
-  { id: 'checkin-3',    name: '晨航打卡', icon: '📅', color: 'linear-gradient(135deg,#fb923c,#f97316)', desc: '连续 3 天打开打卡', intro: '连续 3 天如约而至，像准时起飞的晨间航班一样可靠。' },
-  { id: 'quiz-master',  name: '满分飞行员', icon: '🏆', color: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', desc: 'Quiz 15 题全对', intro: '机型、年代、细节全掌握。满分飞行员，专业级航空通！' },
-  { id: 'checkin-7',    name: '云端常客', icon: '👑', color: 'linear-gradient(135deg,#ef4444,#f59e0b)', desc: '累计打卡满 7 天', intro: '累计 7 天登机打卡，云层之上早已认得你的身影。' }
+  { id: 'first-flight', name: '首航纪念', nameEn: 'First Flight', icon: '✈️', color: 'linear-gradient(135deg,#f59e0b,#fbbf24)', desc: '首次打开收藏馆', descEn: 'Open the collection hall for the first time', intro: '第一次踏上收藏馆的跑道，属于你的航空之旅就此启航。', introEn: 'Your first step onto the museum runway — an aviation journey begins here.',
+    check: function () { return badgeGetCheckin().days.length >= 1; } },
+  { id: 'collector',    name: '收藏新秀', nameEn: 'Rising Collector', icon: '⭐', color: 'linear-gradient(135deg,#10b981,#34d399)', desc: '收藏 5 款机型', descEn: 'Collect 5 aircraft', intro: '机库渐丰，眼光独到。收藏 5 款心仪机型，你就是收藏新秀。', introEn: 'Five favourites in the hangar — your eye for aircraft is showing.',
+    check: function () { return collection.size >= 5; } },
+  { id: 'checkin-3',    name: '晨航打卡', nameEn: 'Morning Departure', icon: '📅', color: 'linear-gradient(135deg,#fb923c,#f97316)', desc: '连续 3 天打开打卡', descEn: 'Check in 3 days in a row', intro: '连续 3 天如约而至，像准时起飞的晨间航班一样可靠。', introEn: 'Three days in a row — as reliable as a morning departure.',
+    check: function () { return badgeGetCheckin().streak >= 3; } },
+  { id: 'quiz-master',  name: '满分飞行员', nameEn: 'Perfect Pilot', icon: '🏆', color: 'linear-gradient(135deg,#8b5cf6,#a78bfa)', desc: 'Quiz 15 题全对', descEn: 'Score 15/15 in a quiz', intro: '机型、年代、细节全掌握。满分飞行员，专业级航空通！', introEn: 'Types, eras and details all nailed — a professional-grade aviation buff.',
+    check: function () { try { return (parseInt(localStorage.getItem('aviation_quiz_best') || '0', 10) || 0) >= 15; } catch (e) { return false; } } },
+  { id: 'checkin-7',    name: '云端常客', nameEn: 'Above the Clouds', icon: '👑', color: 'linear-gradient(135deg,#ef4444,#f59e0b)', desc: '累计打卡满 7 天', descEn: 'Check in on 7 days in total', intro: '累计 7 天登机打卡，云层之上早已认得你的身影。', introEn: 'Seven check-ins logged — the sky already knows your silhouette.',
+    check: function () { return badgeGetCheckin().total >= 7; } },
+  { id: 'collector-20', name: '机库巨擘', nameEn: 'Hangar Titan', icon: '🛩️', color: 'linear-gradient(135deg,#f59e0b,#f97316)', desc: '收藏 20 款机型', descEn: 'Collect 20 aircraft', intro: '从窄体到巨无霸，二十款机型一字排开，你的机库已是小型航展。', introEn: 'From narrow-body to jumbo — twenty types lined up, your hangar is a small airshow.',
+    check: function () { return collection.size >= 20; } },
+  { id: 'livery-5',     name: '涂装收藏家', nameEn: 'Livery Curator', icon: '🎨', color: 'linear-gradient(135deg,#14b8a6,#10b981)', desc: '收藏 5 款涂装', descEn: 'Collect 5 liveries', intro: '机身之外的另一种浪漫。五款涂装入册，你就是涂装收藏家。', introEn: 'Five liveries archived — the romance that lives on the fuselage.',
+    check: function () { try { return (typeof liveryGetCollected === 'function' ? liveryGetCollected().length : 0) >= 5; } catch (e) { return false; } } },
+  { id: 'coldfacts-12', name: '冷知识猎人', nameEn: 'Trivia Hunter', icon: '🔍', color: 'linear-gradient(135deg,#f472b6,#ec4899)', desc: '累计查阅 12 条 AI 冷知识', descEn: 'Read 12 AI cold facts', intro: '一页页翻过去，冷知识攒成了谈资。你已经是民航冷知识猎人。', introEn: 'Batch after batch, trivia became talking points — a true civil-aviation trivia hunter.',
+    check: function () { try { return (parseInt(localStorage.getItem('aviation_coldfacts_seen') || '0', 10) || 0) >= 12; } catch (e) { return false; } } },
+  { id: 'quiz-streak-3', name: '三连满分', nameEn: 'Triple Ace', icon: '🎯', color: 'linear-gradient(135deg,#fbbf24,#f43f5e)', desc: 'Quiz 连续 3 局满分', descEn: 'Three perfect quizzes in a row', intro: '连着三局 15/15，稳定得像自动驾驶。', introEn: 'Three 15/15 finishes back to back — as steady as autopilot.',
+    check: function () { try { return (parseInt(localStorage.getItem('aviation_quiz_perfect_streak') || '0', 10) || 0) >= 3; } catch (e) { return false; } } },
+  { id: 'checkin-30',   name: '月度常客', nameEn: 'Monthly Regular', icon: '🗓️', color: 'linear-gradient(135deg,#e5e7eb,#9ca3af)', desc: '累计打卡满 30 天', descEn: 'Check in on 30 days in total', intro: '三十天登机打卡，收藏馆的灯什么时候亮你都清楚。', introEn: 'Thirty check-ins logged — you know exactly when the lights come on.',
+    check: function () { return badgeGetCheckin().total >= 30; } }
 ];
 var badgeNewThisSession = [];
 function badgeDateStr(offset) {
@@ -14518,6 +14548,25 @@ function badgeSaveTime(id) {
     localStorage.setItem('aviation_badges_time', JSON.stringify(times));
   } catch (e) {}
 }
+function badgeIsEn() { return (typeof currentLang !== 'undefined' && currentLang === 'en'); }
+function badgeLabel(zh, en) { return badgeIsEn() ? en : zh; }
+function badgeField(b, key) {
+  if (!b) return '';
+  if (badgeIsEn()) { var en = b[key + 'En']; if (en) return en; }
+  return b[key] || '';
+}
+// 统一扫描所有带判定函数的徽章，达成即解锁（收藏 / 打卡 / Quiz / 冷知识 / 涂装共用）
+function badgeCheckAll() {
+  var unlocked = badgeGetUnlocked();
+  for (var i = 0; i < BADGES.length; i++) {
+    var b = BADGES[i];
+    if (typeof b.check !== 'function') continue;
+    if (unlocked.indexOf(b.id) !== -1) continue;
+    var ok = false;
+    try { ok = !!b.check(); } catch (e) { ok = false; }
+    if (ok) { unlockBadge(b.id); unlocked = badgeGetUnlocked(); }
+  }
+}
 function unlockBadge(id) {
   var arr = badgeGetUnlocked();
   if (arr.indexOf(id) !== -1) return false;
@@ -14535,7 +14584,7 @@ function showBadgeToast(id) {
   if (!wrap) return;
   var div = document.createElement('div');
   div.className = 'badge-toast';
-  div.innerHTML = '<span>' + b.icon + '</span><span>解锁徽章：<strong>' + b.name + '</strong></span>';
+  div.innerHTML = '<span>' + b.icon + '</span><span>' + badgeLabel('解锁徽章：', 'Badge unlocked: ') + '<strong>' + badgeField(b, 'name') + '</strong></span>';
   wrap.appendChild(div);
   setTimeout(function() {
     div.classList.add('hide');
@@ -14559,9 +14608,11 @@ function checkinOnLoad() {
   if (c.streak >= 3 && unlocked.indexOf('checkin-3') === -1) unlockBadge('checkin-3');
   if (c.total >= 7 && unlocked.indexOf('checkin-7') === -1) unlockBadge('checkin-7');
   if (collection.size >= 5 && unlocked.indexOf('collector') === -1) unlockBadge('collector');
+  badgeCheckAll();
 }
 function openBadges() {
   saveScrollState();
+  if (typeof badgeCheckAll === 'function') badgeCheckAll();
   document.getElementById('badgeOverlay').classList.add('visible');
   document.body.style.overflow = 'hidden';
   renderBadges();
@@ -14576,15 +14627,24 @@ function renderBadges() {
   var unlocked = badgeGetUnlocked();
   var grid = document.getElementById('badgeGrid');
   if (!grid) return;
-  document.getElementById('badgeUnlockedCount').textContent = unlocked.length;
+  var statsEl = document.getElementById('badgeStats');
+  if (statsEl) {
+    statsEl.innerHTML = badgeLabel(
+      '已解锁 <strong id="badgeUnlockedCount">' + unlocked.length + '</strong> / ' + BADGES.length + ' 枚徽章',
+      'Unlocked <strong id="badgeUnlockedCount">' + unlocked.length + '</strong> / ' + BADGES.length + ' badges'
+    );
+  } else {
+    var cntEl = document.getElementById('badgeUnlockedCount');
+    if (cntEl) cntEl.textContent = unlocked.length;
+  }
   grid.innerHTML = BADGES.map(function(b) {
     var has = unlocked.indexOf(b.id) !== -1;
     var isNew = badgeNewThisSession.indexOf(b.id) !== -1;
     return '<div class="badge-card ' + (has ? 'unlocked' : 'locked') + '" onclick="showBadgeDetail(\'' + b.id + '\')">' +
       (has ? (isNew ? '<div class="badge-new">NEW</div>' : '') : '<div class="badge-lock">🔒</div>') +
       '<div class="badge-medal" style="background:' + b.color + '">' + b.icon + '</div>' +
-      '<div class="badge-name">' + b.name + '</div>' +
-      '<div class="badge-desc">' + (has ? b.desc : '未解锁 · ' + b.desc) + '</div>' +
+      '<div class="badge-name">' + badgeField(b, 'name') + '</div>' +
+      '<div class="badge-desc">' + (has ? badgeField(b, 'desc') : badgeLabel('未解锁 · ', 'Locked · ') + badgeField(b, 'desc')) + '</div>' +
     '</div>';
   }).join('');
 }
@@ -14597,17 +14657,17 @@ function showBadgeDetail(id) {
   var el = document.getElementById('badgeDetailOverlay');
   if (!el) return;
   var dateLine = has
-    ? (times[b.id] ? '获取日期：' + times[b.id] : '获取日期：已解锁（较早版本记录）')
-    : '未解锁';
+    ? (times[b.id] ? badgeLabel('获取日期：', 'Unlocked at: ') + times[b.id] : badgeLabel('获取日期：已解锁（较早版本记录）', 'Unlocked (recorded in an earlier version)'))
+    : badgeLabel('未解锁', 'Locked');
   el.innerHTML =
     '<div class="badge-detail-card">' +
       '<button class="badge-detail-close" onclick="closeBadgeDetail()" title="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
       '<div class="badge-detail-medal" style="background:' + b.color + (has ? '' : ';filter:grayscale(1)') + '">' + b.icon + '</div>' +
-      '<div class="badge-detail-name">' + b.name + '</div>' +
-      '<div class="badge-detail-status ' + (has ? 'ok' : 'lock') + '">' + (has ? '已解锁' : '未解锁') + '</div>' +
-      '<div class="badge-detail-intro">' + b.intro + '</div>' +
+      '<div class="badge-detail-name">' + badgeField(b, 'name') + '</div>' +
+      '<div class="badge-detail-status ' + (has ? 'ok' : 'lock') + '">' + (has ? badgeLabel('已解锁', 'Unlocked') : badgeLabel('未解锁', 'Locked')) + '</div>' +
+      '<div class="badge-detail-intro">' + badgeField(b, 'intro') + '</div>' +
       '<div class="badge-detail-date">' + dateLine + '</div>' +
-      '<div class="badge-detail-desc">解锁条件：' + b.desc + '</div>' +
+      '<div class="badge-detail-desc">' + badgeLabel('解锁条件：', 'How to unlock: ') + badgeField(b, 'desc') + '</div>' +
     '</div>';
   el.classList.add('visible');
   document.body.style.overflow = 'hidden';
@@ -14886,6 +14946,7 @@ function toggleCollectLivery(id, idx) {
   if (i !== -1) { list.splice(i, 1); liveryToast(t('liveryUncollectSuccess')); }
   else { list.push(key); liveryToast(t('liveryCollectSuccess')); }
   liverySaveCollected(list);
+  if (typeof badgeCheckAll === 'function') badgeCheckAll();
   var btn = document.getElementById('livery-btn-' + key);
   if (btn) {
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' + ((i !== -1) ? t('liveryCollect') : t('liveryCollected'));
@@ -17007,6 +17068,30 @@ a.gc-social-gh .gc-soc-icon{background:rgba(255,255,255,.16);}
 .cf-card-title { margin: 0 0 var(--space-5); font-size: var(--fs-r090); font-weight: var(--fw-700); color: var(--text); letter-spacing: var(--ls-5); }
 .cf-card-text { margin: 0; font-size: .79rem; line-height: var(--lh-17); color: var(--text-dim); }
 .cf-note { margin-top: var(--space-16); font-size: var(--fs-r070); text-align: center; color: var(--text-dim); opacity: .75; letter-spacing: var(--ls-5); }
+/* ---------- AI 冷知识面板 · 「换一批」按钮（中性灰阶 / 1px 发丝线 / 零蓝零紫） ---------- */
+.cf-head-actions { display: flex; align-items: center; gap: var(--space-8); flex: none; }
+.cf-shuffle {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-6);
+  height: 34px; padding: 0 var(--space-14); border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border); background: transparent; color: var(--text);
+  font: inherit; font-size: var(--fs-12p5px); font-weight: var(--fw-600); letter-spacing: var(--ls-5);
+  line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur-200) ease, border-color var(--dur-200) ease, transform .18s ease;
+}
+.cf-shuffle:hover { background: var(--card-bg-hover); border-color: var(--glass-border-hover); }
+.cf-shuffle:active { transform: scale(.96); }
+.cf-shuffle:focus-visible { outline: 1px solid var(--text); outline-offset: 2px; }
+.cf-shuffle-ic { width: 14px; height: 14px; flex: none; transition: transform .42s cubic-bezier(.22,.61,.36,1); }
+.cf-shuffle.spin .cf-shuffle-ic { transform: rotate(360deg); }
+/* 冷知识卡片灰阶收敛：零蓝零紫，仅用中性变量随主题自适应 */
+.cf-card { background: var(--card-bg); border: 1px solid var(--glass-border); }
+.cf-card::before { background: linear-gradient(90deg, transparent, var(--glass-border-hover), transparent); }
+.cf-card:hover { border-color: var(--glass-border-hover); box-shadow: 0 10px 24px rgba(0,0,0,.28); }
+.cf-card-icon { background: var(--card-bg-hover); border: 1px solid var(--glass-border); }
+body.theme-ink .cf-shuffle { border: var(--hairline); background: transparent; color: var(--text); }
+body.theme-ink .cf-shuffle:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.34); }
+@media (prefers-reduced-motion: reduce) { .cf-shuffle-ic { transition: none; } .cf-shuffle:active { transform: none; } }
+@media (max-width: 480px) { .cf-shuffle { height: 32px; padding: 0 var(--space-11); font-size: var(--fs-12px); } }
 /* Quiz 结果冷知识 */
 .quiz-result-fact {
   display: flex; align-items: flex-start; gap: var(--space-9); text-align: left;
@@ -17031,7 +17116,10 @@ a.gc-social-gh .gc-soc-icon{background:rgba(255,255,255,.16);}
           <div><div id="coldfactTitleText">AI 冷知识</div><div class="cf-sub" id="coldfactSubText">真实民航小知识 · 有据可查</div></div>
         </div>
       </div>
-      <button class="cf-close" id="coldfactCloseTitle" title="关闭" aria-label="关闭" onclick="closeColdFacts()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <div class="cf-head-actions">
+        <button class="cf-shuffle" id="coldfactShuffleBtn" type="button" title="换一批" aria-label="换一批" onclick="v56ShuffleFacts()"><svg class="cf-shuffle-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg><span id="coldfactShuffleText">换一批</span></button>
+        <button class="cf-close" id="coldfactCloseTitle" title="关闭" aria-label="关闭" onclick="closeColdFacts()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
     </div>
     <div class="cf-scroll">
       <div class="cf-grid" id="cfGrid"></div>
@@ -17093,16 +17181,64 @@ a.gc-social-gh .gc-soc-icon{background:rgba(255,255,255,.16);}
     document.body.style.overflow = '';
   };
   window.coldfactBackdrop = function (e) { if (e.target === e.currentTarget) closeColdFacts(); };
-  window.v56RefreshPanel = function () {
+  // 每屏展示的冷知识条数；「换一批」从数据池中随机换一组（不与上一组重复）
+  var V56_PANEL_SIZE = 6;
+  var v56PanelIdx = [];
+  function v56ShuffleIdx(a) {
+    var r = a.slice();
+    for (var i = r.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = r[i]; r[i] = r[j]; r[j] = t; }
+    return r;
+  }
+  function v56ColdfactsSeenAdd(n) {
+    try {
+      var cur = parseInt(localStorage.getItem('aviation_coldfacts_seen') || '0', 10) || 0;
+      localStorage.setItem('aviation_coldfacts_seen', String(cur + n));
+    } catch (e) {}
+  }
+  function v56PickPanel(forceNew) {
+    var n = V56_FACTS.length;
+    var size = Math.min(V56_PANEL_SIZE, n);
+    if (!forceNew && v56PanelIdx.length) return v56PanelIdx;
+    var prev = {};
+    for (var i = 0; i < v56PanelIdx.length; i++) prev[v56PanelIdx[i]] = 1;
+    var rest = [];
+    for (var j = 0; j < n; j++) if (!prev[j]) rest.push(j);
+    var pick = v56ShuffleIdx(rest).slice(0, size);
+    var guard = 0;
+    while (pick.length < size && guard < 300) {
+      guard++;
+      var c = Math.floor(Math.random() * n);
+      if (pick.indexOf(c) === -1) pick.push(c);
+    }
+    v56PanelIdx = v56ShuffleIdx(pick);
+    return v56PanelIdx;
+  }
+  window.v56RefreshPanel = function (forceNew, noCount) {
     var grid = document.getElementById('cfGrid');
     if (!grid) return;
+    var wasEmpty = !v56PanelIdx.length;
+    var idxs = v56PickPanel(!!forceNew);
     var h = [];
-    for (var i = 0; i < V56_FACTS.length; i++) {
-      var f = V56_FACTS[i];
-      h.push('<div class="cf-card"><div class="cf-card-icon">' + f.ic + '</div><div class="cf-card-title">' +
+    for (var i = 0; i < idxs.length; i++) {
+      var f = V56_FACTS[idxs[i]];
+      h.push('<div class="cf-card" data-fi="' + idxs[i] + '"><div class="cf-card-icon">' + f.ic + '</div><div class="cf-card-title">' +
         v56Txt(f.t) + '</div><div class="cf-card-text">' + v56Txt(f.x) + '</div></div>');
     }
     grid.innerHTML = h.join('');
+    // 仅在首次生成新一组或点击「换一批」时累计查阅条数，避免切语言重复计数
+    if (!noCount && (forceNew || wasEmpty)) {
+      v56ColdfactsSeenAdd(idxs.length);
+      if (typeof badgeCheckAll === 'function') badgeCheckAll();
+    }
+  };
+  window.v56PanelRing = function () { return v56PanelIdx.slice(); };
+  window.v56ShuffleFacts = function () {
+    var btn = document.getElementById('coldfactShuffleBtn');
+    if (btn) {
+      btn.classList.add('spin');
+      setTimeout(function () { btn.classList.remove('spin'); }, 460);
+    }
+    window.v56RefreshPanel(true);
   };
   var cfOv = document.getElementById('coldfactOverlay');
   if (cfOv) cfOv.addEventListener('click', coldfactBackdrop);
@@ -18157,7 +18293,15 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     var facts = window.__V56_FACTS || [];
     if (!facts.length) return;
     var cur = (typeof window.__v57DetailIdx === 'number') ? window.__v57DetailIdx : 0;
-    var next = (cur + delta + facts.length) % facts.length;
+    var ring = (typeof window.v56PanelRing === 'function') ? window.v56PanelRing() : [];
+    var next;
+    if (ring && ring.length) {
+      var pos = ring.indexOf(cur);
+      if (pos === -1) pos = 0;
+      next = ring[(pos + delta + ring.length) % ring.length];
+    } else {
+      next = (cur + delta + facts.length) % facts.length;
+    }
     v57OpenFactDetail(next);
     var panel = document.querySelector('.cf-detail-panel');
     if (panel) panel.scrollTop = 0;
@@ -18193,7 +18337,8 @@ html.rln-lock, html.rln-lock body { overflow: hidden; }
     grid.addEventListener('click', function (e) {
       var card = e.target && e.target.closest ? e.target.closest('.cf-card') : null;
       if (!card) return;
-      var idx = Array.prototype.indexOf.call(grid.children, card);
+      var fi = card.getAttribute('data-fi');
+      var idx = (fi !== null && fi !== '') ? parseInt(fi, 10) : Array.prototype.indexOf.call(grid.children, card);
       if (idx >= 0) v57OpenFactDetail(idx);
     });
   }
@@ -24095,37 +24240,37 @@ body.theme-ink .airline-guide-bubble{ background: #f4f4f4 !important; color: #10
 }
 
 /* ============ v4.2 弹层统一为「白纸墨字」：彻底消除浅底浅字 ============ */
-body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth,.gcx-cv-card){
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gcv-ad,.gcx-cv-card){
   background: #f7f7f7 !important;
   border: 1px solid #c9c9c9 !important;
   box-shadow: 0 18px 48px rgba(0,0,0,.55) !important;
   color: #141414 !important;
   -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
 }
-body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth,.gcx-cv-card) *:not(svg):not(path){
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gcv-ad,.gcx-cv-card) *:not(svg):not(path){
   color: #141414 !important;
   text-shadow: none !important;
 }
 /* 纸面上的次要小字：降到深灰仍 ≥ 6:1 */
-body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth) :is(
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gcv-ad) :is(
   .gc-lp-note,.gc-lp-msg,.gc-acct-hint,.gc-acct-sub,.gcx-onetap-sub,.gcv-dock-empty,
   .gcx-dock-empty,label,.gc-acct-ways span,small,.gc-lp-head span,.gc-acct-tip){
   color: #565656 !important;
 }
 /* 弹层内的强调态：纯黑填充 + 白字（全站唯一强调色） */
-body.theme-ink :is(.gc-lp-tab.on,.gc-acct-tab.on,.gc-acct-way.on,.gc-lp-btn,#gcDockSave,
-  .gc-acct-submit,.gc-acct-actions button.pri,.gcv-ad button.pri){
+body.theme-ink :is(.gc-lp-tab.on,.gc-lp-btn,#gcDockSave,
+  .gcv-ad button.pri){
   background: #141414 !important;
   color: #ffffff !important;
   border-color: #141414 !important;
   box-shadow: none !important;
   background-image: none !important;
 }
-body.theme-ink :is(.gc-lp-tab.on,.gc-acct-tab.on,.gc-acct-way.on,.gc-lp-btn,#gcDockSave,
-  .gc-acct-submit,.gc-acct-actions button.pri,.gcv-ad button.pri) *{
+body.theme-ink :is(.gc-lp-tab.on,.gc-lp-btn,#gcDockSave,
+  .gcv-ad button.pri) *{
   color: #ffffff !important;
 }
-body.theme-ink :is(.gc-lp-tab,.gc-acct-tab,.gc-acct-way,.gc-lp-close,#gcDockX,#gcAcctClose,#gcAdX){
+body.theme-ink :is(.gc-lp-tab,.gc-lp-close,#gcDockX,#gcAdX){
   background: #ececec !important;
   color: #1a1a1a !important;
   border: 1px solid #cfcfcf !important;
@@ -24133,16 +24278,16 @@ body.theme-ink :is(.gc-lp-tab,.gc-acct-tab,.gc-acct-way,.gc-lp-close,#gcDockX,#g
   background-image: none !important;
 }
 /* 纸面弹层内的输入框 */
-body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth) :is(input,textarea,select){
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gcv-ad) :is(input,textarea,select){
   background: #ffffff !important;
   color: #141414 !important;
   border: 1px solid #c2c2c2 !important;
   box-shadow: none !important;
 }
-body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card,.gcv-ad,#gcAcctAuth) :is(input,textarea)::placeholder{
+body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gcv-ad) :is(input,textarea)::placeholder{
   color: #6a6a6a !important; opacity: 1 !important;
 }
-body.theme-ink :is(#gcLinkPanel,#gcChatDock,.gc-acct-card) :is(hr,div){ border-color: #dcdcdc !important; }
+body.theme-ink :is(#gcLinkPanel,#gcChatDock) :is(hr,div){ border-color: #dcdcdc !important; }
 body.theme-ink .gc-lp-tabs{ border-bottom: 1px solid #dcdcdc !important; }
 body.theme-ink #gcLinkMask, body.theme-ink #gcAcctMask{ background: rgba(0,0,0,.62) !important; }
 
@@ -24528,6 +24673,182 @@ body.theme-ink #gcSocialSection a.gc-social-btn:hover .gc-soc-icon{
   color: #0a0a0a !important;
 }
 body.theme-ink #gcSocialSection .gc-social-title{ color: #e6e6e6 !important; }
+
+/* =====================================================================
+   v5.3 墨白彻底修复 · 登录/注册面板（#gcAcctAuth）与个人中心面板（#gcBindMask）
+   —— 根因：v4.2「白纸墨字」把 #gcAcctAuth / .gc-acct-card 一并纳入浅底深字，
+      其 `*` 选择器优先级 (1,1,1) 高于 v5.1 的 (0,3,1)，压掉了深底浅字规则，
+      造成 #gcAcctAuth 仍是 #f7f7f7 浅白、卡内文字被压成 #141414（深底深字）。
+      本段用 ID 前缀提升优先级，锁死「深底浅字 + 1px 发丝线 + 零蓝零紫」。
+   ===================================================================== */
+/* 5.3.1 表单容器：浅白纸面 → 深底 + 发丝线 */
+body.theme-ink #gcAcctMask #gcAcctAuth,
+body.theme-ink #gcBindMask #gcAcctAuth{
+  background: #0e0e10 !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: none !important;
+  color: #ededed !important;
+}
+/* 5.3.2 标题 / 字段标签 / 说明小字：浅字阶（≥ .72 白） */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(.gc-acct-title,#gcAcctTitle,#gcBindTitle){
+  color: #f7f7f7 !important;
+}
+body.theme-ink #gcAcctMask #gcAcctAuth label,
+body.theme-ink #gcBindMask #gcAcctAuth label{
+  color: rgba(255,255,255,.80) !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(
+  .gc-acct-sub,.gc-acct-hint,.gc-acct-tipline,#gcBindSub,.gc-pf-tip,.gc-acct-msg){
+  color: rgba(255,255,255,.76) !important;
+}
+/* 5.3.3 输入框 / 文本域：深底浅字 + 发丝线，placeholder ≥ 5:1 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) #gcAcctAuth :is(input,textarea,select),
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(.gc-acct-input,.gc-pf-pwd-input){
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  color: #f5f5f5 !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) #gcAcctAuth :is(input,textarea)::placeholder,
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(.gc-acct-input,.gc-pf-pwd-input)::placeholder{
+  color: rgba(255,255,255,.58) !important;
+  opacity: 1 !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) #gcAcctAuth :is(input,textarea,select):focus,
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(.gc-acct-input,.gc-pf-pwd-input):focus{
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.55) !important;
+  outline: none !important;
+}
+/* 5.3.4 选项卡「登录 / 注册」：默认透明浅字，选中反白填充 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-acct-tabs{
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-acct-tab{
+  background: transparent !important;
+  color: rgba(255,255,255,.75) !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-acct-tab.on{
+  background: #f5f5f5 !important;
+  color: #0a0a0a !important;
+  border-color: #f5f5f5 !important;
+  box-shadow: none !important;
+}
+/* 5.3.5 登录方式「密码 / 验证码」 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-acct-way{
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  color: rgba(255,255,255,.80) !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-acct-way.on{
+  background: rgba(255,255,255,.14) !important;
+  border-color: rgba(255,255,255,.46) !important;
+  color: #ffffff !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-acct-way span{ color: inherit !important; }
+/* 5.3.6「获取验证码」：透明底 + 白描边浅字，hover 反白 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcSendCode,#gcBindSend,.gc-acct-send){
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.30) !important;
+  color: #f5f5f5 !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcSendCode,#gcBindSend,.gc-acct-send):hover{
+  background: #f5f5f5 !important;
+  border-color: #f5f5f5 !important;
+  color: #0a0a0a !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcSendCode,#gcBindSend,.gc-acct-send):disabled{
+  background: transparent !important;
+  border-color: rgba(255,255,255,.14) !important;
+  color: rgba(255,255,255,.54) !important;
+}
+/* 5.3.7 关闭按钮：无底 + 发丝线，hover 反白 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcAcctClose,#gcBindClose,.gc-acct-close){
+  background: rgba(255,255,255,.06) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: rgba(255,255,255,.82) !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcAcctClose,#gcBindClose,.gc-acct-close):hover{
+  background: #f5f5f5 !important;
+  border-color: #f5f5f5 !important;
+  color: #0a0a0a !important;
+}
+/* 5.3.8 主按钮：白底黑字（全站唯一强调色） */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcAcctSubmit,#gcBindSubmit,#gcLoginBtn,.gc-acct-btn-main){
+  background: #f5f5f5 !important;
+  background-image: none !important;
+  border: 1px solid #f5f5f5 !important;
+  color: #0a0a0a !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcAcctSubmit,#gcBindSubmit,#gcLoginBtn,.gc-acct-btn-main):hover{
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #0a0a0a !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(#gcAcctSubmit,#gcBindSubmit,#gcLoginBtn,.gc-acct-btn-main):disabled{
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.16) !important;
+  color: rgba(255,255,255,.54) !important;
+}
+/* 5.3.9 个人中心面板（#gcBindMask）：深底深字 → 深底浅字 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-name{ color: #f7f7f7 !important; }
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(.gc-pf-uid,.gc-pf-empty,.gc-pf-tip){
+  color: rgba(255,255,255,.74) !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-sec-title{ color: #ededed !important; }
+body.theme-ink :is(#gcAcctMask,#gcBindMask) :is(.gc-pf-sec,.gc-pf-item){ border-color: rgba(255,255,255,.12) !important; }
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-badge{
+  background: rgba(255,255,255,.12) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  color: #f2f2f2 !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-btn{
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  color: rgba(255,255,255,.88) !important;
+  box-shadow: none !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-btn:hover{
+  background: #f5f5f5 !important;
+  border-color: #f5f5f5 !important;
+  color: #0a0a0a !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-btn.primary{
+  background: #f5f5f5 !important;
+  background-image: none !important;
+  border: 1px solid #f5f5f5 !important;
+  color: #0a0a0a !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-btn.danger{
+  border-color: rgba(255,255,255,.22) !important;
+  color: rgba(255,255,255,.86) !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-pf-btn.danger:hover{
+  background: #f5f5f5 !important;
+  border-color: #f5f5f5 !important;
+  color: #0a0a0a !important;
+}
+/* 5.3.10 头像选中态：蓝色描边 → 白描边 + 发丝线外环 */
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-avatar-opt{
+  background: #17171a !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+}
+body.theme-ink :is(#gcAcctMask,#gcBindMask) .gc-avatar-opt.on{
+  border-color: #f5f5f5 !important;
+  box-shadow: inset 0 0 0 1px rgba(245,245,245,.55) !important;
+  transform: none !important;
+}
 
 @media (prefers-reduced-motion: reduce){
   body.theme-ink *, body.theme-ink *::before, body.theme-ink *::after{
