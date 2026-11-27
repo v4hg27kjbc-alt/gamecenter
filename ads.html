@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>广告设置 | 民航客机收藏馆</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --ink:#0f172a;--ink-2:#5b6b82;--line:#e3e9f3;--bg:#f5f8fd;--card:#fff;
+    --grad:linear-gradient(135deg,#667eea,#764ba2);
+    --radius:16px;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 18px 90px}
+
+  /* ===== 顶部按钮横排（置顶常驻） ===== */
+  .toolbar{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;gap:9px;align-items:center;
+    padding:11px 13px;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);
+    border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 20px rgba(15,23,42,.06);margin-bottom:18px}
+  .toolbar .tk{flex:1;min-width:150px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+  .toolbar .tk b{color:var(--ink);font-size:13.5px}
+  .btn{border:1px solid var(--line);background:#fff;color:var(--ink);font-size:13px;font-weight:600;
+    border-radius:10px;padding:8px 13px;cursor:pointer;white-space:nowrap;transition:.18s}
+  .btn:hover{border-color:#c7d2fe;transform:translateY(-1px)}
+  .btn.primary{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 8px 18px rgba(102,126,234,.28)}
+  .btn.ghost{background:#f8fafc}
+  .btn.danger{color:#b91c1c;border-color:#fecaca;background:#fff5f5}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  h1{font-size:21px;margin-bottom:5px}
+  .sub{font-size:13px;color:var(--ink-2);margin-bottom:16px}
+  .sub code{background:#eef2f7;border-radius:5px;padding:1px 5px;font-size:12px}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;box-shadow:0 4px 16px rgba(15,23,42,.04)}
+  .panel h2{font-size:14.5px;margin-bottom:10px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  input[type=text],input[type=password],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    font-size:13.5px;background:#fff;color:var(--ink);outline:none;font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.14)}
+  label.f{display:block;font-size:12px;color:var(--ink-2);margin:10px 0 5px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  /* 位置分组 */
+  .pos{margin-bottom:18px}
+  .pos-h{display:flex;align-items:center;gap:10px;margin:0 0 9px}
+  .pos-h b{font-size:14px}
+  .pos-h span{font-size:12px;color:var(--ink-2)}
+  .ads{display:flex;flex-wrap:wrap;gap:10px}
+  .ad{background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 13px;min-width:222px;flex:1 1 240px;
+    box-shadow:0 3px 12px rgba(15,23,42,.04);position:relative}
+  .ad.off{opacity:.55;background:#fbfcfe}
+  .ad .badge{display:inline-block;font-size:11px;font-weight:700;color:#4c1d95;background:#eef2ff;border-radius:20px;padding:1px 8px;margin-bottom:6px}
+  .ad .t{font-size:13.5px;font-weight:700;word-break:break-all}
+  .ad .s{font-size:12px;color:var(--ink-2);margin-top:3px;word-break:break-all}
+  .ad .h{font-size:11.5px;color:#4f46e5;margin-top:5px;word-break:break-all}
+  .ad .meta{font-size:11px;color:#94a3b8;margin-top:6px}
+  .ad .ops{display:flex;gap:6px;margin-top:9px}
+  .ad .ops .btn{padding:5px 9px;font-size:12px}
+  .empty{font-size:13px;color:#94a3b8;padding:8px 2px}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+    background:#0f172a;color:#fff;font-size:13px;padding:10px 18px;border-radius:12px;transition:.25s;z-index:90}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .hint{font-size:11.5px;color:#94a3b8;margin-top:8px}
+  .pill{font-size:11.5px;color:#047857;background:#ecfdf5;border-radius:20px;padding:2px 9px}
+  .pill.bad{color:#b91c1c;background:#fef2f2}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="toolbar">
+    <div class="tk"><b>广告设置</b><span id="kvState" class="pill">—</span></div>
+    <button class="btn ghost" id="btnRefresh">刷新</button>
+    <button class="btn ghost" id="btnNew">新增广告</button>
+    <button class="btn ghost" id="btnEdit">编辑选中</button>
+    <button class="btn primary" id="btnSave">保存到后台</button>
+  </div>
+
+  <h1>广告位统一设置</h1>
+  <p class="sub">数据来自主站接口 <code>/api/ads</code>，按「位置 + 形式」渲染。顶部按钮横排显示在页面最上方。</p>
+
+  <div class="panel">
+    <h2>管理令牌</h2>
+    <div class="row">
+      <input type="password" id="token" placeholder="输入后台 ADMIN_TOKEN 后可保存（仅本地会话保存，不上传到第三方）" style="flex:1;min-width:240px">
+      <button class="btn" id="btnVerify">验证并加载全部</button>
+    </div>
+    <div class="hint">未填令牌时仅能查看已启用的广告；保存、编辑、停用需要令牌。</div>
+  </div>
+
+  <div class="panel" id="editor" style="display:none">
+    <h2 id="editorTitle">新增广告</h2>
+    <div class="grid2">
+      <div><label class="f">ID（留空自动生成）</label><input type="text" id="fId" placeholder="ad-home-top-1"></div>
+      <div><label class="f">标题</label><input type="text" id="fTitle" placeholder="A320 研读 ¥5"></div>
+      <div><label class="f">副文案</label><input type="text" id="fSub" placeholder="空客 A320 系列综合研究报告"></div>
+      <div><label class="f">跳转链接</label><input type="text" id="fHref" placeholder="/pay/a320.html"></div>
+      <div><label class="f">图片地址（选填，形式=image 时使用）</label><input type="text" id="fImage" placeholder="/assets/cover-promo.png"></div>
+      <div><label class="f">角标（选填）</label><input type="text" id="fBadge" placeholder="新上架"></div>
+      <div><label class="f">位置</label>
+        <select id="fPos">
+          <option value="top">top · 页面顶部横排</option>
+          <option value="side">side · 侧栏</option>
+          <option value="bottom">bottom · 页脚上方</option>
+          <option value="float">float · 悬浮</option>
+        </select>
+      </div>
+      <div><label class="f">形式</label>
+        <select id="fForm">
+          <option value="button">button · 按钮横排</option>
+          <option value="card">card · 图文卡片</option>
+          <option value="text">text · 纯文字链接</option>
+          <option value="image">image · 图片横幅</option>
+        </select>
+      </div>
+      <div><label class="f">排序（越小越前）</label><input type="text" id="fOrder" placeholder="10"></div>
+      <div><label class="f">启用</label>
+        <select id="fEnabled"><option value="1">启用</option><option value="0">停用</option></select>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="btnApply">写入本地列表</button>
+      <button class="btn ghost" id="btnCancel">取消</button>
+    </div>
+  </div>
+
+  <div id="listWrap"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var state = { items: [], token: '', all: false, editId: null };
+  var $ = function(id){ return document.getElementById(id); };
+
+  function toast(msg){
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+
+  function labels(){
+    var posMap = { top:'顶部横排', side:'侧栏', bottom:'页脚上方', float:'悬浮' };
+    var formMap = { button:'按钮', card:'卡片', text:'文字', image:'图片' };
+    return { pos: posMap, form: formMap };
+  }
+
+  function render(){
+    var L = labels();
+    var wrap = $('listWrap');
+    var groups = ['top','side','bottom','float'];
+    var html = '';
+    groups.forEach(function(pos){
+      var list = state.items.filter(function(a){ return a.position === pos; })
+        .sort(function(x,y){ return (x.order||100) - (y.order||100); });
+      html += '<div class="panel pos">';
+      html += '<div class="pos-h"><b>' + L.pos[pos] + '</b><span>position=' + pos + ' · ' + list.length + ' 条</span></div>';
+      if (!list.length){
+        html += '<div class="empty">该位置暂无广告</div>';
+      } else {
+        html += '<div class="ads">';
+        list.forEach(function(a){
+          html += '<div class="ad' + (a.enabled ? '' : ' off') + '">';
+          if (a.badge) html += '<span class="badge">' + esc(a.badge) + '</span>';
+          html += '<div class="t">' + esc(a.title || '(无标题)') + '</div>';
+          if (a.sub) html += '<div class="s">' + esc(a.sub) + '</div>';
+          if (a.href) html += '<div class="h">' + esc(a.href) + '</div>';
+          html += '<div class="meta">形式：' + (L.form[a.form] || a.form) + ' · 排序 ' + (a.order||100) + ' · ' + (a.source === 'builtin' ? '内置兜底' : '后台配置') + '</div>';
+          html += '<div class="ops">';
+          html += '<button class="btn ghost" data-act="edit" data-id="' + esc(a.id) + '">编辑</button>';
+          html += '<button class="btn ghost" data-act="toggle" data-id="' + esc(a.id) + '">' + (a.enabled ? '停用' : '启用') + '</button>';
+          if (a.source !== 'builtin') html += '<button class="btn danger" data-act="del" data-id="' + esc(a.id) + '">删除</button>';
+          html += '</div></div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    wrap.innerHTML = html;
+  }
+
+  function setKv(stateText, bad){
+    var el = $('kvState');
+    el.textContent = stateText;
+    el.className = 'pill' + (bad ? ' bad' : '');
+  }
+
+  function load(all){
+    var headers = {};
+    if (all && state.token) headers['X-Admin-Token'] = state.token;
+    var url = '/api/ads' + (all && state.token ? '?all=1' : '');
+    setKv('加载中…');
+    return fetch(url, { headers: headers, cache: 'no-store' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (!d || !d.ok) throw new Error((d && d.message) || '加载失败');
+        state.items = d.items || [];
+        state.all = !!(all && state.token);
+        setKv('数据源：' + (d.source === 'kv' ? '后台 KV' : '内置兜底') + ' · ' + (d.count||0) + ' 条', d.source !== 'kv');
+        render();
+        return d;
+      })
+      .catch(function(e){
+        setKv('加载失败', true);
+        toast(e.message || '加载失败');
+      });
+  }
+
+  function openEditor(ad){
+    $('editor').style.display = 'block';
+    state.editId = ad && ad.id ? ad.id : null;
+    $('editorTitle').textContent = state.editId ? ('编辑广告 · ' + state.editId) : '新增广告';
+    $('fId').value = ad && ad.id && ad.source !== 'builtin' ? ad.id : '';
+    $('fId').disabled = !!(ad && ad.source === 'builtin');
+    $('fTitle').value = (ad && ad.title) || '';
+    $('fSub').value = (ad && ad.sub) || '';
+    $('fHref').value = (ad && ad.href) || '';
+    $('fImage').value = (ad && ad.image) || '';
+    $('fBadge').value = (ad && ad.badge) || '';
+    $('fPos').value = (ad && ad.position) || 'top';
+    $('fForm').value = (ad && ad.form) || 'button';
+    $('fOrder').value = (ad && ad.order) || 10;
+    $('fEnabled').value = (ad && ad.enabled === false) ? '0' : '1';
+    $('editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function applyLocal(){
+    var id = $('fId').value.trim() || ('ad-' + Date.now().toString(36));
+    var item = {
+      id: id,
+      title: $('fTitle').value.trim(),
+      sub: $('fSub').value.trim(),
+      href: $('fHref').value.trim(),
+      image: $('fImage').value.trim(),
+      badge: $('fBadge').value.trim(),
+      position: $('fPos').value,
+      form: $('fForm').value,
+      order: parseInt($('fOrder').value, 10) || 100,
+      enabled: $('fEnabled').value === '1',
+      source: 'admin'
+    };
+    if (!item.title) { toast('请填写标题'); return; }
+    var idx = -1;
+    for (var i = 0; i < state.items.length; i++) if (state.items[i].id === state.editId) { idx = i; break; }
+    if (idx >= 0) state.items[idx] = item; else state.items.push(item);
+    $('editor').style.display = 'none';
+    render();
+    toast('已写入本地列表，点「保存到后台」生效');
+  }
+
+  function save(){
+    if (!state.token) { toast('请先输入管理令牌'); return; }
+    var payload = state.items
+      .filter(function(a){ return a.source !== 'builtin'; })
+      .map(function(a){
+        return {
+          id: a.id, title: a.title, sub: a.sub, href: a.href, image: a.image, badge: a.badge,
+          position: a.position, form: a.form, order: a.order, enabled: a.enabled, source: 'admin'
+        };
+      });
+    if (!payload.length && !state.all) { toast('当前显示的是内置兜底数据，请先验证令牌后编辑'); return; }
+    $('btnSave').disabled = true;
+    fetch('/api/ads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': state.token },
+      body: JSON.stringify({ items: payload })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (!d || !d.ok) throw new Error((d && d.message) || '保存失败');
+        toast('已保存 ' + (d.count || 0) + ' 条广告');
+        return load(true);
+      })
+      .catch(function(e){ toast(e.message || '保存失败'); })
+      .finally(function(){ $('btnSave').disabled = false; });
+  }
+
+  $('btnRefresh').addEventListener('click', function(){ load(state.all); });
+  $('btnNew').addEventListener('click', function(){ openEditor(null); });
+  $('btnEdit').addEventListener('click', function(){
+    if (!state.items.length) { toast('暂无可编辑条目'); return; }
+    openEditor(state.items.filter(function(a){ return a.source !== 'builtin'; })[0] || state.items[0]);
+  });
+  $('btnSave').addEventListener('click', save);
+  $('btnCancel').addEventListener('click', function(){ $('editor').style.display = 'none'; });
+  $('btnApply').addEventListener('click', applyLocal);
+  $('btnVerify').addEventListener('click', function(){
+    state.token = $('token').value.trim();
+    if (!state.token) { toast('请输入令牌'); return; }
+    try { sessionStorage.setItem('gc_admin_token', state.token); } catch (e) {}
+    load(true).then(function(d){ if (d) toast('已验证，可编辑并保存'); });
+  });
+
+  $('listWrap').addEventListener('click', function(ev){
+    var btn = ev.target.closest ? ev.target.closest('button[data-act]') : null;
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    var act = btn.getAttribute('data-act');
+    var ad = state.items.filter(function(a){ return a.id === id; })[0];
+    if (!ad) return;
+    if (act === 'edit') { openEditor(ad); return; }
+    if (!state.token) { toast('请先输入管理令牌'); return; }
+    if (act === 'toggle') {
+      ad.enabled = !ad.enabled;
+      ad.source = ad.source === 'builtin' ? 'admin' : ad.source;
+      render();
+      toast('已切换，点「保存到后台」生效');
+      return;
+    }
+    if (act === 'del') {
+      if (!confirm('确定删除广告「' + (ad.title || id) + '」？')) return;
+      state.items = state.items.filter(function(a){ return a.id !== id; });
+      render();
+      toast('已从本地列表移除，点「保存到后台」生效');
+    }
+  });
+
+  try {
+    var saved = sessionStorage.getItem('gc_admin_token');
+    if (saved) { state.token = saved; $('token').value = saved; }
+  } catch (e) {}
+
+  load(!!state.token);
+})();
+</script>
+</body>
+</html>

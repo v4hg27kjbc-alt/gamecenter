@@ -6735,6 +6735,24 @@ body.gc-pop > .app-container{animation:gcPagePop .8s cubic-bezier(.2,1.25,.35,1)
     </p>
   </template>
 
+  <!-- ===== 站内横幅容器：内容由 /api/banners 渲染（position=launch，内置兜底见 gcBanners 脚本） ===== -->
+  <style id="gcBannersStyle">
+  .gc-launch{display:none;align-items:center;gap:14px;margin:0 0 var(--space-16,16px);padding:13px 16px;border-radius:16px;
+    background:linear-gradient(135deg,#eef4ff,#f7f0ff);border:1px solid #dbe4fb;box-shadow:0 8px 22px rgba(76,29,149,.07);flex-wrap:wrap}
+  .gc-launch.show{display:flex}
+  .gc-launch .gl-flag{flex:none;font-size:11.5px;font-weight:800;letter-spacing:.4px;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2);
+    border-radius:20px;padding:3px 10px}
+  .gc-launch .gl-txt{flex:1;min-width:180px}
+  .gc-launch .gl-txt b{display:block;font-size:14.5px;color:#12243a}
+  .gc-launch .gl-txt span{font-size:12.5px;color:#54657d;line-height:1.5}
+  .gc-launch .gl-go{flex:none;text-decoration:none;color:#fff;font-size:13px;font-weight:700;border-radius:11px;padding:9px 16px;white-space:nowrap;
+    background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 8px 18px rgba(102,126,234,.3);transition:transform .2s ease}
+  .gc-launch .gl-go:hover{transform:translateY(-1px)}
+  .gc-launch .gl-close{flex:none;border:0;background:none;color:#8a98ab;font-size:16px;line-height:1;cursor:pointer;padding:2px 4px}
+  body.light-mode .gc-launch{background:linear-gradient(135deg,#f4f8ff,#faf5ff);border-color:#e3e9f7}
+  </style>
+  <div class="gc-launch" id="gcLaunchBanner" role="status" aria-live="polite"></div>
+
   <div class="hero-banner" id="heroBanner">
     <!-- Slides injected by JS -->
     <div class="hero-dots" id="heroDots"></div>
@@ -11240,13 +11258,120 @@ function dismissUpdateBanner() {
   if (banner) banner.classList.remove('visible');
   localStorage.setItem('aviation-update-20260827-v53', '1');
 }
+
+/* ============================================================
+ * 站内横幅统一数据源（/api/banners）
+ * 后台维护：ads.html / 后台横幅配置；前端只读渲染。
+ * 接口不可用或未配置时回落到 GC_BUILTIN_BANNERS，保证线上永不空窗。
+ * 字段：id / title / sub / href / position / form / enabled / order / source
+ * ============================================================ */
+var GC_BUILTIN_BANNERS = [
+  {
+    id: 'builtin-launch-a320',
+    title: '新上架 · 空客 A320 系列综合研究报告',
+    sub: '约 3.5 万字，¥5 一次购买长期可读，含唯一追踪码',
+    href: '/pay/a320.html',
+    position: 'launch',
+    form: 'strip',
+    enabled: true,
+    order: 10,
+    source: 'builtin'
+  }
+];
+var gcBannersPromise = null;
+function gcBannerItems() {
+  if (gcBannersPromise) return gcBannersPromise;
+  gcBannersPromise = fetch('/api/banners', { headers: { Accept: 'application/json' }, cache: 'default' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { return (d && d.ok && Array.isArray(d.items)) ? d.items : null; })
+    .catch(function () { return null; });
+  return gcBannersPromise;
+}
+
+// 新上架横幅（position=launch）：优先接口，其次内置兜底
+function initLaunchBanner() {
+  var box = document.getElementById('gcLaunchBanner');
+  if (!box) return;
+  gcBannerItems().then(function (items) {
+    var pool = (items && items.length ? items : GC_BUILTIN_BANNERS) || [];
+    var hit = pool.filter(function (b) { return b.position === 'launch' && b.enabled !== false; })[0];
+    if (!hit) return;
+    var dkey = 'gc-banner-dismiss-' + (hit.id || 'launch');
+    try { if (localStorage.getItem(dkey) === '1') return; } catch (e) {}
+
+    box.innerHTML = '';
+    var flag = document.createElement('span');
+    flag.className = 'gl-flag';
+    flag.textContent = 'NEW';
+    box.appendChild(flag);
+
+    var txt = document.createElement('div');
+    txt.className = 'gl-txt';
+    var b = document.createElement('b');
+    b.textContent = hit.title || '';
+    txt.appendChild(b);
+    if (hit.sub) {
+      var sp = document.createElement('span');
+      sp.textContent = hit.sub;
+      txt.appendChild(sp);
+    }
+    box.appendChild(txt);
+
+    if (hit.href) {
+      var go = document.createElement('a');
+      go.className = 'gl-go';
+      go.href = hit.href;
+      go.textContent = '去解锁 →';
+      box.appendChild(go);
+    }
+
+    var cl = document.createElement('button');
+    cl.type = 'button';
+    cl.className = 'gl-close';
+    cl.setAttribute('aria-label', '关闭');
+    cl.innerHTML = '&times;';
+    cl.addEventListener('click', function () {
+      box.classList.remove('show');
+      try { localStorage.setItem(dkey, '1'); } catch (e) {}
+    });
+    box.appendChild(cl);
+
+    box.classList.add('show');
+  });
+}
+
 function initUpdateBanner() {
   if (localStorage.getItem('aviation-update-20260827-v53')) return;
   const banner = document.getElementById('updateBanner');
   const bannerText = document.getElementById('updateBannerText');
   if (!banner || !bannerText) return;
-  bannerText.innerHTML = t('updateBanner');
-  banner.classList.add('visible');
+
+  const showFallback = function () {
+    bannerText.innerHTML = t('updateBanner');
+    banner.classList.add('visible');
+  };
+
+  gcBannerItems().then(function (items) {
+    const hit = (items || []).filter(function (b) { return b.position === 'top' && b.enabled !== false; })[0];
+    if (!hit || !hit.title) { showFallback(); return; }
+    const hi = document.createElement('span');
+    hi.className = 'banner-highlight';
+    hi.textContent = hit.title;
+    bannerText.innerHTML = '';
+    bannerText.appendChild(hi);
+    if (hit.sub) {
+      const sep = document.createElement('span');
+      sep.className = 'banner-sep';
+      sep.textContent = ' · ';
+      bannerText.appendChild(sep);
+      bannerText.appendChild(document.createTextNode(hit.sub));
+    }
+    if (hit.href) {
+      bannerText.style.cursor = 'pointer';
+      bannerText.addEventListener('click', function () { location.href = hit.href; });
+    }
+    banner.classList.add('visible');
+  });
 }
 
 // ===== AI 航空问答 =====
@@ -13195,6 +13320,7 @@ showToast();
   setTimeout(boot, 2000);
 })();
 initUpdateBanner();
+initLaunchBanner();
 createStars();
 renderCountryBar();
 renderAirlineLogosBar();
@@ -23534,60 +23660,150 @@ var CATALOG = [
 </div>
 <!-- GCX-PROD-FEATURES: 补齐 #gcAdminPanel 缺失的闭合标签。原文件该 div 从未闭合，把 推广位/多端互联浮钮/扫码面板/C919提示条/新增样式与脚本 全吞进 display:none 的后台容器，导致这些 UI 在线上不可见。 -->
 <style id="gcPromo5Style">
-#gcPromo5{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:9998;width:min(560px,calc(100vw - 32px));
+#gcPromo5{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:9998;width:min(600px,calc(100vw - 26px));
   background:linear-gradient(135deg,#ffffff,#f6f9ff);border:1px solid #dbe7fb;border-radius:18px;
-  box-shadow:0 18px 48px rgba(18,42,84,.18);padding:16px 18px;display:flex;gap:14px;align-items:center;
-  opacity:0;pointer-events:none;transition:transform .5s cubic-bezier(.22,1,.36,1),opacity .35s ease;}
+  box-shadow:0 18px 48px rgba(18,42,84,.18);padding:13px 13px 11px;opacity:0;pointer-events:none;
+  transition:transform .5s cubic-bezier(.22,1,.36,1),opacity .35s ease;max-height:calc(100vh - 40px);overflow:auto;}
 #gcPromo5.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}
-#gcPromo5 .gp-tag{flex:none;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:800;font-size:15px;letter-spacing:.5px;
-  animation:gpPulse 2.4s ease-in-out infinite;}
-@keyframes gpPulse{0%,100%{box-shadow:0 0 0 0 rgba(102,126,234,.35);}50%{box-shadow:0 0 0 10px rgba(102,126,234,0);}}
-#gcPromo5 .gp-txt{flex:1;min-width:0;}
-#gcPromo5 .gp-txt b{display:block;font-size:14.5px;color:#12243a;margin-bottom:3px;}
-#gcPromo5 .gp-txt span{font-size:12.5px;color:#54657d;line-height:1.5;}
-#gcPromo5 .gp-act{display:flex;flex-direction:column;gap:7px;flex:none;}
-#gcPromo5 a.gp-go{padding:9px 16px;border-radius:11px;text-decoration:none;color:#fff;font-size:13px;font-weight:700;white-space:nowrap;
-  background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 8px 18px rgba(102,126,234,.3);transition:transform .2s ease,box-shadow .2s ease;}
-#gcPromo5 a.gp-go:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(102,126,234,.38);}
-#gcPromo5 button.gp-close{background:none;border:0;color:#8a98ab;font-size:12px;cursor:pointer;padding:2px;}
-@media(max-width:560px){#gcPromo5{flex-wrap:wrap;}#gcPromo5 .gp-act{flex-direction:row;width:100%;justify-content:flex-end;}}
+#gcPromo5 .gp-head{display:flex;align-items:center;gap:10px;padding:2px 4px 10px;border-bottom:1px solid #e8eefb;margin-bottom:9px;}
+#gcPromo5 .gp-head .gp-ttl{flex:1;min-width:0;}
+#gcPromo5 .gp-head b{display:block;font-size:14.5px;color:#12243a;}
+#gcPromo5 .gp-head span{font-size:11.5px;color:#7f8da2;}
+#gcPromo5 .gp-head .gp-x{border:0;background:none;color:#8a98ab;font-size:18px;line-height:1;cursor:pointer;padding:0 4px;}
+#gcPromo5 .gp-doc{border:1px solid #e6edfa;border-radius:13px;background:#fff;margin-bottom:8px;overflow:hidden;transition:border-color .2s ease,box-shadow .2s ease;}
+#gcPromo5 .gp-doc.on{border-color:#c7d2fe;box-shadow:0 8px 20px rgba(102,126,234,.13);}
+#gcPromo5 .gp-sum{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+#gcPromo5 .gp-sum .gp-idx{flex:none;width:24px;height:24px;border-radius:8px;background:#eef2ff;color:#4c1d95;font-size:12px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;}
+#gcPromo5 .gp-sum .gp-name{flex:1;min-width:0;}
+#gcPromo5 .gp-sum .gp-name b{display:block;font-size:13.5px;color:#12243a;line-height:1.45;}
+#gcPromo5 .gp-sum .gp-name span{font-size:11.5px;color:#7f8da2;}
+#gcPromo5 .gp-price{flex:none;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:20px;padding:2px 10px;}
+#gcPromo5 .gp-price.free{background:#ecfdf5;color:#047857;border:1px solid #bbf7d0;}
+#gcPromo5 .gp-arrow{flex:none;color:#9aa8bd;font-size:12px;transition:transform .25s ease;}
+#gcPromo5 .gp-doc.on .gp-arrow{transform:rotate(90deg);}
+#gcPromo5 .gp-detail{display:none;padding:0 12px 12px;border-top:1px dashed #e8eefb;}
+#gcPromo5 .gp-doc.on .gp-detail{display:block;animation:gpIn .26s ease;}
+@keyframes gpIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+#gcPromo5 .gp-detail p{font-size:12.5px;color:#54657d;line-height:1.68;margin:9px 0;}
+#gcPromo5 .gp-detail ul{margin:0 0 10px 17px;}
+#gcPromo5 .gp-detail li{font-size:12.5px;color:#54657d;margin-bottom:4px;}
+#gcPromo5 .gp-btns{display:flex;gap:8px;flex-wrap:wrap;}
+#gcPromo5 .gp-btns a{flex:1 1 132px;text-align:center;text-decoration:none;font-size:12.5px;font-weight:700;border-radius:10px;padding:9px 12px;}
+#gcPromo5 a.gp-buy{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 8px 16px rgba(102,126,234,.25);}
+#gcPromo5 a.gp-read{border:1px solid #cfe0f7;color:#2f6fd0;background:#fff;}
+#gcPromo5 .gp-foot{font-size:11.5px;color:#9aa8bd;padding:2px 4px;line-height:1.5;}
+@media(max-width:560px){#gcPromo5{padding:11px 10px 9px;}#gcPromo5 .gp-btns a{flex:1 1 100%;}}
 </style>
-<div id="gcPromo5" role="dialog" aria-label="限时活动">
-  <div class="gp-tag">¥5</div>
-  <div class="gp-txt">
-    <b>限时活动 · 只需 ¥5 解锁深度研读</b>
-    <span>波音 737 系列综合研究报告全文开放，一次购买长期可读，含唯一追踪码。</span>
+<div id="gcPromo5" role="dialog" aria-label="研读文档">
+  <div class="gp-head">
+    <div class="gp-ttl">
+      <b>深度研读 · 点开看介绍与付款</b>
+      <span>一次购买长期可读，含唯一追踪码水印</span>
+    </div>
+    <button class="gp-x" type="button" id="gcPromo5Close" aria-label="关闭">&times;</button>
   </div>
-  <div class="gp-act">
-    <a class="gp-go" href="/activity.html">去看看</a>
-    <button class="gp-close" type="button" id="gcPromo5Close">本次不再提示</button>
+
+  <div class="gp-doc" data-doc="d1">
+    <div class="gp-sum">
+      <span class="gp-idx">1</span>
+      <div class="gp-name"><b>波音 737 系列综合研究报告</b><span>737-100 → MAX 10 · 约 6.2 万字</span></div>
+      <span class="gp-price">¥5</span>
+      <span class="gp-arrow">&#9654;</span>
+    </div>
+    <div class="gp-detail">
+      <p>从 737-100 首飞讲到 MAX 10，逐代梳理 Classic、NG、MAX 的机身/机翼/发动机演进，含典型事故链与适航整改要点，附录含主要运营商装机与订单对照。</p>
+      <ul>
+        <li>适合：机型爱好者、飞行模拟玩家、民航从业入门</li>
+        <li>交付：在线全文阅读 + 唯一追踪码，可导出</li>
+      </ul>
+      <div class="gp-btns">
+        <a class="gp-buy" href="/pay/737.html">付款解锁 ¥5</a>
+        <a class="gp-read" href="/read/737.html">已有券码 · 进入阅读</a>
+      </div>
+    </div>
   </div>
+
+  <div class="gp-doc" data-doc="d2">
+    <div class="gp-sum">
+      <span class="gp-idx">2</span>
+      <div class="gp-name"><b>空客 A320 系列综合研究报告</b><span>A300 谱系 → A320 家族 → A321XLR · 约 3.5 万字</span></div>
+      <span class="gp-price">¥5</span>
+      <span class="gp-arrow">&#9654;</span>
+    </div>
+    <div class="gp-detail">
+      <p>新上架。梳理空客从 A300 到 A320 家族的完整技术路线，讲解电传操纵与通用驾驶舱如何重塑窄体机市场，并对比 737 的工程取舍，附 A320neo/A321XLR 订单与运营数据。</p>
+      <ul>
+        <li>适合：与 737 报告搭配对读，理解两大窄体机路线差异</li>
+        <li>交付：在线全文阅读 + 唯一追踪码，可导出</li>
+      </ul>
+      <div class="gp-btns">
+        <a class="gp-buy" href="/pay/a320.html">付款解锁 ¥5</a>
+        <a class="gp-read" href="/read/a320.html">已有券码 · 进入阅读</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="gp-doc" data-doc="d3">
+    <div class="gp-sum">
+      <span class="gp-idx">3</span>
+      <div class="gp-name"><b>添加可以管理商品</b><span>后台操作指南 · 商品新增与上下架</span></div>
+      <span class="gp-price free">免费</span>
+      <span class="gp-arrow">&#9654;</span>
+    </div>
+    <div class="gp-detail">
+      <p>说明后台如何新增一件可售卖商品：填写名称/价格/简介、绑定对应研读项目、选择是否需券码鉴权、设置上架状态与排序；券码可在后台选择关联到不同项目。</p>
+      <ul>
+        <li>权限：需后台管理员登录</li>
+        <li>说明：本文档免费，无需付款</li>
+      </ul>
+      <div class="gp-btns">
+        <a class="gp-buy" href="https://henry126923-admincenter.pages.dev/" target="_blank" rel="noopener">去后台管理商品</a>
+        <a class="gp-read" href="/ads.html">广告与横幅设置</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="gp-foot">券码只显示一次：登录后到「我的 → 我购买的商品」点「进入阅读」可随时找回。</div>
 </div>
 <script id="gcPromo5Script">
 (function(){
   try{
-    /* v3.4：每次进入都展示活动横幅，同一次浏览内点过关闭才不再打扰（sessionStorage 会话级） */
     var KEY='gc_promo5_session_v34';
-    try{ if(sessionStorage.getItem(KEY)==='1'){ /* 本会话已看过 */ } }catch(e){}
-    if((function(){try{return sessionStorage.getItem(KEY)==='1';}catch(e){return false;}})()) { /* noop */ }
     var seen=false; try{ seen = sessionStorage.getItem(KEY)==='1'; }catch(e){}
-    if(seen) { /* 本会话已关闭 */ }
-    if(!seen){
-      var box=document.getElementById('gcPromo5');
-      if(box){
-        setTimeout(function(){ box.classList.add('show'); }, 1500);
-        var hide=function(remember){
-          box.classList.remove('show');
-          if(remember){ try{ sessionStorage.setItem(KEY,'1'); }catch(e){} }
-        };
-        var c=document.getElementById('gcPromo5Close');
-        if(c) c.addEventListener('click',function(){ hide(true); });
-        var go=box.querySelector('a.gp-go');
-        if(go) go.addEventListener('click',function(){ hide(true); });
-        setTimeout(function(){ if(box.classList.contains('show')) hide(true); }, 14000);
-      }
+    if(seen) return;
+    var box=document.getElementById('gcPromo5');
+    if(!box) return;
+    var timer=null;
+    var hide=function(remember){
+      box.classList.remove('show');
+      if(timer){ clearTimeout(timer); timer=null; }
+      if(remember){ try{ sessionStorage.setItem(KEY,'1'); }catch(e){} }
+    };
+    setTimeout(function(){ box.classList.add('show'); }, 1500);
+
+    /* 三份文档分别展开：单开模式，点同一份可收起 */
+    var docs=box.querySelectorAll('.gp-doc');
+    for(var i=0;i<docs.length;i++){
+      (function(doc){
+        var sum=doc.querySelector('.gp-sum');
+        if(!sum) return;
+        sum.addEventListener('click',function(ev){
+          var on=doc.classList.contains('on');
+          for(var j=0;j<docs.length;j++) docs[j].classList.remove('on');
+          if(!on) doc.classList.add('on');
+          if(timer){ clearTimeout(timer); timer=null; }
+          void ev;
+        });
+      })(docs[i]);
     }
+
+    var c=document.getElementById('gcPromo5Close');
+    if(c) c.addEventListener('click',function(){ hide(true); });
+    var links=box.querySelectorAll('a');
+    for(var k=0;k<links.length;k++) links[k].addEventListener('click',function(){ hide(true); });
+
+    timer=setTimeout(function(){ if(box.classList.contains('show')) hide(true); }, 20000);
   }catch(e){}
 })();
 </script>
