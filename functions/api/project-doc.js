@@ -8,6 +8,7 @@
  *   3. 通过后返回正文，并在正文头部插入唯一追踪码（=券码本身），用于追溯泄露来源
  */
 import { normProjectKeys, couponAllowsProject, PROJECTS, projectTitle } from './_lib/data/projects.js';
+import { productGate, PRODUCT_OFFLINE_MESSAGE } from './_lib/product-gate.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -46,6 +47,12 @@ export async function onRequestPost({ request, env }) {
   let code = normCode(body.code);
   let reqProject = (normProjectKeys([body.project || 'b737'])[0]) || 'b737';
 
+  // 商品下架守卫（v5.5）：后台停用该商品后，阅读与下载一律拦截
+  {
+    const gate = await productGate(env, reqProject);
+    if (gate.offline) return bad('product_offline', PRODUCT_OFFLINE_MESSAGE);
+  }
+
   // 订单模式：兑换码只展示一次，事后可凭订单号取回阅读权限
   const orderId = String(body.order || '').trim();
   if (orderId && code.length < 6) {
@@ -68,8 +75,8 @@ export async function onRequestPost({ request, env }) {
     if (Number.isFinite(t) && t < Date.now()) return bad('coupon_expired', '该券码已过期');
   }
   if (!couponAllowsProject(rec, reqProject)) {
-    return bad('coupon_project_mismatch', '该券码仅可用于：' +
-      (Array.isArray(rec.projectKeys) ? rec.projectKeys.map(projectTitle).join('、') : ''), { projectKeys: rec.projectKeys || [] });
+    return bad('coupon_project_mismatch', '券码当前无权限：该券码仅可用于 ' +
+      (Array.isArray(rec.projectKeys) ? rec.projectKeys.map(projectTitle).join('、') : '') + '，当前文档不在授权范围内', { projectKeys: rec.projectKeys || [] });
   }
 
   const hit = PROJECTS.filter((p) => p.key === reqProject)[0];
@@ -116,6 +123,12 @@ export async function onRequestGet({ request, env }) {
 
   const hit = PROJECTS.filter((p) => p.key === projectKey)[0];
   if (!hit) return json({ ok: false, code: 'bad_project', message: '项目不存在' }, 400);
+
+  // 商品下架守卫（v5.5）
+  {
+    const gate = await productGate(env, projectKey);
+    if (gate.offline) return json({ ok: false, code: 'product_offline', message: PRODUCT_OFFLINE_MESSAGE }, 409);
+  }
 
   let markdown = '';
   try {
@@ -170,7 +183,7 @@ export async function onRequestGet({ request, env }) {
   const rec = await kv.get('coupon:code:' + code, { type: 'json' });
   if (!rec) return json({ ok: false, code: 'coupon_not_found', message: '券码不存在' }, 404);
   if (String(rec.status || '') === 'revoked') return json({ ok: false, code: 'coupon_revoked', message: '该券码已作废' }, 403);
-  if (!couponAllowsProject(rec, projectKey)) return json({ ok: false, code: 'coupon_project_mismatch', message: '该券码不适用于该项目' }, 403);
+  if (!couponAllowsProject(rec, projectKey)) return json({ ok: false, code: 'coupon_project_mismatch', message: '券码当前无权限' }, 403);
 
   const trace = [
     '> **本份文档为付费授权副本**',

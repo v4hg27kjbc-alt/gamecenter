@@ -17,6 +17,7 @@
  */
 
 import { normProjectKeys, couponAllowsProject, projectTitle } from './_lib/data/projects.js';
+import { productGate, PRODUCT_OFFLINE_MESSAGE } from './_lib/product-gate.js';
 
 const KV_NAME = 'SMS_KV';
 const MAX_COUPONS_PER_USER = 200;
@@ -220,12 +221,17 @@ export async function onRequest(context) {
     const reqKey = String(body.projectKey || '').trim().toLowerCase();
     if (reqKey) {
       if (!projList.length) {
-        return bad('coupon_no_project', origin, { hint: '该券码未关联任何项目，暂不可用于此文档，请联系站长补关联' });
+        return bad('coupon_no_project', origin, { message: '券码当前无权限', hint: '该券码未关联任何项目，暂不可用于此文档，请联系站长补关联' });
       }
       if (!couponAllowsProject(rec, reqKey)) {
         const names = projList.map(projectTitle).join('、');
-        return bad('coupon_project_mismatch', origin, { hint: '该券码仅可用于：' + names, allowed: projList });
+        return bad('coupon_project_mismatch', origin, { message: '券码当前无权限', hint: '该券码仅可用于：' + names, allowed: projList });
       }
+    }
+    // 商品下架联动：券码兑换同样拦截
+    if (reqKey) {
+      const gate = await productGate(env, reqKey);
+      if (gate.offline) return bad('product_offline', origin, { message: PRODUCT_OFFLINE_MESSAGE });
     }
     const projectMismatch = false;
 

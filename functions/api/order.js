@@ -16,6 +16,7 @@
  * 券码一旦生成即可在 /read/737.html 兑换阅读（正文带唯一追踪码水印）。
  */
 import { normProjectKeys, projectTitle, isFreeProject } from './_lib/data/projects.js';
+import { productGate, PRODUCT_OFFLINE_MESSAGE } from './_lib/product-gate.js';
 
 const KV_NAME = 'SMS_KV';
 const INDEX_KEY = 'order:index:v1';
@@ -507,6 +508,11 @@ export async function onRequestPost({ request, env }) {
 
   if (action === 'create') {
     const project = (normProjectKeys([body.project || 'b737'])[0]) || 'b737';
+    // 商品下架守卫（v5.5）：下架商品禁止下单与付款
+    {
+      const gate = await productGate(env, project);
+      if (gate.offline) return bad('product_offline', PRODUCT_OFFLINE_MESSAGE);
+    }
     const contact = String(body.contact || '').slice(0, 100).trim();
     if (!contact) return bad('bad_contact', '请填写手机号或邮箱，便于核对到账与补发');
     /* v3.5：免费项目（C919）不允许下单购买 */
