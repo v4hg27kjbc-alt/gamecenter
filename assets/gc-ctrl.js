@@ -405,7 +405,12 @@
       var first = n.querySelector('img');
       if (first && first.getAttribute('src') !== img) first.setAttribute('src', img);
     }
-    if (c.title) n.setAttribute('aria-label', c.title);
+    if (c.title) {
+      // 主视觉无可见文字位：后台文案同步到 aria-label 与图片 alt，保证改文案可被读到
+      n.setAttribute('aria-label', c.title);
+      var altImg = n.querySelector('img');
+      if (altImg && altImg.getAttribute('alt') !== c.title) altImg.setAttribute('alt', c.title);
+    }
     return n;
   }
 

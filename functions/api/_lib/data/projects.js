@@ -50,10 +50,12 @@ export function normProjectKeys(input) {
   return out;
 }
 
-// 券码是否允许用于该项目：空列表 = 不限制（通用券）
+// 券码是否允许用于该项目：勾选多个项目则每个均可使用，仅勾一个则只有该项目可用，未关联则一律不放行
 export function couponAllowsProject(rec, projectKey) {
-  const list = Array.isArray(rec && rec.projectKeys) ? rec.projectKeys : [];
-  if (!list.length) return true;
+  // v3.6：券码必须真实关联项目才授权；未关联任何项目的券码一律不放行
+  //（与 coupon.js redeem 的 coupon_no_project 拦截保持一致，文案统一「券码当前无权限」）
+  const list = Array.isArray(rec && rec.projectKeys) ? rec.projectKeys.filter(Boolean) : [];
+  if (!list.length) return false;
   const k = String(projectKey || '').trim().toLowerCase();
   if (!k) return false;
   return list.indexOf(k) >= 0;

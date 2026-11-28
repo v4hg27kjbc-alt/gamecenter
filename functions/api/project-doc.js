@@ -24,6 +24,7 @@ function json(data, status) {
 }
 const ok = (d) => json(Object.assign({ ok: true }, d));
 const bad = (code, message, extra) => json(Object.assign({ ok: false, code, message }, extra || {}), 400);
+const deny = (code, message, extra) => json(Object.assign({ ok: false, code, message }, extra || {}), 403);
 
 function kvOf(env) {
   const kv = env && env.SMS_KV;
@@ -75,8 +76,11 @@ export async function onRequestPost({ request, env }) {
     if (Number.isFinite(t) && t < Date.now()) return bad('coupon_expired', '该券码已过期');
   }
   if (!couponAllowsProject(rec, reqProject)) {
-    return bad('coupon_project_mismatch', '券码当前无权限：该券码仅可用于 ' +
-      (Array.isArray(rec.projectKeys) ? rec.projectKeys.map(projectTitle).join('、') : '') + '，当前文档不在授权范围内', { projectKeys: rec.projectKeys || [] });
+    const pk = Array.isArray(rec.projectKeys) ? rec.projectKeys.filter(Boolean) : [];
+    const why = pk.length
+      ? '该券码仅可用于 ' + pk.map(projectTitle).join('、') + '，当前文档不在授权范围内'
+      : '该券码未关联任何项目，请联系站长补关联后使用';
+    return deny('coupon_project_mismatch', '券码当前无权限：' + why, { projectKeys: pk });
   }
 
   const hit = PROJECTS.filter((p) => p.key === reqProject)[0];

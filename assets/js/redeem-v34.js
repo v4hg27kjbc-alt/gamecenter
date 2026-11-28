@@ -42,9 +42,16 @@
     unauthorized: '请先登录后再兑换券码', coupon_not_found: '券码不存在，请核对后重试',
     coupon_used: '该券码已被使用，如有疑问请联系站长', coupon_revoked: '该券码已被作废',
     coupon_expired: '该券码已过期', coupon_invalid: '请输入完整的券码',
-    list_full: '券码数量已达上限', KV_UNAVAILABLE: '服务端存储未就绪，稍后再试'
+    list_full: '券码数量已达上限', KV_UNAVAILABLE: '服务端存储未就绪，稍后再试',
+    product_offline: '目前已下架，无法进行操作',
+    coupon_project_mismatch: '券码当前无权限', coupon_no_project: '券码当前无权限'
   };
   function msgOf(k) { return MSG[k] || ('兑换失败：' + (k || '未知错误')); }
+  /** 优先后端返回的 message（如「券码当前无权限」「目前已下架，无法进行操作」），无则按错误码兜底 */
+  function msgOfRes(res) {
+    if (res && typeof res.message === 'string' && res.message) return res.message;
+    return msgOf(res && (res.error || res.code));
+  }
 
   /* 全站唯一兑换实现：任何入口（个人中心 / 扫码落地 / 链接携带 / 外部调用）都走这里 */
   window.gcRedeemCode = function (raw, opts) {
@@ -77,7 +84,7 @@
       if (res && res.error === 'unauthorized') {
         try { localStorage.setItem(PENDING, code); } catch (e) {}
       }
-      tip(msgOf(res && res.error), true);
+      tip(msgOfRes(res), true);
       return res || { ok: false };
     }).catch(function () {
       if (btn) { btn.disabled = false; btn.textContent = btn.dataset.old || '立即兑换'; }

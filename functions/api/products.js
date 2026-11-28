@@ -15,6 +15,14 @@
  */
 
 import { isAdmin, json, fail, preflight, readBody, str, genId } from './_lib/admutils.js';
+
+// 与 banners / ads / notices 对齐：商品启停需即时生效，禁止浏览器与 CDN 缓存
+const NO_STORE = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+  'CDN-Cache-Control': 'no-store',
+  'Pragma': 'no-cache',
+  'Expires': '0'
+};
 import { remoteItems } from './_lib/remote.js';
 
 const KV_KEY = 'site:products:v1';
@@ -214,7 +222,7 @@ export async function onRequestGet(context) {
     offlineIds: base.filter(function (p) { return !p.enabled; }).map(function (p) { return p.id; }),
     source: srcLabel,
     kvAvailable: store.available
-  }, 200, request);
+  }, 200, request, NO_STORE);
 }
 
 export async function onRequestPost(context) {
@@ -298,8 +306,8 @@ export async function onRequestPost(context) {
   items = normalizeList(items);
   if (action === 'reset') {
     await env.NEWS_KV.delete(KV_KEY);
-    return json({ ok: true, items: BUILTIN_PRODUCTS.map(function (p, i) { return normalize(p, i); }), count: BUILTIN_PRODUCTS.length, source: 'builtin' }, 200, request);
+    return json({ ok: true, items: BUILTIN_PRODUCTS.map(function (p, i) { return normalize(p, i); }), count: BUILTIN_PRODUCTS.length, source: 'builtin' }, 200, request, NO_STORE);
   }
   await kvPut(env, items);
-  return json({ ok: true, items: items, count: items.length, source: 'kv' }, 200, request);
+  return json({ ok: true, items: items, count: items.length, source: 'kv' }, 200, request, NO_STORE);
 }
