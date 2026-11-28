@@ -1,0 +1,9 @@
+
+      .gc-my-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
+      .gc-my-entry{border:1px solid #dbe4f3;background:#f5f8ff;color:#2f6fd0;font-size:13px;font-weight:600;
+        padding:7px 16px;border-radius:999px;cursor:pointer;transition:.16s;line-height:1;-webkit-tap-highlight-color:transparent}
+      .gc-my-entry:hover{background:#eaf1ff;border-color:#bfd3f5;color:#1e4fa3}
+      .gc-my-entry:active{transform:scale(.97)}
+      .gc-my-sep{color:#c3cede;font-size:12px}
+      @media (max-width:520px){ .gc-my-entry{font-size:12.5px;padding:7px 14px} }
+    

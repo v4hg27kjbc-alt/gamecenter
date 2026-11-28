@@ -1,0 +1,15 @@
+
+  .gc-launch{display:none;align-items:center;gap:14px;margin:0 0 var(--space-16,16px);padding:13px 16px;border-radius:16px;
+    background:linear-gradient(135deg,#eef4ff,#f7f0ff);border:1px solid #dbe4fb;box-shadow:0 8px 22px rgba(76,29,149,.07);flex-wrap:wrap}
+  .gc-launch.show{display:flex}
+  .gc-launch .gl-flag{flex:none;font-size:11.5px;font-weight:800;letter-spacing:.4px;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2);
+    border-radius:20px;padding:3px 10px}
+  .gc-launch .gl-txt{flex:1;min-width:180px}
+  .gc-launch .gl-txt b{display:block;font-size:14.5px;color:#12243a}
+  .gc-launch .gl-txt span{font-size:12.5px;color:#54657d;line-height:1.5}
+  .gc-launch .gl-go{flex:none;text-decoration:none;color:#fff;font-size:13px;font-weight:700;border-radius:11px;padding:9px 16px;white-space:nowrap;
+    background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 8px 18px rgba(102,126,234,.3);transition:transform .2s ease}
+  .gc-launch .gl-go:hover{transform:translateY(-1px)}
+  .gc-launch .gl-close{flex:none;border:0;background:none;color:#8a98ab;font-size:16px;line-height:1;cursor:pointer;padding:2px 4px}
+  body.light-mode .gc-launch{background:linear-gradient(135deg,#f4f8ff,#faf5ff);border-color:#e3e9f7}
+  

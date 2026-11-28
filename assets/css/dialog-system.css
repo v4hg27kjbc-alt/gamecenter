@@ -1,0 +1,515 @@
+
+/* =====================================================================
+   v70 · 阶段④ —— 全站弹窗设计系统（Dialog System v2）
+   形态：桌面居中卡片(card，15 个) / 移动端底部抽屉(sheet) / 满屏面板(fullscreen，8 个)
+   动效：开闭非对称（开 340ms 弹簧回弹 · 关 200ms 干脆）+ 真实退场
+   交互：拖拽把手 + 边界橡皮筋（越界阻尼）+ 释放回弹 + 阈值关闭
+
+   落地方式：纯增量插入；所有规则以 body.dlg-sys 门控。
+             未挂类时全站行为与观感与阶段③产物完全一致。
+   侵入面：只新增「几何 / 视觉 / 动效 / 层级 / 遮罩 / 圆角」属性；
+           不改 display-布局轴、不改 width/max-height、不改 overflow/滚动策略、
+           不改任何旧类名、不改任何既有函数。
+   DOM 约定（由配套运行时脚本 dlg-system-runtime 为旧弹窗自动打标）：
+     [data-dlg]                  遮罩层（scrim），面板为后代 .dlg-panel
+     [data-dlg-self]             单元素弹窗（自身即遮罩＋面板）
+     [data-dlg-open]             开启态标记（运行时镜像旧类名 .visible/.show/.active）
+     [data-dlg-form=card|sheet|fullscreen]
+     [data-dlg-size="1|2|3|4"]   尺寸档 D1 380 / D2 620 / D3 760 / D4 960（供新弹窗使用）
+     [data-dlg-scrim="1|2|3"]    遮罩档（轻 / 标准 / 重）
+     .dlg-panel                  面板容器
+     .dlg-handle                 拖拽把手（移动端抽屉显示）
+     .dlg-close                  统一关闭按钮通用类
+
+   若干关键实现说明（勿轻易改动）：
+   1) 出场用 @keyframes 而非 transition：旧站弹窗以 display:none 隐藏（id 级规则
+      优先于本层），从 none→flex 的首帧没有可插值的起始状态，transition 不会触发；
+      动画在元素首次生成盒时必然播放，是唯一能保证「真实回弹」的方案。
+   2) 出场动画的 fill-mode 取 backwards（不是 both）：动画结束后不得继续占用
+      transform，否则拖拽写入的内联位移会被动画的长驻值覆盖。
+   3) 拖拽位移一律写「独立的 translate 属性」，而非 transform 简写/transform:string：
+      旧站若用 transform 做居中或自定义布局，本层的拖拽会与它叠加而非互相覆盖。
+   4) 本层「只增强不接管」：不声明 visibility / opacity / pointer-events / display
+      的基态值。旧站以 display:none 隐藏弹窗（id 级规则优先于本层），若某个开启态
+      未被运行时识别，元素仍按旧站原样渲染，不会出现「已弹出却不可见/不可点击」。
+   ===================================================================== */
+
+/* ---------- L1 · Token 层 ---------- */
+body.dlg-sys {
+  /* 层级：线上 11 种取值 → 6 档（既有取值一律保留，见变更清单映射表；
+     仅修复 4 个低于「页面装饰层」的弹窗，见 L4） */
+  --dlg-z-scrim: 9980;
+  --dlg-z-card: 10000;
+  --dlg-z-full: 10020;
+  --dlg-z-pop: 10040;
+  --dlg-z-top: 10060;
+  --dlg-z-toast: 99990;
+  /* 遮罩：9 种底色 → 3 档 */
+  --dlg-scrim-1: rgba(3, 7, 18, .44);
+  --dlg-scrim-2: rgba(3, 7, 18, .64);
+  --dlg-scrim-3: rgba(3, 7, 18, .86);
+  --dlg-blur-1: var(--glass-blur-thin);
+  --dlg-blur-2: var(--glass-blur-regular);
+  --dlg-blur-3: var(--glass-blur-thick) var(--glass-sat-strong);
+  /* 半径：卡片 / 抽屉 / 内嵌 —— 全站弹窗唯一来源 */
+  --dlg-radius-card: var(--radius-24);
+  --dlg-radius-sheet: var(--radius-28);
+  --dlg-radius-inner: var(--radius-16);
+  /* 尺寸：4 档宽度 + 高度上限（既有面板宽度不回改，档位供新弹窗引用） */
+  --dlg-w-1: 380px;
+  --dlg-w-2: 620px;
+  --dlg-w-3: 760px;
+  --dlg-w-4: 960px;
+  --dlg-w: var(--dlg-w-2);
+  --dlg-maxh: 88vh;
+  --dlg-sheet-maxh: 92vh;
+  /* 动效：开闭非对称 + 弹簧回弹（opening 过冲 ~2% 后回落，closing 无过冲） */
+  --dlg-open-dur: 340ms;
+  --dlg-close-dur: 200ms;
+  --dlg-ease-open: cubic-bezier(.22, 1.14, .32, 1.02);
+  --dlg-ease-close: cubic-bezier(.42, 0, .86, .32);
+  --dlg-enter-y: 22px;
+  --dlg-enter-scale: .965;
+  --dlg-exit-y: 44px;
+  /* 拖拽 / 橡皮筋 */
+  --dlg-handle-w: 44px;
+  --dlg-handle-h: 4px;
+  --dlg-handle-zone: 56px;
+  --dlg-rubber-max: 140px;
+  --dlg-dismiss-ratio: .32;
+  --dlg-handle-bg: var(--c-white-a350);
+  --dlg-safe-b: env(safe-area-inset-bottom, 0px);
+  --dlg-spring-dur: 560ms;
+  --dlg-rubber-k: .42;
+  --dlg-drag-k: 0px;
+}
+body.light-mode.dlg-sys {
+  --dlg-scrim-1: rgba(15, 23, 42, .30);
+  --dlg-scrim-2: rgba(15, 23, 42, .44);
+  --dlg-scrim-3: rgba(15, 23, 42, .62);
+  --dlg-handle-bg: rgba(15, 23, 42, .22);
+}
+
+/* ---------- L2 · 遮罩层（scrim） ----------
+   遮罩底色/模糊一并收归本层：加 !important 是为了压过 6 个弹窗写在
+   自身 id 规则上的旧底色（#feedbackOverlay / #privacyOverlay / #letterOverlay /
+   #coldfactOverlay / #cfDetailOverlay / #badgeDetailOverlay），
+   档位值仍由 --dlg-scrim-* 提供，故明暗主题同步生效。 */
+body.dlg-sys [data-dlg]:not([data-dlg-self]) {
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-20);
+  background: var(--dlg-scrim-c, var(--dlg-scrim-2)) !important;
+  -webkit-backdrop-filter: var(--dlg-blur-c, var(--dlg-blur-2)) !important;
+  backdrop-filter: var(--dlg-blur-c, var(--dlg-blur-2)) !important;
+  overscroll-behavior: contain;
+  animation: none;
+}
+/* 关键：单元素弹窗（[data-dlg-self]，满屏面板自身即面板）必须排除在上面的
+   「遮罩层」规则之外。它自带不透明底色与满屏几何，若被写入 scrim 底色、
+   居中轴或 20px 内边距，会直接改变其内部布局与观感。 */
+/* 设计系统「只增强不接管」：本层不写 visibility / opacity / pointer-events /
+   display 的基态值。旧站以 display:none 隐藏弹窗（id 级规则优先），一旦某个
+   开启态未被运行时识别，元素仍按旧站原样渲染，不会出现「已弹出却不可见/不可
+   点击」的功能性回归。 */
+body.dlg-sys [data-dlg][data-dlg-scrim="1"] {
+  --dlg-scrim-c: var(--dlg-scrim-1);
+  --dlg-blur-c: var(--dlg-blur-1);
+}
+body.dlg-sys [data-dlg][data-dlg-scrim="2"] {
+  --dlg-scrim-c: var(--dlg-scrim-2);
+  --dlg-blur-c: var(--dlg-blur-2);
+}
+body.dlg-sys [data-dlg][data-dlg-scrim="3"] {
+  --dlg-scrim-c: var(--dlg-scrim-3);
+  --dlg-blur-c: var(--dlg-blur-3);
+}
+body.dlg-sys [data-dlg]:not([data-dlg-self])[data-dlg-open] {
+  animation: dlg-scrim-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+}
+
+/* ---------- L2 · 面板（card 形态） ----------
+   同上：不写 opacity / transform 基态，避免与旧站的居中 transform、面板透明度
+   相互覆盖；位移一律走独立的 translate 属性（与旧站 transform 叠加而不互斥）。 */
+body.dlg-sys .dlg-panel {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: var(--dlg-radius-card);
+  animation: none;
+  transition: translate var(--dlg-spring-dur) var(--dlg-ease-open);
+}
+body.dlg-sys [data-dlg][data-dlg-open] .dlg-panel {
+  animation: dlg-card-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+}
+body.dlg-sys [data-dlg-size="1"] .dlg-panel { --dlg-w: var(--dlg-w-1); }
+body.dlg-sys [data-dlg-size="2"] .dlg-panel { --dlg-w: var(--dlg-w-2); }
+body.dlg-sys [data-dlg-size="3"] .dlg-panel { --dlg-w: var(--dlg-w-3); }
+body.dlg-sys [data-dlg-size="4"] .dlg-panel { --dlg-w: var(--dlg-w-4); }
+
+/* ---------- L2 · 单元素弹窗（fullscreen：自身即遮罩＋面板） ----------
+   这 8 个面板（aiChat / aiReview / newsPanel / quiz / badge / photoAi /
+   collectAnalysis / kg）在旧站即「满屏自撑」：id 或类级规则自带
+   inset:0 + display:none + flex-direction:column + 不透明底色，本层刻意
+   不写 display / inset / max-width / max-height / padding / background，
+   避免出现「面板底色被 scrim 色改写」「内缩后四周留出可点击空洞」两类回归；
+   只接管动效、圆角（缺口由 spread 遮罩阴影补齐）、关闭件与移动端拖拽。 */
+body.dlg-sys [data-dlg-self] {
+  position: fixed;
+  margin: auto;
+  border-radius: var(--dlg-radius-sheet);
+  box-shadow: 0 0 0 100vmax var(--dlg-scrim-3), var(--glass-shadow-lg, 0 24px 64px rgba(0, 0, 0, .45));
+  overscroll-behavior: contain;
+  animation: none;
+  transition: translate var(--dlg-spring-dur) var(--dlg-ease-open);
+}
+body.dlg-sys [data-dlg-self][data-dlg-open] {
+  animation: dlg-card-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+}
+
+/* ---------- L2 · 拖拽把手 ----------
+   视觉 44×4，命中区借 content-box + padding 放大到 44×28；
+   pointer-events:auto / touch-action:none 保证触摸端由本层接管拖拽。 */
+body.dlg-sys .dlg-handle {
+  display: none;
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--dlg-handle-w);
+  height: var(--dlg-handle-h);
+  /* 命中区高度对齐运行时拖拽热区 --dlg-handle-zone（56px）：视觉仍是 44×4，
+     手指落点范围是 44×56，避免「看得见却按不住」。 */
+  padding: calc(var(--dlg-handle-zone, 56px) / 2 - 3px) 0;
+  box-sizing: content-box;
+  background: var(--dlg-handle-bg);
+  background-clip: content-box;
+  border-radius: var(--radius-pill);
+  pointer-events: auto;
+  touch-action: none;
+  z-index: 12;
+}
+body.dlg-sys [data-dlg-form="sheet"] > .dlg-handle,
+body.dlg-sys [data-dlg-form="sheet"] .dlg-panel > .dlg-handle { display: block; }
+
+/* ---------- L2 · 统一关闭按钮 ----------
+   旧站关闭控件同名收敛：尺寸 / 形态 / 悬停反馈一致。 */
+body.dlg-sys .dlg-close,
+body.dlg-sys [data-dlg] :is(.modal-close, .ann-modal-close, .privacy-close, .cf-close,
+                            .cf-detail-close, .badge-detail-close, .ai-chat-close,
+                            .ai-review-close, .pa-close, .kg-close, .quiz-close),
+body.dlg-sys [data-dlg-self] :is(.pa-close, .ai-chat-close, .ai-review-close,
+                                .kg-close, .quiz-close) {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  background: var(--btn-ghost-bg, var(--c-white-a120));
+  color: inherit;
+  font-size: var(--fs-r100);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-200) var(--ease-standard),
+              border-color var(--dur-200) var(--ease-standard),
+              transform var(--dur-200) var(--ease-standard);
+}
+body.dlg-sys .dlg-close:hover,
+body.dlg-sys [data-dlg] :is(.modal-close, .ann-modal-close, .privacy-close, .cf-close,
+                            .cf-detail-close, .badge-detail-close, .ai-chat-close,
+                            .ai-review-close, .pa-close, .kg-close, .quiz-close):hover,
+body.dlg-sys [data-dlg-self] :is(.pa-close, .ai-chat-close, .ai-review-close,
+                                .kg-close, .quiz-close):hover {
+  background: var(--btn-ghost-hover, var(--c-white-a180));
+  border-color: var(--glass-border-hover);
+  transform: rotate(90deg);
+}
+body.dlg-sys .dlg-close:active {
+  transform: rotate(90deg) scale(.92);
+}
+
+/* ---------- L3 · 关键帧（开闭非对称） ---------- */
+@keyframes dlg-scrim-in  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes dlg-scrim-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes dlg-card-in {
+  from { opacity: 0; transform: translate3d(0, var(--dlg-enter-y), 0) scale(var(--dlg-enter-scale)); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes dlg-card-out {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to   { opacity: 0; transform: translate3d(0, var(--dlg-exit-y), 0) scale(.985); }
+}
+@keyframes dlg-sheet-in {
+  from { opacity: 0; transform: translate3d(0, 100%, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes dlg-sheet-out {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to   { opacity: 0; transform: translate3d(0, 100%, 0); }
+}
+
+/* ---------- L3 · 中间态（置于开启态之后，保证覆盖顺序） ---------- */
+body.dlg-sys [data-dlg] .dlg-panel.is-dragging,
+body.dlg-sys [data-dlg-self].is-dragging {
+  animation: none;
+  transition: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: translate, opacity;
+}
+/* 释放回弹：由运行时先置 --dlg-drag-k（把当前位移写回起点），再摘除 .is-free，
+   于是 translate 在基态 transition（spring 曲线）下回归 —— 即真实回弹。 */
+body.dlg-sys [data-dlg] .dlg-panel.is-free,
+body.dlg-sys [data-dlg-self].is-free {
+  translate: 0 var(--dlg-drag-k);
+}
+body.dlg-sys [data-dlg]:not([data-dlg-self]).is-closing {
+  animation: dlg-scrim-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+  pointer-events: none;
+}
+body.dlg-sys [data-dlg]:not([data-dlg-self]).is-closing .dlg-panel {
+  animation: dlg-card-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+}
+body.dlg-sys [data-dlg-self].is-closing {
+  animation: dlg-card-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+  pointer-events: none;
+}
+
+/* ---------- L3 · 移动端：居中卡片 → 底部抽屉 ---------- */
+@media (max-width: 640px) {
+  body.dlg-sys [data-dlg]:not([data-dlg-self]),
+  body.dlg-sys :is(#feedbackOverlay, #privacyOverlay, #letterOverlay,
+                  #coldfactOverlay, #cfDetailOverlay, #badgeDetailOverlay) {
+    align-items: flex-end;
+    padding: 0;
+  }
+  body.dlg-sys [data-dlg]:not([data-dlg-self]) {
+    justify-content: center;
+  }
+  body.dlg-sys [data-dlg]:not([data-dlg-self]) .dlg-panel {
+    width: 100%;
+    max-width: 100%;
+    max-height: var(--dlg-sheet-maxh);
+    border-radius: var(--dlg-radius-sheet) var(--dlg-radius-sheet) 0 0;
+    border-bottom: none;
+    box-shadow: 0 -18px 60px rgba(0, 0, 0, .42);
+    padding-bottom: var(--dlg-safe-b);
+  }
+  body.dlg-sys [data-dlg]:not([data-dlg-self])[data-dlg-open] .dlg-panel {
+    animation: dlg-sheet-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+  }
+  body.dlg-sys [data-dlg]:not([data-dlg-self]).is-closing .dlg-panel {
+    animation: dlg-sheet-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+  }
+  body.dlg-sys [data-dlg] .dlg-panel > .dlg-handle { display: block; }
+  body.dlg-sys [data-dlg] :is(.ann-modal-close, .privacy-close, .cf-close, .cf-detail-close,
+                              .badge-detail-close, .modal-close, .dlg-close) {
+    width: 30px;
+    height: 30px;
+  }
+  /* 单元素弹窗（满屏面板）：移动端仍保持满屏，只做「顶部圆角 + 把手 + 安全区」
+     三项增强，不改 inset / 尺寸 / display —— 面板自身的布局轴与滚动策略完整保留。 */
+  body.dlg-sys [data-dlg-self] {
+    border: none;
+    border-radius: var(--dlg-radius-sheet) var(--dlg-radius-sheet) 0 0;
+    box-shadow: none;
+    padding-bottom: var(--dlg-safe-b);
+  }
+  body.dlg-sys [data-dlg-self] > .dlg-handle { display: block; }
+  body.dlg-sys [data-dlg-self][data-dlg-open] {
+    animation: dlg-sheet-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+  }
+  body.dlg-sys [data-dlg-self].is-closing {
+    animation: dlg-sheet-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+  }
+}
+
+/* ---------- L3 · 无障碍：尊重系统减弱动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body.dlg-sys {
+    --dlg-open-dur: 1ms;
+    --dlg-close-dur: 1ms;
+    --dlg-enter-y: 0px;
+    --dlg-enter-scale: 1;
+    --dlg-exit-y: 0px;
+  }
+}
+
+/* ---------- L4 · 旧站桥接 ----------
+   ① id 级特异性覆盖：旧站把弹窗几何/入场动画写在 id 选择器上（(1,0,0) 及以上），
+      本层用 :is(…) 携带同一批 id 提升到 (1,1,1)+，仅收敛到设计系统取值，
+      不改变任何旧选择器本身。:is() 不被支持时整条规则失效，退化为「不动」。
+   ② 4 个低于页面装饰层（.fab-add 999 / .theme-dropdown 1500）的弹窗抬升到
+      遮罩档，修复「弹窗被主题下拉/悬浮按钮盖住」的既有层级缺陷。 */
+
+/* ② 层级修复 */
+body.dlg-sys .ann-overlay,
+body.dlg-sys .add-modal-overlay,
+body.dlg-sys #overlayContainer > .overlay,
+body.dlg-sys .dice-overlay {
+  z-index: var(--dlg-z-scrim);
+}
+
+/* ① 旧站写在 id 上的入场动画 → 交由本层统一曲线 */
+body.dlg-sys :is(#letterOverlay, #coldfactOverlay, #cfDetailOverlay) { animation: none; }
+body.dlg-sys :is(#letterOverlay, #coldfactOverlay, #cfDetailOverlay)[data-dlg-open] {
+  animation: dlg-scrim-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+}
+/* ① 遮罩内边距统一为 20px（旧值 10 / 16 / 20 不一） */
+body.dlg-sys :is(#feedbackOverlay, #privacyOverlay, #letterOverlay,
+                #coldfactOverlay, #cfDetailOverlay, #badgeDetailOverlay) {
+  padding: var(--space-20);
+}
+/* 照片识机下层形态：被上层全屏面板覆盖时不再叠 spread 遮罩 */
+body.dlg-sys #photoAiOverlay.pa-under {
+  box-shadow: var(--glass-shadow-lg, 0 24px 64px rgba(0, 0, 0, .45));
+}
+
+/* ① 移动端抽屉的 id 级对应项：必须排在 L4 桌面 id 规则之后（同特异性靠源序取胜。
+      7 个 fullscreen 面板保持满屏（其内部自带滚动区），移动端以「上滑入场 +
+      下拉橡皮筋关闭」表达抽屉语义，故此处不写 inset。 */
+@media (max-width: 640px) {
+  body.dlg-sys :is(#feedbackOverlay, #privacyOverlay, #letterOverlay,
+                  #coldfactOverlay, #cfDetailOverlay, #badgeDetailOverlay) {
+    align-items: flex-end;
+    padding: 0;
+  }
+}
+
+/* ---------- L4 · 新弹窗接入（opt-in，唯一「接管 display」的地方） ----------
+   旧站 22 个弹窗全部由运行时自动打标，不需要改任何 HTML；后续新增弹窗只要
+   遵守三条约定，即自动继承本套形态与动效，无需再写几何/动效 CSS：
+     ① 根节点 class 加 .dlg-new（可选 data-dlg-form="card|sheet|fullscreen"、data-dlg-size="1|2|3|4"），
+        面板节点 class 加 .dlg-panel（把手由运行时注入）；
+     ② 开闭走运行时 API：__DLG_SYS__.open(el) / __DLG_SYS__.close(el)，
+        或自行维护 [data-dlg-open]；
+     ③ 需要「真正从 DOM 移除」的，先调 __DLG_SYS__.close(el)：内部会播完
+        --dlg-close-dur 出场曲线再摘掉 [data-dlg-open]，动画结束后再移除节点即可。
+   本段只作用于显式声明 .dlg-new 的节点，故对全部旧弹窗零影响。 */
+body.dlg-sys .dlg-new {
+  display: none;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-20);
+  background: var(--dlg-scrim-c, var(--dlg-scrim-2));
+  -webkit-backdrop-filter: var(--dlg-blur-c, var(--dlg-blur-2));
+  backdrop-filter: var(--dlg-blur-c, var(--dlg-blur-2));
+  overscroll-behavior: contain;
+}
+body.dlg-sys .dlg-new[data-dlg-open] {
+  display: flex;
+  animation: dlg-scrim-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+}
+body.dlg-sys .dlg-new[data-dlg-open] > .dlg-panel {
+  width: min(var(--dlg-w), calc(100vw - 2 * var(--space-20)));
+  max-height: var(--dlg-maxh);
+  overflow: auto;
+  animation: dlg-card-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+}
+body.dlg-sys .dlg-new.is-closing {
+  animation: dlg-scrim-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+  pointer-events: none;
+}
+body.dlg-sys .dlg-new.is-closing > .dlg-panel {
+  animation: dlg-card-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+}
+@media (max-width: 640px) {
+  body.dlg-sys .dlg-new { align-items: flex-end; padding: 0; }
+  body.dlg-sys .dlg-new[data-dlg-open] > .dlg-panel {
+    width: 100%;
+    max-width: 100%;
+    max-height: var(--dlg-sheet-maxh);
+    border-radius: var(--dlg-radius-sheet) var(--dlg-radius-sheet) 0 0;
+    padding-bottom: var(--dlg-safe-b);
+    animation: dlg-sheet-in var(--dlg-open-dur) var(--dlg-ease-open) backwards;
+  }
+  body.dlg-sys .dlg-new.is-closing > .dlg-panel {
+    animation: dlg-sheet-out var(--dlg-close-dur) var(--dlg-ease-close) forwards;
+  }
+  body.dlg-sys .dlg-new > .dlg-panel > .dlg-handle { display: block; }
+}
+
+/* ===== 访问控制层：维护遮罩 / 封锁卡片 / AI 灰置 ===== */
+#siteMaintenanceOverlay {
+  position: fixed; inset: 0; z-index: 999999;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 14, 30, 0.55);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+  opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s ease;
+  pointer-events: none;
+}
+#siteMaintenanceOverlay.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+#siteMaintenanceOverlay .mnt-inner {
+  text-align: center; color: #fff; padding: 24px; max-width: 520px; width: 90%;
+  animation: mntFadeUp .6s ease both;
+}
+#siteMaintenanceOverlay .mnt-emoji {
+  font-size: 76px; line-height: 1; margin-bottom: 18px;
+  display: inline-block; animation: mntFloat 2.6s ease-in-out infinite;
+}
+#siteMaintenanceOverlay .mnt-emoji img.mnt-gif {
+  width: 140px; height: 140px; object-fit: contain; border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.35);
+}
+#siteMaintenanceOverlay .mnt-title {
+  font-size: 30px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px;
+  text-shadow: 0 4px 18px rgba(0,0,0,.3);
+}
+#siteMaintenanceOverlay .mnt-sub { font-size: 15px; opacity: .78; line-height: 1.7; }
+#siteMaintenanceOverlay .mnt-badge {
+  display: inline-block; margin-top: 18px; font-size: 12px; letter-spacing: 1px;
+  padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.85);
+}
+#siteMaintenanceOverlay .mnt-migrate-btn {
+  display: inline-block; margin-top: 18px;
+  padding: 9px 18px; border-radius: 999px;
+  border: 1px solid rgba(120, 140, 220, .45);
+  font-size: 13px; color: #cdd8ff; text-decoration: none; transition: .15s;
+}
+#siteMaintenanceOverlay .mnt-migrate-btn:hover {
+  background: rgba(120, 140, 220, .16);
+  border-color: rgba(120, 140, 220, .75);
+  color: #fff;
+}
+@keyframes mntFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+@keyframes mntFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+#siteBlockCard {
+  position: fixed; inset: 0; z-index: 999999;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 14, 30, 0.5);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s ease;
+  pointer-events: none;
+}
+#siteBlockCard.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+#siteBlockCard .blk-card {
+  width: 92%; max-width: 420px; background: #fff; border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.4); overflow: hidden; text-align: center;
+  animation: mntFadeUp .45s ease both;
+}
+#siteBlockCard .blk-head {
+  padding: 26px 20px 18px; color: #b3261e;
+  font-size: 52px; line-height: 1; background: #fdeceb;
+}
+#siteBlockCard .blk-body { padding: 20px 22px 26px; }
+#siteBlockCard .blk-title { font-size: 20px; font-weight: 700; color: #1c2540; margin-bottom: 10px; }
+#siteBlockCard .blk-text { font-size: 14px; line-height: 1.7; color: #55607a; margin-bottom: 20px; }
+#siteBlockCard .blk-btn {
+  display: inline-block; padding: 11px 26px; border-radius: 10px; border: none;
+  background: #2f5bff; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease; text-decoration: none;
+}
+#siteBlockCard .blk-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(47,91,255,.35); }
+
+.ai-gated { opacity: .45 !important; filter: grayscale(.7); pointer-events: none !important; cursor: not-allowed !important; }
+.ai-gated-tip { font-size: 11px; color: #8a94a8; margin-top: 2px; }

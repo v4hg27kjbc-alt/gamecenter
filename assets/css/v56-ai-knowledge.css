@@ -1,0 +1,189 @@
+
+/* ===== v56：AI 冷知识面板 / 动态天空窗 ===== */
+/* ---------- 动态天空窗 ---------- */
+.sky-window {
+  position: relative; width: 100%; height: clamp(148px, 22vw, 204px);
+  border-radius: var(--radius-24); overflow: hidden; margin-bottom: var(--space-32);
+  background: linear-gradient(180deg,#05070f 0%,var(--c-blue-800-2) 45%,#121f3c 100%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--c-white-a050);
+  isolation: isolate;
+}
+.sky-layer { position: absolute; inset: 0; opacity: 0; transition: opacity 1.8s ease; pointer-events: none; }
+.sky-window[data-sky="dawn"]  .sky-layer-dawn,
+.sky-window[data-sky="day"]   .sky-layer-day,
+.sky-window[data-sky="dusk"]  .sky-layer-dusk,
+.sky-window[data-sky="night"] .sky-layer-night { opacity: 1; }
+.sky-layer-dawn  { background: linear-gradient(180deg,#2b3a68 0%,#6b77b4 34%,#c78f7f 64%,#f2bd8d 100%); }
+.sky-layer-day   { background: linear-gradient(180deg,#25509c 0%,#4f8fd0 38%,#93c6ec 72%,#d6ecfa 100%); }
+.sky-layer-dusk  { background: linear-gradient(180deg,#1e2349 0%,#3a3165 30%,#9c5b68 60%,#e08a5a 86%,#f6b46b 100%); }
+.sky-layer-night { background: linear-gradient(180deg,#04060e 0%,var(--c-blue-800-2) 45%,#152544 100%); }
+.sky-sun, .sky-moon { position: absolute; border-radius: var(--radius-full); opacity: 0; pointer-events: none; transition: opacity 1.6s ease, transform 4s ease; }
+.sky-sun {
+  width: 44px; height: 44px; left: 74%; top: 46%;
+  background: radial-gradient(circle at 38% 36%, #fff3d0, #ffd98a 58%, #f2a25b 100%);
+  box-shadow: 0 0 60px 18px rgba(255,198,116,.5);
+}
+.sky-moon {
+  width: 28px; height: 28px; left: 76%; top: 22%;
+  background: radial-gradient(circle at 40% 38%, var(--c-white), #e4ebfb 58%, #aebfe0 100%);
+  box-shadow: 0 0 44px 12px rgba(206,220,255,.36);
+}
+.sky-window[data-sky="dawn"] .sky-sun { opacity: .95; transform: translateY(0); }
+.sky-window[data-sky="day"] .sky-sun { opacity: 1; top: 12%; left: 78%; transform: scale(1.12); }
+.sky-window[data-sky="dusk"] .sky-sun { opacity: .98; top: 52%; left: 70%; }
+.sky-window[data-sky="night"] .sky-sun { opacity: 0; }
+.sky-window[data-sky="night"] .sky-moon { opacity: 1; }
+.sky-cloud { position: absolute; border-radius: var(--radius-pill); filter: blur(16px); opacity: 0; pointer-events: none; transition: opacity 2s ease; background: var(--c-white-a500); }
+.c1 { width: 190px; height: 20px; left: 16%; top: 30%; }
+.c2 { width: 120px; height: 14px; left: 58%; top: 64%; }
+.sky-window[data-sky="day"] .sky-cloud { opacity: .7; }
+.sky-window[data-sky="dawn"] .c2, .sky-window[data-sky="dusk"] .c1 { opacity: .45; }
+.sky-window[data-sky="night"] .sky-cloud { opacity: .1; }
+.sky-window[data-sky="day"] .c1 { transform: translateX(6px); }
+.sky-planes { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+.sky-plane { position: absolute; left: 0; color: #0b1626; opacity: .94; will-change: transform; }
+.sky-plane svg { display: block; width: 100%; height: auto; }
+.sky-window[data-sky="day"] .sky-plane   { color: #0a1626; opacity: .85; }
+.sky-window[data-sky="dawn"] .sky-plane  { color: #141c33; opacity: .8; }
+.sky-window[data-sky="dusk"] .sky-plane  { color: #131a30; opacity: .78; }
+.sky-window[data-sky="night"] .sky-plane { color: #18253f; opacity: .68; }
+.plane-a380 { width: clamp(150px, 26vw, 262px); top: 22%; animation: v56PlaneFly 84s linear infinite; animation-delay: -12s; }
+.plane-b787 { width: clamp(118px, 21vw, 216px); top: 46%; animation: v56PlaneFly 72s linear infinite; animation-delay: -48s; }
+.plane-b737 { width: clamp(92px, 16vw, 168px); top: 66%; animation: v56PlaneFly 60s linear infinite; animation-delay: -30s; }
+@keyframes v56PlaneFly {
+  0%   { transform: translate3d(-30vw, 0, 0); }
+  100% { transform: translate3d(104vw, 0, 0); }
+}
+.sky-label {
+  position: absolute; left: 16px; bottom: 12px; z-index: 3;
+  display: flex; align-items: center; gap: var(--space-8);
+  font-size: var(--fs-r074); letter-spacing: var(--ls-20); color: var(--c-white-a940);
+  text-shadow: 0 1px 8px var(--c-black-a400); pointer-events: none;
+}
+.sky-label-dot { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--c-white); box-shadow: 0 0 10px var(--c-white); }
+@media (max-width: 768px) {
+  .sky-window { height: 128px; border-radius: var(--radius-18); margin-bottom: var(--space-20); }
+  .plane-a380 { top: 18%; } .plane-b787 { top: 44%; } .plane-b737 { top: 64%; }
+  .sky-label { left: 12px; bottom: 8px; font-size: var(--fs-r066); letter-spacing: var(--ls-10); }
+}
+@media (max-width: 480px) {
+  .sky-window { height: 104px; border-radius: var(--radius-14); }
+}
+/* ---------- AI 冷知识面板 ---------- */
+#coldfactOverlay {
+  position: fixed; inset: 0; z-index: 10060; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(3,7,18,.62);
+  backdrop-filter: var(--glass-blur-regular); -webkit-backdrop-filter: var(--glass-blur-regular);
+  padding: var(--space-18); animation: overlayIn .18s ease;
+}
+#coldfactOverlay.visible { display: flex; }
+/* ===== AI 找飞机（自然语言筛选） + 问 AI 机型卡 ===== */
+.ai-find-bar { display: flex; align-items: center; gap: var(--space-8); max-width: 760px; margin: var(--space-10) auto var(--space-2); padding: 0 var(--space-12); }
+.ai-find-bar .ai-find-input { flex: 1 1 auto; min-width: 0; padding: var(--space-10) var(--space-14); border-radius: var(--radius-pill); border: 1px solid var(--glass-border); background: var(--card-bg); color: var(--text); font-size: var(--fs-13px); outline: none; }
+.ai-find-bar .ai-find-input:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px var(--accent-bg); }
+.ai-find-bar .ai-find-btn { flex: 0 0 auto; padding: var(--space-10) var(--space-16); border-radius: var(--radius-pill); border: 1px solid var(--accent-border); background: var(--accent-bg); color: var(--accent); font-size: var(--fs-13px); font-weight: var(--fw-600); cursor: pointer; white-space: nowrap; }
+.ai-find-bar .ai-find-btn:hover { background: var(--btn-ghost-hover); }
+.ai-find-bar .ai-find-btn:disabled { opacity: .6; cursor: default; }
+.ai-find-conds { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: center; max-width: 760px; margin: var(--space-6) auto 0; padding: 0 var(--space-12); }
+.ai-find-chip { font-size: var(--fs-11p5px); padding: var(--space-3) var(--space-9); border-radius: var(--radius-pill); background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--text); }
+.ai-find-count { font-size: var(--fs-11p5px); color: var(--text-dim); }
+.ai-find-clear-btn { font-size: var(--fs-11p5px); padding: var(--space-3) var(--space-10); border-radius: var(--radius-pill); border: 1px solid var(--glass-border); background: transparent; color: var(--text-dim); cursor: pointer; }
+.ai-find-loading { font-size: var(--fs-12px); color: var(--text-dim); }
+.ai-aircraft-cards { display: flex; flex-wrap: wrap; gap: var(--space-8); margin-top: var(--space-8); }
+.ai-aircraft-card { display: flex; gap: var(--space-8); width: 100%; max-width: 268px; padding: var(--space-7) var(--space-8); border-radius: var(--radius-12); background: var(--card-bg); border: 1px solid var(--glass-border); cursor: pointer; text-align: left; }
+.ai-aircraft-card:hover { background: var(--card-bg-hover); }
+.ai-aircraft-img { width: 64px; height: 45px; object-fit: cover; border-radius: var(--radius-8); flex: 0 0 auto; background: #1a1f3a; }
+.ai-aircraft-info { min-width: 0; overflow: hidden; }
+.ai-aircraft-name { font-size: var(--fs-12p5px); font-weight: var(--fw-600); color: var(--text); }
+.ai-aircraft-code { font-size: var(--fs-11px); color: var(--text-dim); }
+.ai-aircraft-spec { font-size: 10.5px; color: var(--text-dim); margin-top: var(--space-2); line-height: var(--lh-135); }
+@media (max-width: 640px) { .ai-find-bar { flex-wrap: wrap; } .ai-find-bar .ai-find-input { flex: 1 1 100%; } .ai-find-bar .ai-find-btn { flex: 1 1 100%; } }
+
+.cf-panel {
+  width: min(1040px, 100%); max-height: 88vh;
+  display: flex; flex-direction: column;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-24); overflow: hidden;
+  box-shadow: 0 24px 80px var(--c-black-a550);
+  backdrop-filter: var(--glass-blur-thick) var(--glass-sat-soft); -webkit-backdrop-filter: var(--glass-blur-thick) var(--glass-sat-soft);
+  animation: cfIn .3s cubic-bezier(.2,.86,.32,1.16);
+}
+@keyframes cfIn { from { opacity: 0; transform: translateY(20px) scale(.97); } to { opacity: 1; transform: none; } }
+.cf-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-12);
+  padding: var(--space-15) var(--space-20); border-bottom: 1px solid var(--glass-border); flex-shrink: 0;
+}
+.cf-title { display: flex; align-items: center; gap: var(--space-11); font-size: var(--fs-r102); font-weight: var(--fw-700); letter-spacing: var(--ls-10); color: var(--text); }
+.cf-title-icon {
+  width: 34px; height: 34px; border-radius: var(--radius-12); flex: none;
+  background: linear-gradient(135deg, var(--c-blue-100-3), var(--c-indigo-100));
+  display: flex; align-items: center; justify-content: center; color: var(--c-white);
+  box-shadow: 0 4px 16px rgba(99,102,241,.42);
+}
+.cf-sub { font-size: var(--fs-r070); color: var(--text-dim); margin-top: var(--space-3); letter-spacing: var(--ls-10); }
+.cf-close {
+  width: 36px; height: 36px; border-radius: var(--radius-full); border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-250) ease; flex: none;
+}
+.cf-close:hover { background: var(--card-bg-hover); color: var(--text); }
+.cf-close svg { width: 20px; height: 20px; }
+.cf-scroll { overflow-y: auto; padding: var(--space-20) var(--space-22) var(--space-24); }
+.cf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-14); }
+.cf-card {
+  position: relative; border-radius: var(--radius-18); padding: var(--space-15) var(--space-16) var(--space-14); overflow: hidden;
+  background: linear-gradient(150deg, rgba(59,102,255,.12), rgba(30,42,86,.22));
+  border: 1px solid rgba(130,145,250,.24);
+  transition: transform var(--dur-250) ease, border-color var(--dur-250) ease, box-shadow var(--dur-250) ease;
+}
+.cf-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--c-blue-100-a900), transparent);
+}
+.cf-card:hover { transform: translateY(-3px); border-color: var(--c-blue-100-a600); box-shadow: 0 10px 28px rgba(16,26,60,.4); }
+.cf-card-icon {
+  width: 34px; height: 34px; border-radius: 11px; margin-bottom: var(--space-9);
+  background: rgba(59,130,246,.16); border: 1px solid rgba(99,102,241,.36);
+  display: flex; align-items: center; justify-content: center; font-size: 1.06rem;
+}
+.cf-card-title { margin: 0 0 var(--space-5); font-size: var(--fs-r090); font-weight: var(--fw-700); color: var(--text); letter-spacing: var(--ls-5); }
+.cf-card-text { margin: 0; font-size: .79rem; line-height: var(--lh-17); color: var(--text-dim); }
+.cf-note { margin-top: var(--space-16); font-size: var(--fs-r070); text-align: center; color: var(--text-dim); opacity: .75; letter-spacing: var(--ls-5); }
+/* ---------- AI 冷知识面板 · 「换一批」按钮（中性灰阶 / 1px 发丝线 / 零蓝零紫） ---------- */
+.cf-head-actions { display: flex; align-items: center; gap: var(--space-8); flex: none; }
+.cf-shuffle {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-6);
+  height: 34px; padding: 0 var(--space-14); border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border); background: transparent; color: var(--text);
+  font: inherit; font-size: var(--fs-12p5px); font-weight: var(--fw-600); letter-spacing: var(--ls-5);
+  line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur-200) ease, border-color var(--dur-200) ease, transform .18s ease;
+}
+.cf-shuffle:hover { background: var(--card-bg-hover); border-color: var(--glass-border-hover); }
+.cf-shuffle:active { transform: scale(.96); }
+.cf-shuffle:focus-visible { outline: 1px solid var(--text); outline-offset: 2px; }
+.cf-shuffle-ic { width: 14px; height: 14px; flex: none; transition: transform .42s cubic-bezier(.22,.61,.36,1); }
+.cf-shuffle.spin .cf-shuffle-ic { transform: rotate(360deg); }
+/* 冷知识卡片灰阶收敛：零蓝零紫，仅用中性变量随主题自适应 */
+.cf-card { background: var(--card-bg); border: 1px solid var(--glass-border); }
+.cf-card::before { background: linear-gradient(90deg, transparent, var(--glass-border-hover), transparent); }
+.cf-card:hover { border-color: var(--glass-border-hover); box-shadow: 0 10px 24px rgba(0,0,0,.28); }
+.cf-card-icon { background: var(--card-bg-hover); border: 1px solid var(--glass-border); }
+body.theme-ink .cf-shuffle { border: var(--hairline); background: transparent; color: var(--text); }
+body.theme-ink .cf-shuffle:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.34); }
+@media (prefers-reduced-motion: reduce) { .cf-shuffle-ic { transition: none; } .cf-shuffle:active { transform: none; } }
+@media (max-width: 480px) { .cf-shuffle { height: 32px; padding: 0 var(--space-11); font-size: var(--fs-12px); } }
+/* Quiz 结果冷知识 */
+.quiz-result-fact {
+  display: flex; align-items: flex-start; gap: var(--space-9); text-align: left;
+  width: min(580px, 94%); margin: var(--space-4) auto var(--space-22); padding: var(--space-12) var(--space-15);
+  border-radius: var(--radius-14); font-size: var(--fs-r082); line-height: var(--lh-17); color: var(--text-dim);
+  background: linear-gradient(120deg, rgba(59,130,246,.13), rgba(139,92,246,.13));
+  border: 1px solid rgba(129,140,248,.34);
+}
+.quiz-result-fact .qr-icon { flex: none; font-size: var(--fs-r100); margin-top: var(--space-1); }
+.quiz-result-fact strong { color: var(--c-blue-100); font-weight: var(--fw-600); margin-right: var(--space-5); }
+@media (max-width: 900px) { .cf-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .cf-grid { grid-template-columns: 1fr; } #coldfactOverlay { padding: var(--space-10); } .cf-panel { max-height: 92vh; } }

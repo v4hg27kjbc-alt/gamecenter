@@ -1,0 +1,45 @@
+
+/* P1 账户入口坞：固定在页面右上角（原在右下角与 AI 浮钮/多端互联浮钮同区，造成按钮叠压）
+   规则要点：四边显式定位 + 最高层级 + 横排不换行；移动端贴右并让出刘海安全区。 */
+#gcAcctDock{position:fixed !important;top:18px !important;right:20px !important;left:auto !important;bottom:auto !important;z-index:2147482000 !important;display:flex !important;flex-direction:row !important;align-items:center !important;flex-wrap:nowrap !important;gap:8px !important;}
+#gcAcctDock > *{flex:0 0 auto;}
+#gcAcctDock .theme-dropdown{top:calc(100% + 8px) !important;right:0 !important;left:auto !important;}
+@media (max-width:640px){
+  /* 移动端顶部另有公告条 #announceToast（约 24–76px），账户坞下移到其下方，避免叠压 */
+  #gcAcctDock{top:calc(84px + env(safe-area-inset-top,0px)) !important;right:10px !important;gap:6px !important;}
+  #gcAcctDock .gc-acct-name{max-width:64px;}
+}
+/* 多端互联浮钮 + 面板同样收到右上角、紧跟账户坞下方依次纵向排布；右下角仅保留 AI 反馈按钮，三者互不重合 */
+
+/* P3 一键登录页签（复用面板既有按钮/输入框样式，仅新增两行中性文字） */
+.gcx-onetap-who{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #e8ecf5;border-radius:12px;background:#f8fafc;margin-bottom:10px;}
+.gcx-onetap-avatar{width:38px;height:38px;border-radius:50%;background:#e5e9f2;color:#475569;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 38px;}
+.gcx-onetap-name{font-size:13.5px;font-weight:600;color:#1e293b;line-height:1.35;word-break:break-all;}
+.gcx-onetap-sub{font-size:11.5px;color:#7b8798;line-height:1.4;}
+
+/* P4 开屏加载 HUD：叠加在站点既有开屏层内，1px 细线 + 百分比；浅灰阶以适配开屏深底 */
+.gcx-boot-hud{position:absolute;left:50%;bottom:14vh;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:6;pointer-events:none;transition:opacity .3s cubic-bezier(.22,.61,.36,1);}
+.gcx-boot-hud.is-done{opacity:0;}
+.gcx-boot-hud .gcx-boot-line{position:relative;width:min(220px,44vw);height:1px;background:rgba(255,255,255,.18);overflow:hidden;}
+.gcx-boot-hud .gcx-boot-line i{position:absolute;left:0;top:0;height:1px;width:0%;background:#f5f5f5;transition:width .26s cubic-bezier(.22,.61,.36,1);}
+.gcx-boot-hud .gcx-boot-pct{font-size:12px;letter-spacing:.16em;color:rgba(245,245,245,.55);font-variant-numeric:tabular-nums;}
+
+/* P5 字色定色（按区域显式定义，不做运行时猜背景色）
+   原则：深底只放浅字、浅底只放深字；次级文字用同色系低透明，不引入第三种灰。 */
+/* 5.1 英雄区（深色遮罩上）——文字一律走浅端 */
+.hero-text .hero-manufacturer,
+.hero-text .hero-model-tag,
+.hero-text .hero-meta{color:rgba(245,245,245,.82) !important;}
+.hero-text h1, .hero-text h2, .hero-text .hero-title{color:#f7f7f7 !important;}
+.hero-text .hero-desc, .hero-text p{color:rgba(240,240,240,.80) !important;}
+.hero-text .hero-btn, .hero-text .hero-cta{color:#0a0a0a !important;background:#f7f7f7 !important;border-color:transparent !important;}
+.hero-text .hero-btn--ghost{color:#f7f7f7 !important;background:transparent !important;border:1px solid rgba(247,247,247,.42) !important;}
+/* 5.2 统计卡（浅色玻璃底）——数字走深端，避免白字压浅底 */
+.stat-card .stat-number, .stat-card .stat-number *{color:#0a0a0a !important;}
+.stat-card .stat-label{color:rgba(10,10,10,.60) !important;}
+.stat-card .stat-icon{color:rgba(10,10,10,.72) !important;}
+/* 5.3 全站浅底次级文字统一（灰阶收敛到同一档） */
+.rln-card-title, .rln-card-desc{color:rgba(10,10,10,.88) !important;}
+.fuzzy-toggle.active{color:#141414 !important;}
+
+@media (prefers-reduced-motion:reduce){.gcx-boot-hud,.gcx-boot-hud .gcx-boot-line i{transition:none !important;}}

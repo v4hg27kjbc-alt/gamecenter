@@ -1,0 +1,53 @@
+
+  /* 浮钮：右上角、紧跟账户坞下方（桌面 top:64px；移动端由 media 查询下移避开公告条） */
+  .gc-link-fab{position:fixed;top:64px;right:20px;bottom:auto;left:auto;z-index:99995;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
+    background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 10px 26px rgba(102,126,234,.42);display:flex;align-items:center;justify-content:center;
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease}
+  .gc-link-fab:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 16px 32px rgba(102,126,234,.5)}
+  .gc-link-fab::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(102,126,234,.45);animation:gcLinkPulse 2.4s ease-out infinite}
+  @keyframes gcLinkPulse{0%{transform:scale(.86);opacity:.85}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
+  .gc-link-mask{position:fixed;inset:0;background:rgba(15,23,42,.44);backdrop-filter:blur(3px);z-index:2147482600;opacity:0;pointer-events:none;transition:opacity .24s ease}
+  .gc-link-mask.on{opacity:1;pointer-events:auto}
+  /* 面板：从浮钮正下方往页面内展开（右侧对齐、向下生长），不再占用右下角与 AI 反馈按钮同区 */
+  .gc-link-panel{position:fixed;top:124px;right:20px;bottom:auto;left:auto;width:min(374px,calc(100vw - 40px));max-height:calc(100vh - 146px);overflow:auto;z-index:2147482700;border-radius:20px;background:#fff;
+    box-shadow:0 26px 60px rgba(15,23,42,.26);border:1px solid #e5e9f2;transform:translateY(-8px) scale(.97);opacity:0;pointer-events:none;
+    transition:transform .28s cubic-bezier(.34,1.4,.64,1),opacity .22s ease}
+  .gc-link-panel.on{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+  .gc-lp-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #eef1f7;position:sticky;top:0;background:#fff;z-index:2}
+  .gc-lp-head b{font-size:14.5px;color:#1e293b}
+  .gc-lp-close{margin-left:auto;border:0;background:#f1f4fa;color:#64748b;width:28px;height:28px;border-radius:9px;cursor:pointer;font-size:15px;line-height:1}
+  .gc-lp-close:hover{background:#e6ebf5;color:#334155}
+  .gc-lp-tabs{display:flex;gap:6px;padding:10px 14px 0}
+  .gc-lp-tab{flex:1;border:0;background:#f5f7fc;color:#64748b;font-size:12.5px;padding:8px 4px;border-radius:10px;cursor:pointer;transition:all .18s ease}
+  .gc-lp-tab.on{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;box-shadow:0 6px 14px rgba(102,126,234,.3)}
+  .gc-lp-body{padding:14px 16px 18px}
+  .gc-lp-pane{display:none;animation:gcLpIn .26s ease}
+  .gc-lp-pane.on{display:block}
+  @keyframes gcLpIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .gc-lp-note{font-size:12px;color:#7b8798;line-height:1.65;margin:0 0 12px}
+  .gc-lp-btn{width:100%;border:0;border-radius:12px;padding:11px;font-size:13.5px;font-weight:600;color:#fff;cursor:pointer;
+    background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 8px 18px rgba(102,126,234,.3);transition:transform .16s ease,box-shadow .2s ease}
+  .gc-lp-btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(102,126,234,.36)}
+  .gc-lp-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .gc-lp-btn.ghost{background:#f4f6fb;color:#475569;box-shadow:none}
+  .gc-lp-code{font-family:ui-monospace,Menlo,monospace;font-size:22px;letter-spacing:6px;text-align:center;color:#4338ca;font-weight:700;margin:6px 0 2px}
+  .gc-lp-input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #dbe2ee;border-radius:11px;font-size:13.5px;outline:none;transition:border-color .18s ease,box-shadow .18s ease}
+  .gc-lp-input:focus{border-color:#8b9cf7;box-shadow:0 0 0 3px rgba(102,126,234,.14)}
+  .gc-lp-row{display:flex;gap:8px;margin-top:10px}
+  .gc-lp-msg{font-size:12px;color:#64748b;margin-top:10px;min-height:16px;line-height:1.5}
+  .gc-lp-msg.ok{color:#0f9d58}
+  .gc-lp-msg.err{color:#e05252}
+  .gc-lp-preview{margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid #e8ecf5;display:none;animation:gcLpIn .3s ease}
+  .gc-lp-preview.on{display:block}
+  .gc-lp-preview img{width:100%;display:block}
+  .gc-lp-preview .txt{padding:11px;font-size:13px;color:#334155;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow:auto}
+  .gc-lp-drop{border:1.5px dashed #cfd8ea;border-radius:12px;padding:16px;text-align:center;color:#8494ab;font-size:12.5px;cursor:pointer;transition:all .2s ease}
+  .gc-lp-drop:hover,.gc-lp-drop.over{border-color:#8b9cf7;background:#f6f8ff;color:#5b6ee0}
+  .gc-lp-spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:gcLpSpin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes gcLpSpin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.gc-link-fab::after{animation:none}}
+  /* 移动端：账户坞下移到公告条下方（top:84px + 安全区，高约 35px），浮钮与面板依次排在其下，统一贴右 */
+  @media (max-width:640px){
+    .gc-link-fab{top:calc(128px + env(safe-area-inset-top,0px));right:10px;width:46px;height:46px;}
+    .gc-link-panel{top:calc(184px + env(safe-area-inset-top,0px));right:10px;width:calc(100vw - 20px);max-height:calc(100vh - 204px - env(safe-area-inset-top,0px));}
+  }
